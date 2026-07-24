@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>香盤メーカー — 使い方</title>
+<meta name="description" content="香盤メーカーの使い方。稽古のNGから「今日できる場面」を出し、香盤を自動で組むための道具です。">
+<link rel="apple-touch-icon" href="icon-kouban.png">
+<style>
+  :root{
+    --paper:#F4F2EE; --surface:#ECE9E3; --ink:#242321; --muted:#77736B;
+    --hair:#D8D4CC; --ghost:#BEB9B0; --control:#F8F7F4;
+    /* アプリ画面の再現に使う色（香盤メーカー本体と同じ） */
+    --app-ink:#1f2933; --app-subtle:#52606d; --app-line:#e4e7eb; --app-surface:#f5f7fa;
+    --ng:#ef4444; --ok:#10b981;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:'Hiragino Maru Gothic ProN',-apple-system,BlinkMacSystemFont,'Hiragino Sans','Noto Sans JP',sans-serif;
+    line-height:1.85; -webkit-font-smoothing:antialiased;
+    padding:0 22px calc(56px + env(safe-area-inset-bottom));
+    font-size:15px;
+  }
+  .wrap{max-width:620px; margin:0 auto;}
+
+  /* ---- 見出し ---- */
+  header{padding:52px 0 8px;}
+  .kicker{font-size:11.5px; font-weight:700; letter-spacing:.16em; color:var(--muted); margin-bottom:10px;}
+  h1{font-size:27px; font-weight:700; letter-spacing:.03em; line-height:1.45;}
+  header .lead{margin-top:12px; font-size:14.5px; color:var(--muted);}
+  .openapp{margin-top:18px;}
+  .openapp a{
+    display:inline-block; background:var(--ink); color:var(--paper);
+    text-decoration:none; border-radius:999px; padding:9px 20px;
+    font-size:14px; font-weight:700;
+  }
+  h2{
+    font-size:19px; font-weight:700; letter-spacing:.02em; line-height:1.5;
+    margin:52px 0 14px; padding-bottom:10px; border-bottom:1.5px solid var(--hair);
+  }
+  h2 .num{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:26px; height:26px; border-radius:50%; background:var(--ink); color:var(--paper);
+    font-size:13px; margin-right:10px; vertical-align:2px;
+  }
+  h3{font-size:15.5px; font-weight:700; margin:26px 0 8px;}
+  p{margin:10px 0;}
+  strong{font-weight:700;}
+  .muted{color:var(--muted);}
+  .small{font-size:13px;}
+
+  /* ---- 目次 ---- */
+  nav.toc{
+    background:var(--control); border:1px solid var(--hair); border-radius:18px;
+    padding:18px 20px; margin-top:28px;
+  }
+  nav.toc p{margin:0 0 8px; font-size:12.5px; font-weight:700; letter-spacing:.1em; color:var(--muted);}
+  nav.toc ol{margin:0; padding-left:1.3em;}
+  nav.toc li{margin:3px 0; font-size:14px;}
+  nav.toc a{color:var(--ink); text-decoration:none; border-bottom:1px solid var(--hair);}
+
+  /* ---- 部品 ---- */
+  .card{background:var(--control); border:1px solid var(--hair); border-radius:18px; padding:18px 20px; margin:16px 0;}
+  .note{
+    border-left:4px solid var(--ghost); background:var(--control);
+    border-radius:0 12px 12px 0; padding:14px 16px; margin:16px 0; font-size:14px;
+  }
+  .warn{border-left-color:#c0392b;}
+  .warn .title{font-weight:700; color:#a5321f;}
+  .note .title{display:block; font-weight:700; margin-bottom:4px;}
+  ul,ol{margin:10px 0; padding-left:1.4em;}
+  li{margin:6px 0;}
+  .steps{list-style:none; padding-left:0; counter-reset:s;}
+  .steps>li{
+    counter-increment:s; position:relative; padding-left:38px; margin:16px 0;
+  }
+  .steps>li::before{
+    content:counter(s); position:absolute; left:0; top:2px;
+    width:26px; height:26px; border-radius:50%;
+    background:var(--ink); color:var(--paper);
+    font-size:13px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .steps>li .h{font-weight:700;}
+  kbd{
+    display:inline-block; background:#fff; border:1px solid var(--hair);
+    border-bottom-width:2px; border-radius:7px; padding:1px 8px;
+    font-family:inherit; font-size:13.5px; font-weight:700; white-space:nowrap;
+  }
+  .path{font-size:13px; color:var(--muted);}
+  .path b{color:var(--ink); font-weight:700;}
+
+  /* ---- 流れ図 ---- */
+  .flow{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:18px 0;}
+  .flow .box{
+    background:#fff; border:1px solid var(--hair); border-radius:12px;
+    padding:8px 12px; font-size:13.5px; font-weight:700;
+  }
+  .flow .arw{color:var(--ghost); font-weight:700;}
+
+  /* ---- アプリ画面の再現 ---- */
+  .mock{
+    border:1px solid var(--app-line); border-radius:14px; background:#fff;
+    padding:14px; margin:16px 0; overflow-x:auto;
+    color:var(--app-ink); font-size:13px; line-height:1.6;
+  }
+  .mock .cap{font-size:12px; color:var(--muted); margin-bottom:10px;}
+  table.ng{border-collapse:collapse; width:100%; min-width:280px; font-size:12.5px;}
+  table.ng th, table.ng td{border:1px solid var(--app-line); padding:6px 8px; text-align:center;}
+  table.ng thead th{background:var(--app-surface); color:var(--app-subtle); font-weight:400; font-size:11.5px;}
+  table.ng thead th:last-child, table.ng td.allday{white-space:nowrap;}
+  table.ng tbody th{text-align:left; font-weight:600; background:#fff;}
+  table.ng td.ng{background:var(--ng);}
+  table.ng td.allday{background:var(--app-surface); color:var(--app-subtle); font-size:11px;}
+  table.ng td.allday.on{background:#fee2e2; color:#b91c1c;}
+  .legend{display:flex; flex-wrap:wrap; gap:14px; font-size:12px; color:var(--app-subtle); margin-top:10px;}
+  .legend span{display:inline-flex; align-items:center; gap:5px;}
+  .sw{width:13px; height:13px; border-radius:3px; display:inline-block;}
+  .sw.white{background:#fff; border:1px solid var(--app-line);}
+  .sw.red{background:var(--ng);}
+  .chip{display:inline-block; border-radius:999px; padding:2px 10px; font-size:12px; font-weight:600;}
+  .chip.ok{background:var(--ok); color:#fff;}
+  .chip.absent{background:#fee2e2; color:#b91c1c;}
+  .mock .row{margin:8px 0;}
+  .mock .label{font-size:11px; color:var(--app-subtle); font-weight:700; letter-spacing:.04em;}
+
+  /* ---- Q&A ---- */
+  .qa{border-top:1px solid var(--hair); padding:14px 0;}
+  .qa:last-of-type{border-bottom:1px solid var(--hair);}
+  .qa .q{font-weight:700;}
+  .qa .a{margin-top:4px; color:var(--muted); font-size:14px;}
+
+  footer{
+    margin-top:56px; padding-top:20px; border-top:1px solid var(--hair);
+    font-size:12.5px; color:var(--ghost); text-align:center; line-height:2;
+  }
+  a{color:var(--ink);}
+
+  /* ---- 印刷（このページをA4のPDFにして保管・配布できるように） ---- */
+  @media print{
+    @page{margin:16mm 14mm;}
+    body{background:#fff; color:#000; font-size:10.5pt; padding:0;}
+    .wrap{max-width:none;}
+    nav.toc,.openapp{display:none;}
+    header{padding-top:0;}
+    h2{margin-top:22pt; page-break-after:avoid;}
+    h3{page-break-after:avoid;}
+    .card,.note,.mock,.qa,.steps>li{page-break-inside:avoid;}
+    .card,.note,.mock{background:#fff;}
+    footer{color:#555;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="kicker">TSUMIKI TOOLS</p>
+  <h1>香盤メーカー<br>使い方</h1>
+  <p class="lead">
+    誰が来られないかを入れると、<strong>その日にできる場面</strong>が出ます。
+    そこから稽古の香盤（＝その日の進行表）まで自動で組めます。
+  </p>
+  <p class="openapp"><a href="kouban.html">香盤メーカーを開く →</a></p>
+</header>
+
+<nav class="toc">
+  <p>もくじ</p>
+  <ol>
+    <li><a href="#what">どんな道具か</a></li>
+    <li><a href="#try">まず、さわってみる</a></li>
+    <li><a href="#setup">はじめの準備（3つ登録する）</a></li>
+    <li><a href="#daily">毎回の使い方（出欠 → できる場面）</a></li>
+    <li><a href="#plan">香盤を組む・印刷する</a></li>
+    <li><a href="#share">人に配る</a></li>
+    <li><a href="#data">データの保存について</a></li>
+    <li><a href="#home">ホーム画面に置いておく</a></li>
+    <li><a href="#qa">こまったとき</a></li>
+  </ol>
+</nav>
+
+<!-- ============================ -->
+<h2 id="what"><span class="num">1</span>どんな道具か</h2>
+
+<p>
+  稽古の予定を組むとき、いちばん面倒なのは
+  <strong>「今日はこの人が来られない。じゃあ何の場面ができる？」</strong>
+  を台本とにらめっこして探すところです。香盤メーカーはそこだけをやります。
+</p>
+
+<div class="flow">
+  <span class="box">誰が来られないか</span>
+  <span class="arw">→</span>
+  <span class="box">できる場面が出る</span>
+  <span class="arw">→</span>
+  <span class="box">その日の香盤ができる</span>
+</div>
+
+<p class="small muted">
+  ※ 香盤（こうばん）＝ どの場面を何時からやるかを並べた、その日の進行表のことです。
+</p>
+
+<div class="note">
+  <span class="title">インターネットにデータは送りません</span>
+  登録した内容は<strong>お使いの端末の中だけ</strong>に保存されます。
+  ログインもアカウント登録も要りません。くわしくは<a href="#data">7</a>。
+</div>
+
+<!-- ============================ -->
+<h2 id="try"><span class="num">2</span>まず、さわってみる</h2>
+
+<p>
+  説明を読むより、動いているものを触るほうが早いです。
+  はじめて開いた画面に <kbd>サンプルで試す</kbd> があります。
+</p>
+
+<p>
+  押すと『ロミオとジュリエット』（役26人・全26場面）がぜんぶ入った状態になり、
+  すべての画面をそのまま試せます。
+  <strong>自分の劇団のデータを1文字も入れずに、全機能を確認できます。</strong>
+</p>
+
+<div class="note">
+  <span class="title">サンプルを消したくなったら</span>
+  <span class="path"><b>設定</b>（右上の歯車）→ 一番下の<b>データ</b> → <b>全データを消去</b></span>
+  で空にできます。そこから自分の台本を入れてください。
+</div>
+
+<!-- ============================ -->
+<h2 id="setup"><span class="num">3</span>はじめの準備（3つ登録する）</h2>
+
+<p>
+  最初の1回だけ、右上の歯車（<kbd>設定</kbd>）を開いて<strong>3つ</strong>を登録します。
+  <strong>この順番で入れてください。</strong>あとの画面がそのまま使えます。
+</p>
+
+<ol class="steps">
+  <li>
+    <span class="h">役（登場人物）を入れる</span>
+    <div class="path"><b>設定 → 役（登場人物）</b></div>
+    <p>稽古に出る役を、役名で登録します。人の名前でも構いません（配役が決まっていないときは役名のままでOK）。</p>
+  </li>
+  <li>
+    <span class="h">場面を入れて、出る役をチェックする</span>
+    <div class="path"><b>設定 → 場面</b></div>
+    <p>
+      場番号とタイトルを入れて追加すると、その下に役の一覧が出ます。
+      <strong>その場面に出る役をタップして黒くします。</strong>
+      ここが「できる／できない」の判定のもとになるので、ここだけは丁寧に入れてください。
+    </p>
+    <ul>
+      <li><strong>分</strong>…その場面の稽古にかける時間。はじめは60分です。香盤を組むときの長さになります。</li>
+      <li><strong>時代・幕</strong>…任意です。時代が行き来する台本で見分けたいときだけ入れてください（例：第一幕）。</li>
+    </ul>
+  </li>
+  <li>
+    <span class="h">稽古日と時間帯を入れる</span>
+    <div class="path"><b>設定 → 稽古日・時間帯</b></div>
+    <p>
+      日付を追加すると、その日に「午後 13:00–17:00」が1つ入った状態でできます。
+      名前も時刻も変えられますし、<kbd>＋ 時間帯を追加</kbd> で
+      「午前」「午後」のように<strong>1日を分けられます</strong>。
+    </p>
+    <p class="small muted">
+      ※ ここで分けた時間帯（コマ）の単位で、出欠と判定が出ます。
+      午前だけ来られない人がいるなら、午前と午後は分けておくと便利です。
+    </p>
+  </li>
+</ol>
+
+<p>3つとも入ると、設定の上に出ている「登録の順番」の案内は自動で消えます。</p>
+
+<!-- ============================ -->
+<h2 id="daily"><span class="num">4</span>毎回の使い方（出欠 → できる場面）</h2>
+
+<p>
+  ここからが毎回やるところです。<kbd>きょうの稽古</kbd> タブを開きます。
+</p>
+
+<h3>① 日付を選ぶ</h3>
+<p>上に稽古日が並んでいるので、入力したい日を押します。</p>
+
+<h3>② 出られない時間帯を、赤く塗る</h3>
+<p>
+  役ごとのマス目が出ます。<strong>出られない</strong>ところをタップすると赤くなります。
+  もう一度押すと戻ります。
+</p>
+
+<div class="mock">
+  <div class="cap">画面のイメージ</div>
+  <table class="ng">
+    <thead>
+      <tr>
+        <th style="text-align:left">役</th>
+        <th>午前<br>10:00–13:00</th>
+        <th>午後<br>14:00–18:00</th>
+        <th>終日</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><th>ロミオ</th><td class="ng"></td><td></td><td class="allday">終日</td></tr>
+      <tr><th>ジュリエット</th><td class="ng"></td><td class="ng"></td><td class="allday on">終日</td></tr>
+      <tr><th>乳母</th><td></td><td></td><td class="allday">終日</td></tr>
+    </tbody>
+  </table>
+  <div class="legend">
+    <span><i class="sw white"></i>出られる</span>
+    <span><i class="sw red"></i>出られない（NG）</span>
+    <span><i class="sw" style="background:#fee2e2"></i>終日＝その日まるごと切り替え</span>
+  </div>
+</div>
+
+<p>
+  右端の <kbd>終日</kbd> は、その人の<strong>その日ぜんぶ</strong>を一度に切り替えるボタンです。
+  1日まるごと来られない人は、これを1回押すだけで済みます。
+</p>
+
+<h3>③ 下に「できる場面」が出る</h3>
+<p>
+  塗ったその場で、下の判定が変わります。時間帯ごとに、こう出ます。
+</p>
+
+<div class="mock">
+  <div class="cap">画面のイメージ（午後 14:00–18:00）</div>
+  <div class="row">
+    <span style="color:#b91c1c; font-weight:700; font-size:12.5px">欠席</span>
+    <span class="chip absent">ジュリエット</span>
+  </div>
+  <div class="row">
+    <div class="label">できる場面（2）</div>
+    <span class="chip ok">3場・広場のけんか</span>
+    <span class="chip ok">7場・決闘</span>
+  </div>
+  <div class="row">
+    <div class="label">できない場面（1）</div>
+    <div>5場・バルコニー <span style="color:#b91c1c; font-size:12px">（ジュリエットが不在）</span></div>
+  </div>
+</div>
+
+<p>
+  <strong>できない場面には、誰がいないからできないのかが出ます。</strong>
+  「この人だけ来られれば1本増える」が分かるので、連絡すべき相手がすぐ決まります。
+</p>
+
+<!-- ============================ -->
+<h2 id="plan"><span class="num">5</span>香盤を組む・印刷する</h2>
+
+<p><kbd>香盤</kbd> タブに切り替えます。日付を選んで進めます。</p>
+
+<ol class="steps">
+  <li>
+    <span class="h">（任意）締切を入れる</span>
+    <p>
+      「◯場を◯時までに終わらせたい」を入れておくと、自動生成がそれを優先します。
+      早く帰る人がいる場面などに使ってください。無くても組めます。
+    </p>
+  </li>
+  <li>
+    <span class="h">自動生成して、3つの案から選ぶ</span>
+    <p><kbd>香盤を自動生成</kbd> を押すと、考え方の違う3案が並びます。</p>
+    <ul>
+      <li><strong>番号順消化</strong>…場番号の若い順に、できるものから詰める</li>
+      <li><strong>欠け役優先</strong>…欠けやすい役がそろった枠を優先して使う</li>
+      <li><strong>消化数最大</strong>…短い場面から詰めて、こなす本数を増やす</li>
+    </ul>
+    <p>
+      各案に <strong>消化（何場やれるか）</strong> と <strong>積み残し（できない場面）</strong> が出るので、
+      見比べて <kbd>この案を採用</kbd> を押します。
+    </p>
+  </li>
+  <li>
+    <span class="h">手で並べ替える</span>
+    <p>
+      採用すると手動編集ができます。場面のブロックを<strong>ドラッグして順番や枠を入れ替え</strong>られます。
+    </p>
+    <p>
+      役がそろっていない置き方をすると <strong>⚠ ◯◯が不在</strong> と赤く出ますが、
+      <strong>置くこと自体はできます</strong>。「本人不在でも立ち位置だけ確認する」といった
+      現場の判断を止めないためです。
+    </p>
+  </li>
+  <li>
+    <span class="h">印刷して貼り出す</span>
+    <p>
+      <kbd>🖨 印刷用表示</kbd> を押すと、その日の香盤だけの表になって印刷できます。
+      ボタンや設定は印刷されません。
+      印刷画面で「PDFとして保存」を選べば、そのままLINEやメールでも送れます。
+    </p>
+  </li>
+</ol>
+
+<!-- ============================ -->
+<h2 id="share"><span class="num">6</span>人に配る</h2>
+
+<p>
+  <span class="path"><b>設定 → データ → この内容を配る（URLをコピー）</b></span>
+</p>
+<p>
+  いま登録されている内容<strong>ぜんぶ</strong>（役・場面・稽古日・出欠・組んだ香盤）が
+  1本のURLになります。LINEやメールで送れば、相手はそのURLを開くだけで同じ状態を見られます。
+  アプリを入れる必要も、ログインも要りません。
+</p>
+
+<div class="note warn">
+  <span class="title">⚠ 受け取った人の内容は、置き換わります</span>
+  URLを開くと、その端末に入っていた内容は<strong>受け取った内容に置き換わります</strong>。
+  置き換える前に確認画面が出て、<kbd>いまの内容のまま開く</kbd> を選べば守れますが、
+  <strong>行き来してやりとりする使い方には向きません。</strong>
+  出欠は<strong>まとめ役がひとりで入力し、できあがったものを配る</strong>のがいちばん安全です。
+</div>
+
+<!-- ============================ -->
+<h2 id="data"><span class="num">7</span>データの保存について</h2>
+
+<ul>
+  <li>入力した内容は<strong>その端末の中に自動で保存</strong>されます。保存ボタンはありません。</li>
+  <li>サーバーには送っていません。ほかの人からは見えません。</li>
+  <li>ただし<strong>端末ごとに別々</strong>です。iPhoneで入れた内容はパソコンには出てきません。</li>
+</ul>
+
+<div class="note">
+  <span class="title">控えを取っておきたいときは</span>
+  <span class="path"><b>設定 → データ → この内容を配る（URLをコピー）</b></span>
+  で出たURLを、自分あてにメールやLINEで送っておいてください。
+  それが<strong>そのままバックアップ</strong>になります。端末を変えたときも、そのURLを開けば元に戻せます。
+</div>
+
+<p class="small muted">
+  ※ ブラウザの履歴やサイトデータを消す操作をすると、保存された内容も消えることがあります。
+  大事な香盤は、上のURLか印刷したPDFを残しておくと安心です。
+</p>
+
+<!-- ============================ -->
+<h2 id="home"><span class="num">8</span>ホーム画面に置いておく</h2>
+
+<p>
+  毎回URLを探すのは大変なので、ホーム画面に置いておくと普通のアプリのように開けます。
+</p>
+
+<h3>iPhone / iPad（Safari）</h3>
+<ol>
+  <li>香盤メーカーを Safari で開く</li>
+  <li>下（または右上）の<strong>共有ボタン</strong>（□に↑）を押す</li>
+  <li>メニューを下にたどって <strong>「ホーム画面に追加」</strong> を押す</li>
+</ol>
+
+<h3>Android（Chrome）</h3>
+<ol>
+  <li>香盤メーカーを Chrome で開く</li>
+  <li>右上の <strong>⋮</strong> を押す</li>
+  <li><strong>「ホーム画面に追加」</strong> を押す</li>
+</ol>
+
+<div class="note">
+  <span class="title">大事なこと</span>
+  ホーム画面のアイコンは<strong>そのブラウザに入っているデータを見に行きます</strong>。
+  追加したあとは、<strong>いつも同じアイコンから開いてください。</strong>
+  別のブラウザで開くと、中身が空に見えます（消えたわけではありません）。
+</div>
+
+<!-- ============================ -->
+<h2 id="qa"><span class="num">9</span>こまったとき</h2>
+
+<div class="qa">
+  <div class="q">場面が「できない」ばかりになる</div>
+  <div class="a">
+    その場面に必要な役として<strong>チェックを付けすぎていないか</strong>を見てください。
+    実際にはその日に稽古しない役までチェックが付いていると、その場面はできない判定になります。
+    <span class="path">設定 → 場面</span> で見直せます。
+  </div>
+</div>
+
+<div class="qa">
+  <div class="q">できる場面が1つも出ない</div>
+  <div class="a">
+    その時間帯に、多くの役がNGになっている状態です。
+    判定の「欠席」に出ている人が、その日の鍵になります。
+  </div>
+</div>
+
+<div class="qa">
+  <div class="q">役を消したら、ほかも消えた</div>
+  <div class="a">
+    役を削除すると、<strong>その役の場面チェックと、入れた出欠も一緒に消えます</strong>。
+    残しておくとおかしな判定になるためです。名前を直したいだけなら、削除せず
+    <strong>名前の欄を書き換えて</strong>ください。
+  </div>
+</div>
+
+<div class="qa">
+  <div class="q">稽古日や時間帯を消したら、出欠はどうなる？</div>
+  <div class="a">
+    その日（その時間帯）に入れた出欠も一緒に消えます。日程が変わったときは、
+    <strong>消して入れ直すより、日付や時刻を書き換える</strong>ほうが入力が残ります。
+  </div>
+</div>
+
+<div class="qa">
+  <div class="q">同じ日付を2回追加できない</div>
+  <div class="a">
+    同じ日は1つだけです。1日に2部あるときは、日を増やすのではなく
+    その日に<strong>時間帯（コマ）を足して</strong>ください。
+  </div>
+</div>
+
+<div class="qa">
+  <div class="q">数字を入れると画面が拡大してしまう</div>
+  <div class="a">
+    起きないようにしてあります。もし起きたら、お使いの端末と場所を教えてください。
+  </div>
+</div>
+
+<div class="qa">
+  <div class="q">最初からやり直したい</div>
+  <div class="a">
+    <span class="path">設定 → データ → 全データを消去</span>。
+    <strong>元には戻せません。</strong>消す前に「この内容を配る」のURLを自分あてに送っておくと、
+    やっぱり戻したいときに復元できます。
+  </div>
+</div>
+
+<footer>
+  香盤メーカー 使い方<br>
+  つくったもの：つみき<br>
+  2026年7月24日
+</footer>
+
+</div>
+</body>
+</html>
