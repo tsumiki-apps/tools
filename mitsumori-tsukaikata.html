@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>くらし見積り — 設計図（使い方の見本）</title>
+<meta name="description" content="入居とショートステイの『毎月いくら』を、その場でご家族に。区分や日数で変わる自己負担を足し引きして、印刷できる見積書に。ことのは様向けの小さな道具の設計図。">
+<link rel="stylesheet" href="teian.css">
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="kicker">TSUMIKI ご提案 ／ 道具 03</p>
+  <h1>くらし見積り</h1>
+  <p class="lead">
+    入居とショートステイの「<strong>毎月いくらかかるか</strong>」を、区分や日数を選ぶだけで即計算。
+    そのまま<strong>印刷してご家族にお渡しできる見積書</strong>になります。
+  </p>
+  <div class="banner">
+    <span class="ic">✎</span>
+    <span>これは<b>設計図（使い方の見本）</b>です。画面の金額は<b>例</b>で、まだ動きません。
+      実際にはことのは様の料金・最新の制度に合わせてお作りします。</span>
+  </div>
+  <p class="openapp"><a class="ghost" href="kotonoha-teian.html">← 3つのご提案にもどる</a></p>
+</header>
+
+<div class="layout">
+
+<aside class="toc">
+  <p class="t">もくじ</p>
+  <ol>
+    <li><a href="#what">どんな道具か</a></li>
+    <li><a href="#input">入力する</a></li>
+    <li><a href="#live">入居の見積り</a></li>
+    <li><a href="#short">ショートステイ</a></li>
+    <li><a href="#fit">ことのは様に合う理由</a></li>
+    <li><a href="#safe">安全・データ・お渡し</a></li>
+    <li><a href="#qa">こまったとき</a></li>
+  </ol>
+</aside>
+
+<main>
+
+<!-- 1 -->
+<section id="what" style="padding-top:20px">
+  <h2><span class="num">1</span>どんな道具か</h2>
+
+  <div class="flow" style="margin-bottom:18px">
+    <span class="box">区分と日数をえらぶ</span><span class="arw">→</span>
+    <span class="box">月額が内訳つきで出る</span><span class="arw">→</span>
+    <span class="box">印刷してお渡し</span>
+  </div>
+
+  <div class="split wide">
+    <div>
+      <ul class="tight">
+        <li><strong>やること</strong>：入居・ショートステイの月額を概算／内訳を見せる／見積書を印刷</li>
+        <li><strong>やらないこと</strong>：実際の請求、受給者証の管理、記録</li>
+        <li><strong>使う人</strong>：相談担当・サービス管理責任者・代表</li>
+        <li><strong>入れる情報</strong>：その場の計算だけ。<strong>個人を保存しなくても使えます</strong></li>
+      </ul>
+      <p class="small muted">※ あくまで「説明用の概算」。正式な金額は受給者証・自治体の決定によります。</p>
+    </div>
+
+    <figure class="shot">
+      <div class="screen">
+        <div class="bar"><span class="ttl">くらし見積り</span><span class="gear">🖨 印刷</span></div>
+        <div class="lbl" style="margin-bottom:6px">入居プラン・月額（概算）</div>
+        <div class="big" style="margin-bottom:8px">105,300<span style="font-size:14px; font-weight:600"> 円/月</span></div>
+        <div class="money"><span>お住まいの費用（家賃ほか）</span><span>115,000</span></div>
+        <div class="money"><span>家賃の補助（補足給付）</span><span>−10,000</span></div>
+        <div class="money"><span>サービス自己負担（上限）</span><span>+300</span></div>
+        <span class="pin" style="top:30%; right:-11px">1</span>
+      </div>
+      <ol class="pins">
+        <li>大きな数字＝月額。下に<strong>「何がいくら」</strong>の内訳が並ぶ</li>
+      </ol>
+      <figcaption>計算結果（金額は例）</figcaption>
+    </figure>
+  </div>
+
+  <div class="note warn">
+    <span class="title">これは“概算の説明用”です（大事なところ）</span>
+    正式な自己負担額は、利用者様の受給者証・自治体の決定で決まります。この道具は
+    <strong>ご家族に「だいたいこのくらい」を分かりやすく示す</strong>ためのもの。
+    請求や記録には一切つなぎません。
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="input">
+  <h2><span class="num">2</span>入力する（えらぶだけ）</h2>
+  <div class="split wide flip">
+    <figure class="shot">
+      <div class="screen">
+        <div class="lbl" style="margin-bottom:8px">じょうけんを選ぶ</div>
+        <div class="dash">
+          <div class="row" style="border:none; padding:5px 0"><span style="width:96px; color:var(--app-subtle); font-size:12px">プラン</span><span class="chip dark">入居</span><span class="chip line">ショートステイ</span></div>
+          <div class="row" style="border:none; padding:5px 0"><span style="width:96px; color:var(--app-subtle); font-size:12px">負担の区分</span><span class="chip line">生活保護</span><span class="chip dark">低所得</span><span class="chip line">一般1</span></div>
+          <div class="row" style="border:none; padding:5px 0"><span style="width:96px; color:var(--app-subtle); font-size:12px">家賃補助</span><span class="chip dark">あり</span><span class="chip line">なし</span></div>
+        </div>
+        <span class="pin" style="top:52%; right:-11px">1</span>
+      </div>
+      <ol class="pins">
+        <li>ふだを押すだけ。金額はその場で下に反映されます</li>
+      </ol>
+    </figure>
+
+    <div>
+      <h3>選ぶのは3つ</h3>
+      <ul class="tight">
+        <li><strong>プラン</strong>：入居 ／ ショートステイ</li>
+        <li><strong>負担の区分</strong>：生活保護／低所得／一般1 …（＝サービス自己負担の上限が決まる）</li>
+        <li><strong>家賃補助</strong>：補足給付の対象かどうか</li>
+      </ul>
+      <div class="note good">
+        <span class="title">料金も上限額も、施設で直せます</span>
+        家賃・食費・水光熱費・消耗品費、そして区分ごとの上限額は<strong>ことのは様側で編集可能</strong>。
+        制度改定や値上げがあっても、施設だけで最新にできます。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="live">
+  <h2><span class="num">3</span>入居プランの見積り</h2>
+  <p>ことのは様の入居費用（家賃6万・食費3.5万・水光熱1.5万・消耗品5千の実費）を初期値に、区分と補助を足し引きして月額を出します。<span class="small muted">※下の金額はすべて例です。</span></p>
+
+  <div class="split wide" style="margin-top:16px">
+    <div>
+      <h3>内訳の考え方</h3>
+      <ul class="tight">
+        <li><strong>お住まいの実費</strong>＝家賃＋食費＋水光熱＋消耗品</li>
+        <li><strong>−家賃補助</strong>（補足給付の対象なら差し引き）</li>
+        <li><strong>＋サービス自己負担</strong>（区分の上限まで。低所得・生活保護は0円）</li>
+      </ul>
+      <div class="note">
+        <span class="title">ご家族がいちばん安心するのは「内訳」</span>
+        総額だけだと不安が残ります。<strong>何にいくらかかるか</strong>を並べて見せられるのが、
+        この道具のいちばんの役目です。
+      </div>
+    </div>
+
+    <figure class="shot">
+      <div class="screen">
+        <div class="lbl" style="margin-bottom:8px">入居プラン・低所得／家賃補助あり</div>
+        <div class="money"><span>家賃</span><span>60,000</span></div>
+        <div class="money"><span>食費</span><span>35,000</span></div>
+        <div class="money"><span>水光熱費</span><span>15,000</span></div>
+        <div class="money"><span>消耗品費</span><span>5,000</span></div>
+        <div class="money"><span>家賃補助（補足給付）</span><span>−10,000</span></div>
+        <div class="money"><span>サービス自己負担（上限）</span><span>0</span></div>
+        <div class="money total"><span>月額（概算）</span><span>105,000 円</span></div>
+        <span class="pin" style="bottom:10px; right:-11px">1</span>
+      </div>
+      <ol class="pins">
+        <li>いちばん下に<strong>月額</strong>。区分を変えると全部が同時に変わります</li>
+      </ol>
+      <figcaption>入居の見積り（金額は例）</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="short">
+  <h2><span class="num">4</span>ショートステイの見積り</h2>
+  <p>短期入所は、<strong>日数を入れるだけ</strong>。1日あたりの食費・滞在費に、サービス自己負担（日額・月の上限まで）を足して合計します。「今回◯泊だといくら？」に即答できます。</p>
+
+  <div class="split wide flip" style="margin-top:16px">
+    <figure class="shot">
+      <div class="screen">
+        <div class="lbl" style="margin-bottom:8px">ショートステイ・7泊8日</div>
+        <div class="row" style="padding:6px 0"><span style="flex:1">泊数</span><span class="chip dark">7 泊</span></div>
+        <div class="money"><span>食費（8日 × 例1,500）</span><span>12,000</span></div>
+        <div class="money"><span>滞在費（8日 × 例1,000）</span><span>8,000</span></div>
+        <div class="money"><span>サービス自己負担</span><span>+1,800</span></div>
+        <div class="money total"><span>今回の合計（概算）</span><span>21,800 円</span></div>
+        <span class="pin" style="top:26%; right:-11px">1</span>
+      </div>
+      <ol class="pins">
+        <li>泊数を変えるだけで合計が出る。金額は例です</li>
+      </ol>
+      <figcaption>ショートステイの見積り</figcaption>
+    </figure>
+
+    <div>
+      <h3>使う場面</h3>
+      <ul class="tight">
+        <li>ショートステイの<strong>問い合わせ電話</strong>で「◯泊だといくら？」に即答</li>
+        <li>見学・面談のとき、その場で数字を見せる</li>
+        <li>印刷して、検討材料としてお渡し</li>
+      </ul>
+      <div class="note good">
+        <span class="title">併設のショートステイと相性がいい</span>
+        入居とショートの<strong>両方を1つの道具</strong>で見積れます。ことのは様は両方を運営されているので、
+        1本で二役こなせます。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="fit">
+  <h2><span class="num">5</span>ことのは様に合う理由</h2>
+  <div class="cols c2">
+    <div class="card">
+      <h3>費用体系がはっきりしているから</h3>
+      <p class="small">家賃・食費・水光熱・消耗品が明確なので、見積りの土台をそのまま作れます。区分と補助を足すだけで、実態に近い数字が出せます。</p>
+    </div>
+    <div class="card">
+      <h3>入居とショート、両方あるから</h3>
+      <p class="small">1本で入居とショートステイの両方を見積れます。問い合わせの多いショートの即答ができると、受け入れ判断もスムーズになります。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="safe">
+  <h2><span class="num">6</span>安全・データ・お渡し</h2>
+  <div class="cols c2">
+    <div class="card">
+      <h3>データのしくみ</h3>
+      <ul class="tight">
+        <li>基本は<strong>その場の計算だけ</strong>。個人を保存せずに使えます</li>
+        <li>お名前を入れて見積書にする場合も、その端末の中だけに保存</li>
+        <li><strong>サーバーには送りません</strong></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>お渡しのかたち</h3>
+      <ul class="tight">
+        <li>買い切り・<strong>ソースまで全部お渡し</strong></li>
+        <li>料金・上限額・補助は施設側で変更可能</li>
+        <li class="muted">目安：15〜25万円ほど</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note warn">
+    <span class="title">金額は必ず最新の制度で作ります</span>
+    負担上限額や補足給付は制度改定で変わります。納品時に最新値でお作りし、<strong>以後は施設側で直せる</strong>設計にします。
+    見積書には「概算です」の一文を必ず入れます。
+  </div>
+</section>
+
+<!-- 7 -->
+<section id="qa">
+  <h2><span class="num">7</span>こまったとき（想定Q&A）</h2>
+  <div class="cols c2">
+    <div class="qa">
+      <div class="q">これで正式な請求ができますか？</div>
+      <div class="a">できません。あくまでご家族への「概算の説明用」です。正式な自己負担は受給者証・自治体の決定によります。請求は既存のしくみで行ってください。</div>
+    </div>
+    <div class="qa">
+      <div class="q">制度が変わったら金額がズレませんか？</div>
+      <div class="a">料金・上限額・補助額を施設側で編集できる設計にします。改定があってもその場で最新に直せます。</div>
+    </div>
+    <div class="qa">
+      <div class="q">利用者様ごとに保存できますか？</div>
+      <div class="a">保存も可能です（端末の中だけ）。ただし基本は保存せず「その場で計算して印刷」が身軽でおすすめです。</div>
+    </div>
+    <div class="qa">
+      <div class="q">見積書はきれいに印刷できますか？</div>
+      <div class="a">はい。ボタンや入力欄は消え、内訳と月額だけのすっきりした紙になります。PDF保存してメールでも送れます。</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  くらし見積り — 設計図 ／ つみき ご提案（ことのは様向け）<br>
+  <a href="kotonoha-teian.html">← 3つのご提案にもどる</a><br>
+  2026年7月
+</footer>
+
+</main>
+</div>
+</div>
+</body>
+</html>

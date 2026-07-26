@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ケアしかく手帳 — 設計図（使い方の見本）</title>
+<meta name="description" content="職員の医療的ケア実施可否・資格・法定研修の期限を1画面で。切れる前に赤でお知らせする、ことのは様向けの小さな道具の設計図。">
+<link rel="stylesheet" href="teian.css">
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="kicker">TSUMIKI ご提案 ／ 道具 01</p>
+  <h1>ケアしかく手帳</h1>
+  <p class="lead">
+    「<strong>誰が・どの医療的ケアをできるか</strong>」と、資格・法定研修の<strong>期限</strong>を1画面に。
+    切れる前に赤でお知らせするので、うっかりが防げます。
+  </p>
+  <div class="banner">
+    <span class="ic">✎</span>
+    <span>これは<b>設計図（使い方の見本）</b>です。画面は完成イメージで、まだ動きません。
+      実際にはことのは様の職員数・研修に合わせてお作りします。</span>
+  </div>
+  <p class="openapp"><a class="ghost" href="kotonoha-teian.html">← 3つのご提案にもどる</a></p>
+</header>
+
+<div class="layout">
+
+<aside class="toc">
+  <p class="t">もくじ</p>
+  <ol>
+    <li><a href="#what">どんな道具か</a></li>
+    <li><a href="#setup">はじめの登録</a></li>
+    <li><a href="#daily">毎日ひらく画面</a></li>
+    <li><a href="#matrix">できる人ひとめ表</a></li>
+    <li><a href="#fit">ことのは様に合う理由</a></li>
+    <li><a href="#safe">安全・データ・お渡し</a></li>
+    <li><a href="#qa">こまったとき</a></li>
+  </ol>
+</aside>
+
+<main>
+
+<!-- 1 -->
+<section id="what" style="padding-top:20px">
+  <h2><span class="num">1</span>どんな道具か</h2>
+
+  <div class="flow" style="margin-bottom:18px">
+    <span class="box">職員と研修を登録</span><span class="arw">→</span>
+    <span class="box">開くと期限が近い順に赤表示</span><span class="arw">→</span>
+    <span class="box">切れる前に手が打てる</span>
+  </div>
+
+  <div class="split wide">
+    <div>
+      <ul class="tight">
+        <li><strong>やること</strong>：職員ごとの「できる医療的ケア」を一覧化／資格・法定研修の期限を見張る／期限切れ前にお知らせ</li>
+        <li><strong>やらないこと</strong>：利用者様の記録、シフトの自動作成、給与計算</li>
+        <li><strong>使う人</strong>：管理者・サービス管理責任者ひとり。月に1回開けば十分まわります</li>
+        <li><strong>入れる情報</strong>：<strong>職員の情報だけ</strong>。利用者様の医療情報は入れません</li>
+      </ul>
+      <p class="small muted">※ 法定研修＝虐待防止・身体拘束適正化・感染症対策・業務継続（BCP）など、年1回以上の実施が義務づけられた研修。</p>
+    </div>
+
+    <figure class="shot">
+      <div class="screen">
+        <div class="bar"><span class="ttl">ケアしかく手帳</span><span class="gear">⚙ 設定</span></div>
+        <div class="lbl" style="margin-bottom:8px">きょうの注意（期限が近い順）</div>
+        <div class="row"><span class="dot r"></span><span style="flex:1">身体拘束適正化 研修<br><span class="small muted">前回から11か月・全体研修</span></span><span class="chip dang">今月まで</span></div>
+        <div class="row"><span class="dot y"></span><span style="flex:1">感染症対策 研修<br><span class="small muted">前回から10か月</span></span><span class="chip warnb">あと2か月</span></div>
+        <div class="row"><span class="dot g"></span><span style="flex:1">虐待防止 研修<br><span class="small muted">前回から4か月</span></span><span class="chip ok">余裕あり</span></div>
+        <span class="pin" style="top:34%; left:-11px">1</span>
+        <span class="pin" style="top:34%; right:-11px">2</span>
+      </div>
+      <ol class="pins">
+        <li>色の玉：<strong>赤＝すぐ／黄＝そろそろ／緑＝余裕</strong></li>
+        <li>右のふだで「あと何か月」がひと目で分かる</li>
+      </ol>
+      <figcaption>開くと最初に出る画面</figcaption>
+    </figure>
+  </div>
+
+  <div class="note">
+    <span class="title">「自分から通知は送りません」ここが正直なところ</span>
+    メール等で自動リマインドは送りません（サーバーを持たないため）。
+    かわりに<strong>開いた瞬間に、期限が近い順で赤く並ぶ</strong>ので、月1回開く習慣だけで抜けを防げます。
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="setup">
+  <h2><span class="num">2</span>はじめの登録（最初の1回だけ）</h2>
+  <p>設定を開いて、この3つを登録します。あとは毎月チェックを更新するだけです。</p>
+
+  <div class="cols c3" style="margin-top:16px">
+    <div class="card">
+      <h3>① 職員</h3>
+      <p class="where"><b>設定 → 職員</b></p>
+      <ul class="tight">
+        <li>氏名と役割（世話人・生活支援員・看護師・夜勤専任 など）</li>
+        <li>入職日</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>② できる医療的ケア</h3>
+      <p class="where"><b>職員をひらく → ケア</b></p>
+      <ul class="tight">
+        <li>喀痰吸引（口腔内／鼻腔内／気管カニューレ内）</li>
+        <li>経管栄養（胃ろう／腸ろう／経鼻）</li>
+        <li>根拠（喀痰吸引等研修 第◯号／実地研修修了／看護師）</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>③ 資格・法定研修</h3>
+      <p class="where"><b>設定 → 研修・資格</b></p>
+      <ul class="tight">
+        <li>項目名（例：身体拘束適正化研修）</li>
+        <li>周期（例：年1回／2年ごと）</li>
+        <li>前回の実施日 or 取得日</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note good">
+    <span class="title">項目は施設で足せます</span>
+    法定研修は制度で変わります。<strong>項目・周期をことのは様側で追加・変更できる</strong>ようにするので、
+    ルールが変わってもお渡ししたまま使い続けられます。
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="daily">
+  <h2><span class="num">3</span>毎月ひらく画面</h2>
+
+  <div class="split wide flip">
+    <figure class="shot">
+      <div class="screen">
+        <div class="tabs"><span class="on">注意ボード</span><span>職員ごと</span><span>できる人ひとめ</span></div>
+        <div class="lbl" style="margin-bottom:6px">期限を更新する</div>
+        <div class="row"><span style="flex:1">身体拘束適正化 研修</span><span class="btn pri">実施した</span></div>
+        <div class="row"><span style="flex:1">看護師 免許（更新不要）</span><span class="chip ok">確認済</span></div>
+        <span class="pin" style="top:52%; right:-11px">1</span>
+      </div>
+      <ol class="pins">
+        <li>研修をやったら <kbd>実施した</kbd> を押すだけ。次の期限が自動で先に延びます</li>
+      </ol>
+    </figure>
+
+    <div>
+      <h3>毎月やること</h3>
+      <ol class="tight">
+        <li><strong>注意ボードを見る</strong>（赤・黄が出ていないか）</li>
+        <li>研修を実施したら <kbd>実施した</kbd> を押す → 次回期限が自動で更新</li>
+        <li>新しい職員が入ったら「職員」に追加、できるケアをチェック</li>
+      </ol>
+      <div class="note">
+        <span class="title">実地指導のときにそのまま見せられる</span>
+        「誰がどの研修をいつ受けたか」「医療的ケアの実施者は誰か」を、<strong>印刷して一覧で提示</strong>できます。
+        Excelを探し回らずに済みます。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="matrix">
+  <h2><span class="num">4</span>「できる人ひとめ表」</h2>
+  <p>ことのは様のように医療的ケアがある施設で、いちばん効く画面です。<strong>どのケアを、今、誰ができるか</strong>が一目で分かります。夜勤やショートステイ受け入れの体制確認に使えます。</p>
+
+  <div class="split wide" style="margin-top:16px">
+    <div>
+      <ul class="tight">
+        <li><strong>緑のマス＝できる</strong>（根拠あり）</li>
+        <li>空マス＝できない</li>
+        <li>「気管カニューレ内の吸引ができる人が日勤に1人もいない」といった<strong>穴</strong>が見える</li>
+      </ul>
+      <div class="note good">
+        <span class="title">シフトを組む“前”のチェックに</span>
+        シフト表そのものは作りませんが、「この時間帯、必要なケアの担い手がいるか」を
+        組む前に確かめられます。
+      </div>
+    </div>
+
+    <figure class="shot">
+      <div class="screen">
+        <div class="lbl" style="margin-bottom:8px">できる人ひとめ表</div>
+        <div class="tblwrap">
+          <table class="grid">
+            <thead>
+              <tr><th style="text-align:left">医療的ケア</th><th>看護A</th><th>支援B</th><th>支援C</th><th>夜勤D</th></tr>
+            </thead>
+            <tbody>
+              <tr><th>口腔内 吸引</th><td class="y">◯</td><td class="y">◯</td><td class="n">–</td><td class="y">◯</td></tr>
+              <tr><th>鼻腔内 吸引</th><td class="y">◯</td><td class="y">◯</td><td class="n">–</td><td class="n">–</td></tr>
+              <tr><th>カニューレ内 吸引</th><td class="y">◯</td><td class="n">–</td><td class="n">–</td><td class="n">–</td></tr>
+              <tr><th>胃ろう 経管栄養</th><td class="y">◯</td><td class="y">◯</td><td class="y">◯</td><td class="y">◯</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <span class="pin" style="top:60%; right:-11px">1</span>
+      </div>
+      <ol class="pins">
+        <li>カニューレ内の吸引が<strong>看護Aさんonly</strong>＝この人が休むと空く、が見える</li>
+      </ol>
+      <figcaption>ケア × 職員のはや見</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="fit">
+  <h2><span class="num">5</span>ことのは様に合う理由</h2>
+  <div class="cols c2">
+    <div class="card">
+      <h3>医療的ケアが施設の核だから</h3>
+      <p class="small">重症心身・重度身体障がいの方を看護師配置で支える体制では、「誰がどのケアをできるか」の把握が安全に直結します。ここを見える化する道具は、ことのは様の性格にまっすぐ合います。</p>
+    </div>
+    <div class="card">
+      <h3>個人情報がいちばん軽いから</h3>
+      <p class="small">入れるのは<strong>職員の情報だけ</strong>。利用者様の医療情報は一切入りません。だから導入のハードルが低く、「まず1本」に向いています。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="safe">
+  <h2><span class="num">6</span>安全・データ・お渡し</h2>
+  <div class="cols c2">
+    <div class="card">
+      <h3>データのしくみ</h3>
+      <ul class="tight">
+        <li>その端末の中に自動保存。<strong>サーバーには送りません</strong></li>
+        <li>控えは「この内容を送る」でURL化し、自分あてに送るだけ</li>
+        <li>ブラウザのデータを消すと一緒に消えるので、控えは時々とってください</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>お渡しのかたち</h3>
+      <ul class="tight">
+        <li>買い切り・<strong>ソースまで全部お渡し</strong></li>
+        <li>研修項目・周期は施設側で変更可能</li>
+        <li class="muted">目安：15〜25万円ほど</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section id="qa">
+  <h2><span class="num">7</span>こまったとき（想定Q&A）</h2>
+  <div class="cols c2">
+    <div class="qa">
+      <div class="q">シフト表も作れますか？</div>
+      <div class="a">この道具は作りません。ただ「その時間に必要なケアの担い手がいるか」を組む前に確認できます。シフト作成は別の専用ソフトが得意な領域です。</div>
+    </div>
+    <div class="qa">
+      <div class="q">通知は来ますか？</div>
+      <div class="a">自動通知は送りません。開いたときに期限が近い順で赤く並ぶ方式です。月1回開く運用と相性がいいです。</div>
+    </div>
+    <div class="qa">
+      <div class="q">職員が増えても使えますか？</div>
+      <div class="a">はい。人数が数十名までなら軽快に動きます。ことのは様の規模なら余裕です。</div>
+    </div>
+    <div class="qa">
+      <div class="q">制度が変わったら？</div>
+      <div class="a">研修の項目・周期を施設側で足せる設計にします。お渡ししたあとも、施設だけで手直しできます。</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  ケアしかく手帳 — 設計図 ／ つみき ご提案（ことのは様向け）<br>
+  <a href="kotonoha-teian.html">← 3つのご提案にもどる</a><br>
+  2026年7月
+</footer>
+
+</main>
+</div>
+</div>
+</body>
+</html>
