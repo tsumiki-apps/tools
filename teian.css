@@ -130,16 +130,18 @@ table.cmp tbody th{font-weight:700; white-space:nowrap;}
 .idea{
   display:block; text-decoration:none; color:var(--ink);
   background:var(--control); border:1px solid var(--hair); border-radius:22px;
-  padding:22px 22px; transition:transform .12s ease, border-color .12s ease;
+  padding:22px 24px; transition:transform .12s ease, border-color .12s ease;
 }
 .idea:active{transform:scale(.99);}
 .idea:hover{border-color:var(--ghost);}
-.idea .no{font-size:12px; font-weight:700; letter-spacing:.1em; color:var(--mark);}
+.idea .l, .idea .r{min-width:0;}
+.idea .no{display:block; font-size:12px; font-weight:700; letter-spacing:.1em; color:var(--mark);}
 .idea .nm{font-size:20px; font-weight:700; margin:6px 0 2px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
-.idea .sub{font-size:13.5px; color:var(--muted); margin-bottom:12px;}
-.idea .fit{font-size:13.5px;}
+.idea .sub{display:block; font-size:13.5px; color:var(--muted); margin-bottom:2px;}
+.idea .r{margin-top:12px;}
+.idea .fit{display:block; font-size:13.5px;}
 .idea .fit b{color:var(--ink);}
-.idea .go{margin-top:14px; font-size:13.5px; font-weight:700; color:var(--mark);}
+.idea .go{display:inline-block; margin-top:14px; font-size:13.5px; font-weight:700; color:var(--mark);}
 
 /* ================= アプリ画面の再現（図） ================= */
 figure.shot{margin:0; padding-inline:16px;}
@@ -234,20 +236,28 @@ footer a{color:var(--muted);}
 @media (min-width:720px){
   .cols.c2{grid-template-columns:1fr 1fr;}
   .cols.c3{grid-template-columns:1fr 1fr 1fr;}
-  .ideas{grid-template-columns:1fr;}
   .split{display:grid; grid-template-columns:minmax(0,1fr) minmax(300px,400px); gap:28px; align-items:start;}
-  .split.wide{grid-template-columns:minmax(0,1fr) minmax(340px,460px);}
+  .split.wide{grid-template-columns:minmax(0,1fr) minmax(340px,480px);}
   .split.flip{grid-template-columns:minmax(300px,400px) minmax(0,1fr);}
+  /* 提案カードを横並び（見出し | 施設に合う理由）にして横幅を使う */
+  .idea{display:grid; grid-template-columns:minmax(230px,300px) minmax(0,1fr); column-gap:0; align-items:start; padding:24px 28px;}
+  .idea .l{padding-right:34px;}
+  .idea .r{margin-top:0; padding-left:34px; border-left:1px solid var(--hair);}
+  .idea .sub{margin-bottom:0;}
 }
 @media (min-width:1000px){
-  body{padding-left:32px; padding-right:32px;}
-  .layout{display:grid; grid-template-columns:196px minmax(0,1fr); gap:44px; align-items:start;}
+  body{max-width:none; padding-left:32px; padding-right:32px;}
+  .wrap{max-width:1240px;}
+  .layout{display:grid; grid-template-columns:210px minmax(0,1fr); gap:48px; align-items:start;}
   aside.toc{position:sticky; top:26px; margin-top:44px; background:none; border:none; padding:0;}
   aside.toc li{margin:4px 0; font-size:13.5px;}
   aside.toc a{border-bottom:none;}
   aside.toc a:hover{border-bottom:1px solid var(--hair);}
   h1{font-size:33px;}
   section{padding:52px 0 4px;}
+  /* 広い画面では見出しブロックをやや広く、余白も少しゆったり */
+  .idea{grid-template-columns:minmax(260px,340px) minmax(0,1fr); padding:26px 32px;}
+  .idea .nm{font-size:21px;}
 }
 
 /* ================= 印刷（A4のPDFになる） ================= */
