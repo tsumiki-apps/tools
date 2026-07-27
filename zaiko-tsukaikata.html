@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>在庫ノート — 設計図（使い方の見本）</title>
+<meta name="description" content="物品・おむつの在庫を管理し、発注ラインを下回ると赤で知らせる。そのまま発注リストとして印刷。個人情報を扱わない、いちばん気軽な小さな道具の設計図。">
+<link rel="stylesheet" href="teian.css">
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="kicker">TSUMIKI 道具のたね ／ 現場運営</p>
+  <h1>在庫ノート</h1>
+  <p class="lead">
+    物品・おむつの在庫を管理して、<strong>少なくなったら「発注」を赤でお知らせ</strong>。
+    そのまま<strong>発注リストとして印刷</strong>できます。個人情報を一切扱わないので、いちばん気軽に始められます。
+  </p>
+  <div class="banner">
+    <span class="ic">✎</span>
+    <span>これは<b>設計図（使い方の見本）</b>です。画面は完成イメージで、まだ動きません。
+      実際には現場で使う品目に合わせてお作りします。</span>
+  </div>
+  <p class="openapp"><a class="ghost" href="dougu-catalog.html">← 道具のカタログにもどる</a></p>
+</header>
+
+<div class="layout">
+
+<aside class="toc">
+  <p class="t">もくじ</p>
+  <ol>
+    <li><a href="#what">どんな道具か</a></li>
+    <li><a href="#setup">はじめの登録</a></li>
+    <li><a href="#daily">毎週の使い方</a></li>
+    <li><a href="#print">発注リストを印刷</a></li>
+    <li><a href="#fit">向いている現場</a></li>
+    <li><a href="#safe">安全・データ・お渡し</a></li>
+    <li><a href="#qa">こまったとき</a></li>
+  </ol>
+</aside>
+
+<main>
+
+<!-- 1 -->
+<section id="what" style="padding-top:20px">
+  <h2><span class="num">1</span>どんな道具か</h2>
+
+  <div class="flow" style="margin-bottom:18px">
+    <span class="box">品目と発注ラインを登録</span><span class="arw">→</span>
+    <span class="box">在庫の数を更新</span><span class="arw">→</span>
+    <span class="box">下回ると赤で「発注」</span>
+  </div>
+
+  <div class="split wide">
+    <div>
+      <ul class="tight">
+        <li><strong>やること</strong>：在庫の見える化／発注ラインを下回ったら知らせる／発注リストの印刷</li>
+        <li><strong>やらないこと</strong>：自動発注、業者への送信、金額の会計処理</li>
+        <li><strong>使う人</strong>：現場リーダーひとり。週1回の棚卸しで十分</li>
+        <li><strong>入れる情報</strong>：品目と数だけ。<strong>個人情報はありません</strong></li>
+      </ul>
+    </div>
+
+    <figure class="shot">
+      <div class="screen">
+        <div class="bar"><span class="ttl">在庫ノート</span><span class="gear">🖨 発注リスト</span></div>
+        <div class="lbl" style="margin-bottom:6px">在庫いちらん</div>
+        <div class="row"><span class="dot r"></span><span style="flex:1">紙おむつ（L）<br><span class="small muted">残り 2 / 発注ライン 5</span></span><span class="chip dang">発注</span></div>
+        <div class="row"><span class="dot y"></span><span style="flex:1">尿とりパッド<br><span class="small muted">残り 6 / 発注ライン 5</span></span><span class="chip warnb">そろそろ</span></div>
+        <div class="row"><span class="dot g"></span><span style="flex:1">手袋（M）<br><span class="small muted">残り 18 / 発注ライン 8</span></span><span class="chip ok">十分</span></div>
+        <span class="pin" style="top:34%; left:-11px">1</span>
+        <span class="pin" style="top:34%; right:-11px">2</span>
+      </div>
+      <ol class="pins">
+        <li>色の玉：<strong>赤＝発注／黄＝そろそろ／緑＝十分</strong></li>
+        <li>発注ラインを下回った品目に<strong>「発注」</strong>のふだ</li>
+      </ol>
+      <figcaption>開くと最初に出る画面</figcaption>
+    </figure>
+  </div>
+
+  <div class="note">
+    <span class="title">「気づいたら切らしていた」をなくす</span>
+    在庫は人の記憶頼りになりがち。<strong>発注ラインを決めておくだけ</strong>で、切らす前に手が打てます。
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="setup">
+  <h2><span class="num">2</span>はじめの登録（最初の1回だけ）</h2>
+  <div class="cols c2" style="margin-top:16px">
+    <div class="card">
+      <h3>① 品目</h3>
+      <p class="where"><b>設定 → 品目</b></p>
+      <ul class="tight">
+        <li>品名（例：紙おむつL・尿とりパッド）</li>
+        <li>数え方の単位（枚・箱・本 など）</li>
+        <li>仕入れ先メモ（任意）</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>② 発注ライン</h3>
+      <p class="where"><b>品目ごとに設定</b></p>
+      <ul class="tight">
+        <li>「これを下回ったら発注」の数</li>
+        <li>いつも切らす品は少し高めに</li>
+        <li>あとから何度でも直せます</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="daily">
+  <h2><span class="num">3</span>毎週の使い方</h2>
+  <div class="split wide flip">
+    <figure class="shot">
+      <div class="screen">
+        <div class="lbl" style="margin-bottom:8px">数をなおす</div>
+        <div class="row"><span style="flex:1">紙おむつ（L）</span><span class="btn">−</span><span class="chip line">2</span><span class="btn">＋</span></div>
+        <div class="row"><span style="flex:1">尿とりパッド</span><span class="btn">−</span><span class="chip line">6</span><span class="btn">＋</span></div>
+        <span class="pin" style="top:30%; right:-11px">1</span>
+      </div>
+      <ol class="pins">
+        <li>棚卸しで数えた数に <kbd>＋</kbd> <kbd>−</kbd> で合わせるだけ</li>
+      </ol>
+    </figure>
+    <div>
+      <h3>やることは1つ</h3>
+      <ol class="tight">
+        <li>週に1回、棚を見て<strong>数を合わせる</strong></li>
+      </ol>
+      <p>それだけで、発注が必要な品目が自動で赤くなります。</p>
+      <div class="note good">
+        <span class="title">使った分を減らす運用もOK</span>
+        「箱を開けたら1減らす」といった都度更新でも使えます。現場のやりやすい方で。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="print">
+  <h2><span class="num">4</span>発注リストを印刷</h2>
+  <div class="split wide">
+    <div>
+      <ul class="tight">
+        <li><kbd>🖨 発注リスト</kbd> を押すと<strong>「発注」の品目だけ</strong>がまとまります</li>
+        <li>仕入れ先メモも一緒に出せます</li>
+        <li>PDFにして、そのまま発注のメールに添付も</li>
+      </ul>
+    </div>
+    <figure class="shot">
+      <div class="screen">
+        <strong style="font-size:13px">発注リスト（7/27）</strong>
+        <div class="row" style="padding:6px 0"><span style="flex:1">紙おむつ（L）</span><span class="chip line">不足 3</span></div>
+        <div class="row" style="padding:6px 0"><span style="flex:1">おしり拭き</span><span class="chip line">不足 2</span></div>
+        <figcaption>発注が必要な品だけの一覧</figcaption>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="fit">
+  <h2><span class="num">5</span>向いている現場</h2>
+  <div class="cols c2">
+    <div class="card">
+      <h3>消耗品の種類が多い現場</h3>
+      <p class="small">おむつ・パッド・手袋・消毒など、切らせない消耗品が多い入所・通所系。品目ごとの発注ラインが効きます。</p>
+    </div>
+    <div class="card">
+      <h3>まず1本ためしたい現場</h3>
+      <p class="small">個人情報を扱わないので導入のハードルが最も低い道具です。「つみきの道具ってどんな感じ？」の入口にも向いています。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="safe">
+  <h2><span class="num">6</span>安全・データ・お渡し</h2>
+  <div class="cols c2">
+    <div class="card">
+      <h3>データのしくみ</h3>
+      <ul class="tight">
+        <li>その端末の中に自動保存。<strong>サーバーには送りません</strong></li>
+        <li>個人情報を扱わないので、共有端末でも安心して使えます</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>お渡しのかたち</h3>
+      <ul class="tight">
+        <li>買い切り・<strong>ソースまで全部お渡し</strong></li>
+        <li>品目・単位・発注ラインは施設側で変更可能</li>
+        <li class="muted">目安：15万円前後〜</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section id="qa">
+  <h2><span class="num">7</span>こまったとき（想定Q&A）</h2>
+  <div class="cols c2">
+    <div class="qa">
+      <div class="q">自動で発注してくれますか？</div>
+      <div class="a">しません。業者との連携は現場ごとに事情が異なるため、この道具は「発注が必要な品を教える・リストにする」までを担います。発注はいつもの方法で。</div>
+    </div>
+    <div class="qa">
+      <div class="q">複数の場所の在庫を分けられますか？</div>
+      <div class="a">はい。倉庫・フロアなど置き場ごとに分けて管理できます。</div>
+    </div>
+    <div class="qa">
+      <div class="q">金額は管理できますか？</div>
+      <div class="a">数の管理が中心です。単価メモを添えることはできますが、会計処理は行いません。</div>
+    </div>
+    <div class="qa">
+      <div class="q">バーコードで読めますか？</div>
+      <div class="a">対応しません。<kbd>＋</kbd><kbd>−</kbd>で数を合わせる、シンプルな方式です。</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  在庫ノート — 設計図 ／ つみき 道具のたね<br>
+  <a href="dougu-catalog.html">← 道具のカタログにもどる</a><br>
+  2026年7月
+</footer>
+
+</main>
+</div>
+</div>
+</body>
+</html>

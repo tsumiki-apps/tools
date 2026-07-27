@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>送迎ボード — 設計図（使い方の見本）</title>
+<meta name="description" content="車 × 時間帯に利用者名をドラッグして送迎を割り付け。当日キャンセルに強く、きれいに印刷して配れる。介護・福祉の現場向けの小さな道具の設計図。">
+<link rel="stylesheet" href="teian.css">
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="kicker">TSUMIKI 道具のたね ／ 送迎まわり</p>
+  <h1>送迎ボード</h1>
+  <p class="lead">
+    <strong>車 × 時間帯</strong>に利用者名をドラッグして割り付けるだけ。
+    当日キャンセル・追加にも強く、そのまま<strong>きれいに印刷して運転手さんに配れます</strong>。
+  </p>
+  <div class="banner">
+    <span class="ic">✎</span>
+    <span>これは<b>設計図（使い方の見本）</b>です。画面は完成イメージで、まだ動きません。
+      実際には現場の車の台数・便に合わせてお作りします。</span>
+  </div>
+  <p class="openapp"><a class="ghost" href="dougu-catalog.html">← 道具のカタログにもどる</a></p>
+</header>
+
+<div class="layout">
+
+<aside class="toc">
+  <p class="t">もくじ</p>
+  <ol>
+    <li><a href="#what">どんな道具か</a></li>
+    <li><a href="#setup">はじめの登録</a></li>
+    <li><a href="#daily">毎日の割り付け</a></li>
+    <li><a href="#print">印刷して配る</a></li>
+    <li><a href="#fit">向いている現場</a></li>
+    <li><a href="#safe">安全・データ・お渡し</a></li>
+    <li><a href="#qa">こまったとき</a></li>
+  </ol>
+</aside>
+
+<main>
+
+<!-- 1 -->
+<section id="what" style="padding-top:20px">
+  <h2><span class="num">1</span>どんな道具か</h2>
+
+  <div class="flow" style="margin-bottom:18px">
+    <span class="box">車と利用者を登録</span><span class="arw">→</span>
+    <span class="box">ドラッグで割り付け</span><span class="arw">→</span>
+    <span class="box">印刷して配る</span>
+  </div>
+
+  <div class="split wide">
+    <div>
+      <ul class="tight">
+        <li><strong>やること</strong>：誰をどの車・どの便に乗せるかを組む／当日変更に対応／印刷</li>
+        <li><strong>やらないこと</strong>：カーナビのような自動最短ルート、送迎記録の保存、請求</li>
+        <li><strong>使う人</strong>：生活相談員・管理者ひとり（組んで配る係）</li>
+        <li><strong>入れる情報</strong>：利用者のお名前・乗降の目安時刻など。医療情報は入れません</li>
+      </ul>
+    </div>
+
+    <figure class="shot">
+      <div class="screen">
+        <div class="bar"><span class="ttl">送迎ボード</span><span class="gear">🖨 印刷</span></div>
+        <div class="tabs"><span class="on">往路（お迎え）</span><span>復路（お送り）</span></div>
+        <div class="kanban">
+          <div class="col"><div class="h"><span>1号車</span><span>3</span></div>
+            <div class="cardlet">田中さん<span class="m">8:40</span></div>
+            <div class="cardlet">佐藤さん<span class="m">8:55</span></div>
+            <div class="cardlet">鈴木さん<span class="m">9:10</span></div>
+          </div>
+          <div class="col"><div class="h"><span>2号車</span><span>2</span></div>
+            <div class="cardlet">高橋さん<span class="m">8:45</span></div>
+            <div class="cardlet">伊藤さん<span class="m">9:05</span></div>
+          </div>
+          <div class="col"><div class="h"><span>未割当</span><span>1</span></div>
+            <div class="cardlet" style="border-style:dashed">渡辺さん<span class="m">要調整</span></div>
+          </div>
+        </div>
+        <span class="pin" style="top:52%; left:-11px">1</span>
+        <span class="pin" style="top:52%; right:-11px">2</span>
+      </div>
+      <ol class="pins">
+        <li>車ごとに乗る人が並ぶ。数字は「その車に何人か」</li>
+        <li><strong>未割当</strong>に残った人がひと目で分かる（乗せ忘れ防止）</li>
+      </ol>
+      <figcaption>送迎の割り付け画面（横スクロールします）</figcaption>
+    </figure>
+  </div>
+
+  <div class="note warn">
+    <span class="title">送迎表づくりは、毎回まるまる1時間かかることも</span>
+    当日キャンセルや新規が入るたびに作り直し——という現場は多いです。
+    <strong>ふだをずらすだけ</strong>にできれば、その時間がまるごと浮きます。
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="setup">
+  <h2><span class="num">2</span>はじめの登録（最初の1回だけ）</h2>
+  <div class="cols c3" style="margin-top:16px">
+    <div class="card">
+      <h3>① 車</h3>
+      <p class="where"><b>設定 → 車</b></p>
+      <ul class="tight">
+        <li>1号車・2号車…と登録</li>
+        <li>定員（乗れる人数）</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>② 便（時間帯）</h3>
+      <p class="where"><b>設定 → 便</b></p>
+      <ul class="tight">
+        <li>往路（お迎え）／復路（お送り）</li>
+        <li>午前便・午後便など、必要なだけ</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>③ 利用者</h3>
+      <p class="where"><b>設定 → 利用者</b></p>
+      <ul class="tight">
+        <li>お名前</li>
+        <li>だいたいの乗降時刻・エリア（任意）</li>
+        <li>住所は<strong>任意</strong>。入れる場合もこの端末の中だけ</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note good">
+    <span class="title">住所は入れなくても使えます</span>
+    「名前と順番」だけでも十分まわります。住所を入れる場合も外に出ません（<a href="#safe">6. 安全・データ</a>）。
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="daily">
+  <h2><span class="num">3</span>毎日の割り付け・当日変更</h2>
+  <div class="split wide flip">
+    <figure class="shot">
+      <div class="screen">
+        <div class="lbl" style="margin-bottom:8px">当日キャンセルが入ったら</div>
+        <div class="row"><span style="flex:1"><span class="chip dang">休み</span> 佐藤さん（1号車）</span><span class="btn">はずす</span></div>
+        <div class="row"><span style="flex:1">空いた分、鈴木さんを前に</span><span class="chip line">自動で詰む</span></div>
+        <span class="pin" style="top:30%; right:-11px">1</span>
+      </div>
+      <ol class="pins">
+        <li>休みの人を<strong>はずす</strong>と、その車の順番は自動で詰まります</li>
+      </ol>
+    </figure>
+
+    <div>
+      <h3>やることは2つだけ</h3>
+      <ol class="tight">
+        <li><strong>名前をドラッグ</strong>して車・便に置く（順番も入れ替え自由）</li>
+        <li>当日の休み・追加は、<strong>はずす／足す</strong>だけ</li>
+      </ol>
+      <div class="note">
+        <span class="title">「乗せ忘れ」を防ぐ未割当ゾーン</span>
+        まだどの車にも乗っていない人は<strong>未割当</strong>にたまります。ここが空になれば全員に席がある、という確認になります。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="print">
+  <h2><span class="num">4</span>印刷して配る</h2>
+  <div class="split wide">
+    <div>
+      <ul class="tight">
+        <li><kbd>🖨 印刷</kbd> で<strong>車ごとの一覧</strong>になります（ボタンや設定は印刷されません）</li>
+        <li>運転手さんごとに1枚ずつ渡せます</li>
+        <li>PDFで保存すれば、そのままLINEやメールでも送れます</li>
+      </ul>
+      <div class="note good">
+        <span class="title">紙のまま運用できる</span>
+        車内はスマホを見づらいもの。<strong>紙で渡せる</strong>ことが現場では効きます。
+      </div>
+    </div>
+    <figure class="shot">
+      <div class="screen">
+        <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--app-line); padding-bottom:7px; margin-bottom:8px">
+          <strong style="font-size:13px">1号車 ・ 往路</strong><span style="font-size:11.5px; color:var(--app-subtle)">運転：山田</span>
+        </div>
+        <div class="row" style="padding:6px 0"><span style="width:44px; color:var(--app-subtle)">8:40</span><span style="flex:1">田中さん</span></div>
+        <div class="row" style="padding:6px 0"><span style="width:44px; color:var(--app-subtle)">8:55</span><span style="flex:1">佐藤さん</span></div>
+        <div class="row" style="padding:6px 0"><span style="width:44px; color:var(--app-subtle)">9:10</span><span style="flex:1">鈴木さん</span></div>
+      </div>
+      <figcaption>印刷イメージ（車ごとに1枚）</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="fit">
+  <h2><span class="num">5</span>向いている現場</h2>
+  <div class="cols c2">
+    <div class="card">
+      <h3>通所・デイサービス</h3>
+      <p class="small">毎日まとまった人数の送迎があり、当日キャンセルも多い現場。作り直しの手間がいちばん大きいので、効果がはっきり出ます。</p>
+    </div>
+    <div class="card">
+      <h3>専用サブスクほどは要らない現場</h3>
+      <p class="small">高機能な送迎システムは月額がかさみます。「名前と順番と印刷」で十分な小〜中規模の現場に、買い切りの軽い道具が合います。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="safe">
+  <h2><span class="num">6</span>安全・データ・お渡し</h2>
+  <div class="cols c2">
+    <div class="card">
+      <h3>データのしくみ</h3>
+      <ul class="tight">
+        <li>その端末の中に自動保存。<strong>サーバーには送りません</strong></li>
+        <li>住所を入れる場合も、外に出ません</li>
+        <li>控えは「この内容を送る」でURL化し、自分あてに送るだけ</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>お渡しのかたち</h3>
+      <ul class="tight">
+        <li>買い切り・<strong>ソースまで全部お渡し</strong></li>
+        <li>車・便・エリアは施設側で変更可能</li>
+        <li class="muted">目安：15〜30万円ほど</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section id="qa">
+  <h2><span class="num">7</span>こまったとき（想定Q&A）</h2>
+  <div class="cols c2">
+    <div class="qa">
+      <div class="q">最短ルートを自動で出せますか？</div>
+      <div class="a">出しません。地図と連携した自動最適化は、この小さな買い切り道具の範囲を超えます。順番は人が決め、道具は「割り付けと印刷」を担います。距離の目安が欲しい場合は「送迎ルート下書き」をご覧ください。</div>
+    </div>
+    <div class="qa">
+      <div class="q">定員を超えたら教えてくれますか？</div>
+      <div class="a">はい。車の定員を超えて乗せようとすると色で知らせます。</div>
+    </div>
+    <div class="qa">
+      <div class="q">往路と復路で組み方が違います</div>
+      <div class="a">便（往路・復路）を分けて登録できます。それぞれ別に組めます。</div>
+    </div>
+    <div class="qa">
+      <div class="q">運転手さんも入力しますか？</div>
+      <div class="a">いいえ。組むのは相談員ひとり。運転手さんは印刷された紙を受け取るだけです。</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  送迎ボード — 設計図 ／ つみき 道具のたね<br>
+  <a href="dougu-catalog.html">← 道具のカタログにもどる</a><br>
+  2026年7月
+</footer>
+
+</main>
+</div>
+</div>
+</body>
+</html>
