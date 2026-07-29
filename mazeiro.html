@@ -53,22 +53,25 @@
 
   /* 1剤: 比率カラム */
   .cols{display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:center;
-    gap:14px 6px; padding-top:2px;}
-  .col{display:flex; flex-direction:column; align-items:center; gap:7px; position:relative;}
+    gap:18px 17px; padding-top:2px;}
+  .col{display:flex; flex-direction:column; align-items:center; gap:8px; position:relative;
+    min-width:58px;}
+  /* 「:」はカラムに紐づけて置く（折り返しで行末に取り残されないように） */
+  .col:not(:first-child)::before{content:":"; position:absolute; left:-12px; top:0; height:54px;
+    display:flex; align-items:center; color:var(--ghost); font-size:18px; font-weight:700;}
   .col input{width:58px; height:54px; border:1px solid var(--hair); border-radius:16px;
     background:#fff; text-align:center; font-family:inherit; font-weight:700; font-size:20px;
     color:var(--ink);}
   .col input:focus{outline:none; border-color:var(--ink);}
   .col input::placeholder{color:var(--ghost); font-weight:400;}
-  .col .g{font-size:14px; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap;}
-  .col .g small{font-size:10.5px; font-weight:500; color:var(--muted); margin-left:1px;}
+  .col .g{font-size:26px; line-height:1.15; font-weight:700; font-variant-numeric:tabular-nums;
+    white-space:nowrap; letter-spacing:-.01em;}
+  .col .g small{font-size:13px; font-weight:500; color:var(--muted); margin-left:2px;}
   .col .g.off{color:var(--ghost); font-weight:500;}
   .col .x{position:absolute; top:-8px; right:-8px; width:20px; height:20px; border-radius:50%;
     background:var(--surface); border:1px solid var(--hair); color:var(--muted);
     display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0;}
   .col .x svg{width:9px; height:9px; stroke:var(--muted); stroke-width:2;}
-  .sep{height:54px; display:flex; align-items:center; color:var(--ghost);
-    font-size:18px; font-weight:700;}
   .addc{width:36px; height:54px; display:flex; align-items:center; justify-content:center;
     background:none; border:none; cursor:pointer; transition:transform .12s ease;}
   .addc:active{transform:scale(.9);}
@@ -83,8 +86,9 @@
   .dev input:focus{outline:none; border-color:var(--ink);}
   .dev input::placeholder{color:var(--ghost); font-weight:400;}
   .dev .arrow svg{width:18px; height:18px; stroke:var(--ghost);}
-  .dev .g{font-size:21px; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap;}
-  .dev .g small{font-size:12px; font-weight:500; color:var(--muted); margin-left:2px;}
+  .dev .g{font-size:30px; line-height:1.15; font-weight:700; font-variant-numeric:tabular-nums;
+    white-space:nowrap; letter-spacing:-.01em;}
+  .dev .g small{font-size:14px; font-weight:500; color:var(--muted); margin-left:2px;}
   .dev .g.off{color:var(--ghost); font-weight:500;}
   .pills{display:flex; gap:8px; margin-top:16px; justify-content:center;}
   .pills button{flex:0 1 76px; border:1px solid var(--hair); background:none; color:var(--muted);
@@ -104,6 +108,62 @@
     font-variant-numeric:tabular-nums;}
   .sum .tot small{font-size:14px; font-weight:500; color:var(--muted);}
   .sum.off{opacity:.35;}
+
+  /* マウス環境だけホバーを効かせる（タップ端末では出さない） */
+  @media (hover:hover) and (pointer:fine){
+    .iconbtn:hover{border-color:var(--ghost); background:var(--surface);}
+    .addc:hover svg{stroke:var(--muted);}
+    .pills button:hover{border-color:var(--ghost); color:var(--ink);}
+    .pills button.on:hover{color:var(--paper);}
+    .col .x:hover{background:var(--hair);}
+  }
+
+  /* ── PC / 横長タブレット：横幅を使って2カラム ── */
+  @media (min-width:900px){
+    body{padding:env(safe-area-inset-top) 40px 64px;}
+    .wrap{max-width:1280px; display:grid; gap:22px;
+      grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); align-items:start;}
+    header{grid-column:1 / -1; padding:34px 4px 6px;}
+    .brand{font-size:19px; gap:12px;}
+    .brand svg{width:26px; height:26px;}
+    .iconbtn{width:44px; height:44px;}
+    .iconbtn svg{width:19px; height:19px;}
+
+    .card{margin-bottom:0; padding:30px 28px 32px; border-radius:28px;}
+    .cap{margin-bottom:24px;}
+    .cap span{font-size:13.5px;}
+
+    .total{margin-bottom:30px; gap:10px;}
+    .total input{width:230px; font-size:58px; padding:0 6px 4px;}
+    .total .u{font-size:20px;}
+
+    .cols{gap:24px 24px;}
+    .col{min-width:76px;}
+    .col input{width:76px; height:66px; border-radius:18px; font-size:24px;}
+    .col:not(:first-child)::before{height:66px; left:-16px; font-size:22px;}
+    .col .g{font-size:32px;}
+    .col .g small{font-size:15px;}
+    .col .x{width:22px; height:22px; top:-9px; right:-9px;}
+    .addc{width:46px; height:66px;}
+    .addc svg{width:30px; height:30px;}
+
+    .dev{gap:16px;}
+    .dev .x{font-size:24px;}
+    .dev input{width:104px; height:66px; border-radius:18px; font-size:26px;}
+    .dev .arrow svg{width:20px; height:20px;}
+    .dev .g{font-size:34px;}
+    .dev .g small{font-size:16px;}
+    .pills{margin-top:22px; gap:10px;}
+    .pills button{flex:0 1 88px; font-size:15px; padding:10px 0;}
+
+    #sumLine{grid-column:1 / -1; gap:14px; padding:14px 0 4px;
+      border-top:1px solid var(--hair); margin-top:6px;}
+    .sum .pc{font-size:17px;}
+    .sum .pc svg{width:18px; height:18px;}
+    .sum .op{font-size:16px;}
+    .sum .tot{font-size:38px;}
+    .sum .tot small{font-size:16px;}
+  }
 </style>
 </head>
 <body>
@@ -194,11 +254,6 @@
   function renderCols(){
     colsEl.innerHTML = "";
     state.ratios.forEach((r, i) => {
-      if(i > 0){
-        const sep = document.createElement("span");
-        sep.className = "sep"; sep.textContent = ":";
-        colsEl.appendChild(sep);
-      }
       const col = document.createElement("div");
       col.className = "col";
       col.innerHTML = '<input type="number" inputmode="decimal" min="0" step="0.1" placeholder="0">' +
