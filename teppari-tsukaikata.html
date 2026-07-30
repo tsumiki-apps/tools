@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>てっぱりボード — 使い方</title>
+<meta name="description" content="てっぱりボードの使い方。てっぱり表と香盤表から「その日どの場の稽古ができるか」を出し、稽古の進み具合（予定と結果）が分かる道具です。">
+<link rel="apple-touch-icon" href="icon-teppari.png">
+<style>
+  :root{
+    --paper:#F4F2EE; --surface:#ECE9E3; --ink:#242321; --muted:#77736B;
+    --hair:#D8D4CC; --ghost:#BEB9B0; --control:#F8F7F4;
+    --mark:#B4562E;                       /* 図の注釈（番号・矢印） */
+    /* アプリ画面の再現に使う色（香盤メーカー本体と同じ値） */
+    --app-ink:#1f2933; --app-subtle:#52606d; --app-line:#e4e7eb; --app-surface:#f5f7fa;
+    --ng:#ef4444; --ok:#10b981;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%; scroll-behavior:smooth;}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:'Hiragino Maru Gothic ProN',-apple-system,BlinkMacSystemFont,'Hiragino Sans','Noto Sans JP',sans-serif;
+    line-height:1.8; -webkit-font-smoothing:antialiased;
+    padding:0 20px calc(56px + env(safe-area-inset-bottom));
+    font-size:15px;
+  }
+  .wrap{max-width:1180px; margin:0 auto;}
+  a{color:var(--ink);}
+  /* grid/flex の子は既定が min-width:auto。中身（表など）に押し広げられて
+     375px幅で横スクロールが出るのを防ぐ。 */
+  main,section,.split>*,.cols>*,figure.shot{min-width:0;}
+  /* 横に長くなりうる表は、その枠の中だけでスクロールさせる */
+  .tblwrap{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+
+  /* ================= 見出し ================= */
+  header{padding:48px 0 4px;}
+  .kicker{font-size:11.5px; font-weight:700; letter-spacing:.16em; color:var(--muted); margin-bottom:10px;}
+  h1{font-size:29px; font-weight:700; letter-spacing:.03em; line-height:1.4;}
+  /* リード文は読みやすさのため上限を置くが、狭くしすぎない（横幅を活かす） */
+  header .lead{margin-top:12px; font-size:15px; color:var(--muted); max-width:1000px;}
+  .openapp{margin-top:20px;}
+  .openapp a{
+    display:inline-block; background:var(--ink); color:var(--paper);
+    text-decoration:none; border-radius:999px; padding:10px 22px;
+    font-size:14.5px; font-weight:700;
+  }
+  h2{
+    font-size:21px; font-weight:700; letter-spacing:.02em; line-height:1.5;
+    margin:0 0 20px; padding-bottom:12px; border-bottom:1.5px solid var(--hair);
+    display:flex; align-items:center; gap:11px;
+  }
+  h2 .num{
+    flex:none; width:28px; height:28px; border-radius:50%;
+    background:var(--ink); color:var(--paper); font-size:14px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  h3{font-size:15.5px; font-weight:700; margin:0 0 8px;}
+  section{padding:44px 0 4px; scroll-margin-top:20px;}
+  p{margin:9px 0;}
+  .muted{color:var(--muted);}
+  .small{font-size:13px;}
+
+  /* ================= 全体レイアウト ================= */
+  .layout{display:block;}
+  aside.toc{
+    background:var(--control); border:1px solid var(--hair); border-radius:18px;
+    padding:16px 20px; margin-top:26px;
+  }
+  aside.toc .t{font-size:11.5px; font-weight:700; letter-spacing:.12em; color:var(--muted); margin-bottom:8px;}
+  aside.toc ol{margin:0; padding-left:1.35em;}
+  aside.toc li{margin:2px 0; font-size:14px;}
+  aside.toc a{text-decoration:none; border-bottom:1px solid var(--hair);}
+
+  /* ================= 部品 ================= */
+  .cols{display:grid; gap:16px;}
+  .card{
+    background:var(--control); border:1px solid var(--hair); border-radius:18px;
+    padding:18px 20px;
+  }
+  .card h3{margin-bottom:6px;}
+  .card .where{font-size:12.5px; color:var(--muted); margin-bottom:8px;}
+  .card .where b{color:var(--ink);}
+  ul.tight{margin:8px 0; padding-left:1.25em;}
+  ul.tight li{margin:5px 0;}
+  ul.tight li::marker{color:var(--ghost);}
+  ol.tight{margin:8px 0; padding-left:1.35em;}
+  ol.tight li{margin:5px 0;}
+
+  .note{
+    border-left:4px solid var(--ghost); background:var(--control);
+    border-radius:0 12px 12px 0; padding:14px 16px; margin:16px 0; font-size:14px;
+  }
+  .note .title{display:block; font-weight:700; margin-bottom:3px;}
+  .warn{border-left-color:#B03A22; background:#F7EFEA;}
+  .warn .title{color:#94301b;}
+
+  kbd{
+    display:inline-block; background:#fff; border:1px solid var(--hair);
+    border-bottom-width:2px; border-radius:7px; padding:0 8px;
+    font-family:inherit; font-size:13.5px; font-weight:700; white-space:nowrap;
+  }
+  .path{font-size:13px; color:var(--muted);}
+  .path b{color:var(--ink); font-weight:700;}
+
+  /* 流れ図 */
+  .flow{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:6px 0 4px;}
+  .flow .box{
+    background:#fff; border:1px solid var(--hair); border-radius:13px;
+    padding:10px 16px; font-size:14px; font-weight:700;
+  }
+  .flow .arw{color:var(--mark); font-weight:700; font-size:17px;}
+
+  /* 比較表 */
+  table.cmp{border-collapse:collapse; width:100%; margin:12px 0; font-size:14px; background:#fff;
+    border:1px solid var(--hair); border-radius:14px; overflow:hidden;}
+  table.cmp th, table.cmp td{border-bottom:1px solid var(--hair); padding:11px 14px; text-align:left; vertical-align:top;}
+  table.cmp thead th{background:var(--surface); font-size:12.5px; color:var(--muted); font-weight:700;}
+  table.cmp tbody tr:last-child th, table.cmp tbody tr:last-child td{border-bottom:none;}
+  table.cmp tbody th{font-weight:700; white-space:nowrap;}
+
+  /* ================= アプリ画面の再現（図） ================= */
+  /* 番号ピンが枠の外に 11px はみ出す（＋影3px）ぶんの余白を figure 側に持たせる。
+     これが無いと375px幅で横スクロールが出る。 */
+  figure.shot{margin:0; padding-inline:16px;}
+  .screen{
+    position:relative; border:1px solid var(--app-line); border-radius:14px; background:#fff;
+    padding:14px; color:var(--app-ink); font-size:13px; line-height:1.6;
+    box-shadow:0 1px 3px rgba(36,35,33,.06);
+  }
+  .screen .bar{
+    display:flex; align-items:center; gap:8px; margin:-14px -14px 12px; padding:10px 14px;
+    border-bottom:1px solid var(--app-line); background:#fff; border-radius:14px 14px 0 0;
+  }
+  .screen .bar .ttl{font-weight:700; font-size:13.5px;}
+  .screen .bar .gear{margin-left:auto; border:1px solid var(--app-line); border-radius:9px; padding:2px 9px; font-size:11.5px;}
+  .screen .tabs{display:flex; gap:14px; margin:-6px 0 12px; font-size:12.5px; color:var(--app-subtle);}
+  .screen .tabs .on{color:var(--app-ink); font-weight:700; border-bottom:2px solid var(--app-ink); padding-bottom:3px;}
+  .screen .lbl{font-size:11px; color:var(--app-subtle); font-weight:700; letter-spacing:.04em;}
+  .screen .btn{
+    display:inline-block; border:1px solid var(--app-line); background:#fff; border-radius:9px;
+    padding:5px 12px; font-size:12.5px; font-weight:600;
+  }
+  .screen .btn.pri{background:var(--app-ink); color:#fff; border-color:var(--app-ink);}
+  .screen .dash{border:1px dashed var(--app-line); border-radius:11px; background:var(--app-surface); padding:12px;}
+  figcaption{font-size:12px; color:var(--muted); margin-top:8px;}
+
+  /* 注釈：番号ピンと矢印 */
+  .pin{
+    position:absolute; z-index:3; width:22px; height:22px; border-radius:50%;
+    background:var(--mark); color:#fff; font-size:12px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 0 3px rgba(255,255,255,.9);
+  }
+  .arrow{position:absolute; z-index:2; height:2px; background:var(--mark); transform-origin:left center;}
+  .arrow::after{
+    content:''; position:absolute; right:-2px; top:-4px;
+    border:5px solid transparent; border-left-color:var(--mark);
+  }
+  ol.pins{margin:10px 0 0; padding:0; list-style:none; counter-reset:p;}
+  ol.pins li{
+    counter-increment:p; position:relative; padding-left:30px; margin:7px 0; font-size:13.5px;
+  }
+  ol.pins li::before{
+    content:counter(p); position:absolute; left:0; top:3px;
+    width:20px; height:20px; border-radius:50%; background:var(--mark); color:#fff;
+    font-size:11.5px; font-weight:700; display:flex; align-items:center; justify-content:center;
+  }
+
+  /* 出欠表の再現 */
+  table.ng{border-collapse:collapse; width:100%; font-size:12.5px;}
+  table.ng th, table.ng td{border:1px solid var(--app-line); padding:6px 8px; text-align:center;}
+  table.ng thead th{background:var(--app-surface); color:var(--app-subtle); font-weight:400; font-size:11.5px;}
+  table.ng thead th:last-child, table.ng td.allday{white-space:nowrap;}
+  table.ng tbody th{text-align:left; font-weight:600; background:#fff; white-space:nowrap;}
+  table.ng td.on{background:var(--ng);}
+  table.ng td.allday{background:var(--app-surface); color:var(--app-subtle); font-size:11px;}
+  table.ng td.allday.on{background:#fee2e2; color:#b91c1c;}
+  .legend{display:flex; flex-wrap:wrap; gap:12px; font-size:11.5px; color:var(--app-subtle); margin-top:9px;}
+  .legend span{display:inline-flex; align-items:center; gap:5px;}
+  .sw{width:12px; height:12px; border-radius:3px; display:inline-block;}
+  .sw.white{background:#fff; border:1px solid var(--app-line);}
+  .sw.red{background:var(--ng);}
+  .sw.pink{background:#fee2e2;}
+  .chip{display:inline-block; border-radius:999px; padding:2px 10px; font-size:12px; font-weight:600;}
+  .chip.ok{background:var(--ok); color:#fff;}
+  .chip.absent{background:#fee2e2; color:#b91c1c;}
+  .chip.line{background:#fff; border:1px solid var(--app-line); color:var(--app-subtle); font-weight:500;}
+
+  /* Q&A */
+  .qa{background:var(--control); border:1px solid var(--hair); border-radius:16px; padding:15px 18px;}
+  .qa .q{font-weight:700; font-size:14.5px;}
+  .qa .a{margin-top:5px; color:var(--muted); font-size:13.5px; line-height:1.75;}
+
+  footer{
+    margin-top:56px; padding-top:20px; border-top:1px solid var(--hair);
+    font-size:12.5px; color:var(--ghost); text-align:center; line-height:2;
+  }
+
+  /* ================= 横幅を使う（タブレット以上） ================= */
+  @media (min-width:720px){
+    .cols.c2{grid-template-columns:1fr 1fr;}
+    .cols.c3{grid-template-columns:1fr 1fr 1fr;}
+    /* 文章＋図の2段組み */
+    .split{display:grid; grid-template-columns:minmax(0,1fr) minmax(300px,400px); gap:28px; align-items:start;}
+    .split.wide{grid-template-columns:minmax(0,1fr) minmax(340px,460px);}
+    .split.flip{grid-template-columns:minmax(300px,400px) minmax(0,1fr);}
+  }
+  @media (min-width:1000px){
+    body{padding-left:32px; padding-right:32px;}
+    .layout{display:grid; grid-template-columns:196px minmax(0,1fr); gap:44px; align-items:start;}
+    aside.toc{position:sticky; top:26px; margin-top:44px; background:none; border:none; padding:0;}
+    aside.toc li{margin:4px 0; font-size:13.5px;}
+    aside.toc a{border-bottom:none;}
+    aside.toc a:hover{border-bottom:1px solid var(--hair);}
+    h1{font-size:33px;}
+    section{padding:52px 0 4px;}
+  }
+
+
+  /* ================= てっぱり表の再現（図） ================= */
+  table.board{border-collapse:collapse; width:100%; font-size:11px; background:#fff;}
+  table.board th, table.board td{border:1px solid var(--app-line); padding:4px 3px; text-align:center; white-space:nowrap;}
+  table.board thead th{background:var(--app-surface); color:var(--app-subtle); font-weight:700; font-size:10.5px;}
+  table.board thead th.sel{background:var(--app-ink); color:#fff;}
+  table.board tbody th{text-align:left; font-weight:600; font-size:10.5px; background:#fff;}
+  table.board td.ng{background:var(--ng); color:#fff; font-weight:700;}
+  table.board td.part{background:#fef3c7; color:#92400e; font-weight:700;}
+  table.board tr.plan td{background:#fffbeb; color:#92400e; font-weight:700; font-size:10px;}
+  table.board tr.plan td.off{background:#e2e8f0; color:#64748b;}
+  table.board tfoot th{background:var(--app-surface); color:var(--app-subtle); font-weight:400; font-size:10px; text-align:left;}
+  table.board tfoot td{background:var(--app-surface); color:var(--app-subtle); font-weight:700;}
+  table.board tfoot tr.can td{background:#d1fae5; color:#065f46;}
+  table.board tfoot tr.did td{background:#fff; color:var(--app-subtle);}
+  table.board tfoot tr.did td.on{background:#e0f2fe; color:#075985;}
+
+  /* 香盤表の再現 */
+  table.kouban td.dot{color:var(--app-ink);}
+  table.kouban thead th.ok{background:var(--ok); color:#fff;}
+  table.kouban thead th.near{background:#fde68a; color:#92400e;}
+
+  /* 進み具合の帯 */
+  .bar3{display:flex; height:12px; border-radius:999px; overflow:hidden; background:var(--app-line); margin:10px 0 8px;}
+  .bar3 i{display:block;}
+  .bar3 .did{background:#0284c7;}
+  .bar3 .can{background:#34d399;}
+  .bar3 .no{background:#f87171;}
+  .keys{display:flex; flex-wrap:wrap; gap:12px; font-size:11.5px; color:var(--app-subtle);}
+  .keys span{display:inline-flex; align-items:center; gap:5px;}
+
+  /* ================= 印刷（A4のPDFになる） ================= */
+  @media print{
+    @page{margin:15mm 13mm;}
+    body{background:#fff; color:#000; font-size:10pt; padding:0;}
+    .wrap{max-width:none;}
+    .layout{display:block;}
+    aside.toc,.openapp{display:none;}
+    header{padding-top:0;}
+    section{padding:16pt 0 0;}
+    h2{margin-bottom:10pt; page-break-after:avoid;}
+    h3{page-break-after:avoid;}
+    .card,.note,.screen,.qa,figure.shot,table.cmp{page-break-inside:avoid;}
+    .card,.note,.qa{background:#fff;}
+    .screen{box-shadow:none;}
+    .split{display:grid; grid-template-columns:1fr 300px; gap:14pt;}
+    .cols.c2{grid-template-columns:1fr 1fr;}
+    .cols.c3{grid-template-columns:1fr 1fr 1fr;}
+    footer{color:#555;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="kicker">TSUMIKI TOOLS</p>
+  <h1>てっぱりボード 使い方</h1>
+  <p class="lead">
+    てっぱり表と香盤表を突き合わせて、<strong>その日どの場（シーン）の稽古ができるか</strong>を出す道具です。
+    JOE Company「ほろほろ2026」の内容は、はじめから入っています。
+  </p>
+  <p class="openapp"><a href="teppari-board.html">てっぱりボードを開く →</a></p>
+</header>
+
+<div class="layout">
+
+<aside class="toc">
+  <p class="t">もくじ</p>
+  <ol>
+    <li><a href="#what">どんな道具か</a></li>
+    <li><a href="#open">最初の1回だけ</a></li>
+    <li><a href="#screen">画面の見かた</a></li>
+    <li><a href="#daily">毎回の使い方</a></li>
+    <li><a href="#input">予定・NGを入れる</a></li>
+    <li><a href="#progress">予定と結果</a></li>
+    <li><a href="#print">印刷とデータ</a></li>
+    <li><a href="#home">ホーム画面に置く</a></li>
+    <li><a href="#qa">こまったとき</a></li>
+  </ol>
+</aside>
+
+<main>
+
+<!-- ============ 1 ============ -->
+<section id="what">
+  <h2><span class="num">1</span>どんな道具か</h2>
+
+  <div class="flow" style="margin-bottom:18px">
+    <span class="box">てっぱり（NG）を入れる</span>
+    <span class="arw">→</span>
+    <span class="box">その日できる場面が出る</span>
+    <span class="arw">→</span>
+    <span class="box">稽古のあと、できた場面を記録</span>
+  </div>
+
+  <div class="split wide">
+    <div>
+      <ul class="tight">
+        <li><strong>やること</strong>：てっぱりから「その日できる場面」を出す／期間ぜんぶの見通しを出す／稽古の進み具合（予定と結果）を出す</li>
+        <li><strong>やらないこと</strong>：出欠の集計や連絡、時間割づくり（1場面あたりの稽古時間は決めない方針のため）</li>
+        <li><strong>使う人</strong>：高木様おひとり。てっぱりもまとめて入力していただく形です</li>
+        <li><strong>準備</strong>：インストール不要。URLを開いて、最初の1回だけプロダクトキーを入れるだけ</li>
+      </ul>
+      <p class="small muted">
+        ※ 画面の呼び方：<b>てっぱり表</b>＝キャスト×日付（NG・◯時入り／出し）、<b>香盤表</b>＝キャスト×場面（誰がどの場面に出るか）。
+        いつもお使いの2つの表と同じ並びにしてあります。
+      </p>
+    </div>
+
+    <figure class="shot">
+      <div class="screen" style="padding:12px">
+        <div class="bar"><span class="ttl">てっぱりボード</span><span class="gear">管理</span></div>
+        <div class="tblwrap">
+        <table class="board">
+          <thead>
+            <tr><th>キャスト</th><th>4<br>火</th><th class="sel">5<br>水</th><th>6<br>木</th><th>7<br>金</th></tr>
+            <tr class="plan"><td style="text-align:left">予定</td><td>通し</td><td>…</td><td>通し</td><td>未定</td></tr>
+          </thead>
+          <tbody>
+            <tr><th>新垣樽助</th><td class="part">16入</td><td class="part">16入</td><td></td><td></td></tr>
+            <tr><th>櫂作真帆</th><td></td><td></td><td></td><td></td></tr>
+            <tr><th>藤村 忠生</th><td class="part">17出</td><td></td><td class="part">17出</td><td></td></tr>
+            <tr><th>崔 哲浩</th><td></td><td class="ng">NG</td><td></td><td></td></tr>
+          </tbody>
+          <tfoot>
+            <tr><th>休み</th><td></td><td>2</td><td></td><td></td></tr>
+            <tr class="can"><th>できる（予定）</th><td>23</td><td>10</td><td>23</td><td>23</td></tr>
+            <tr class="did"><th>できた（結果）</th><td class="on">5</td><td></td><td></td><td></td></tr>
+          </tfoot>
+        </table>
+        </div>
+        <span class="pin" style="top:16%; left:-11px">1</span>
+        <span class="pin" style="top:62%; left:-11px">2</span>
+        <span class="pin" style="bottom:14%; left:-11px">3</span>
+      </div>
+      <ol class="pins">
+        <li>日付を押すと、その日が選ばれます（黒くなります）</li>
+        <li>マスを押すと「終日NG／◯時入り／◯時出し」を入れられます</li>
+        <li>下段はいつも見えています。<b>できる（予定）</b>と<b>できた（結果）</b></li>
+      </ol>
+      <figcaption>てっぱり表（実際は26日ぶん・24名が並びます）</figcaption>
+    </figure>
+  </div>
+
+  <div class="note">
+    <span class="title">入れた内容は、この端末の中だけに保存されます</span>
+    どこにも送信していません。バックアップの取り方は <a href="#print">7. 印刷とデータ</a> をご覧ください。
+  </div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section id="open">
+  <h2><span class="num">2</span>最初の1回だけ（プロダクトキー）</h2>
+
+  <div class="split wide">
+    <div>
+      <ol class="tight">
+        <li>お送りしたURLを開きます</li>
+        <li>プロダクトキーを入れて <kbd>はじめる</kbd> を押します</li>
+        <li>以後、<strong>同じ端末では入力は不要</strong>です。開けばすぐ使えます</li>
+      </ol>
+      <p>キーは大文字・小文字どちらでも、ハイフンの有無も問いません。</p>
+
+      <div class="note warn">
+        <span class="title">キーはメールを消さずに残しておいてください</span>
+        <b>別の端末で開くとき</b>や、履歴・サイトデータを消したあとは、もう一度キーの入力が必要です。
+        そのときはメール本文のキーを貼り付けてください。
+      </div>
+    </div>
+
+    <figure class="shot">
+      <div class="screen" style="text-align:center; padding:22px 14px">
+        <div class="lbl" style="letter-spacing:.16em">TSUMIKI TOOLS</div>
+        <div style="font-size:16px; font-weight:700; margin:8px 0 4px">プロダクトキー</div>
+        <p style="font-size:12px; color:var(--app-subtle); margin-bottom:12px">
+          このアプリのご利用にはプロダクトキーが必要です。<br>お渡ししたキーを入力してください。
+        </p>
+        <div class="dash" style="color:var(--app-subtle); letter-spacing:.08em">TSUMIKI-XXXX-XXXX-XXXX</div>
+        <div style="margin-top:12px"><span class="btn pri">はじめる</span></div>
+      </div>
+      <figcaption>最初に出る画面。1回入れたら、この端末では二度と出ません</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section id="screen">
+  <h2><span class="num">3</span>画面の見かた</h2>
+
+  <p>画面は1枚です。右上で<strong>2つの表</strong>を切り替え、選んだ日の中身は<strong>右</strong>（スマホでは下）に出ます。</p>
+
+  <div class="cols c3" style="margin-top:16px">
+    <div class="card">
+      <h3>① てっぱり表</h3>
+      <p class="where"><b>キャスト × 日付</b></p>
+      <ul class="tight">
+        <li>NG・◯時入り／出しを入れる場所</li>
+        <li>日付を押すと、その日が選ばれる</li>
+        <li>下段に 休み／できる（予定）／できた（結果）</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>② 香盤表</h3>
+      <p class="where"><b>キャスト × 場面</b></p>
+      <ul class="tight">
+        <li>●＝その場面に出る人</li>
+        <li><strong>列の色＝選んだ日にその場面ができるか</strong></li>
+        <li>赤い行＝その日は終日休みの人</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>③ 選んだ日の中身</h3>
+      <p class="where"><b>画面の右（スマホは下）</b></p>
+      <ul class="tight">
+        <li>時間の区切りごとの欠席者とできる場面</li>
+        <li>その日の特別稽古（通しなど）</li>
+        <li>稽古できた場面の記録</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="split wide" style="margin-top:22px">
+    <div>
+      <h3>香盤表の色</h3>
+      <p>選んでいる日に、その場面ができるかどうかを列の色で表します。</p>
+      <table class="cmp">
+        <tbody>
+          <tr><th>◎ 緑</th><td>できる（出る人が全員そろう時間がある）</td></tr>
+          <tr><th>△ 黄</th><td><strong>あと1人</strong>でできる（1人だけ足りない）</td></tr>
+          <tr><th>× 灰</th><td>できない（2人以上足りない）</td></tr>
+        </tbody>
+      </table>
+      <p class="small muted">
+        「あと1人」を分けているのは、<strong>誰が来られれば成立するか</strong>が分かると段取りを決めやすいためです。
+      </p>
+    </div>
+
+    <figure class="shot">
+      <div class="screen" style="padding:12px">
+        <div class="tblwrap">
+        <table class="board kouban">
+          <thead>
+            <tr><th>キャスト</th><th class="ok">1場<br>◎</th><th class="ok">2場<br>◎</th><th>3場<br>×</th><th class="near">5場<br>△</th></tr>
+          </thead>
+          <tbody>
+            <tr><th>新垣樽助</th><td class="dot">●</td><td class="dot">●</td><td class="dot">●</td><td></td></tr>
+            <tr><th>櫂作真帆</th><td></td><td></td><td class="dot">●</td><td></td></tr>
+            <tr style="background:#fef2f2"><th style="background:#fef2f2; color:#b91c1c">三上俊</th><td></td><td></td><td style="background:#fee2e2; color:#b91c1c; font-weight:700">●</td><td style="background:#fee2e2; color:#b91c1c; font-weight:700">●</td></tr>
+            <tr><th>岡本 毅</th><td></td><td></td><td class="dot">●</td><td></td></tr>
+          </tbody>
+          <tfoot>
+            <tr><th>出る人数</th><td>1</td><td>5</td><td>11</td><td>4</td></tr>
+            <tr class="did"><th>稽古できた</th><td class="on">✓</td><td class="on">✓</td><td></td><td></td></tr>
+          </tfoot>
+        </table>
+        </div>
+        <span class="pin" style="top:10%; right:-11px">1</span>
+        <span class="pin" style="top:56%; left:-11px">2</span>
+      </div>
+      <ol class="pins">
+        <li>緑の列＝この日にできる場面</li>
+        <li>赤い行＝この日は終日休みの人。その人の●が、できない理由です</li>
+      </ol>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section id="daily">
+  <h2><span class="num">4</span>毎回の使い方（3つだけ）</h2>
+
+  <div class="split wide">
+    <div>
+      <ol class="tight">
+        <li><strong>日付を押す</strong>（今日に戻るときは右上の <kbd>今日へ</kbd>）</li>
+        <li><strong>できる場面を見る</strong>。1日は「◯時入り／◯時出し」で自動的に区切られ、区切りごとに欠席者とできる場面が出ます</li>
+        <li><strong>稽古のあと、できた場面を押す</strong>（右側の「稽古できた場面の記録」）</li>
+      </ol>
+
+      <div class="note">
+        <span class="title">区切りの例（8/4）</span>
+        新垣様が16:00入り、藤村様が17:00出しの日は、<b>13:00–16:00 ／ 16:00–17:00 ／ 17:00–19:00</b> の3つに自動で分かれます。
+        まん中は全員そろうので「通しが打てます」と出ます。
+      </div>
+      <p class="small muted">
+        判定は「<strong>その区切りのあいだ、ずっと居る人</strong>」だけを数えます。
+        17:00出しの方が出る場面は、17:00をまたぐ形では出てきません。
+      </p>
+    </div>
+
+    <figure class="shot">
+      <div class="screen">
+        <div style="display:flex; align-items:baseline; justify-content:space-between; border-bottom:1px solid var(--app-line); padding-bottom:6px; margin-bottom:8px">
+          <b style="font-size:14px">13:00–16:00</b>
+          <span style="font-size:11px; color:var(--app-subtle)">できる 12 ／ あと1人 11</span>
+        </div>
+        <div style="font-size:11.5px; margin-bottom:8px">
+          <b style="color:#b91c1c">欠席</b>
+          <span class="chip absent">新垣樽助</span>
+        </div>
+        <div class="lbl" style="margin-bottom:6px">◎ できる場面（12）</div>
+        <div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px">
+          <span class="chip ok">4場</span><span class="chip ok">5場</span><span class="chip ok">6場</span>
+          <span class="chip ok">8場</span><span class="chip ok">9場</span><span class="chip line">…</span>
+        </div>
+        <div class="lbl" style="color:#92400e; margin-bottom:4px">△ あと1人でできる場面（11）</div>
+        <div style="font-size:11.5px; color:#92400e">1場（新垣樽助が不在）／2場（新垣樽助が不在）…</div>
+        <span class="pin" style="top:34%; left:-11px">1</span>
+        <span class="pin" style="bottom:16%; left:-11px">2</span>
+      </div>
+      <ol class="pins">
+        <li>この区切りで欠ける人</li>
+        <li>あと1人でできる場面と、その「1人」の名前</li>
+      </ol>
+      <figcaption>選んだ日の中身（区切りごとに1枚ずつ出ます）</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section id="input">
+  <h2><span class="num">5</span>予定・NGを入れる</h2>
+
+  <h3>マスを押す（キャストのNG）</h3>
+  <p>てっぱり表のマスを押すと、下から選ぶ画面が出ます。</p>
+  <table class="cmp">
+    <thead><tr><th style="width:9.5em">押すもの</th><th>入るもの</th><th>表での見え方</th></tr></thead>
+    <tbody>
+      <tr><th>出られる</th><td>その日の指定をぜんぶ消す</td><td>空白</td></tr>
+      <tr><th>終日NG</th><td>その日まるごと来られない</td><td>赤い <b>NG</b></td></tr>
+      <tr><th>◯時入り</th><td>その時刻より前は居ない（途中から来る）</td><td>黄色い <b>14入</b></td></tr>
+      <tr><th>◯時出し</th><td>その時刻以降は居ない（途中で帰る）</td><td>黄色い <b>17出</b></td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:26px">「予定」の行を押す（その日のこと）</h3>
+  <p>いちばん上の「予定」の行を押すと、その日の設定が開きます。</p>
+  <div class="cols c2" style="margin-top:14px">
+    <div class="card">
+      <h3>この日の扱い</h3>
+      <ul class="tight">
+        <li><b>稽古あり</b>… ふつうの全体稽古</li>
+        <li><b>OFF</b>… 全体稽古なし（自主稽古）。<strong>判定も集計もしません</strong></li>
+        <li><b>未定</b>… まだ決まっていない日。判定はしますが、表では黄色く「未定」と出ます</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>特別稽古・時間・メモ</h3>
+      <ul class="tight">
+        <li><b>特別稽古</b>＝通し／通し②／殺陣／全ブロック／衣装合わせ。<strong>開始時刻</strong>も入れられます</li>
+        <li><b>この日の稽古時間</b>＝1日だけ変えたいとき（通しの日など）</li>
+        <li><b>メモ</b>＝照明打合せ、小道具搬入など</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note">
+    <span class="title">1日に通しを2回入れるとき</span>
+    <b>通し</b>と<b>通し②</b>の両方を選び、それぞれに開始時刻を入れてください。
+    8/7 は「未定・14:00–20:00・通し14:00／通し②18:00」で、あらかじめ入れてあります。
+  </div>
+
+  <p class="small muted">
+    全日まとめて稽古時間を変えるときは、右上の <kbd>管理</kbd> →「稽古時間（全日まとめて）」です。
+  </p>
+</section>
+
+<!-- ============ 6 ============ -->
+<section id="progress">
+  <h2><span class="num">6</span>予定と結果（稽古の進み具合）</h2>
+
+  <div class="split wide">
+    <div>
+      <p>画面のいちばん上に、全23場面を3つに分けた帯が出ます。</p>
+      <table class="cmp">
+        <tbody>
+          <tr><th style="white-space:nowrap">稽古できた</th><td><strong>結果</strong>。稽古のあとに記録したもの</td></tr>
+          <tr><th>これからできる</th><td>まだですが、<strong>この先の稽古日のどこかで顔がそろう</strong>場面</td></tr>
+          <tr><th>このままだとできない</th><td>まだで、<strong>この先どの稽古日でも顔がそろわない</strong>場面。場番号を名指しで出します</td></tr>
+        </tbody>
+      </table>
+      <p><b>予定</b>＝「稽古できた」＋「これからできる」＝ 最終的に稽古できる見込みの数です。</p>
+      <div class="note">
+        <span class="title">3つめが 0 でないときが、いちばん手を打つべき状態です</span>
+        その場面は、いまのてっぱりのままだと本番まで一度も稽古できません。
+        日程の入れ替えや、その方の予定の調整をご検討ください。
+      </div>
+      <p class="small muted">
+        判定は<strong>きょう以降</strong>の稽古日で行います（過ぎた日では取り返せないため）。
+        OFFの日は数えません。未定の日は数に入れたうえで「うち未定◯日」と添えています。
+      </p>
+    </div>
+
+    <figure class="shot">
+      <div class="screen">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap">
+          <b style="font-size:13px">稽古の進み具合（全23場面）</b>
+          <span style="font-size:11.5px; color:var(--app-subtle)">できた <b style="color:#0369a1">5</b> ／ 予定 <b style="color:#047857">21</b></span>
+        </div>
+        <div class="bar3">
+          <i class="did" style="width:22%"></i><i class="can" style="width:69%"></i><i class="no" style="width:9%"></i>
+        </div>
+        <div class="keys">
+          <span><i class="sw" style="background:#0284c7"></i>稽古できた 5</span>
+          <span><i class="sw" style="background:#34d399"></i>これからできる 16</span>
+          <span><i class="sw" style="background:#f87171"></i>このままだとできない 2</span>
+        </div>
+        <div style="margin-top:10px; background:#fef2f2; border-radius:10px; padding:8px 10px">
+          <div style="font-size:11px; font-weight:700; color:#b91c1c">この先どの稽古日でも顔がそろわない場面</div>
+          <div style="margin-top:4px"><span class="chip line" style="color:#b91c1c">13場</span> <span class="chip line" style="color:#b91c1c">20場</span></div>
+        </div>
+        <span class="pin" style="top:30%; right:-11px">1</span>
+        <span class="pin" style="bottom:18%; left:-11px">2</span>
+      </div>
+      <ol class="pins">
+        <li>青＝結果、緑＝これからできる、赤＝できない</li>
+        <li>赤があるときは、ここに場番号が出ます</li>
+      </ol>
+      <figcaption>数字は例です</figcaption>
+    </figure>
+  </div>
+
+  <h3 style="margin-top:26px">結果の入れかた（稽古のあとに毎回）</h3>
+  <p>
+    選んだ日の中身のいちばん下に「<b>稽古できた場面の記録</b>」があります。
+    <strong>実際にやった場面を押すだけ</strong>です（もう一度押すと取り消せます）。
+    <span class="chip line" style="border-color:var(--ok)">緑の枠</span> が付いているものが、その日にできる場面です。
+  </p>
+  <p class="small muted">
+    押すと、てっぱり表の下段「できた（結果）」と、香盤表の「稽古できた」の行（✓）にも反映されます。
+  </p>
+</section>
+
+<!-- ============ 7 ============ -->
+<section id="print">
+  <h2><span class="num">7</span>印刷とデータの保存</h2>
+
+  <div class="cols c2">
+    <div class="card">
+      <h3>貼り出し用に印刷する</h3>
+      <p class="where">選んだ日の中身 → <b>この日を印刷（貼り出し用）</b></p>
+      <ul class="tight">
+        <li>その日の「時間の区切り・欠席者・できる場面」だけが1枚になります</li>
+        <li>印刷画面で「PDFとして保存」を選ぶとPDFになります</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>データの保存とバックアップ</h3>
+      <p class="where"><b>管理 → バックアップ</b></p>
+      <ul class="tight">
+        <li>入力は<strong>その端末の中だけ</strong>に自動保存されます（どこにも送りません）</li>
+        <li><kbd>書き出す</kbd> でファイルとして保存できます</li>
+        <li>機種変更のときは、新しい端末で <kbd>読み込む</kbd></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note warn">
+    <span class="title">ご注意</span>
+    ブラウザの「履歴・サイトデータを消去」を行うと、<strong>入力した内容も消えます</strong>。
+    ときどき <b>管理 → バックアップ → 書き出す</b> をしておくと安心です。
+    <b>管理 →「お渡し時の状態に戻す」</b>は、入力をすべて捨ててお渡し直後の状態に戻す機能です（元に戻せません）。
+  </div>
+</section>
+
+<!-- ============ 8 ============ -->
+<section id="home">
+  <h2><span class="num">8</span>ホーム画面に置く</h2>
+
+  <p>毎回URLを探さずに済むように、ホーム画面に置いておくと便利です。</p>
+  <div class="cols c2" style="margin-top:14px">
+    <div class="card">
+      <h3>iPhone / iPad（Safari）</h3>
+      <ol class="tight">
+        <li>アプリのURLを Safari で開く</li>
+        <li>下の <kbd>共有</kbd>（□に↑）を押す</li>
+        <li><kbd>ホーム画面に追加</kbd> を押す</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>Android（Chrome）</h3>
+      <ol class="tight">
+        <li>アプリのURLを Chrome で開く</li>
+        <li>右上の <kbd>⋮</kbd> を押す</li>
+        <li><kbd>ホーム画面に追加</kbd> を押す</li>
+      </ol>
+    </div>
+  </div>
+  <p class="small muted" style="margin-top:12px">
+    パソコンでは、ブラウザのブックマークに入れておいてください。表が広く見えるので、計画を立てるときはパソコンが見やすいです。
+  </p>
+</section>
+
+<!-- ============ 9 ============ -->
+<section id="qa">
+  <h2><span class="num">9</span>こまったとき</h2>
+
+  <div class="cols c2">
+    <div class="qa">
+      <p class="q">キーの入力画面がまた出てきました</p>
+      <p class="a">別の端末で開いたか、履歴・サイトデータを消したときに出ます。メール本文のキーを貼り付けてください。分からなくなったら、いつでもご連絡ください。</p>
+    </div>
+    <div class="qa">
+      <p class="q">てっぱりの中身が実際と違います</p>
+      <p class="a">お預かりしたてっぱり表が<strong>雛形</strong>のものでしたので、暫定の値が入っています。表のマスを押して直していただくか、最新のものをお送りいただければこちらで入れ直します。</p>
+    </div>
+    <div class="qa">
+      <p class="q">「できる場面」が思ったより少ないです</p>
+      <p class="a">出る人が<strong>1人でも欠ける</strong>と、その場面は「できる」に入りません。「あと1人でできる場面」に、誰が足りないかが出ていますのでご確認ください。</p>
+    </div>
+    <div class="qa">
+      <p class="q">オフの日を稽古日に変えたい</p>
+      <p class="a">その日の「予定」の行を押して、<b>この日の扱い</b>を切り替えてください。稽古あり／OFF／未定の3つです。</p>
+    </div>
+    <div class="qa">
+      <p class="q">キャストが増えた・役が変わった</p>
+      <p class="a">アプリからは変えられません。お手数ですがご連絡ください。こちらで入れて、同じURLに反映します。</p>
+    </div>
+    <div class="qa">
+      <p class="q">それ以外で困ったとき</p>
+      <p class="a">どんなことでも <b>support.tsumiki@gmail.com</b> までご連絡ください。使いにくいところのご指摘も歓迎です。直してお返しします。</p>
+    </div>
+  </div>
+</section>
+
+</main>
+</div><!-- /layout -->
+
+<footer>
+  つみき（Tsumiki）／ support.tsumiki@gmail.com<br>
+  てっぱりボード — JOE Company「ほろほろ2026」
+</footer>
+
+</div><!-- /wrap -->
+</body>
+</html>
