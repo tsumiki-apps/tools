@@ -266,6 +266,27 @@
     .cols.c3{grid-template-columns:1fr 1fr 1fr;}
     footer{color:#555;}
   }
+  /* ========= 狭い画面（〜719px）：比較表は行ごとのカードに積み替える =========
+     3列の表を375px幅に押し込むと、列が細くなって文字が1字ずつ縦に折れてしまう。
+     見出し行は隠し、各セルの前に data-l のラベルを出す。 */
+  @media (max-width:719px){
+    table.cmp.stack{display:block; border-radius:14px;}
+    table.cmp.stack thead{display:none;}
+    table.cmp.stack tbody{display:block;}
+    table.cmp.stack tbody tr{display:block; padding:14px 15px; border-bottom:1px solid var(--hair);}
+    table.cmp.stack tbody tr:last-child{border-bottom:none;}
+    table.cmp.stack tbody th,
+    table.cmp.stack tbody td{
+      display:block; width:auto!important; padding:0; border:none;
+      white-space:normal; text-align:left;
+    }
+    table.cmp.stack tbody th{font-size:15.5px; line-height:1.6;}
+    table.cmp.stack tbody td{margin-top:10px;}
+    table.cmp.stack tbody td[data-l]::before{
+      content:attr(data-l); display:block; margin-bottom:3px;
+      font-size:11px; font-weight:700; letter-spacing:.08em; color:var(--muted);
+    }
+  }
 </style>
 </head>
 <body>
@@ -309,28 +330,28 @@
 
   <p>直したいものによって、入口が3つあります。まずはこの表だけ覚えていただければ十分です。</p>
 
-  <table class="cmp">
+  <table class="cmp stack">
     <thead><tr><th style="width:11em">直したいもの</th><th>どこから</th><th>例</th></tr></thead>
     <tbody>
       <tr>
         <th>キャストの名前<br>場面・通し<br>稽古日<br>舞台の名前</th>
-        <td>右上の <kbd>管理</kbd><br><span class="path">→ 上のタブで<b>キャスト</b>／<b>稽古日</b>／<b>場面・通し</b>／<b>その他</b></span></td>
-        <td>降板・代役、舞台稽古の日を足す、場面を足す、別の舞台を始める</td>
+        <td data-l="どこから">右上の <kbd>管理</kbd><br><span class="path">→ 上のタブで<b>キャスト</b>／<b>稽古日</b>／<b>場面・通し</b>／<b>その他</b></span></td>
+        <td data-l="例">降板・代役、舞台稽古の日を足す、場面を足す、別の舞台を始める</td>
       </tr>
       <tr>
         <th>出番（香盤の●）</th>
-        <td><b>香盤表</b>に切り替えて <kbd>出番を直す</kbd></td>
-        <td>役の入れ替え、この場面にも出ることになった</td>
+        <td data-l="どこから"><b>香盤表</b>に切り替えて <kbd>出番を直す</kbd></td>
+        <td data-l="例">役の入れ替え、この場面にも出ることになった</td>
       </tr>
       <tr>
         <th>その日のこと<br>（時間・OFF・通し）</th>
-        <td>表の<b>「その日の予定」</b>の行<br><span class="path">または 日の詳細の <kbd>この日を直す</kbd></span></td>
-        <td>2〜4日は11〜17時、6日の通しは13:30から</td>
+        <td data-l="どこから">表の<b>「その日の予定」</b>の行<br><span class="path">または 日の詳細の <kbd>この日を直す</kbd></span></td>
+        <td data-l="例">2〜4日は11〜17時、6日の通しは13:30から</td>
       </tr>
       <tr>
         <th>キャストのNG</th>
-        <td>てっぱり表の<b>マス</b>（これまでどおり）</td>
-        <td>8日と9日がOFF</td>
+        <td data-l="どこから">てっぱり表の<b>マス</b>（これまでどおり）</td>
+        <td data-l="例">8日と9日がOFF</td>
       </tr>
     </tbody>
   </table>
@@ -670,13 +691,13 @@
     残っていると判定が狂うため、消したものに付いていた情報も一緒に片づけます。確認の文にも同じことが出ます。
   </p>
 
-  <table class="cmp">
+  <table class="cmp stack">
     <thead><tr><th style="width:11em">消すもの</th><th>一緒に消えるもの</th></tr></thead>
     <tbody>
-      <tr><th>キャスト</th><td>その人のNG（終日NG・◯時入り／出し）／香盤のその人の●</td></tr>
-      <tr><th>稽古日</th><td>その日に入れたNG／その日の「できた場面」の記録</td></tr>
-      <tr><th>場面</th><td>その場面の出番／「できた場面」の記録</td></tr>
-      <tr><th>特別稽古</th><td>その特別稽古を入れていた日の選択・開始時刻</td></tr>
+      <tr><th>キャスト</th><td data-l="一緒に消えるもの">その人のNG（終日NG・◯時入り／出し）／香盤のその人の●</td></tr>
+      <tr><th>稽古日</th><td data-l="一緒に消えるもの">その日に入れたNG／その日の「できた場面」の記録</td></tr>
+      <tr><th>場面</th><td data-l="一緒に消えるもの">その場面の出番／「できた場面」の記録</td></tr>
+      <tr><th>特別稽古</th><td data-l="一緒に消えるもの">その特別稽古を入れていた日の選択・開始時刻</td></tr>
     </tbody>
   </table>
 

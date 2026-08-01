@@ -266,6 +266,27 @@
     .cols.c3{grid-template-columns:1fr 1fr 1fr;}
     footer{color:#555;}
   }
+  /* ========= 狭い画面（〜719px）：比較表は行ごとのカードに積み替える =========
+     3列の表を375px幅に押し込むと、列が細くなって文字が1字ずつ縦に折れてしまう。
+     見出し行は隠し、各セルの前に data-l のラベルを出す。 */
+  @media (max-width:719px){
+    table.cmp.stack{display:block; border-radius:14px;}
+    table.cmp.stack thead{display:none;}
+    table.cmp.stack tbody{display:block;}
+    table.cmp.stack tbody tr{display:block; padding:14px 15px; border-bottom:1px solid var(--hair);}
+    table.cmp.stack tbody tr:last-child{border-bottom:none;}
+    table.cmp.stack tbody th,
+    table.cmp.stack tbody td{
+      display:block; width:auto!important; padding:0; border:none;
+      white-space:normal; text-align:left;
+    }
+    table.cmp.stack tbody th{font-size:15.5px; line-height:1.6;}
+    table.cmp.stack tbody td{margin-top:10px;}
+    table.cmp.stack tbody td[data-l]::before{
+      content:attr(data-l); display:block; margin-bottom:3px;
+      font-size:11px; font-weight:700; letter-spacing:.08em; color:var(--muted);
+    }
+  }
 </style>
 </head>
 <body>
@@ -548,13 +569,13 @@
 
   <h3>マスを押す（キャストのNG）</h3>
   <p>てっぱり表のマスを押すと、下から選ぶ画面が出ます。</p>
-  <table class="cmp">
+  <table class="cmp stack">
     <thead><tr><th style="width:9.5em">押すもの</th><th>入るもの</th><th>表での見え方</th></tr></thead>
     <tbody>
-      <tr><th>出られる</th><td>その日の指定をぜんぶ消す</td><td>空白</td></tr>
-      <tr><th>終日NG</th><td>その日まるごと来られない</td><td>赤い <b>NG</b></td></tr>
-      <tr><th>◯時入り</th><td>その時刻より前は居ない（途中から来る）</td><td>黄色い <b>14入</b></td></tr>
-      <tr><th>◯時出し</th><td>その時刻以降は居ない（途中で帰る）</td><td>黄色い <b>17出</b></td></tr>
+      <tr><th>出られる</th><td data-l="入るもの">その日の指定をぜんぶ消す</td><td data-l="表での見え方">空白</td></tr>
+      <tr><th>終日NG</th><td data-l="入るもの">その日まるごと来られない</td><td data-l="表での見え方">赤い <b>NG</b></td></tr>
+      <tr><th>◯時入り</th><td data-l="入るもの">その時刻より前は居ない（途中から来る）</td><td data-l="表での見え方">黄色い <b>14入</b></td></tr>
+      <tr><th>◯時出し</th><td data-l="入るもの">その時刻以降は居ない（途中で帰る）</td><td data-l="表での見え方">黄色い <b>17出</b></td></tr>
     </tbody>
   </table>
 
