@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>てっぱりボード — 追加分の使い方（V2）</title>
-<meta name="description" content="てっぱりボードV2で増えた「中身を直す」機能の説明。キャストの名前変更・出番（香盤の●）の入れ替え・稽古日の追加・場面の追加・別の公演での使い回しができます。">
+<meta name="description" content="てっぱりボードV2で増えた「中身を直す」機能の説明。キャストの名前変更・出番（香盤の●）の入れ替え・稽古日の追加・場面の追加、いまの舞台を保存して別の舞台を始めることができます。">
 <link rel="apple-touch-icon" href="icon-teppari.png">
 <style>
   :root{
@@ -276,7 +276,7 @@
   <h1>てっぱりボード<br>増えたところの使い方</h1>
   <p class="lead">
     2026年8月に、<strong>中身をご自身で直せる</strong>ようにいたしました。
-    キャストの名前・出番（香盤の●）・稽古日・場面、それに公演そのものの入れ替えまで、
+    キャストの名前・出番（香盤の●）・稽古日・場面、それに舞台そのものの入れ替えまで、
     アプリの中で変えられます。このページは<strong>増えたところだけ</strong>をまとめたものです。
     これまでの使い方は変わっておりませんので、基本の操作は
     <a href="teppari-tsukaikata.html">はじめの使い方ページ</a>をご覧ください。
@@ -295,7 +295,7 @@
     <li><a href="#dot">出番（●）を直す</a></li>
     <li><a href="#days">稽古日を足す</a></li>
     <li><a href="#scene">場面・通しを直す</a></li>
-    <li><a href="#other">別の公演に使う</a></li>
+    <li><a href="#other">別の舞台を始める</a></li>
     <li><a href="#care">消すときの注意</a></li>
     <li><a href="#qa">こまったとき</a></li>
   </ol>
@@ -313,9 +313,9 @@
     <thead><tr><th style="width:11em">直したいもの</th><th>どこから</th><th>例</th></tr></thead>
     <tbody>
       <tr>
-        <th>キャストの名前<br>場面・通し<br>稽古日<br>公演名</th>
+        <th>キャストの名前<br>場面・通し<br>稽古日<br>舞台の名前</th>
         <td>右上の <kbd>管理</kbd><br><span class="path">→ 上のタブで<b>キャスト</b>／<b>稽古日</b>／<b>場面・通し</b>／<b>その他</b></span></td>
-        <td>降板・代役、舞台稽古の日を足す、場面を足す</td>
+        <td>降板・代役、舞台稽古の日を足す、場面を足す、別の舞台を始める</td>
       </tr>
       <tr>
         <th>出番（香盤の●）</th>
@@ -582,37 +582,83 @@
 
 <!-- ============ 7 ============ -->
 <section id="other">
-  <h2><span class="num">7</span>公演名を変える／別の公演に使う</h2>
+  <h2><span class="num">7</span>保存して、別の舞台を始める</h2>
 
   <p class="path"><b>右上の <kbd>管理</kbd> → その他</b></p>
 
-  <div class="cols c2" style="margin-top:14px">
-    <div class="card">
-      <h3>公演名</h3>
-      <p>画面のいちばん上に出る名前です。押して書き替えられます。</p>
-    </div>
-    <div class="card">
-      <h3>白紙にして別の公演を作る</h3>
+  <p>
+    いま作っている舞台を<strong>このアプリの中に保存したまま</strong>、次の作品を白紙から作りはじめられます。
+    保存したものは消えません。あとからいつでも開き直して、そのときの続きから使えます。
+  </p>
+
+  <div class="split wide">
+    <div>
+      <h3>やりかた</h3>
+      <ol class="tight">
+        <li><kbd>管理</kbd> →「その他」→ <kbd>保存して別の舞台を始める</kbd> を押します</li>
+        <li>確認が出ます（「◯◯を保存して、新しい舞台を始めます」）</li>
+        <li>いまの舞台がしまわれ、画面が<b>トップ画面</b>に変わります</li>
+        <li>新しい舞台の名前を入れて <kbd>この名前ではじめる</kbd> を押すと、白紙から始まります</li>
+      </ol>
+      <p class="small muted">
+        白紙のあとは、<b>キャスト → 稽古日 → 場面</b> の順に入れていくのが早いです。
+        出番の●は、香盤表の <kbd>出番を直す</kbd> で付けていきます。
+      </p>
+
+      <h3 style="margin-top:26px">しまった舞台を開き直す</h3>
       <p>
-        中身をぜんぶ消して、次の作品に同じ道具を使えます。公演名を聞かれたあと、確認が2回出ます。
+        トップ画面の<b>「しまってある舞台」</b>、または <kbd>管理</kbd> →「その他」の同じ一覧から
+        <kbd>開く</kbd> を押します。
       </p>
       <ul class="tight">
-        <li>白紙のあと、<b>キャスト → 稽古日 → 場面</b> の順に入れていくのが早いです</li>
-        <li>出番の●は、香盤表の <kbd>出番を直す</kbd> で付けていきます</li>
+        <li>開くと、<strong>いま開いていた舞台は入れ替わりに保存されます</strong>。どちらも失われません</li>
+        <li>行ったり来たりして構いません。稽古中の作品と、次の作品を並べて持てます</li>
+        <li>いらなくなった舞台は <kbd>×</kbd> で捨てられます（こちらは元に戻せません）</li>
       </ul>
+
+      <h3 style="margin-top:26px">舞台の名前</h3>
+      <p>
+        <kbd>管理</kbd> →「その他」の<b>「舞台の名前」</b>で、いつでも書き替えられます。
+        画面のいちばん上に出る名前で、保存したときの見出しにもなります。
+      </p>
     </div>
+
+    <figure class="shot">
+      <div class="screen">
+        <div class="bar"><span class="ttl">てっぱりボード</span></div>
+        <p class="lbl" style="margin-bottom:6px">トップ画面</p>
+        <div class="dash" style="margin-bottom:10px">
+          <div style="font-weight:700; font-size:12.5px; margin-bottom:6px">新しい舞台をはじめる</div>
+          <div style="border:1px solid var(--app-line); border-radius:9px; padding:7px 10px; background:#fff; color:var(--app-subtle); font-size:12px">例：JOE Company「つぎの公演」</div>
+          <div style="margin-top:7px"><span class="btn pri" style="display:block; text-align:center">この名前ではじめる</span></div>
+        </div>
+        <div style="font-weight:700; font-size:12.5px; margin-bottom:6px">しまってある舞台（1）</div>
+        <div style="display:flex; gap:6px; align-items:center; border:1px solid var(--app-line); border-radius:11px; padding:8px 10px">
+          <div style="flex:1; min-width:0">
+            <div style="font-weight:600; font-size:12.5px">JOE Company「ほろほろ2026」</div>
+            <div style="font-size:11px; color:var(--app-subtle)">8/2(日) にしまいました ・ キャスト 24／稽古日 26</div>
+          </div>
+          <span class="btn">開く</span>
+        </div>
+        <div class="pin" style="left:-11px; top:150px">1</div>
+      </div>
+      <ol class="pins">
+        <li>しまった舞台は、ここから開き直せます</li>
+      </ol>
+      <figcaption>保存したあとに出るトップ画面</figcaption>
+    </figure>
   </div>
 
-  <div class="note warn">
-    <span class="title">白紙にする前に、かならず「書き出す」を</span>
-    <kbd>管理</kbd> →「その他」→ バックアップの <kbd>書き出す</kbd> で、いまの内容がファイル1つになって手元に残ります。
-    あとから <kbd>読み込む</kbd> で、そっくりそのまま戻せます。<strong>白紙にしたものは、書き出していないと戻せません。</strong>
-    ほろほろ2026を残したまま次の作品を作りたいときは、先に書き出しておいてください。
+  <div class="note">
+    <span class="title">保存はこの端末の中だけです</span>
+    しまった舞台も、この端末の中に置かれます。機種を変えるときや、もしもの時にそなえて、
+    <kbd>管理</kbd> →「その他」→ バックアップの <kbd>書き出す</kbd> でファイルにも残しておかれると安心です
+    （あとから <kbd>読み込む</kbd> で戻せます）。
   </div>
 
   <p class="small muted">
-    「お渡し時の状態に戻す」は、いま入っているほろほろ2026の<strong>お渡し当初の内容</strong>に戻すものです
-    （その後に直したところは消えます）。白紙にするのとは別のものです。
+    「お渡し時の状態に戻す」は、<strong>いま開いている舞台の中身</strong>を、お渡し当初の内容に戻すものです
+    （その後に直したところは消え、保存もされません）。「保存して別の舞台を始める」とは別のものです。
   </p>
 </section>
 
@@ -660,6 +706,10 @@
     <div class="qa">
       <p class="q">アプリが新しくなっても、入れた内容は残りますか</p>
       <p class="a">残ります。こちらが直してお渡しするのはアプリの側だけで、高木様が入れられた内容には触れません。</p>
+    </div>
+    <div class="qa">
+      <p class="q">前の作品のデータは、消えてしまいませんか</p>
+      <p class="a"><b>保存して別の舞台を始める</b>を使えば消えません。トップ画面の「しまってある舞台」から、いつでも開き直せます。開くときは、そのとき開いていた舞台が入れ替わりに保存されます。</p>
     </div>
     <div class="qa">
       <p class="q">キャストが多すぎて、管理の一覧が長いです</p>
