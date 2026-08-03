@@ -4,125 +4,238 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>打刻アプリ — 使い方</title>
-<meta name="description" content="打刻アプリの使い方。出勤・退勤をタップするだけで、派遣の勤怠管理表（提出書類）まで自動でつくれます。労働者用と管理者用の2つのアプリの案内。">
+<meta name="description" content="打刻アプリの使い方。現場でボタンを押すだけで出退勤を記録し、月ごとに集計します。">
 <link rel="apple-touch-icon" href="icon-dakoku.png">
 <style>
+  /* ================================================================
+     つみき 取扱説明書 共通スタイル v2（1項目＝1図＋数行）
+     ・外部読み込みゼロ（フォント/CDN/画像すべて無し）
+     ・図はアプリ画面をHTML/CSSで再現（スクショ画像を使わない）
+     ================================================================ */
   :root{
     --paper:#F4F2EE; --surface:#ECE9E3; --ink:#242321; --muted:#77736B;
-    --hair:#D8D4CC; --ghost:#BEB9B0; --control:#F8F7F4;
-    --mark:#B4562E;                       /* 図の注釈（番号・矢印） */
-    /* アプリ画面の再現に使う色（打刻アプリ本体と同じ値） */
-    --app-ink:#1a2734; --app-subtle:#7488a0; --app-line:#e2e9f1; --app-surface:#eef3f8;
-    --acc:#2f6fd6; --in:#2f9e6b; --out:#e0663b; --kyu:#c0442a;
-    --yel:#fffccc; --gray:#e5e5e5; --cyan:#e0f4f4;
+    --hair:#D8D4CC; --ghost:#BEB9B0; --control:#FBFAF8;
+    --mark:#B4562E;                       /* 図の注釈（番号ピン・矢印） */
   }
   *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
   html{-webkit-text-size-adjust:100%; scroll-behavior:smooth;}
   body{
     background:var(--paper); color:var(--ink);
     font-family:'Hiragino Maru Gothic ProN',-apple-system,BlinkMacSystemFont,'Hiragino Sans','Noto Sans JP',sans-serif;
-    line-height:1.8; -webkit-font-smoothing:antialiased;
-    padding:0 20px calc(56px + env(safe-area-inset-bottom));
+    line-height:1.75; -webkit-font-smoothing:antialiased;
+    padding:0 18px calc(48px + env(safe-area-inset-bottom));
     font-size:15px;
   }
   .wrap{max-width:1180px; margin:0 auto;}
   a{color:var(--ink);}
-  main,section,.split>*,.cols>*,figure.shot{min-width:0;}
+  /* grid/flex の子は既定 min-width:auto。中身（表など）に押し広げられて
+     375px幅で横スクロールが出るのを防ぐ。 */
+  main,.grp,.items,.item,figure.shot{min-width:0;}
   .tblwrap{overflow-x:auto; -webkit-overflow-scrolling:touch;}
 
   /* ================= 見出し ================= */
-  header{padding:48px 0 4px;}
-  .kicker{font-size:11.5px; font-weight:700; letter-spacing:.16em; color:var(--muted); margin-bottom:10px;}
-  h1{font-size:29px; font-weight:700; letter-spacing:.03em; line-height:1.4;}
-  header .lead{margin-top:12px; font-size:15px; color:var(--muted); max-width:1000px;}
-  .openapp{margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;}
+  header{padding:40px 0 0;}
+  .kicker{font-size:11px; font-weight:700; letter-spacing:.16em; color:var(--muted); margin-bottom:9px;}
+  h1{font-size:27px; font-weight:700; letter-spacing:.03em; line-height:1.4;}
+  header .lead{margin-top:10px; font-size:14.5px; color:var(--muted); max-width:36em;}
+  .openapp{margin-top:16px; display:flex; gap:9px; flex-wrap:wrap;}
   .openapp a{
     display:inline-block; background:var(--ink); color:var(--paper);
-    text-decoration:none; border-radius:999px; padding:10px 22px;
-    font-size:14.5px; font-weight:700;
+    text-decoration:none; border-radius:999px; padding:9px 20px;
+    font-size:14px; font-weight:700;
   }
-  .openapp a.ghost{background:none; color:var(--ink); border:1.5px solid var(--ink);}
-  h2{
-    font-size:21px; font-weight:700; letter-spacing:.02em; line-height:1.5;
-    margin:0 0 20px; padding-bottom:12px; border-bottom:1.5px solid var(--hair);
-    display:flex; align-items:center; gap:11px;
-  }
-  h2 .num{
-    flex:none; width:28px; height:28px; border-radius:50%;
-    background:var(--ink); color:var(--paper); font-size:14px;
-    display:flex; align-items:center; justify-content:center;
-  }
-  h3{font-size:15.5px; font-weight:700; margin:0 0 8px;}
-  section{padding:44px 0 4px; scroll-margin-top:20px;}
-  p{margin:9px 0;}
-  .muted{color:var(--muted);}
-  .small{font-size:13px;}
+  .openapp a.ghost{background:none; color:var(--ink); border:1.5px solid var(--hair);}
 
-  /* ================= 全体レイアウト ================= */
-  .layout{display:block;}
-  aside.toc{
+  /* ================= もくじ ================= */
+  /* 狭い画面ではたたんでおく（項目が多いので本文が遠くならないように）。
+     1000px以上ではサマリを隠して左に貼り付ける。開閉は末尾の script。 */
+  details.toc{
+    margin-top:22px; background:var(--control); border:1px solid var(--hair);
+    border-radius:16px; padding:12px 16px;
+  }
+  details.toc summary{
+    cursor:pointer; list-style:none; font-size:12.5px; font-weight:700;
+    letter-spacing:.08em; color:var(--muted);
+  }
+  details.toc summary::-webkit-details-marker{display:none;}
+  details.toc summary::after{content:'▾'; margin-left:7px; font-size:11px;}
+  details.toc[open] summary::after{content:'▴';}
+  .toc nav{margin-top:10px;}
+  .toc .g{
+    font-size:10.5px; font-weight:700; letter-spacing:.14em; color:var(--ghost);
+    margin:14px 0 3px;
+  }
+  .toc .g:first-child{margin-top:0;}
+  .toc a{
+    display:block; text-decoration:none; font-size:13.5px; padding:2px 0;
+    color:var(--ink);
+  }
+  .toc a .n{display:inline-block; width:1.9em; color:var(--ghost); font-weight:700; font-size:12px;}
+  .toc a.on{color:var(--mark); font-weight:700;}
+  .toc a.on .n{color:var(--mark);}
+
+  /* ================= 項目（1項目＝1図＋数行） ================= */
+  .grp{padding:34px 0 0; scroll-margin-top:14px;}
+  .grp > h2{
+    font-size:12.5px; font-weight:700; letter-spacing:.14em; color:var(--muted);
+    border-bottom:1px solid var(--hair); padding-bottom:8px; margin-bottom:16px;
+  }
+  .items{display:grid; gap:16px;}
+  .item{
     background:var(--control); border:1px solid var(--hair); border-radius:18px;
-    padding:16px 20px; margin-top:26px;
+    padding:14px 14px 16px; scroll-margin-top:14px;
   }
-  aside.toc .t{font-size:11.5px; font-weight:700; letter-spacing:.12em; color:var(--muted); margin-bottom:8px;}
-  aside.toc ol{margin:0; padding-left:1.35em;}
-  aside.toc li{margin:2px 0; font-size:14px;}
-  aside.toc a{text-decoration:none; border-bottom:1px solid var(--hair);}
-
-  /* ================= 部品 ================= */
-  .cols{display:grid; gap:16px;}
-  .card{
-    background:var(--control); border:1px solid var(--hair); border-radius:18px;
-    padding:18px 20px;
+  .item h3{
+    font-size:15.5px; font-weight:700; line-height:1.55; margin:13px 0 2px;
+    display:flex; gap:9px; align-items:flex-start;
   }
-  .card h3{margin-bottom:6px;}
-  .card .where{font-size:12.5px; color:var(--muted); margin-bottom:8px;}
-  .card .where b{color:var(--ink);}
-  ul.tight{margin:8px 0; padding-left:1.25em;}
-  ul.tight li{margin:5px 0;}
-  ul.tight li::marker{color:var(--ghost);}
-  ol.tight{margin:8px 0; padding-left:1.35em;}
-  ol.tight li{margin:5px 0;}
-
-  .note{
-    border-left:4px solid var(--ghost); background:var(--control);
-    border-radius:0 12px 12px 0; padding:14px 16px; margin:16px 0; font-size:14px;
+  .item h3 .n{
+    flex:none; width:23px; height:23px; border-radius:50%;
+    background:var(--ink); color:var(--paper); font-size:12px; font-weight:700;
+    display:flex; align-items:center; justify-content:center; margin-top:2px;
   }
-  .note .title{display:block; font-weight:700; margin-bottom:3px;}
-  .warn{border-left-color:#B03A22; background:#F7EFEA;}
-  .warn .title{color:#94301b;}
-  .tip{border-left-color:var(--acc); background:#eef3fb;}
-  .tip .title{color:#245bb0;}
+  .item p{font-size:14px; margin:5px 0 0; padding-left:32px;}
+  .item p.fine{font-size:12.5px; color:var(--muted); margin-top:8px; line-height:1.7;}
+  .item p.caution{color:#94301b;}
+  .item p.caution b{color:#94301b;}
+  .item ul{margin:5px 0 0; padding-left:calc(32px + 1.1em); font-size:14px;}
+  .item ul li{margin:3px 0;}
+  .item ul li::marker{color:var(--ghost);}
+  /* 図のないおまけ項目（データの保存など）は番号だけで詰めて見せる */
+  .item.nofig h3{margin-top:2px;}
 
   kbd{
     display:inline-block; background:#fff; border:1px solid var(--hair);
-    border-bottom-width:2px; border-radius:7px; padding:0 8px;
-    font-family:inherit; font-size:13.5px; font-weight:700; white-space:nowrap;
+    border-bottom-width:2px; border-radius:7px; padding:0 7px;
+    font-family:inherit; font-size:13px; font-weight:700; white-space:nowrap;
   }
-  .path{font-size:13px; color:var(--muted);}
+  .path{color:var(--muted);}
   .path b{color:var(--ink); font-weight:700;}
-  .who-tag{display:inline-block; font-size:11px; font-weight:700; border-radius:999px; padding:2px 10px; vertical-align:middle; margin-left:2px;}
-  .who-tag.w{background:#e7f5ef; color:#1d7a54;}
-  .who-tag.m{background:#e7f0fb; color:#245bb0;}
 
-  /* 流れ図 */
-  .flow{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:6px 0 4px;}
-  .flow .box{
-    background:#fff; border:1px solid var(--hair); border-radius:13px;
-    padding:10px 16px; font-size:14px; font-weight:700;
+  /* ================= 図（アプリ画面の再現） ================= */
+  /* 番号ピンが枠の外に11px＋影ぶんはみ出す。その余白を figure 側に持たせる。 */
+  figure.shot{margin:0; padding:2px 14px 0;}
+  figcaption{font-size:11.5px; color:var(--ghost); margin-top:7px; text-align:center;}
+  /* 注釈：番号ピンと矢印（使うのは「ここを押す」が言葉で伝わらない図だけ） */
+  .pin{
+    position:absolute; z-index:3; width:21px; height:21px; border-radius:50%;
+    background:var(--mark); color:#fff; font-size:11.5px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 0 3px rgba(255,255,255,.9);
   }
-  .flow .arw{color:var(--mark); font-weight:700; font-size:17px;}
+  .arrow{position:absolute; z-index:2; height:2px; background:var(--mark); transform-origin:left center;}
+  .arrow::after{
+    content:''; position:absolute; right:-2px; top:-4px;
+    border:5px solid transparent; border-left-color:var(--mark);
+  }
 
-  /* 比較表 */
-  table.cmp{border-collapse:collapse; width:100%; margin:12px 0; font-size:14px; background:#fff;
+  /* 流れ図（「どんな道具か」の1枚目に使う） */
+  .flow{display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center;
+    background:#fff; border:1px solid var(--hair); border-radius:14px; padding:16px 12px;}
+  .flow .box{background:var(--surface); border-radius:10px; padding:7px 12px; font-size:13px; font-weight:700;}
+  .flow .arw{color:var(--mark); font-weight:700;}
+
+  /* 計算式の図 */
+  .calc{
+    background:#fff; border:1px solid var(--hair); border-radius:14px;
+    padding:13px 14px; font-size:14.5px; font-weight:700;
+    font-variant-numeric:tabular-nums; text-align:center; line-height:2;
+  }
+  .calc .op{color:var(--ghost); margin:0 3px;}
+  .calc .res{color:var(--mark);}
+  .calc small{font-size:11px; color:var(--muted); font-weight:500; margin-left:1px;}
+  .calc .note2{display:block; font-size:11.5px; color:var(--muted); font-weight:500; margin-top:3px;}
+
+  /* 注意（赤の細い帯。多用しない） */
+  .warnbox{
+    border-left:3px solid #B03A22; background:#F7EFEA; border-radius:0 10px 10px 0;
+    padding:9px 12px; margin:9px 0 0 32px; font-size:13px; color:#7d2c19;
+  }
+  .warnbox b{color:#7d2c19;}
+
+  /* 比較表（巻末で使う） */
+  table.cmp{border-collapse:collapse; width:100%; margin:8px 0 0; font-size:13.5px; background:#fff;
     border:1px solid var(--hair); border-radius:14px; overflow:hidden;}
-  table.cmp th, table.cmp td{border-bottom:1px solid var(--hair); padding:11px 14px; text-align:left; vertical-align:top;}
-  table.cmp thead th{background:var(--surface); font-size:12.5px; color:var(--muted); font-weight:700;}
+  table.cmp th, table.cmp td{border-bottom:1px solid var(--hair); padding:9px 12px; text-align:left; vertical-align:top;}
+  table.cmp thead th{background:var(--surface); font-size:11.5px; color:var(--muted); font-weight:700;}
   table.cmp tbody tr:last-child th, table.cmp tbody tr:last-child td{border-bottom:none;}
   table.cmp tbody th{font-weight:700; white-space:nowrap;}
+  /* 表は項目カードの中に入るので、常に行ごとのカードへ積み替える
+     （列が細って1字ずつ縦に折れるのを防ぐ） */
+  table.cmp.stack{display:block;}
+  table.cmp.stack thead{display:none;}
+  table.cmp.stack tbody,table.cmp.stack tbody tr{display:block;}
+  table.cmp.stack tbody tr{padding:11px 13px; border-bottom:1px solid var(--hair);}
+  table.cmp.stack tbody tr:last-child{border-bottom:none;}
+  table.cmp.stack tbody th,table.cmp.stack tbody td{
+    display:block; width:auto!important; padding:0; border:none; white-space:normal;}
+  table.cmp.stack tbody th{font-size:14px;}
+  table.cmp.stack tbody td{margin-top:5px; font-size:13px;}
+  table.cmp.stack tbody td[data-l]::before{
+    content:attr(data-l); display:block; font-size:10.5px; font-weight:700;
+    letter-spacing:.08em; color:var(--muted);}
+
+  /* ================= 巻末（小さく・端に） ================= */
+  .appendix{padding-top:34px;}
+  .appendix > h2{
+    font-size:12.5px; font-weight:700; letter-spacing:.14em; color:var(--muted);
+    border-bottom:1px solid var(--hair); padding-bottom:8px; margin-bottom:14px;
+  }
+  .qa{display:grid; gap:11px;}
+  .qa .q{font-size:13.5px; font-weight:700;}
+  .qa .a{font-size:13px; color:var(--muted); margin-top:2px;}
+  .qa > div{border-bottom:1px dotted var(--hair); padding-bottom:10px;}
+  .qa > div:last-child{border-bottom:none;}
+
+  footer{
+    margin-top:44px; padding-top:18px; border-top:1px solid var(--hair);
+    font-size:12px; color:var(--ghost); text-align:center; line-height:2;
+  }
+
+  /* ================= 横幅を使う ================= */
+  @media (min-width:640px){
+    .items{grid-template-columns:1fr 1fr;}
+    .qa{grid-template-columns:1fr 1fr; gap:11px 26px;}
+  }
+  @media (min-width:1000px){
+    body{padding-left:28px; padding-right:28px;}
+    h1{font-size:32px;}
+    .layout{display:grid; grid-template-columns:212px minmax(0,1fr); gap:40px; align-items:start;}
+    details.toc{
+      position:sticky; top:22px; margin-top:40px; background:none; border:none; padding:0;
+      max-height:calc(100vh - 56px); overflow:auto;
+    }
+    details.toc summary{display:none;}
+    .grp{padding-top:40px;}
+  }
+
+  /* ================= 印刷（そのままA4のPDFになる） ================= */
+  @media print{
+    @page{margin:14mm 12mm;}
+    body{background:#fff; color:#000; font-size:9.5pt; padding:0;}
+    .wrap{max-width:none;}
+    .layout{display:block;}
+    details.toc,.openapp{display:none;}
+    header{padding-top:0;}
+    .grp{padding-top:14pt;}
+    .grp > h2{page-break-after:avoid;}
+    .items{grid-template-columns:1fr 1fr; gap:9pt;}
+    .item{background:#fff; page-break-inside:avoid;}
+    .qa{grid-template-columns:1fr 1fr;}
+    .qa > div{page-break-inside:avoid;}
+    .screen{box-shadow:none;}
+    footer{color:#555;}
+  }
+
+  /* dakoku 本体と同じ色（画面再現に使う） */
+  :root{
+    /* アプリ画面の再現に使う色（打刻アプリ本体と同じ値） */
+    --app-ink:#1a2734; --app-subtle:#7488a0; --app-line:#e2e9f1; --app-surface:#eef3f8;
+    --acc:#2f6fd6; --in:#2f9e6b; --out:#e0663b; --kyu:#c0442a;
+    --yel:#fffccc; --gray:#e5e5e5; --cyan:#e0f4f4;
+  }
 
   /* ================= アプリ画面の再現（図） ================= */
-  figure.shot{margin:0; padding-inline:16px;}
   .screen{
     position:relative; border:1px solid var(--app-line); border-radius:14px; background:#fff;
     padding:14px; color:var(--app-ink); font-size:13px; line-height:1.6;
@@ -144,7 +257,6 @@
     padding:5px 12px; font-size:12.5px; font-weight:700;
   }
   .screen .btn.pri{background:var(--acc); color:#fff; border-color:var(--acc);}
-  figcaption{font-size:12px; color:var(--muted); margin-top:8px;}
 
   /* 打刻の大ボタン */
   .punch{width:118px; height:118px; border-radius:50%; margin:10px auto 6px; color:#fff;
@@ -190,68 +302,15 @@
     font-weight:800; letter-spacing:.1em; border-radius:9px; padding:5px 12px; font-size:15px;}
 
   /* 注釈：番号ピンと矢印 */
-  .pin{
-    position:absolute; z-index:3; width:22px; height:22px; border-radius:50%;
-    background:var(--mark); color:#fff; font-size:12px; font-weight:700;
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 0 0 3px rgba(255,255,255,.9);
-  }
-  ol.pins{margin:10px 0 0; padding:0; list-style:none; counter-reset:p;}
-  ol.pins li{counter-increment:p; position:relative; padding-left:30px; margin:7px 0; font-size:13.5px;}
-  ol.pins li::before{
-    content:counter(p); position:absolute; left:0; top:3px;
-    width:20px; height:20px; border-radius:50%; background:var(--mark); color:#fff;
-    font-size:11.5px; font-weight:700; display:flex; align-items:center; justify-content:center;
-  }
 
   /* Q&A */
-  .qa{background:var(--control); border:1px solid var(--hair); border-radius:16px; padding:15px 18px;}
-  .qa .q{font-weight:700; font-size:14.5px;}
-  .qa .a{margin-top:5px; color:var(--muted); font-size:13.5px; line-height:1.75;}
 
-  footer{
-    margin-top:56px; padding-top:20px; border-top:1px solid var(--hair);
-    font-size:12.5px; color:var(--ghost); text-align:center; line-height:2;
-  }
+  /* 誰がやるかの札（労働者／管理者） */
+  .who-tag{display:inline-block; font-size:10.5px; font-weight:700; border-radius:999px;
+    padding:1px 9px; vertical-align:middle; margin-left:6px; white-space:nowrap;}
+  .who-tag.w{background:#e7f5ef; color:#1d7a54;}
+  .who-tag.m{background:#e7f0fb; color:#245bb0;}
 
-  /* ================= 横幅を使う（タブレット以上） ================= */
-  @media (min-width:720px){
-    .cols.c2{grid-template-columns:1fr 1fr;}
-    .cols.c3{grid-template-columns:1fr 1fr 1fr;}
-    .split{display:grid; grid-template-columns:minmax(0,1fr) minmax(300px,400px); gap:28px; align-items:start;}
-    .split.wide{grid-template-columns:minmax(0,1fr) minmax(340px,460px);}
-    .split.flip{grid-template-columns:minmax(300px,400px) minmax(0,1fr);}
-  }
-  @media (min-width:1000px){
-    body{padding-left:32px; padding-right:32px;}
-    .layout{display:grid; grid-template-columns:200px minmax(0,1fr); gap:44px; align-items:start;}
-    aside.toc{position:sticky; top:26px; margin-top:44px; background:none; border:none; padding:0;}
-    aside.toc li{margin:4px 0; font-size:13.5px;}
-    aside.toc a{border-bottom:none;}
-    aside.toc a:hover{border-bottom:1px solid var(--hair);}
-    h1{font-size:33px;}
-    section{padding:52px 0 4px;}
-  }
-
-  /* ================= 印刷（A4のPDFになる） ================= */
-  @media print{
-    @page{margin:15mm 13mm;}
-    body{background:#fff; color:#000; font-size:10pt; padding:0;}
-    .wrap{max-width:none;}
-    .layout{display:block;}
-    aside.toc,.openapp{display:none;}
-    header{padding-top:0;}
-    section{padding:16pt 0 0;}
-    h2{margin-bottom:10pt; page-break-after:avoid;}
-    h3{page-break-after:avoid;}
-    .card,.note,.screen,.qa,figure.shot,table.cmp{page-break-inside:avoid;}
-    .card,.note,.qa{background:#fff;}
-    .screen{box-shadow:none;}
-    .split{display:grid; grid-template-columns:1fr 300px; gap:14pt;}
-    .cols.c2{grid-template-columns:1fr 1fr;}
-    .cols.c3{grid-template-columns:1fr 1fr 1fr;}
-    footer{color:#555;}
-  }
 </style>
 </head>
 <body>
@@ -260,453 +319,501 @@
 <header>
   <p class="kicker">TSUMIKI TOOLS</p>
   <h1>打刻アプリ 使い方</h1>
-  <p class="lead">
-    出勤・退勤を<strong>タップするだけ</strong>。派遣の勤怠管理表（＝会社に出す提出書類）まで自動でつくれます。
-    アプリは<strong>労働者用</strong>と<strong>管理者用</strong>の2つ。ここでは両方の使い方を案内します。
-  </p>
+  <p class="lead">出勤・退勤を<strong>タップするだけ</strong>。派遣の勤怠管理表（＝会社に出す提出書類）まで自動でつくれます。アプリは<strong>労働者用</strong>と<strong>管理者用</strong>の2つです。</p>
 </header>
 
 <div class="layout">
 
-<aside class="toc">
-  <p class="t">もくじ</p>
-  <ol>
-    <li><a href="#what">どんなアプリか</a></li>
-    <li><a href="#flow">はじめの流れ</a></li>
-    <li><a href="#worker">労働者：打刻する</a></li>
-    <li><a href="#addworker">管理者：従業員を登録</a></li>
-    <li><a href="#timesheet">管理者：勤務表を見る</a></li>
-    <li><a href="#export">Excel／PDFで書き出す</a></li>
-    <li><a href="#billing">請求算定（金額計算）</a></li>
-    <li><a href="#rules">時間の計算ルール</a></li>
-    <li><a href="#data">保存・ホーム画面</a></li>
-    <li><a href="#qa">こまったとき</a></li>
-  </ol>
-</aside>
+<details class="toc" id="toc" open>
+  <summary>もくじ（全25項目）</summary>
+  <nav>
+    <p class="g">まず知る</p>
+    <a href="#i1"><span class="n">1</span>どんなアプリか</a>
+    <a href="#i2"><span class="n">2</span>2つのアプリの役割</a>
+    <a href="#i3"><span class="n">3</span>コードは2種類</a>
+
+    <p class="g">はじめの準備（管理者）</p>
+    <a href="#i4"><span class="n">4</span>会社を登録する</a>
+    <a href="#i5"><span class="n">5</span>従業員を追加する</a>
+    <a href="#i6"><span class="n">6</span>打刻コードを渡す</a>
+    <a href="#i7"><span class="n">7</span>時給などを入れる</a>
+
+    <p class="g">毎日つかう（労働者）</p>
+    <a href="#i8"><span class="n">8</span>コードを入れて開く</a>
+    <a href="#i9"><span class="n">9</span>現場を確認する</a>
+    <a href="#i10"><span class="n">10</span>大ボタンで出勤・退勤</a>
+    <a href="#i11"><span class="n">11</span>打ち忘れを直す</a>
+    <a href="#i12"><span class="n">12</span>月の合計を見る</a>
+    <a href="#i13"><span class="n">13</span>交通費・定期を入れる</a>
+
+    <p class="g">集計する（管理者）</p>
+    <a href="#i14"><span class="n">14</span>勤務表を開く</a>
+    <a href="#i15"><span class="n">15</span>3つの区分の読み方</a>
+    <a href="#i16"><span class="n">16</span>月度は21日締め</a>
+    <a href="#i17"><span class="n">17</span>記録を直す・足す</a>
+    <a href="#i18"><span class="n">18</span>確認印の会社名</a>
+
+    <p class="g">書き出す</p>
+    <a href="#i19"><span class="n">19</span>Excel／PDFで出す</a>
+    <a href="#i20"><span class="n">20</span>色が出ないとき</a>
+
+    <p class="g">請求算定（使う場合だけ）</p>
+    <a href="#i21"><span class="n">21</span>請求算定パネル</a>
+    <a href="#i22"><span class="n">22</span>計算のしくみ</a>
+    <a href="#i23"><span class="n">23</span>倍率を変える</a>
+
+    <p class="g">ルール・保存</p>
+    <a href="#i24"><span class="n">24</span>時間の計算ルール</a>
+    <a href="#i25"><span class="n">25</span>保存とホーム画面</a>
+
+    <p class="g">巻末</p>
+    <a href="#qa"><span class="n">Q</span>こまったとき</a>
+  </nav>
+</details>
 
 <main>
 
-<!-- ============ 1 ============ -->
-<section id="what">
-  <h2><span class="num">1</span>どんなアプリか</h2>
+<!-- ==================== まず知る ==================== -->
+<section class="grp" id="g1">
+  <h2>まず知る</h2>
+  <div class="items">
 
-  <div class="flow" style="margin-bottom:18px">
-    <span class="box">労働者が打刻</span>
-    <span class="arw">→</span>
-    <span class="box">管理者が集計</span>
-    <span class="arw">→</span>
-    <span class="box">Excel／PDFで提出</span>
-  </div>
-
-  <div class="split wide">
-    <div>
-      <ul class="tight">
-        <li><strong>やること</strong>：出勤・退勤の打刻／勤務時間の集計／派遣の勤怠管理表を書き出す</li>
-        <li><strong>2つのアプリ</strong>：現場で打刻する<b>労働者用</b>と、集計・提出する<b>管理者用</b></li>
-        <li><strong>つながり</strong>：クラウドで共有。労働者の打刻を管理者がそのまま見られます</li>
-        <li><strong>準備</strong>：インストール不要。URLを開いてコードを入れるだけ</li>
-      </ul>
-      <p class="small muted">※ 管理者＝派遣会社の担当者。労働者＝現場で働くスタッフ。</p>
-    </div>
-
-    <figure class="shot">
-      <div class="screen">
-        <div class="bar"><span class="ttl">打刻</span><span class="dot">同期</span></div>
-        <div style="text-align:center; padding:2px 0">
-          <div class="sitechip">現場 <span>A物流センター</span> <span class="e">変更</span></div>
-          <div class="punch in"><span class="l">タップで</span><span class="m">出勤</span></div>
-          <div style="font-size:12px; color:var(--app-subtle); font-weight:700">未出勤</div>
+    <article class="item" id="i1">
+      <figure class="shot">
+        <div class="flow">
+          <span class="box">労働者が打刻</span><span class="arw">→</span>
+          <span class="box">管理者が集計</span><span class="arw">→</span>
+          <span class="box">Excel／PDFで提出</span>
         </div>
-        <span class="pin" style="top:34%; right:-11px">1</span>
-        <span class="pin" style="top:66%; right:-11px">2</span>
-      </div>
-      <ol class="pins">
-        <li>今いる現場を選ぶ（既定は自分の派遣先）</li>
-        <li>大きなボタンを押すと<strong>出勤⇄退勤</strong>が切り替わります</li>
-      </ol>
-      <figcaption>労働者アプリ・打刻画面</figcaption>
-    </figure>
-  </div>
+      </figure>
+      <h3><span class="n">1</span>どんなアプリか</h3>
+      <p>出勤・退勤の打刻から、勤務時間の集計、派遣の勤怠管理表の書き出しまでを1本でやります。</p>
+      <p class="fine">打刻はクラウドで共有されるので、管理者が集計をやり直す必要がありません。インストール不要、URLを開いてコードを入れるだけです。</p>
+    </article>
 
-  <h3 style="margin-top:26px">2つのアプリの役割</h3>
-  <div class="tblwrap">
-    <table class="cmp">
-      <thead><tr><th style="width:9em">アプリ</th><th>する人</th><th>できること</th></tr></thead>
-      <tbody>
-        <tr><th>労働者用<br>（打刻）</th><td>現場のスタッフ</td><td>大ボタンで出勤・退勤／自分の記録の確認・訂正／交通費・定期の入力</td></tr>
-        <tr><th>管理者用<br>（打刻管理）</th><td>派遣会社の担当者</td><td>従業員の登録とコード発行／勤務表の確認・修正／Excel・PDFで書き出し／請求算定</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="note">
-    <span class="title">データはクラウドで共有</span>
-    打刻はクラウドに保存され、労働者・管理者で同じデータを見ます。だから管理者は集計をやり直す必要がありません。
-  </div>
-</section>
-
-<!-- ============ 2 ============ -->
-<section id="flow">
-  <h2><span class="num">2</span>はじめの流れ（最初の1回）</h2>
-
-  <p>まず<strong>管理者</strong>が準備し、発行した<strong>打刻コード</strong>を労働者に渡します。</p>
-
-  <div class="cols c3" style="margin-top:16px">
-    <div class="card">
-      <h3>① 会社を登録 <span class="who-tag m">管理者</span></h3>
-      <p class="where"><b>管理者アプリ →「はじめての方」→ 会社名を入れて登録</b></p>
-      <ul class="tight">
-        <li><strong>管理者コード</strong>が発行されます</li>
-        <li>次からはこのコードでログイン。<strong>必ず控えて</strong>おきます</li>
-      </ul>
-    </div>
-    <div class="card">
-      <h3>② 従業員を追加 <span class="who-tag m">管理者</span></h3>
-      <p class="where"><b>従業員タブ →「＋ 従業員を追加」</b></p>
-      <ul class="tight">
-        <li>名前と派遣先を入れて保存</li>
-        <li>その人の<strong>打刻コード</strong>が発行されます</li>
-      </ul>
-    </div>
-    <div class="card">
-      <h3>③ コードを渡して打刻 <span class="who-tag w">労働者</span></h3>
-      <p class="where"><b>労働者アプリ → 打刻コードを入力</b></p>
-      <ul class="tight">
-        <li>一度入れれば、次からは自動で開きます</li>
-        <li>あとは大ボタンを押すだけ</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="note tip">
-    <span class="title">コードは2種類</span>
-    <b>管理者コード</b>＝会社の担当者がログインに使う。<b>打刻コード</b>＝労働者ひとりずつに発行する、その人専用のコード。
-  </div>
-</section>
-
-<!-- ============ 3 ============ -->
-<section id="worker">
-  <h2><span class="num">3</span>労働者：打刻する</h2>
-
-  <div class="split wide">
-    <div>
-      <h3>毎日やること</h3>
-      <ol class="tight">
-        <li><strong>現場を確認</strong>（違えば「変更」で選ぶ）</li>
-        <li>出社したら<strong>大ボタンで「出勤」</strong></li>
-        <li>帰るときに<strong>もう一度押して「退勤」</strong></li>
-      </ol>
-      <p>それだけです。押した時刻がクラウドに記録されます。</p>
-
-      <div class="note">
-        <span class="title">打ち忘れ・打ち間違いは自分で直せる</span>
-        <kbd>記録</kbd> タブでその日の記録をタップ → 時刻を直して保存。退勤を押し忘れても、あとから入れられます。
-      </div>
-
-      <h3 style="margin-top:20px">交通費・定期を入れる</h3>
-      <p class="path"><b>記録タブ →「交通費・定期の設定」</b></p>
-      <ul class="tight">
-        <li><strong>通勤区間</strong>と<strong>1ヶ月の定期代（税込）</strong>を入れておくと、勤務先の請求に反映されます</li>
-      </ul>
-    </div>
-
-    <figure class="shot">
-      <div class="screen">
-        <div class="bar"><span class="ttl">記録</span><span class="dot">同期</span></div>
-        <div class="sumcard">
-          <div class="top"><span style="font-size:11px">実働合計 ／ 稼働17日</span><span class="v">176:30</span></div>
-          <div class="brk">
-            <div><div class="bk">平日勤務</div><div class="bv">120:00</div></div>
-            <div><div class="bk">残業</div><div class="bv">42:30</div></div>
-            <div><div class="bk">休日出勤</div><div class="bv">14:00</div></div>
-          </div>
-        </div>
-        <div style="border:1px solid var(--app-line); border-radius:11px; padding:9px 11px; margin-top:9px; display:flex; align-items:center; gap:10px">
-          <div style="text-align:center; width:34px"><div style="font-weight:800">3</div><div style="font-size:10px; color:var(--app-subtle)">水</div></div>
-          <div style="flex:1; font-size:12px; font-weight:700">08:00 → 23:30<div style="font-size:10px; color:var(--app-subtle); font-weight:400">八重洲二丁目…再開発事業</div></div>
-          <div style="text-align:right"><div style="font-weight:800">8:00</div><div style="font-size:10px; color:var(--out); font-weight:700">残 6:30</div></div>
-        </div>
-        <span class="pin" style="top:30%; left:-11px">1</span>
-        <span class="pin" style="bottom:20px; right:-11px">2</span>
-      </div>
-      <ol class="pins">
-        <li>その月度の<strong>実働・平日・残業・休日出勤</strong>が自動で出ます</li>
-        <li>各日の行をタップすると<strong>時刻を直せます</strong></li>
-      </ol>
-      <figcaption>労働者アプリ・記録画面</figcaption>
-    </figure>
-  </div>
-</section>
-
-<!-- ============ 4 ============ -->
-<section id="addworker">
-  <h2><span class="num">4</span>管理者：従業員を登録・コード発行</h2>
-
-  <div class="split wide flip">
-    <figure class="shot">
-      <div class="screen">
-        <div class="bar"><span class="ttl">従業員を追加</span></div>
-        <div style="text-align:center; margin-bottom:10px">
-          <div class="codechip">CRHJBG</div>
-          <div style="font-size:10.5px; color:var(--app-subtle); margin-top:4px">この打刻コードを本人に渡してください</div>
-        </div>
-        <div class="lbl">名前</div>
-        <div class="btn" style="display:block; margin:3px 0 8px; font-weight:400">田中 花子</div>
-        <div class="lbl">派遣先（既定の現場名）</div>
-        <div class="btn" style="display:block; margin:3px 0; font-weight:400; color:var(--app-subtle)">〇〇再開発事業</div>
-        <span class="pin" style="top:24%; right:-11px">1</span>
-      </div>
-      <ol class="pins">
-        <li>保存すると<strong>打刻コードが自動発行</strong>。これを本人に伝えます</li>
-      </ol>
-      <figcaption>管理者アプリ・従業員の追加</figcaption>
-    </figure>
-
-    <div>
-      <h3>手順</h3>
-      <ol class="tight">
-        <li><kbd>＋ 従業員を追加</kbd> → 名前と派遣先を入れて保存</li>
-        <li>出てきた<strong>打刻コード</strong>を本人に渡す（LINEや口頭で）</li>
-        <li>あとで名前・派遣先を直したいときは、一覧の従業員をタップ</li>
-      </ol>
-
-      <div class="note">
-        <span class="title">辞めた人・休止中の人</span>
-        従業員の編集で <kbd>打刻を有効にする</kbd> をオフにすると、その人は打刻できなくなります（記録は残ります）。
-      </div>
-
-      <div class="note tip">
-        <span class="title">請求算定を使う場合だけ</span>
-        従業員の編集で<strong>時給・基本賃金・交通費</strong>も入れられます。入れると金額計算（→ <a href="#billing">7</a>）が使えます。空欄なら勤怠表だけ出ます。
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 5 ============ -->
-<section id="timesheet">
-  <h2><span class="num">5</span>管理者：勤務表を見る</h2>
-
-  <p><kbd>勤務表</kbd> タブで、従業員と月度を選びます。パソコンでは<strong>横長の表</strong>で提出書類に近い形で見られます。</p>
-
-  <div class="split wide" style="margin-top:16px">
-    <div>
-      <h3>3つの区分の読み方</h3>
-      <ul class="tight">
-        <li><strong>平日勤務</strong>…平日は<strong>8時間まで</strong>ここに入ります</li>
-        <li><strong>残業</strong>…平日の<strong>8時間を超えた分</strong></li>
-        <li><strong>休日出勤</strong>…<strong>土日・祝日</strong>に働いた分は全部ここ</li>
-      </ul>
-      <div class="note">
-        <span class="title">修正もここで</span>
-        各日の行（PCは表の行）をタップすると、出勤・退勤・現場を直せます。記録のない日をタップすれば追加もできます。
-      </div>
-      <div class="note tip">
-        <span class="title">月度＝21日締め</span>
-        「6月度」は <b>5/21〜6/20</b> のこと。左右の <kbd>‹ ›</kbd> で月度を切り替えます。
-      </div>
-    </div>
-
-    <figure class="shot">
-      <div class="screen">
+    <article class="item" id="i2">
+      <figure class="shot">
         <div class="tblwrap">
-          <table class="ts">
-            <thead><tr><th class="g">日</th><th class="g">曜</th><th class="y">業務内容</th><th class="y">始業</th><th class="y">終業</th><th class="y">休憩</th><th class="g">平日</th><th class="g">残業</th><th class="g">休日</th></tr></thead>
+          <table class="cmp stack">
+            <thead><tr><th style="width:8em">アプリ</th><th>する人</th><th>できること</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td>月</td><td class="biz">八重洲…</td><td class="y">08:00</td><td class="y">17:30</td><td class="y">1:00</td><td>8:00</td><td class="z">0:30</td><td></td></tr>
-              <tr><td>3</td><td>水</td><td class="biz">八重洲…</td><td class="y">08:00</td><td class="y">23:30</td><td class="y">1:00</td><td>8:00</td><td class="z">6:30</td><td></td></tr>
-              <tr><td class="sat">13</td><td class="sat">土</td><td class="biz" style="color:var(--kyu)">八重洲…</td><td class="y">09:00</td><td class="y">17:00</td><td class="y">1:00</td><td></td><td></td><td class="k">7:00</td></tr>
-              <tr class="tot"><td colspan="6">合計</td><td>120:00</td><td>42:30</td><td>14:00</td></tr>
+              <tr><th>労働者用<br>（打刻）</th><td data-l="する人">現場のスタッフ</td><td data-l="できること">大ボタンで出勤・退勤／自分の記録の確認・訂正／交通費・定期の入力</td></tr>
+              <tr><th>管理者用<br>（打刻管理）</th><td data-l="する人">派遣会社の担当者</td><td data-l="できること">従業員の登録とコード発行／勤務表の確認・修正／Excel・PDF書き出し／請求算定</td></tr>
             </tbody>
           </table>
         </div>
-        <span class="pin" style="top:52%; right:-11px">1</span>
-      </div>
-      <ol class="pins">
-        <li>土日は<strong>休日出勤</strong>の列に入り、曜日は色分けされます</li>
-      </ol>
-      <figcaption>管理者アプリ・勤務表（PC表示）</figcaption>
-    </figure>
+      </figure>
+      <h3><span class="n">2</span>2つのアプリの役割</h3>
+      <p>現場で打刻する<strong>労働者用</strong>と、集計・提出する<strong>管理者用</strong>に分かれています。</p>
+      <p class="fine">この説明書では、項目ごとに <span class="who-tag w">労働者</span> <span class="who-tag m">管理者</span> の札で誰がやるかを示します。</p>
+    </article>
+
+    <article class="item" id="i3">
+      <figure class="shot">
+        <div class="screen" style="text-align:center">
+          <div class="codechip">CRHJBG</div>
+          <div style="font-size:10.5px; color:var(--app-subtle); margin-top:5px">打刻コード（ひとり1つ）</div>
+        </div>
+      </figure>
+      <h3><span class="n">3</span>コードは2種類</h3>
+      <p>ログインに使うのはコードだけです。</p>
+      <p class="fine"><b>管理者コード</b>＝会社の担当者用。<b>打刻コード</b>＝労働者ひとりずつに発行する、その人専用のコード。</p>
+    </article>
+
   </div>
 </section>
 
-<!-- ============ 6 ============ -->
-<section id="export">
-  <h2><span class="num">6</span>Excel／PDFで書き出す</h2>
+<!-- ==================== はじめの準備 ==================== -->
+<section class="grp" id="g2">
+  <h2>はじめの準備（最初の1回）</h2>
+  <div class="items">
 
-  <div class="split wide">
-    <div>
-      <p>勤務表タブの <kbd>📊 Excel書き出し</kbd> <kbd>📄 PDF書き出し</kbd> を押すだけ。<strong>提出書類そっくりの様式</strong>で出ます。</p>
-      <ul class="tight">
-        <li><strong>Excel</strong>…ファイルがダウンロードされます</li>
-        <li><strong>PDF</strong>…印刷画面が出るので「<strong>PDFとして保存</strong>」を選びます</li>
-      </ul>
+    <article class="item" id="i4">
+      <figure class="shot">
+        <div class="screen">
+          <div class="bar"><span class="ttl">はじめての方</span></div>
+          <div class="lbl">会社名</div>
+          <div class="btn" style="display:block; margin:3px 0 9px; font-weight:400">株式会社ニチボウ</div>
+          <div style="text-align:right"><span class="btn pri">登録する</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">4</span>会社を登録する<span class="who-tag m">管理者</span></h3>
+      <p>管理者アプリの「はじめての方」から会社名を登録すると、<strong>管理者コード</strong>が発行されます。</p>
+      <p class="fine">次からはこのコードでログインします。<b>必ず控えてください。</b></p>
+    </article>
 
-      <div class="note warn">
-        <span class="title">⚠ PDFで色が出ないとき</span>
-        印刷ダイアログの「<strong>背景のグラフィック</strong>」をONにすると、黄色やシアンの色が出ます。
-      </div>
+    <article class="item" id="i5">
+      <figure class="shot">
+        <div class="screen">
+          <div class="bar"><span class="ttl">従業員を追加</span></div>
+          <div class="lbl">名前</div>
+          <div class="btn" style="display:block; margin:3px 0 8px; font-weight:400">田中 花子</div>
+          <div class="lbl">派遣先（既定の現場名）</div>
+          <div class="btn" style="display:block; margin:3px 0; font-weight:400; color:var(--app-subtle)">〇〇再開発事業</div>
+        </div>
+      </figure>
+      <h3><span class="n">5</span>従業員を追加する<span class="who-tag m">管理者</span></h3>
+      <p><kbd>＋ 従業員を追加</kbd> から、名前と派遣先を入れて保存します。</p>
+      <p class="fine">あとで直したいときは、一覧の従業員をタップ。辞めた人は <kbd>打刻を有効にする</kbd> をオフに（記録は残ります）。</p>
+    </article>
 
-      <h3 style="margin-top:20px">確認印の会社名を設定</h3>
-      <p class="path"><b>従業員タブ →「会社名・提出先の設定」</b>（上部の会社名をタップでも開きます）</p>
-      <ul class="tight">
-        <li><strong>派遣元・派遣先の会社名</strong>を入れると、確認印欄に入ります</li>
-        <li>登録時に入れた事業所名も、ここで直せます</li>
-      </ul>
-    </div>
+    <article class="item" id="i6">
+      <figure class="shot">
+        <div class="screen" style="text-align:center">
+          <div class="codechip">CRHJBG</div>
+          <div style="font-size:10.5px; color:var(--app-subtle); margin-top:5px">この打刻コードを本人に渡してください</div>
+        </div>
+      </figure>
+      <h3><span class="n">6</span>打刻コードを渡す<span class="who-tag m">管理者</span></h3>
+      <p>保存すると打刻コードが自動発行されます。LINEや口頭で本人に伝えます。</p>
+      <p class="fine">忘れられても、従業員一覧にいつでも表示されています。</p>
+    </article>
 
-    <figure class="shot">
-      <div class="screen">
-        <table class="ksum"><tr><th>出向者</th><th>出勤日数</th><th>平日勤務</th><th>残業時間</th><th>休日出勤</th></tr>
-          <tr><td>内山 杏奈</td><td>17</td><td>120:00</td><td>42:30</td><td>14:00</td></tr></table>
-        <div style="font-size:11px; color:var(--app-subtle); text-align:center; margin:6px 0">…（日別の表）…</div>
-        <div style="display:flex; gap:8px; align-items:flex-start">
-          <div style="flex:1; border:1px solid var(--app-line); border-radius:8px; overflow:hidden; font-size:10px">
-            <div style="background:var(--gray); text-align:center; font-weight:800; padding:3px">請 求 算 定</div>
-            <div style="display:flex; justify-content:space-between; padding:3px 6px; border-top:1px solid var(--app-line)"><span>基本賃金</span><span>640,000</span></div>
-            <div style="display:flex; justify-content:space-between; padding:3px 6px; border-top:1px solid var(--app-line)"><span>時間外手当</span><span>212,500</span></div>
+    <article class="item" id="i7">
+      <figure class="shot">
+        <div class="screen">
+          <div class="lbl">時給</div>
+          <div class="btn" style="display:block; margin:3px 0 8px; font-weight:400">4,000</div>
+          <div class="lbl">1ヶ月の定期代（税込）</div>
+          <div class="btn" style="display:block; margin:3px 0; font-weight:400">17,970</div>
+        </div>
+      </figure>
+      <h3><span class="n">7</span>時給などを入れる<span class="who-tag m">管理者</span></h3>
+      <p>従業員の編集で<strong>時給・基本賃金・交通費</strong>も入れられます。</p>
+      <p class="fine">入れると金額計算（請求算定）が使えます。空欄なら勤怠表だけが出ます。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 毎日つかう ==================== -->
+<section class="grp" id="g3">
+  <h2>毎日つかう</h2>
+  <div class="items">
+
+    <article class="item" id="i8">
+      <figure class="shot">
+        <div class="screen" style="text-align:center">
+          <div class="lbl" style="margin-bottom:7px">打刻コードを入力</div>
+          <div class="codechip">CRHJBG</div>
+        </div>
+      </figure>
+      <h3><span class="n">8</span>コードを入れて開く<span class="who-tag w">労働者</span></h3>
+      <p>もらった打刻コードを一度入れれば、次からは自動で開きます。</p>
+    </article>
+
+    <article class="item" id="i9">
+      <figure class="shot">
+        <div class="screen" style="text-align:center">
+          <div class="sitechip">現場 <span>A物流センター</span> <span class="e">変更</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">9</span>現場を確認する<span class="who-tag w">労働者</span></h3>
+      <p>今いる現場が違っていたら <kbd>変更</kbd> で選び直します。</p>
+      <p class="fine">既定は登録された派遣先です。ふだんは触らなくて構いません。</p>
+    </article>
+
+    <article class="item" id="i10">
+      <figure class="shot">
+        <div class="screen">
+          <div class="bar"><span class="ttl">打刻</span><span class="dot">同期</span></div>
+          <div style="text-align:center; padding:2px 0">
+            <div class="punch in"><span class="l">タップで</span><span class="m">出勤</span></div>
+            <div style="font-size:12px; color:var(--app-subtle); font-weight:700">未出勤</div>
           </div>
-          <div style="width:74px; border:1px solid var(--app-line); border-radius:8px; text-align:center; font-size:10px">
-            <div style="border-bottom:1px solid var(--app-line); font-weight:800; padding:3px">確認印</div>
-            <div style="padding:8px 2px; line-height:1.3">株式会社<br>ニチボウ</div>
+        </div>
+      </figure>
+      <h3><span class="n">10</span>大ボタンで出勤・退勤<span class="who-tag w">労働者</span></h3>
+      <p>出社したら押して「出勤」、帰るときにもう一度押して「退勤」。それだけです。</p>
+    </article>
+
+    <article class="item" id="i11">
+      <figure class="shot">
+        <div class="screen">
+          <div class="lbl" style="margin-bottom:7px">3日（水）の記録</div>
+          <div style="display:flex; gap:8px">
+            <span class="btn" style="flex:1">出勤 08:00</span>
+            <span class="btn" style="flex:1">退勤 23:30</span>
+          </div>
+          <div style="text-align:right; margin-top:9px"><span class="btn pri">保存</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">11</span>打ち忘れを直す<span class="who-tag w">労働者</span></h3>
+      <p><kbd>記録</kbd> タブでその日をタップし、時刻を直して保存します。</p>
+      <p class="fine">退勤を押し忘れても、あとから入れられます。管理者側からも直せます。</p>
+    </article>
+
+    <article class="item" id="i12">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sumcard">
+            <div class="top"><span style="font-size:11px">実働合計 ／ 稼働17日</span><span class="v">176:30</span></div>
+            <div class="brk">
+              <div><div class="bk">平日勤務</div><div class="bv">120:00</div></div>
+              <div><div class="bk">残業</div><div class="bv">42:30</div></div>
+              <div><div class="bk">休日出勤</div><div class="bv">14:00</div></div>
+            </div>
           </div>
         </div>
-        <span class="pin" style="top:6px; right:-11px">1</span>
-      </div>
-      <ol class="pins">
-        <li>タイトル・シアンの集計・確認印まで、<strong>提出書類と同じ見た目</strong>で出ます</li>
-      </ol>
-      <figcaption>書き出したPDFのイメージ</figcaption>
-    </figure>
+      </figure>
+      <h3><span class="n">12</span>月の合計を見る<span class="who-tag w">労働者</span></h3>
+      <p>その月度の実働・平日・残業・休日出勤が自動で出ます。</p>
+    </article>
+
+    <article class="item" id="i13">
+      <figure class="shot">
+        <div class="screen">
+          <div class="lbl">通勤区間</div>
+          <div class="btn" style="display:block; margin:3px 0 8px; font-weight:400">〇〇駅 〜 △△駅</div>
+          <div class="lbl">1ヶ月の定期代（税込）</div>
+          <div class="btn" style="display:block; margin:3px 0; font-weight:400">17,970</div>
+        </div>
+      </figure>
+      <h3><span class="n">13</span>交通費・定期を入れる<span class="who-tag w">労働者</span></h3>
+      <p><span class="path"><b>記録タブ →「交通費・定期の設定」</b></span>で入れておくと、勤務先の請求に反映されます。</p>
+    </article>
+
   </div>
 </section>
 
-<!-- ============ 7 ============ -->
-<section id="billing">
-  <h2><span class="num">7</span>請求算定（金額計算）<span class="small muted">　※使う場合だけ</span></h2>
+<!-- ==================== 集計する ==================== -->
+<section class="grp" id="g4">
+  <h2>集計する（管理者）</h2>
+  <div class="items">
 
-  <p>従業員に<strong>時給・基本賃金・交通費</strong>を入れておくと、勤務表の下に<strong>請求算定パネル</strong>が出て、金額が自動計算されます。Excel・PDFにも自動で載ります。</p>
-
-  <div class="split wide flip" style="margin-top:16px">
-    <figure class="shot">
-      <div class="screen">
-        <div class="lbl" style="font-size:13px; color:var(--app-ink); margin-bottom:8px">請求算定</div>
-        <div style="display:flex; gap:8px; margin-bottom:8px">
-          <span class="btn" style="flex:1">早退（時間） 0</span>
-          <span class="btn" style="flex:1">欠勤（日） 0</span>
+    <article class="item" id="i14">
+      <figure class="shot">
+        <div class="screen">
+          <div class="tabs"><span>従業員</span><span class="on">勤務表</span></div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:12.5px; font-weight:700">
+            <span class="btn">‹</span><span>内山 杏奈 ／ 6月度</span><span class="btn">›</span>
+          </div>
         </div>
-        <div class="bill">
-          <div class="r"><span class="l">基本賃金</span><span>640,000</span></div>
-          <div class="r"><span class="l">時間外 42.5h×1.25</span><span>212,500</span></div>
-          <div class="r"><span class="l">深夜 3h×0.25</span><span>3,000</span></div>
-          <div class="r"><span class="l">法定休日 14h×1.35</span><span>75,600</span></div>
-          <div class="r sub"><span class="l">出向負担金(税抜)</span><span class="v">931,100</span></div>
-          <div class="r" style="border:none"><span class="l">交通費(税抜)</span><span>16,336</span></div>
-        </div>
-        <span class="pin" style="top:20%; right:-11px">1</span>
-        <span class="pin" style="bottom:44px; left:-11px">2</span>
-      </div>
-      <ol class="pins">
-        <li><strong>早退・欠勤</strong>だけ手入力（通常0）</li>
-        <li>時間×時給×倍率で<strong>金額は自動</strong>。深夜も打刻から自動集計</li>
-      </ol>
-      <figcaption>管理者アプリ・請求算定パネル</figcaption>
-    </figure>
+      </figure>
+      <h3><span class="n">14</span>勤務表を開く<span class="who-tag m">管理者</span></h3>
+      <p><kbd>勤務表</kbd> タブで、従業員と月度を選びます。</p>
+      <p class="fine">パソコンでは横長の表になり、提出書類に近い形で見られます。</p>
+    </article>
 
+    <article class="item" id="i15">
+      <figure class="shot">
+        <div class="screen">
+          <div class="tblwrap">
+            <table class="ts">
+              <thead><tr><th class="g">日</th><th class="g">曜</th><th class="y">始業</th><th class="y">終業</th><th class="g">平日</th><th class="g">残業</th><th class="g">休日</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>月</td><td class="y">08:00</td><td class="y">17:30</td><td>8:00</td><td class="z">0:30</td><td></td></tr>
+                <tr><td>3</td><td>水</td><td class="y">08:00</td><td class="y">23:30</td><td>8:00</td><td class="z">6:30</td><td></td></tr>
+                <tr><td class="sat">13</td><td class="sat">土</td><td class="y">09:00</td><td class="y">17:00</td><td></td><td></td><td class="k">7:00</td></tr>
+                <tr class="tot"><td colspan="4">合計</td><td>120:00</td><td>42:30</td><td>14:00</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">15</span>3つの区分の読み方<span class="who-tag m">管理者</span></h3>
+      <p><b>平日勤務</b>＝平日の8時間まで。<b>残業</b>＝8時間を超えた分。<b>休日出勤</b>＝土日祝に働いた分は全部。</p>
+    </article>
+
+    <article class="item" id="i16">
+      <figure class="shot">
+        <div class="calc">
+          6月度 <span class="op">＝</span> <span class="res">5/21 〜 6/20</span>
+          <span class="note2">左右の ‹ › で月度を切り替えます</span>
+        </div>
+      </figure>
+      <h3><span class="n">16</span>月度は21日締め<span class="who-tag m">管理者</span></h3>
+      <p>21日〜翌20日を「翌月度」として集計します。カレンダーの月とはずれます。</p>
+    </article>
+
+    <article class="item" id="i17">
+      <figure class="shot">
+        <div class="screen">
+          <div class="lbl" style="margin-bottom:7px">3日（水）を修正</div>
+          <div style="display:flex; gap:8px">
+            <span class="btn" style="flex:1">出勤 08:00</span>
+            <span class="btn" style="flex:1">退勤 23:30</span>
+          </div>
+          <div class="lbl" style="margin-top:9px">現場</div>
+          <div class="btn" style="display:block; margin-top:3px; font-weight:400">八重洲二丁目…再開発事業</div>
+        </div>
+      </figure>
+      <h3><span class="n">17</span>記録を直す・足す<span class="who-tag m">管理者</span></h3>
+      <p>各日の行をタップすると、出勤・退勤・現場を直せます。</p>
+      <p class="fine">記録のない日をタップすれば、あとから追加もできます。</p>
+    </article>
+
+    <article class="item" id="i18">
+      <figure class="shot">
+        <div class="screen">
+          <div style="display:flex; gap:8px">
+            <div style="flex:1; border:1px solid var(--app-line); border-radius:8px; text-align:center; font-size:10.5px">
+              <div style="border-bottom:1px solid var(--app-line); font-weight:800; padding:3px">派遣元</div>
+              <div style="padding:8px 2px">株式会社<br>ニチボウ</div>
+            </div>
+            <div style="flex:1; border:1px solid var(--app-line); border-radius:8px; text-align:center; font-size:10.5px">
+              <div style="border-bottom:1px solid var(--app-line); font-weight:800; padding:3px">派遣先</div>
+              <div style="padding:8px 2px">〇〇建設<br>株式会社</div>
+            </div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">18</span>確認印の会社名<span class="who-tag m">管理者</span></h3>
+      <p><span class="path"><b>従業員タブ →「会社名・提出先の設定」</b></span>で、派遣元・派遣先の会社名を入れると確認印欄に入ります。</p>
+      <p class="fine">上部の会社名をタップしても開きます。登録時の事業所名もここで直せます。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 書き出す ==================== -->
+<section class="grp" id="g5">
+  <h2>書き出す</h2>
+  <div class="items">
+
+    <article class="item" id="i19">
+      <figure class="shot">
+        <div class="screen">
+          <table class="ksum"><tr><th>出向者</th><th>出勤日数</th><th>平日勤務</th><th>残業時間</th><th>休日出勤</th></tr>
+            <tr><td>内山 杏奈</td><td>17</td><td>120:00</td><td>42:30</td><td>14:00</td></tr></table>
+          <div style="display:flex; gap:7px; margin-top:9px; justify-content:center">
+            <span class="btn">📊 Excel書き出し</span>
+            <span class="btn">📄 PDF書き出し</span>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">19</span>Excel／PDFで出す<span class="who-tag m">管理者</span></h3>
+      <p>押すだけで<strong>提出書類そっくりの様式</strong>で出ます。</p>
+      <p class="fine">Excelはファイルがダウンロードされます。PDFは印刷画面から「PDFとして保存」を選びます。</p>
+    </article>
+
+    <article class="item" id="i20">
+      <figure class="shot">
+        <div class="screen">
+          <div class="lbl" style="margin-bottom:7px">印刷ダイアログ</div>
+          <div style="display:flex; align-items:center; gap:8px; font-size:12.5px">
+            <span class="btn pri">ON</span><span>背景のグラフィック</span>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">20</span>色が出ないとき</h3>
+      <p>印刷ダイアログの「<strong>背景のグラフィック</strong>」をONにすると、黄色やシアンの色が出ます。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 請求算定 ==================== -->
+<section class="grp" id="g6">
+  <h2>請求算定（使う場合だけ）</h2>
+  <div class="items">
+
+    <article class="item" id="i21">
+      <figure class="shot">
+        <div class="screen">
+          <div class="bill">
+            <div class="r"><span class="l">基本賃金</span><span>640,000</span></div>
+            <div class="r"><span class="l">時間外 42.5h×1.25</span><span>212,500</span></div>
+            <div class="r"><span class="l">深夜 3h×0.25</span><span>3,000</span></div>
+            <div class="r sub"><span class="l">出向負担金(税抜)</span><span class="v">931,100</span></div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">21</span>請求算定パネル<span class="who-tag m">管理者</span></h3>
+      <p>従業員に時給などが入っていると、勤務表の下に金額が自動計算されて出ます。</p>
+      <p class="fine">手で入れるのは<b>早退・欠勤</b>だけ（通常は0）。Excel・PDFにも自動で載ります。</p>
+    </article>
+
+    <article class="item" id="i22">
+      <figure class="shot">
+        <div class="calc" style="text-align:left; font-size:13px; line-height:1.9">
+          時間外 ＝ 残業 <span class="op">×</span> 時給 <span class="op">×</span> 1.25<br>
+          深夜 ＝ 22:00〜翌5:00 <span class="op">×</span> 時給 <span class="op">×</span> 0.25<br>
+          法定休日 ＝ 休日出勤 <span class="op">×</span> 時給 <span class="op">×</span> 1.35<br>
+          交通費 ＝ 税込 <span class="op">÷</span> 1.1
+        </div>
+      </figure>
+      <h3><span class="n">22</span>計算のしくみ</h3>
+      <p>時間 × 時給 × 倍率で出しています。深夜も打刻から自動で集計されます。</p>
+      <p class="fine">早退＝時給×時間、欠勤＝時給×所定日時間×日数。</p>
+    </article>
+
+    <article class="item nofig" id="i23">
+      <h3><span class="n">23</span>倍率を変える<span class="who-tag m">管理者</span></h3>
+      <p>時間外1.25・深夜0.25・法定休日1.35・消費税は、<span class="path"><b>会社名・提出先の設定</b></span>で会社共通に変えられます。</p>
+      <p class="fine">通常はそのままでOKです。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== ルール・保存 ==================== -->
+<section class="grp" id="g7">
+  <h2>ルール・保存</h2>
+  <div class="items">
+
+    <article class="item" id="i24">
+      <figure class="shot">
+        <div class="tblwrap">
+          <table class="cmp stack">
+            <thead><tr><th style="width:8em">項目</th><th>ルール</th></tr></thead>
+            <tbody>
+              <tr><th>締め日</th><td data-l="ルール">21日締め（21日〜翌20日を「翌月度」）</td></tr>
+              <tr><th>丸め</th><td data-l="ルール">15分・いちばん近い側（9:07→9:00、17:52→17:45）</td></tr>
+              <tr><th>昼休憩</th><td data-l="ルール">実働から1時間を差し引く（1時間未満の日は引かない）</td></tr>
+              <tr><th>平日／残業</th><td data-l="ルール">平日は8時間まで平日勤務、超えた分が残業</td></tr>
+              <tr><th>休日出勤</th><td data-l="ルール">土曜・日曜・日本の祝日に働いた分は全部</td></tr>
+              <tr><th>深夜</th><td data-l="ルール">22:00〜翌5:00を自動集計（請求算定で使用）</td></tr>
+              <tr><th>日またぎ</th><td data-l="ルール">夜勤で退勤が翌日になっても正しく計算</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </figure>
+      <h3><span class="n">24</span>時間の計算ルール</h3>
+      <p>集計はこのルールで自動計算されます。</p>
+      <p class="caution fine"><b>⚠ 年末年始やGWなど会社独自の休みは、自動では休日になりません。</b>自動判定は土日祝だけです。必要なら記録を手で直してください。</p>
+    </article>
+
+    <article class="item nofig" id="i25">
+      <h3><span class="n">25</span>保存とホーム画面</h3>
+      <p>入力は<strong>クラウドに自動保存</strong>されます。保存ボタンはありません。</p>
+      <ul>
+        <li>ログインはコードだけ（労働者＝打刻コード／管理者＝管理者コード）</li>
+        <li>管理者コードを忘れるとログインできません。大切に保管を</li>
+        <li><b>iPhone</b>：共有ボタン（□に↑）→「ホーム画面に追加」／<b>Android</b>：右上「⋮」→「ホーム画面に追加」</li>
+      </ul>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 巻末 ==================== -->
+<section class="appendix" id="qa">
+  <h2>こまったとき</h2>
+  <div class="qa">
     <div>
-      <h3>計算のしくみ</h3>
-      <ul class="tight">
-        <li><strong>時間外</strong>＝残業 × 時給 × 1.25</li>
-        <li><strong>深夜</strong>＝22:00〜翌5:00の時間 × 時給 × 0.25（打刻から自動）</li>
-        <li><strong>法定休日</strong>＝休日出勤 × 時給 × 1.35</li>
-        <li><strong>早退</strong>＝時給 × 時間、<strong>欠勤</strong>＝時給 × 所定日時間 × 日</li>
-        <li><strong>交通費</strong>＝税込 ÷ 1.1（税抜）</li>
-      </ul>
-      <div class="note tip">
-        <span class="title">倍率は会社共通で変えられる</span>
-        時間外1.25・深夜0.25・法定休日1.35・消費税は、<span class="path">会社名・提出先の設定</span>で調整できます（通常はそのままでOK）。
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 8 ============ -->
-<section id="rules">
-  <h2><span class="num">8</span>時間の計算ルール</h2>
-
-  <div class="tblwrap">
-    <table class="cmp">
-      <thead><tr><th style="width:11em">項目</th><th>ルール</th></tr></thead>
-      <tbody>
-        <tr><th>締め日</th><td><strong>21日締め</strong>（21日〜翌20日を「翌月度」として集計）</td></tr>
-        <tr><th>丸め</th><td>打刻は<strong>15分・いちばん近い側</strong>に丸め（例 9:07→9:00、17:52→17:45）</td></tr>
-        <tr><th>昼休憩</th><td>実働から<strong>1時間</strong>を差し引く（勤務が1時間未満の日は引きません）</td></tr>
-        <tr><th>平日／残業</th><td>平日は<strong>8時間まで平日勤務</strong>、超えた分が<strong>残業</strong></td></tr>
-        <tr><th>休日出勤</th><td><strong>土曜・日曜・日本の祝日</strong>に働いた分は全部「休日出勤」</td></tr>
-        <tr><th>深夜</th><td><strong>22:00〜翌5:00</strong>に働いた時間を自動で集計（請求算定で使用）</td></tr>
-        <tr><th>日またぎ</th><td>夜勤で退勤が翌日になっても正しく計算します</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="note warn">
-    <span class="title">⚠ 年末年始・GWなど会社独自の休みは自動では休日になりません</span>
-    自動で休日になるのは<strong>土日祝だけ</strong>です。会社の休みの日に働くと平日勤務に入るので、必要なら記録を手で直してください。
-  </div>
-</section>
-
-<!-- ============ 9 ============ -->
-<section id="data">
-  <h2><span class="num">9</span>保存とホーム画面</h2>
-
-  <div class="cols c2">
-    <div class="card">
-      <h3>データの保存</h3>
-      <ul class="tight">
-        <li><strong>クラウドに自動保存</strong>。保存ボタンはありません</li>
-        <li>ログインは<strong>コード</strong>だけ（労働者＝打刻コード／管理者＝管理者コード）</li>
-        <li>コードは<strong>大切に保管</strong>を。管理者コードを忘れるとログインできません</li>
-      </ul>
-    </div>
-    <div class="card">
-      <h3>ホーム画面に置く</h3>
-      <p class="small muted" style="margin-top:0">毎回URLを探さず、アプリのように開けます。</p>
-      <ul class="tight">
-        <li><strong>iPhone（Safari）</strong>：共有ボタン（□に↑）→「ホーム画面に追加」</li>
-        <li><strong>Android（Chrome）</strong>：右上「⋮」→「ホーム画面に追加」</li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 10 ============ -->
-<section id="qa">
-  <h2><span class="num">10</span>こまったとき</h2>
-
-  <div class="cols c2">
-    <div class="qa">
       <div class="q">打刻コードを忘れた／なくした</div>
-      <div class="a">管理者アプリの<strong>従業員一覧</strong>に各自のコードが表示されています。管理者に確認してください。</div>
+      <div class="a">管理者アプリの<b>従業員一覧</b>に各自のコードが表示されています。管理者に確認してください。</div>
     </div>
-    <div class="qa">
+    <div>
       <div class="q">退勤を押し忘れた</div>
-      <div class="a"><strong>記録タブ</strong>でその日をタップし、退勤時刻を入れて保存すればOK。管理者側からも直せます。</div>
+      <div class="a"><b>記録タブ</b>でその日をタップし、退勤時刻を入れて保存すればOK。管理者側からも直せます。</div>
     </div>
-    <div class="qa">
+    <div>
       <div class="q">土日でもないのに休日出勤にならない</div>
-      <div class="a">休日は<strong>土日祝だけ</strong>が自動判定です。会社独自の休み（年末年始など）は自動では休日になりません。</div>
+      <div class="a">休日は<b>土日祝だけ</b>が自動判定です。会社独自の休みは自動では休日になりません。</div>
     </div>
-    <div class="qa">
+    <div>
       <div class="q">請求算定が出てこない</div>
-      <div class="a">その従業員に<strong>時給が未設定</strong>だと出ません。従業員の編集で時給などを入れてください。</div>
+      <div class="a">その従業員に<b>時給が未設定</b>だと出ません。従業員の編集で時給などを入れてください。</div>
     </div>
-    <div class="qa">
-      <div class="q">会社名（事業所名）を間違えて登録した</div>
+    <div>
+      <div class="q">会社名を間違えて登録した</div>
       <div class="a">上部の会社名をタップ →「会社名・提出先の設定」で直せます。</div>
     </div>
-    <div class="qa">
+    <div>
       <div class="q">PDFの色が出ない</div>
-      <div class="a">印刷ダイアログで「<strong>背景のグラフィック</strong>」をONにしてください。</div>
+      <div class="a">印刷ダイアログで「<b>背景のグラフィック</b>」をONにしてください。</div>
     </div>
   </div>
 </section>
@@ -714,11 +821,41 @@
 <footer>
   打刻アプリ 使い方<br>
   つくったもの：つみき<br>
-  2026年7月26日
+  2026年8月3日
 </footer>
 
 </main>
 </div>
 </div>
+
+<script>
+/* もくじ：狭い画面ではたたむ／広い画面では開いて左に貼り付ける。
+   いま読んでいる項目のグループを、もくじで色づけする。 */
+(function(){
+  var toc = document.getElementById('toc');
+  if(!toc) return;
+  var wide = window.matchMedia('(min-width:1000px)');
+  function sync(){ toc.open = wide.matches; }
+  sync();
+  (wide.addEventListener ? wide.addEventListener('change', sync) : window.addEventListener('resize', sync));
+  toc.addEventListener('click', function(e){
+    if(e.target.closest('a') && !wide.matches) toc.open = false;
+  });
+  if(!('IntersectionObserver' in window)) return;
+  var links = {}, targets = [];
+  Array.prototype.forEach.call(toc.querySelectorAll('a[href^="#"]'), function(a){
+    var el = document.getElementById(a.getAttribute('href').slice(1));
+    if(el){ links[a.getAttribute('href').slice(1)] = a; targets.push(el); }
+  });
+  var seen = {};
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(en){ seen[en.target.id] = en.isIntersecting; });
+    var cur = null;
+    targets.forEach(function(el){ if(seen[el.id] && !cur) cur = el.id; });
+    for(var k in links) links[k].classList.toggle('on', k === cur);
+  }, {rootMargin:'-10% 0px -70% 0px'});
+  targets.forEach(function(el){ io.observe(el); });
+})();
+</script>
 </body>
 </html>

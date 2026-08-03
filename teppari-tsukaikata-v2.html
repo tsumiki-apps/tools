@@ -4,124 +4,239 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>てっぱりボード — 追加分の使い方（V2）</title>
-<meta name="description" content="てっぱりボードV2で増えた「中身を直す」機能の説明。キャストの名前変更・出番（香盤の●）の入れ替え・稽古日の追加・場面の追加、いまの舞台を保存して別の舞台を始めることができます。">
+<meta name="description" content="てっぱりボードV2で増えた機能の使い方。">
 <link rel="apple-touch-icon" href="icon-teppari.png">
 <style>
+  /* ================================================================
+     つみき 取扱説明書 共通スタイル v2（1項目＝1図＋数行）
+     ・外部読み込みゼロ（フォント/CDN/画像すべて無し）
+     ・図はアプリ画面をHTML/CSSで再現（スクショ画像を使わない）
+     ================================================================ */
   :root{
     --paper:#F4F2EE; --surface:#ECE9E3; --ink:#242321; --muted:#77736B;
-    --hair:#D8D4CC; --ghost:#BEB9B0; --control:#F8F7F4;
-    --mark:#B4562E;                       /* 図の注釈（番号・矢印） */
-    /* アプリ画面の再現に使う色（香盤メーカー本体と同じ値） */
-    --app-ink:#1f2933; --app-subtle:#52606d; --app-line:#e4e7eb; --app-surface:#f5f7fa;
-    --ng:#ef4444; --ok:#10b981;
+    --hair:#D8D4CC; --ghost:#BEB9B0; --control:#FBFAF8;
+    --mark:#B4562E;                       /* 図の注釈（番号ピン・矢印） */
   }
   *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
   html{-webkit-text-size-adjust:100%; scroll-behavior:smooth;}
   body{
     background:var(--paper); color:var(--ink);
     font-family:'Hiragino Maru Gothic ProN',-apple-system,BlinkMacSystemFont,'Hiragino Sans','Noto Sans JP',sans-serif;
-    line-height:1.8; -webkit-font-smoothing:antialiased;
-    padding:0 20px calc(56px + env(safe-area-inset-bottom));
+    line-height:1.75; -webkit-font-smoothing:antialiased;
+    padding:0 18px calc(48px + env(safe-area-inset-bottom));
     font-size:15px;
   }
   .wrap{max-width:1180px; margin:0 auto;}
   a{color:var(--ink);}
-  /* grid/flex の子は既定が min-width:auto。中身（表など）に押し広げられて
+  /* grid/flex の子は既定 min-width:auto。中身（表など）に押し広げられて
      375px幅で横スクロールが出るのを防ぐ。 */
-  main,section,.split>*,.cols>*,figure.shot{min-width:0;}
-  /* 横に長くなりうる表は、その枠の中だけでスクロールさせる */
+  main,.grp,.items,.item,figure.shot{min-width:0;}
   .tblwrap{overflow-x:auto; -webkit-overflow-scrolling:touch;}
 
   /* ================= 見出し ================= */
-  header{padding:48px 0 4px;}
-  .kicker{font-size:11.5px; font-weight:700; letter-spacing:.16em; color:var(--muted); margin-bottom:10px;}
-  h1{font-size:29px; font-weight:700; letter-spacing:.03em; line-height:1.4;}
-  /* リード文は読みやすさのため上限を置くが、狭くしすぎない（横幅を活かす） */
-  header .lead{margin-top:12px; font-size:15px; color:var(--muted); max-width:1000px;}
-  .openapp{margin-top:20px;}
+  header{padding:40px 0 0;}
+  .kicker{font-size:11px; font-weight:700; letter-spacing:.16em; color:var(--muted); margin-bottom:9px;}
+  h1{font-size:27px; font-weight:700; letter-spacing:.03em; line-height:1.4;}
+  header .lead{margin-top:10px; font-size:14.5px; color:var(--muted); max-width:36em;}
+  .openapp{margin-top:16px; display:flex; gap:9px; flex-wrap:wrap;}
   .openapp a{
     display:inline-block; background:var(--ink); color:var(--paper);
-    text-decoration:none; border-radius:999px; padding:10px 22px;
-    font-size:14.5px; font-weight:700;
+    text-decoration:none; border-radius:999px; padding:9px 20px;
+    font-size:14px; font-weight:700;
   }
-  h2{
-    font-size:21px; font-weight:700; letter-spacing:.02em; line-height:1.5;
-    margin:0 0 20px; padding-bottom:12px; border-bottom:1.5px solid var(--hair);
-    display:flex; align-items:center; gap:11px;
-  }
-  h2 .num{
-    flex:none; width:28px; height:28px; border-radius:50%;
-    background:var(--ink); color:var(--paper); font-size:14px;
-    display:flex; align-items:center; justify-content:center;
-  }
-  h3{font-size:15.5px; font-weight:700; margin:0 0 8px;}
-  section{padding:44px 0 4px; scroll-margin-top:20px;}
-  p{margin:9px 0;}
-  .muted{color:var(--muted);}
-  .small{font-size:13px;}
+  .openapp a.ghost{background:none; color:var(--ink); border:1.5px solid var(--hair);}
 
-  /* ================= 全体レイアウト ================= */
-  .layout{display:block;}
-  aside.toc{
+  /* ================= もくじ ================= */
+  /* 狭い画面ではたたんでおく（項目が多いので本文が遠くならないように）。
+     1000px以上ではサマリを隠して左に貼り付ける。開閉は末尾の script。 */
+  details.toc{
+    margin-top:22px; background:var(--control); border:1px solid var(--hair);
+    border-radius:16px; padding:12px 16px;
+  }
+  details.toc summary{
+    cursor:pointer; list-style:none; font-size:12.5px; font-weight:700;
+    letter-spacing:.08em; color:var(--muted);
+  }
+  details.toc summary::-webkit-details-marker{display:none;}
+  details.toc summary::after{content:'▾'; margin-left:7px; font-size:11px;}
+  details.toc[open] summary::after{content:'▴';}
+  .toc nav{margin-top:10px;}
+  .toc .g{
+    font-size:10.5px; font-weight:700; letter-spacing:.14em; color:var(--ghost);
+    margin:14px 0 3px;
+  }
+  .toc .g:first-child{margin-top:0;}
+  .toc a{
+    display:block; text-decoration:none; font-size:13.5px; padding:2px 0;
+    color:var(--ink);
+  }
+  .toc a .n{display:inline-block; width:1.9em; color:var(--ghost); font-weight:700; font-size:12px;}
+  .toc a.on{color:var(--mark); font-weight:700;}
+  .toc a.on .n{color:var(--mark);}
+
+  /* ================= 項目（1項目＝1図＋数行） ================= */
+  .grp{padding:34px 0 0; scroll-margin-top:14px;}
+  .grp > h2{
+    font-size:12.5px; font-weight:700; letter-spacing:.14em; color:var(--muted);
+    border-bottom:1px solid var(--hair); padding-bottom:8px; margin-bottom:16px;
+  }
+  .items{display:grid; gap:16px;}
+  .item{
     background:var(--control); border:1px solid var(--hair); border-radius:18px;
-    padding:16px 20px; margin-top:26px;
+    padding:14px 14px 16px; scroll-margin-top:14px;
   }
-  aside.toc .t{font-size:11.5px; font-weight:700; letter-spacing:.12em; color:var(--muted); margin-bottom:8px;}
-  aside.toc ol{margin:0; padding-left:1.35em;}
-  aside.toc li{margin:2px 0; font-size:14px;}
-  aside.toc a{text-decoration:none; border-bottom:1px solid var(--hair);}
-
-  /* ================= 部品 ================= */
-  .cols{display:grid; gap:16px;}
-  .card{
-    background:var(--control); border:1px solid var(--hair); border-radius:18px;
-    padding:18px 20px;
+  .item h3{
+    font-size:15.5px; font-weight:700; line-height:1.55; margin:13px 0 2px;
+    display:flex; gap:9px; align-items:flex-start;
   }
-  .card h3{margin-bottom:6px;}
-  .card .where{font-size:12.5px; color:var(--muted); margin-bottom:8px;}
-  .card .where b{color:var(--ink);}
-  ul.tight{margin:8px 0; padding-left:1.25em;}
-  ul.tight li{margin:5px 0;}
-  ul.tight li::marker{color:var(--ghost);}
-  ol.tight{margin:8px 0; padding-left:1.35em;}
-  ol.tight li{margin:5px 0;}
-
-  .note{
-    border-left:4px solid var(--ghost); background:var(--control);
-    border-radius:0 12px 12px 0; padding:14px 16px; margin:16px 0; font-size:14px;
+  .item h3 .n{
+    flex:none; width:23px; height:23px; border-radius:50%;
+    background:var(--ink); color:var(--paper); font-size:12px; font-weight:700;
+    display:flex; align-items:center; justify-content:center; margin-top:2px;
   }
-  .note .title{display:block; font-weight:700; margin-bottom:3px;}
-  .warn{border-left-color:#B03A22; background:#F7EFEA;}
-  .warn .title{color:#94301b;}
+  .item p{font-size:14px; margin:5px 0 0; padding-left:32px;}
+  .item p.fine{font-size:12.5px; color:var(--muted); margin-top:8px; line-height:1.7;}
+  .item p.caution{color:#94301b;}
+  .item p.caution b{color:#94301b;}
+  .item ul{margin:5px 0 0; padding-left:calc(32px + 1.1em); font-size:14px;}
+  .item ul li{margin:3px 0;}
+  .item ul li::marker{color:var(--ghost);}
+  /* 図のないおまけ項目（データの保存など）は番号だけで詰めて見せる */
+  .item.nofig h3{margin-top:2px;}
 
   kbd{
     display:inline-block; background:#fff; border:1px solid var(--hair);
-    border-bottom-width:2px; border-radius:7px; padding:0 8px;
-    font-family:inherit; font-size:13.5px; font-weight:700; white-space:nowrap;
+    border-bottom-width:2px; border-radius:7px; padding:0 7px;
+    font-family:inherit; font-size:13px; font-weight:700; white-space:nowrap;
   }
-  .path{font-size:13px; color:var(--muted);}
+  .path{color:var(--muted);}
   .path b{color:var(--ink); font-weight:700;}
 
-  /* 流れ図 */
-  .flow{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:6px 0 4px;}
-  .flow .box{
-    background:#fff; border:1px solid var(--hair); border-radius:13px;
-    padding:10px 16px; font-size:14px; font-weight:700;
+  /* ================= 図（アプリ画面の再現） ================= */
+  /* 番号ピンが枠の外に11px＋影ぶんはみ出す。その余白を figure 側に持たせる。 */
+  figure.shot{margin:0; padding:2px 14px 0;}
+  figcaption{font-size:11.5px; color:var(--ghost); margin-top:7px; text-align:center;}
+  /* 注釈：番号ピンと矢印（使うのは「ここを押す」が言葉で伝わらない図だけ） */
+  .pin{
+    position:absolute; z-index:3; width:21px; height:21px; border-radius:50%;
+    background:var(--mark); color:#fff; font-size:11.5px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 0 3px rgba(255,255,255,.9);
   }
-  .flow .arw{color:var(--mark); font-weight:700; font-size:17px;}
+  .arrow{position:absolute; z-index:2; height:2px; background:var(--mark); transform-origin:left center;}
+  .arrow::after{
+    content:''; position:absolute; right:-2px; top:-4px;
+    border:5px solid transparent; border-left-color:var(--mark);
+  }
 
-  /* 比較表 */
-  table.cmp{border-collapse:collapse; width:100%; margin:12px 0; font-size:14px; background:#fff;
+  /* 流れ図（「どんな道具か」の1枚目に使う） */
+  .flow{display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center;
+    background:#fff; border:1px solid var(--hair); border-radius:14px; padding:16px 12px;}
+  .flow .box{background:var(--surface); border-radius:10px; padding:7px 12px; font-size:13px; font-weight:700;}
+  .flow .arw{color:var(--mark); font-weight:700;}
+
+  /* 計算式の図 */
+  .calc{
+    background:#fff; border:1px solid var(--hair); border-radius:14px;
+    padding:13px 14px; font-size:14.5px; font-weight:700;
+    font-variant-numeric:tabular-nums; text-align:center; line-height:2;
+  }
+  .calc .op{color:var(--ghost); margin:0 3px;}
+  .calc .res{color:var(--mark);}
+  .calc small{font-size:11px; color:var(--muted); font-weight:500; margin-left:1px;}
+  .calc .note2{display:block; font-size:11.5px; color:var(--muted); font-weight:500; margin-top:3px;}
+
+  /* 注意（赤の細い帯。多用しない） */
+  .warnbox{
+    border-left:3px solid #B03A22; background:#F7EFEA; border-radius:0 10px 10px 0;
+    padding:9px 12px; margin:9px 0 0 32px; font-size:13px; color:#7d2c19;
+  }
+  .warnbox b{color:#7d2c19;}
+
+  /* 比較表（巻末で使う） */
+  table.cmp{border-collapse:collapse; width:100%; margin:8px 0 0; font-size:13.5px; background:#fff;
     border:1px solid var(--hair); border-radius:14px; overflow:hidden;}
-  table.cmp th, table.cmp td{border-bottom:1px solid var(--hair); padding:11px 14px; text-align:left; vertical-align:top;}
-  table.cmp thead th{background:var(--surface); font-size:12.5px; color:var(--muted); font-weight:700;}
+  table.cmp th, table.cmp td{border-bottom:1px solid var(--hair); padding:9px 12px; text-align:left; vertical-align:top;}
+  table.cmp thead th{background:var(--surface); font-size:11.5px; color:var(--muted); font-weight:700;}
   table.cmp tbody tr:last-child th, table.cmp tbody tr:last-child td{border-bottom:none;}
   table.cmp tbody th{font-weight:700; white-space:nowrap;}
+  /* 表は項目カードの中に入るので、常に行ごとのカードへ積み替える
+     （列が細って1字ずつ縦に折れるのを防ぐ） */
+  table.cmp.stack{display:block;}
+  table.cmp.stack thead{display:none;}
+  table.cmp.stack tbody,table.cmp.stack tbody tr{display:block;}
+  table.cmp.stack tbody tr{padding:11px 13px; border-bottom:1px solid var(--hair);}
+  table.cmp.stack tbody tr:last-child{border-bottom:none;}
+  table.cmp.stack tbody th,table.cmp.stack tbody td{
+    display:block; width:auto!important; padding:0; border:none; white-space:normal;}
+  table.cmp.stack tbody th{font-size:14px;}
+  table.cmp.stack tbody td{margin-top:5px; font-size:13px;}
+  table.cmp.stack tbody td[data-l]::before{
+    content:attr(data-l); display:block; font-size:10.5px; font-weight:700;
+    letter-spacing:.08em; color:var(--muted);}
+
+  /* ================= 巻末（小さく・端に） ================= */
+  .appendix{padding-top:34px;}
+  .appendix > h2{
+    font-size:12.5px; font-weight:700; letter-spacing:.14em; color:var(--muted);
+    border-bottom:1px solid var(--hair); padding-bottom:8px; margin-bottom:14px;
+  }
+  .qa{display:grid; gap:11px;}
+  .qa .q{font-size:13.5px; font-weight:700;}
+  .qa .a{font-size:13px; color:var(--muted); margin-top:2px;}
+  .qa > div{border-bottom:1px dotted var(--hair); padding-bottom:10px;}
+  .qa > div:last-child{border-bottom:none;}
+
+  footer{
+    margin-top:44px; padding-top:18px; border-top:1px solid var(--hair);
+    font-size:12px; color:var(--ghost); text-align:center; line-height:2;
+  }
+
+  /* ================= 横幅を使う ================= */
+  @media (min-width:640px){
+    .items{grid-template-columns:1fr 1fr;}
+    .qa{grid-template-columns:1fr 1fr; gap:11px 26px;}
+  }
+  @media (min-width:1000px){
+    body{padding-left:28px; padding-right:28px;}
+    h1{font-size:32px;}
+    .layout{display:grid; grid-template-columns:212px minmax(0,1fr); gap:40px; align-items:start;}
+    details.toc{
+      position:sticky; top:22px; margin-top:40px; background:none; border:none; padding:0;
+      max-height:calc(100vh - 56px); overflow:auto;
+    }
+    details.toc summary{display:none;}
+    .grp{padding-top:40px;}
+  }
+
+  /* ================= 印刷（そのままA4のPDFになる） ================= */
+  @media print{
+    @page{margin:14mm 12mm;}
+    body{background:#fff; color:#000; font-size:9.5pt; padding:0;}
+    .wrap{max-width:none;}
+    .layout{display:block;}
+    details.toc,.openapp{display:none;}
+    header{padding-top:0;}
+    .grp{padding-top:14pt;}
+    .grp > h2{page-break-after:avoid;}
+    .items{grid-template-columns:1fr 1fr; gap:9pt;}
+    .item{background:#fff; page-break-inside:avoid;}
+    .qa{grid-template-columns:1fr 1fr;}
+    .qa > div{page-break-inside:avoid;}
+    .screen{box-shadow:none;}
+    footer{color:#555;}
+  }
+
+  /* teppari 本体と同じ色（画面再現に使う） */
+  :root{
+    /* アプリ画面の再現に使う色（香盤メーカー本体と同じ値） */
+    --app-ink:#1f2933; --app-subtle:#52606d; --app-line:#e4e7eb; --app-surface:#f5f7fa;
+    --ng:#ef4444; --ok:#10b981;
+  }
 
   /* ================= アプリ画面の再現（図） ================= */
   /* 番号ピンが枠の外に 11px はみ出す（＋影3px）ぶんの余白を figure 側に持たせる。
      これが無いと375px幅で横スクロールが出る。 */
-  figure.shot{margin:0; padding-inline:16px;}
   .screen{
     position:relative; border:1px solid var(--app-line); border-radius:14px; background:#fff;
     padding:14px; color:var(--app-ink); font-size:13px; line-height:1.6;
@@ -142,29 +257,8 @@
   }
   .screen .btn.pri{background:var(--app-ink); color:#fff; border-color:var(--app-ink);}
   .screen .dash{border:1px dashed var(--app-line); border-radius:11px; background:var(--app-surface); padding:12px;}
-  figcaption{font-size:12px; color:var(--muted); margin-top:8px;}
 
   /* 注釈：番号ピンと矢印 */
-  .pin{
-    position:absolute; z-index:3; width:22px; height:22px; border-radius:50%;
-    background:var(--mark); color:#fff; font-size:12px; font-weight:700;
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 0 0 3px rgba(255,255,255,.9);
-  }
-  .arrow{position:absolute; z-index:2; height:2px; background:var(--mark); transform-origin:left center;}
-  .arrow::after{
-    content:''; position:absolute; right:-2px; top:-4px;
-    border:5px solid transparent; border-left-color:var(--mark);
-  }
-  ol.pins{margin:10px 0 0; padding:0; list-style:none; counter-reset:p;}
-  ol.pins li{
-    counter-increment:p; position:relative; padding-left:30px; margin:7px 0; font-size:13.5px;
-  }
-  ol.pins li::before{
-    content:counter(p); position:absolute; left:0; top:3px;
-    width:20px; height:20px; border-radius:50%; background:var(--mark); color:#fff;
-    font-size:11.5px; font-weight:700; display:flex; align-items:center; justify-content:center;
-  }
 
   /* 出欠表の再現 */
   table.ng{border-collapse:collapse; width:100%; font-size:12.5px;}
@@ -187,35 +281,6 @@
   .chip.line{background:#fff; border:1px solid var(--app-line); color:var(--app-subtle); font-weight:500;}
 
   /* Q&A */
-  .qa{background:var(--control); border:1px solid var(--hair); border-radius:16px; padding:15px 18px;}
-  .qa .q{font-weight:700; font-size:14.5px;}
-  .qa .a{margin-top:5px; color:var(--muted); font-size:13.5px; line-height:1.75;}
-
-  footer{
-    margin-top:56px; padding-top:20px; border-top:1px solid var(--hair);
-    font-size:12.5px; color:var(--ghost); text-align:center; line-height:2;
-  }
-
-  /* ================= 横幅を使う（タブレット以上） ================= */
-  @media (min-width:720px){
-    .cols.c2{grid-template-columns:1fr 1fr;}
-    .cols.c3{grid-template-columns:1fr 1fr 1fr;}
-    /* 文章＋図の2段組み */
-    .split{display:grid; grid-template-columns:minmax(0,1fr) minmax(300px,400px); gap:28px; align-items:start;}
-    .split.wide{grid-template-columns:minmax(0,1fr) minmax(340px,460px);}
-    .split.flip{grid-template-columns:minmax(300px,400px) minmax(0,1fr);}
-  }
-  @media (min-width:1000px){
-    body{padding-left:32px; padding-right:32px;}
-    .layout{display:grid; grid-template-columns:196px minmax(0,1fr); gap:44px; align-items:start;}
-    aside.toc{position:sticky; top:26px; margin-top:44px; background:none; border:none; padding:0;}
-    aside.toc li{margin:4px 0; font-size:13.5px;}
-    aside.toc a{border-bottom:none;}
-    aside.toc a:hover{border-bottom:1px solid var(--hair);}
-    h1{font-size:33px;}
-    section{padding:52px 0 4px;}
-  }
-
 
   /* ================= てっぱり表の再現（図） ================= */
   table.board{border-collapse:collapse; width:100%; font-size:11px; background:#fff;}
@@ -247,46 +312,6 @@
   .keys{display:flex; flex-wrap:wrap; gap:12px; font-size:11.5px; color:var(--app-subtle);}
   .keys span{display:inline-flex; align-items:center; gap:5px;}
 
-  /* ================= 印刷（A4のPDFになる） ================= */
-  @media print{
-    @page{margin:15mm 13mm;}
-    body{background:#fff; color:#000; font-size:10pt; padding:0;}
-    .wrap{max-width:none;}
-    .layout{display:block;}
-    aside.toc,.openapp{display:none;}
-    header{padding-top:0;}
-    section{padding:16pt 0 0;}
-    h2{margin-bottom:10pt; page-break-after:avoid;}
-    h3{page-break-after:avoid;}
-    .card,.note,.screen,.qa,figure.shot,table.cmp{page-break-inside:avoid;}
-    .card,.note,.qa{background:#fff;}
-    .screen{box-shadow:none;}
-    .split{display:grid; grid-template-columns:1fr 300px; gap:14pt;}
-    .cols.c2{grid-template-columns:1fr 1fr;}
-    .cols.c3{grid-template-columns:1fr 1fr 1fr;}
-    footer{color:#555;}
-  }
-  /* ========= 狭い画面（〜719px）：比較表は行ごとのカードに積み替える =========
-     3列の表を375px幅に押し込むと、列が細くなって文字が1字ずつ縦に折れてしまう。
-     見出し行は隠し、各セルの前に data-l のラベルを出す。 */
-  @media (max-width:719px){
-    table.cmp.stack{display:block; border-radius:14px;}
-    table.cmp.stack thead{display:none;}
-    table.cmp.stack tbody{display:block;}
-    table.cmp.stack tbody tr{display:block; padding:14px 15px; border-bottom:1px solid var(--hair);}
-    table.cmp.stack tbody tr:last-child{border-bottom:none;}
-    table.cmp.stack tbody th,
-    table.cmp.stack tbody td{
-      display:block; width:auto!important; padding:0; border:none;
-      white-space:normal; text-align:left;
-    }
-    table.cmp.stack tbody th{font-size:15.5px; line-height:1.6;}
-    table.cmp.stack tbody td{margin-top:10px;}
-    table.cmp.stack tbody td[data-l]::before{
-      content:attr(data-l); display:block; margin-bottom:3px;
-      font-size:11px; font-weight:700; letter-spacing:.08em; color:var(--muted);
-    }
-  }
 </style>
 </head>
 <body>
@@ -295,464 +320,486 @@
 <header>
   <p class="kicker">TSUMIKI TOOLS ／ V2 追加分</p>
   <h1>てっぱりボード<br>増えたところの使い方</h1>
-  <p class="lead">
-    2026年8月に、<strong>中身をご自身で直せる</strong>ようにいたしました。
-    キャストの名前・出番（香盤の●）・稽古日・場面、それに舞台そのものの入れ替えまで、
-    アプリの中で変えられます。このページは<strong>増えたところだけ</strong>をまとめたものです。
-    これまでの使い方は変わっておりませんので、基本の操作は
-    <a href="teppari-tsukaikata.html">はじめの使い方ページ</a>をご覧ください。
+  <p class="lead">2026年8月に、<strong>中身をご自身で直せる</strong>ようにいたしました。キャストの名前・出番（香盤の●）・稽古日・場面、それに舞台そのものの入れ替えまで、アプリの中で変えられます。</p>
+  <p class="openapp">
+    <a href="teppari-board.html">てっぱりボードを開く →</a>
+    <a class="ghost" href="teppari-tsukaikata.html">はじめの使い方ページ</a>
   </p>
-  <p class="openapp"><a href="teppari-board.html">てっぱりボードを開く →</a></p>
 </header>
 
 <div class="layout">
 
-<aside class="toc">
-  <p class="t">もくじ</p>
-  <ol>
-    <li><a href="#map">どこで何ができるか</a></li>
-    <li><a href="#plan">「その日の予定」の行</a></li>
-    <li><a href="#cast">キャストを直す</a></li>
-    <li><a href="#dot">出番（●）を直す</a></li>
-    <li><a href="#days">稽古日を足す</a></li>
-    <li><a href="#scene">場面・通しを直す</a></li>
-    <li><a href="#other">別の舞台を始める</a></li>
-    <li><a href="#care">消すときの注意</a></li>
-    <li><a href="#qa">こまったとき</a></li>
-  </ol>
-</aside>
+<details class="toc" id="toc" open>
+  <summary>もくじ（全23項目）</summary>
+  <nav>
+    <p class="g">どこで何ができるか</p>
+    <a href="#i1"><span class="n">1</span>入口は3つ</a>
+    <a href="#i2"><span class="n">2</span>その場で反映されます</a>
+
+    <p class="g">「その日の予定」の行</p>
+    <a href="#i3"><span class="n">3</span>行はここです</a>
+    <a href="#i4"><span class="n">4</span>開くと4つ入っています</a>
+    <a href="#i5"><span class="n">5</span>押しにくいときは</a>
+    <a href="#i6"><span class="n">6</span>下段の名前も変えました</a>
+
+    <p class="g">キャストを直す</p>
+    <a href="#i7"><span class="n">7</span>名前を変える</a>
+    <a href="#i8"><span class="n">8</span>降板・代役は書き替え</a>
+    <a href="#i9"><span class="n">9</span>足す・並べ替え・消す</a>
+    <a href="#i10"><span class="n">10</span>名前の書き方のコツ</a>
+
+    <p class="g">出番（香盤の●）</p>
+    <a href="#i11"><span class="n">11</span>出番を直すモード</a>
+    <a href="#i12"><span class="n">12</span>○ を押すと ● に</a>
+    <a href="#i13"><span class="n">13</span>●を触らなくていい場合</a>
+
+    <p class="g">稽古日を足す</p>
+    <a href="#i14"><span class="n">14</span>まとめて足す</a>
+    <a href="#i15"><span class="n">15</span>足した日の時間</a>
+    <a href="#i16"><span class="n">16</span>稽古日を消す</a>
+
+    <p class="g">場面・特別稽古</p>
+    <a href="#i17"><span class="n">17</span>台本の場面を直す</a>
+    <a href="#i18"><span class="n">18</span>特別稽古を直す</a>
+
+    <p class="g">別の舞台を始める</p>
+    <a href="#i19"><span class="n">19</span>保存して別の舞台へ</a>
+    <a href="#i20"><span class="n">20</span>しまった舞台を開く</a>
+    <a href="#i21"><span class="n">21</span>舞台の名前</a>
+    <a href="#i22"><span class="n">22</span>保存はこの端末の中だけ</a>
+
+    <p class="g">注意</p>
+    <a href="#i23"><span class="n">23</span>一緒に消えるもの</a>
+
+    <p class="g">巻末</p>
+    <a href="#qa"><span class="n">Q</span>こまったとき</a>
+  </nav>
+</details>
 
 <main>
 
-<!-- ============ 1 ============ -->
-<section id="map">
-  <h2><span class="num">1</span>どこで何ができるか</h2>
+<!-- ==================== どこで何ができるか ==================== -->
+<section class="grp" id="g1">
+  <h2>どこで何ができるか</h2>
+  <div class="items">
 
-  <p>直したいものによって、入口が3つあります。まずはこの表だけ覚えていただければ十分です。</p>
-
-  <table class="cmp stack">
-    <thead><tr><th style="width:11em">直したいもの</th><th>どこから</th><th>例</th></tr></thead>
-    <tbody>
-      <tr>
-        <th>キャストの名前<br>場面・通し<br>稽古日<br>舞台の名前</th>
-        <td data-l="どこから">右上の <kbd>管理</kbd><br><span class="path">→ 上のタブで<b>キャスト</b>／<b>稽古日</b>／<b>場面・通し</b>／<b>その他</b></span></td>
-        <td data-l="例">降板・代役、舞台稽古の日を足す、場面を足す、別の舞台を始める</td>
-      </tr>
-      <tr>
-        <th>出番（香盤の●）</th>
-        <td data-l="どこから"><b>香盤表</b>に切り替えて <kbd>出番を直す</kbd></td>
-        <td data-l="例">役の入れ替え、この場面にも出ることになった</td>
-      </tr>
-      <tr>
-        <th>その日のこと<br>（時間・OFF・通し）</th>
-        <td data-l="どこから">表の<b>「その日の予定」</b>の行<br><span class="path">または 日の詳細の <kbd>この日を直す</kbd></span></td>
-        <td data-l="例">2〜4日は11〜17時、6日の通しは13:30から</td>
-      </tr>
-      <tr>
-        <th>キャストのNG</th>
-        <td data-l="どこから">てっぱり表の<b>マス</b>（これまでどおり）</td>
-        <td data-l="例">8日と9日がOFF</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div class="note">
-    <span class="title">直したものは、その場で判定に反映されます</span>
-    名前を変えても、出番やNGはその人のものとして残ります。
-    稽古日を足せば、その日も「できる場面」の判定に入ります。保存の操作は要りません。
-  </div>
-</section>
-
-<!-- ============ 2 ============ -->
-<section id="plan">
-  <h2><span class="num">2</span>「その日の予定」の行はここです</h2>
-
-  <p>
-    これまで「予定」とだけ書いていた行の名前を、<strong>「その日の予定 ✎」</strong>に変えました。
-    表のいちばん上、<strong>日付のすぐ下</strong>の細い行です。ここを押すと、その日のことが開きます。
-  </p>
-
-  <div class="split wide">
-    <div>
-      <p>開くと、上から順にこの4つが入っています。</p>
-      <ul class="tight">
-        <li><b>この日の扱い</b>… 稽古あり／OFF／未定</li>
-        <li><b>この日の稽古時間</b>… 例：11:00–17:00（この日だけ変わります）</li>
-        <li><b>特別稽古</b>… 通し・殺陣など。<strong>開始時刻</strong>も入れられます（例：13:30）</li>
-        <li><b>メモ</b>… 照明打合せ、小道具搬入など</li>
-      </ul>
-      <p>
-        同じものが、選んだ日の詳細（PCでは右、スマホでは表の下）の
-        <kbd>この日を直す</kbd> からも開きます。<strong>表の細い行が押しにくいときは、こちらが確実です。</strong>
-      </p>
-      <p class="small muted">
-        全部の日をまとめて同じ時間にするときは、<kbd>管理</kbd> →「その他」→「稽古時間（全日まとめて）」です。
-      </p>
-    </div>
-
-    <figure class="shot">
-      <div class="screen">
-        <table class="board">
-          <thead>
-            <tr><th style="text-align:left">キャスト</th><th>2<br>日</th><th class="sel">3<br>月</th><th>4<br>火</th><th>5<br>水</th><th>6<br>木</th></tr>
-          </thead>
-          <tbody>
-            <tr class="plan"><td style="text-align:left; background:var(--app-surface); color:var(--app-subtle); font-weight:700">その日の予定 ✎</td><td>＋</td><td>＋</td><td>＋</td><td class="off">OFF</td><td>通し</td></tr>
-            <tr><th>新垣樽助</th><td></td><td class="ng">NG</td><td></td><td></td><td></td></tr>
-            <tr><th>櫂作真帆</th><td class="part">15入</td><td></td><td></td><td></td><td></td></tr>
-          </tbody>
-        </table>
-        <div class="pin" style="left:-11px; top:44px">1</div>
-      </div>
-      <ol class="pins">
-        <li>この行が「その日の予定」。押すと、その日の時間・OFF・通しが開きます</li>
-      </ol>
-      <figcaption>日付のすぐ下の行です（薄い色のマス）</figcaption>
-    </figure>
-  </div>
-
-  <div class="note">
-    <span class="title">表のいちばん下の行も、名前を変えました</span>
-    「できる（予定）」→<b>できる場面</b>、「できた（結果）」→<b>できた場面</b>。
-    「予定」という言葉が上と下で二重になっていて分かりにくかったためで、中身は変わっておりません。
-  </div>
-</section>
-
-<!-- ============ 3 ============ -->
-<section id="cast">
-  <h2><span class="num">3</span>キャストを直す（降板・代役・追加）</h2>
-
-  <p class="path"><b>右上の <kbd>管理</kbd> → キャスト</b></p>
-
-  <div class="split wide">
-    <div>
-      <h3>名前を変える</h3>
-      <p>
-        名前の欄をそのまま押して、書き替えるだけです。欄の外を押す（またはEnter）と決まります。
-      </p>
-      <div class="note">
-        <span class="title">降板・代役は「名前を書き替える」のが正解です</span>
-        消して入れ直すのではなく、名前だけを書き替えてください。
-        <strong>その人に入っていたNGも、香盤の●も、そのまま新しい方に引き継がれます。</strong><br>
-        例：<b>小野寺昭（役名）</b> → <b>佐野圭亮（役名）</b> と書き替える。
-        役名まで同じなら、これだけで入れ替えは終わりです。
-      </div>
-
-      <h3 style="margin-top:26px">足す・並べ替える・消す</h3>
-      <ul class="tight">
-        <li><b>足す</b>… いちばん下の欄に名前を入れて <kbd>足す</kbd>。表のいちばん下に付きます</li>
-        <li><b>並べ替え</b>… <kbd>↑</kbd> <kbd>↓</kbd> で1つずつ動きます（てっぱり表・香盤表の並びが変わります）</li>
-        <li><b>消す</b>… <kbd>×</kbd>。確認が出ます</li>
-      </ul>
-      <p class="small muted">
-        名前は「<b>俳優名（役名）</b>」の形にしておくと、表では俳優名だけが出て見やすくなります。
-      </p>
-    </div>
-
-    <figure class="shot">
-      <div class="screen">
-        <div class="bar"><span class="ttl">管理</span><span class="gear">閉じる</span></div>
-        <div class="tabs"><span class="on">キャスト</span><span>稽古日</span><span>場面・通し</span><span>その他</span></div>
-        <div class="dash" style="margin-bottom:10px; font-size:11.5px; color:var(--app-subtle)">
-          名前の欄を押すと直せます（降板・代役はここで名前を書き替えます。NGや出番はそのまま残ります）。
+    <article class="item" id="i1">
+      <figure class="shot">
+        <div class="tblwrap">
+          <table class="cmp stack">
+            <thead><tr><th style="width:9em">直したいもの</th><th>どこから</th></tr></thead>
+            <tbody>
+              <tr><th>キャストの名前<br>場面・通し<br>稽古日<br>舞台の名前</th><td data-l="どこから">右上の <kbd>管理</kbd> → 上のタブで<b>キャスト</b>／<b>稽古日</b>／<b>場面・通し</b>／<b>その他</b></td></tr>
+              <tr><th>出番（香盤の●）</th><td data-l="どこから"><b>香盤表</b>に切り替えて <kbd>出番を直す</kbd></td></tr>
+              <tr><th>その日のこと<br>（時間・OFF・通し）</th><td data-l="どこから">表の<b>「その日の予定」</b>の行、または日の詳細の <kbd>この日を直す</kbd></td></tr>
+              <tr><th>キャストのNG</th><td data-l="どこから">てっぱり表の<b>マス</b>（これまでどおり）</td></tr>
+            </tbody>
+          </table>
         </div>
-        <div style="display:flex; gap:6px; align-items:center; margin:8px 0">
-          <span style="flex:1; border:1px solid var(--app-line); border-radius:9px; padding:7px 10px">佐野圭亮（甚兵衛）</span>
-          <span class="btn">↑</span><span class="btn">↓</span><span class="btn" style="color:#b91c1c">×</span>
-        </div>
-        <div style="display:flex; gap:6px; align-items:center; margin:8px 0">
-          <span style="flex:1; border:1px solid var(--app-line); border-radius:9px; padding:7px 10px">櫂作真帆（お咲）</span>
-          <span class="btn">↑</span><span class="btn">↓</span><span class="btn" style="color:#b91c1c">×</span>
-        </div>
-        <div class="pin" style="left:-11px; top:112px">1</div>
-      </div>
-      <ol class="pins">
-        <li>ここを押して、そのまま書き替えます</li>
-      </ol>
-      <figcaption>管理 → キャスト</figcaption>
-    </figure>
+      </figure>
+      <h3><span class="n">1</span>入口は3つ</h3>
+      <p>直したいものによって入口が分かれています。まずはこの表だけ覚えていただければ十分です。</p>
+    </article>
+
+    <article class="item nofig" id="i2">
+      <h3><span class="n">2</span>その場で反映されます</h3>
+      <p>直したものは、<strong>その場で判定に反映されます</strong>。保存の操作は要りません。</p>
+      <p class="fine">名前を変えても、出番やNGはその方のものとして残ります。稽古日を足せば、その日も「できる場面」の判定に入ります。</p>
+    </article>
+
   </div>
 </section>
 
-<!-- ============ 4 ============ -->
-<section id="dot">
-  <h2><span class="num">4</span>出番（香盤の●）を直す＝役の入れ替え</h2>
+<!-- ==================== その日の予定の行 ==================== -->
+<section class="grp" id="g2">
+  <h2>「その日の予定」の行</h2>
+  <div class="items">
 
-  <p class="path"><b>画面右上で <kbd>香盤表</kbd> に切り替え → <kbd>出番を直す</kbd></b></p>
-
-  <div class="split wide">
-    <div>
-      <p>
-        <kbd>出番を直す</kbd> を押しているあいだは、<strong>マスを押すたびに●が付いたり消えたり</strong>します。
-        出番のないマスには薄い ○ が出ますので、押せる場所がひと目で分かります。
-        直し終わったら、もう一度同じボタンを押してください（ふだんは読むだけの表に戻ります）。
-      </p>
-      <ul class="tight">
-        <li><b>役が入れ替わった</b>… 元の方の●を消して、新しい方の●を付けます</li>
-        <li><b>出番が増えた／減った</b>… その場面のマスを押すだけです</li>
-        <li>●を直すと、<strong>その場でその日の判定（◎△×）が変わります</strong></li>
-      </ul>
-      <div class="note">
-        <span class="title">同じ方が役を引き継ぐ場合は、●を触る必要はありません</span>
-        「3」の名前の書き替えだけで、出番はそのまま引き継がれます。
-        ●を直すのは、<strong>だれがどの場面に出るかが実際に変わったとき</strong>だけです。
-      </div>
-    </div>
-
-    <figure class="shot">
-      <div class="screen">
-        <div style="margin-bottom:10px"><span class="btn pri">✓ 出番を直しています（押すと終わり）</span></div>
-        <table class="board kouban">
-          <thead>
-            <tr><th style="text-align:left">キャスト</th><th>プロ<br>ローグ</th><th class="near">1場<br>△</th><th>2場</th><th class="ok">4場<br>◎</th></tr>
-          </thead>
-          <tbody>
-            <tr><th>佐野圭亮</th><td class="dot">●</td><td style="color:var(--app-line)">○</td><td class="dot">●</td><td style="color:var(--app-line)">○</td></tr>
-            <tr><th>櫂作真帆</th><td class="dot">●</td><td style="color:var(--app-line)">○</td><td style="color:var(--app-line)">○</td><td class="dot">●</td></tr>
-          </tbody>
-        </table>
-        <div class="pin" style="left:-11px; top:14px">1</div>
-        <div class="pin" style="right:-11px; top:84px">2</div>
-      </div>
-      <ol class="pins">
-        <li>押しているあいだだけ直せます</li>
-        <li>○ を押すと ● に、● を押すと ○ に</li>
-      </ol>
-      <figcaption>香盤表 → 出番を直す</figcaption>
-    </figure>
-  </div>
-</section>
-
-<!-- ============ 5 ============ -->
-<section id="days">
-  <h2><span class="num">5</span>稽古日を足す（舞台稽古から千秋楽まで）</h2>
-
-  <p class="path"><b>右上の <kbd>管理</kbd> → 稽古日</b></p>
-
-  <div class="split wide">
-    <div>
-      <h3>まとめて足す</h3>
-      <ol class="tight">
-        <li>「日を足す」の左の欄に<b>はじめの日</b>、右の欄に<b>おわりの日</b>を入れます</li>
-        <li><kbd>この期間の日を足す</kbd> を押します</li>
-      </ol>
-      <p>
-        例：<b>8月10日 〜 8月16日</b> と入れて押すと、7日ぶんが一度に入ります。
-        1日だけのときは、両方に同じ日を入れてください。
-      </p>
-      <ul class="tight">
-        <li>足した日の<b>稽古時間</b>は、その前の日と同じもので入ります。あとから「その日の予定」で直してください</li>
-        <li>すでにある日を含めて足しても、<strong>二重にはなりません</strong>（無い日だけが増えます）</li>
-        <li>日付の順に自動で並びます。表の右へ伸びていきます</li>
-      </ul>
-
-      <h3 style="margin-top:26px">消す</h3>
-      <p>
-        下の一覧の <kbd>×</kbd> で消せます。<strong>その日に入れたNGと「できた場面」の記録も一緒に消えます</strong>ので、
-        確認が出たらお読みのうえでお進みください。
-      </p>
-    </div>
-
-    <figure class="shot">
-      <div class="screen">
-        <div class="bar"><span class="ttl">管理</span><span class="gear">閉じる</span></div>
-        <div class="tabs"><span>キャスト</span><span class="on">稽古日</span><span>場面・通し</span><span>その他</span></div>
-        <p class="lbl" style="margin-bottom:6px">日を足す</p>
-        <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px">
-          <span style="flex:1; border:1px solid var(--app-line); border-radius:9px; padding:7px 10px">2026/08/10</span>
-          <span>〜</span>
-          <span style="flex:1; border:1px solid var(--app-line); border-radius:9px; padding:7px 10px">2026/08/16</span>
-        </div>
-        <div style="text-align:center"><span class="btn pri" style="display:block">この期間の日を足す</span></div>
-        <p style="margin-top:10px; font-size:11.5px; color:var(--ok); font-weight:700">✓ 7日ぶん足しました</p>
-      </div>
-      <figcaption>管理 → 稽古日</figcaption>
-    </figure>
-  </div>
-</section>
-
-<!-- ============ 6 ============ -->
-<section id="scene">
-  <h2><span class="num">6</span>場面・特別稽古を直す</h2>
-
-  <p class="path"><b>右上の <kbd>管理</kbd> → 場面・通し</b></p>
-
-  <div class="cols c2" style="margin-top:14px">
-    <div class="card">
-      <h3>台本の場面</h3>
-      <ul class="tight">
-        <li>左の小さい欄が<b>場番号</b>、右が<b>題名</b>。どちらも押して直せます</li>
-        <li>下の欄に題名を入れて <kbd>足す</kbd> で、場面が増えます（番号は最後の次になります）</li>
-        <li><kbd>×</kbd> で消せます</li>
-      </ul>
-      <p class="small muted">
-        足したばかりの場面は<strong>まだだれも出ない状態</strong>です。香盤表の <kbd>出番を直す</kbd> で●を付けてください。
-      </p>
-    </div>
-    <div class="card">
-      <h3>特別稽古（通し・殺陣など）</h3>
-      <ul class="tight">
-        <li>名前と<b>長さ（分）</b>を直せます</li>
-        <li>下の欄に名前を入れて <kbd>足す</kbd>（例：場当たり、ゲネプロ）</li>
-        <li>足したものは<strong>はじめは全員が出る扱い</strong>です。要らない人は香盤表で●を外してください</li>
-        <li>どの日にやるかは、これまでどおり「その日の予定」で選びます</li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 7 ============ -->
-<section id="other">
-  <h2><span class="num">7</span>保存して、別の舞台を始める</h2>
-
-  <p class="path"><b>右上の <kbd>管理</kbd> → その他</b></p>
-
-  <p>
-    いま作っている舞台を<strong>このアプリの中に保存したまま</strong>、次の作品を白紙から作りはじめられます。
-    保存したものは消えません。あとからいつでも開き直して、そのときの続きから使えます。
-  </p>
-
-  <div class="split wide">
-    <div>
-      <h3>やりかた</h3>
-      <ol class="tight">
-        <li><kbd>管理</kbd> →「その他」→ <kbd>保存して別の舞台を始める</kbd> を押します</li>
-        <li>確認が出ます（「◯◯を保存して、新しい舞台を始めます」）</li>
-        <li>いまの舞台がしまわれ、画面が<b>トップ画面</b>に変わります</li>
-        <li>新しい舞台の名前を入れて <kbd>この名前ではじめる</kbd> を押すと、白紙から始まります</li>
-      </ol>
-      <p class="small muted">
-        白紙のあとは、<b>キャスト → 稽古日 → 場面</b> の順に入れていくのが早いです。
-        出番の●は、香盤表の <kbd>出番を直す</kbd> で付けていきます。
-      </p>
-
-      <h3 style="margin-top:26px">しまった舞台を開き直す</h3>
-      <p>
-        トップ画面の<b>「しまってある舞台」</b>、または <kbd>管理</kbd> →「その他」の同じ一覧から
-        <kbd>開く</kbd> を押します。
-      </p>
-      <ul class="tight">
-        <li>開くと、<strong>いま開いていた舞台は入れ替わりに保存されます</strong>。どちらも失われません</li>
-        <li>行ったり来たりして構いません。稽古中の作品と、次の作品を並べて持てます</li>
-        <li>いらなくなった舞台は <kbd>×</kbd> で捨てられます（こちらは元に戻せません）</li>
-      </ul>
-
-      <h3 style="margin-top:26px">舞台の名前</h3>
-      <p>
-        <kbd>管理</kbd> →「その他」の<b>「舞台の名前」</b>で、いつでも書き替えられます。
-        画面のいちばん上に出る名前で、保存したときの見出しにもなります。
-      </p>
-    </div>
-
-    <figure class="shot">
-      <div class="screen">
-        <div class="bar"><span class="ttl">てっぱりボード</span></div>
-        <p class="lbl" style="margin-bottom:6px">トップ画面</p>
-        <div class="dash" style="margin-bottom:10px">
-          <div style="font-weight:700; font-size:12.5px; margin-bottom:6px">新しい舞台をはじめる</div>
-          <div style="border:1px solid var(--app-line); border-radius:9px; padding:7px 10px; background:#fff; color:var(--app-subtle); font-size:12px">例：JOE Company「つぎの公演」</div>
-          <div style="margin-top:7px"><span class="btn pri" style="display:block; text-align:center">この名前ではじめる</span></div>
-        </div>
-        <div style="font-weight:700; font-size:12.5px; margin-bottom:6px">しまってある舞台（1）</div>
-        <div style="display:flex; gap:6px; align-items:center; border:1px solid var(--app-line); border-radius:11px; padding:8px 10px">
-          <div style="flex:1; min-width:0">
-            <div style="font-weight:600; font-size:12.5px">JOE Company「ほろほろ2026」</div>
-            <div style="font-size:11px; color:var(--app-subtle)">8/2(日) にしまいました ・ キャスト 24／稽古日 26</div>
+    <article class="item" id="i3">
+      <figure class="shot">
+        <div class="screen" style="padding:12px">
+          <div class="tblwrap">
+            <table class="board">
+              <thead>
+                <tr><th style="text-align:left">キャスト</th><th>2<br>日</th><th class="sel">3<br>月</th><th>5<br>水</th><th>6<br>木</th></tr>
+              </thead>
+              <tbody>
+                <tr class="plan"><td style="text-align:left; background:var(--app-surface); color:var(--app-subtle); font-weight:700">その日の予定 ✎</td><td>＋</td><td>＋</td><td class="off">OFF</td><td>通し</td></tr>
+                <tr><th>新垣樽助</th><td></td><td class="ng">NG</td><td></td><td></td></tr>
+              </tbody>
+            </table>
           </div>
-          <span class="btn">開く</span>
+          <span class="pin" style="top:52%; left:-10px">1</span>
         </div>
-        <div class="pin" style="left:-11px; top:150px">1</div>
-      </div>
-      <ol class="pins">
-        <li>しまった舞台は、ここから開き直せます</li>
-      </ol>
-      <figcaption>保存したあとに出るトップ画面</figcaption>
-    </figure>
-  </div>
+        <figcaption>日付のすぐ下の、薄い色の行です</figcaption>
+      </figure>
+      <h3><span class="n">3</span>行はここです</h3>
+      <p>これまで「予定」とだけ書いていた行の名前を、<strong>「その日の予定 ✎」</strong>に変えました。</p>
+    </article>
 
-  <div class="note">
-    <span class="title">保存はこの端末の中だけです</span>
-    しまった舞台も、この端末の中に置かれます。機種を変えるときや、もしもの時にそなえて、
-    <kbd>管理</kbd> →「その他」→ バックアップの <kbd>書き出す</kbd> でファイルにも残しておかれると安心です
-    （あとから <kbd>読み込む</kbd> で戻せます）。
-  </div>
+    <article class="item nofig" id="i4">
+      <h3><span class="n">4</span>開くと4つ入っています</h3>
+      <ul>
+        <li><b>この日の扱い</b>…稽古あり／OFF／未定</li>
+        <li><b>この日の稽古時間</b>…例：11:00–17:00（この日だけ変わります）</li>
+        <li><b>特別稽古</b>…通し・殺陣など。開始時刻も入れられます（例：13:30）</li>
+        <li><b>メモ</b>…照明打合せ、小道具搬入など</li>
+      </ul>
+    </article>
 
-  <p class="small muted">
-    「お渡し時の状態に戻す」は、<strong>いま開いている舞台の中身</strong>を、お渡し当初の内容に戻すものです
-    （その後に直したところは消え、保存もされません）。「保存して別の舞台を始める」とは別のものです。
-  </p>
-</section>
+    <article class="item" id="i5">
+      <figure class="shot">
+        <div class="screen" style="text-align:center">
+          <span class="btn pri">この日を直す</span>
+        </div>
+      </figure>
+      <h3><span class="n">5</span>押しにくいときは</h3>
+      <p>同じものが、選んだ日の詳細（PCでは右、スマホでは表の下）の <kbd>この日を直す</kbd> からも開きます。</p>
+      <p class="fine">表の細い行が押しにくいときは、こちらが確実です。全日まとめて時間を変えるときは <kbd>管理</kbd> →「その他」→「稽古時間（全日まとめて）」。</p>
+    </article>
 
-<!-- ============ 8 ============ -->
-<section id="care">
-  <h2><span class="num">8</span>消すときに、一緒に消えるもの</h2>
+    <article class="item nofig" id="i6">
+      <h3><span class="n">6</span>下段の名前も変えました</h3>
+      <p>「できる（予定）」→ <b>できる場面</b>、「できた（結果）」→ <b>できた場面</b>。</p>
+      <p class="fine">「予定」という言葉が上と下で二重になっていて分かりにくかったためで、中身は変わっておりません。</p>
+    </article>
 
-  <p>
-    残っていると判定が狂うため、消したものに付いていた情報も一緒に片づけます。確認の文にも同じことが出ます。
-  </p>
-
-  <table class="cmp stack">
-    <thead><tr><th style="width:11em">消すもの</th><th>一緒に消えるもの</th></tr></thead>
-    <tbody>
-      <tr><th>キャスト</th><td data-l="一緒に消えるもの">その人のNG（終日NG・◯時入り／出し）／香盤のその人の●</td></tr>
-      <tr><th>稽古日</th><td data-l="一緒に消えるもの">その日に入れたNG／その日の「できた場面」の記録</td></tr>
-      <tr><th>場面</th><td data-l="一緒に消えるもの">その場面の出番／「できた場面」の記録</td></tr>
-      <tr><th>特別稽古</th><td data-l="一緒に消えるもの">その特別稽古を入れていた日の選択・開始時刻</td></tr>
-    </tbody>
-  </table>
-
-  <div class="note">
-    <span class="title">名前を書き替えるだけなら、何も消えません</span>
-    降板・代役は<strong>消さずに書き替え</strong>。これがいちばん安全で、手も少なくて済みます。
   </div>
 </section>
 
-<!-- ============ 9 ============ -->
-<section id="qa">
-  <h2><span class="num">9</span>こまったとき</h2>
+<!-- ==================== キャスト ==================== -->
+<section class="grp" id="g3">
+  <h2>キャストを直す</h2>
+  <div class="items">
 
-  <div class="cols c2">
-    <div class="qa">
-      <p class="q">直したものは、どこに保存されますか</p>
-      <p class="a">お使いの端末の中だけです。押した時点で自動で保存されます。別の端末には移りませんので、ご家族や共演者の端末で同じものを見たいときは、<kbd>管理</kbd>→その他→<b>書き出す</b>で作ったファイルをお渡しいただき、その端末で<b>読み込む</b>と同じ内容になります。</p>
-    </div>
-    <div class="qa">
-      <p class="q">直したのに、判定が変わりません</p>
-      <p class="a">名前や数字の欄は、<strong>欄の外を押した（またはEnterを押した）ときに決まります</strong>。キーボードが出たままになっていないかご確認ください。</p>
-    </div>
-    <div class="qa">
-      <p class="q">間違えて消してしまいました</p>
-      <p class="a">元に戻す機能はありません。<b>書き出す</b>でとってあるファイルがあれば、<b>読み込む</b>で戻せます。無い場合はご連絡ください。こちらのお渡し時の内容からお作りします。</p>
-    </div>
-    <div class="qa">
-      <p class="q">アプリが新しくなっても、入れた内容は残りますか</p>
-      <p class="a">残ります。こちらが直してお渡しするのはアプリの側だけで、高木様が入れられた内容には触れません。</p>
-    </div>
-    <div class="qa">
-      <p class="q">前の作品のデータは、消えてしまいませんか</p>
-      <p class="a"><b>保存して別の舞台を始める</b>を使えば消えません。トップ画面の「しまってある舞台」から、いつでも開き直せます。開くときは、そのとき開いていた舞台が入れ替わりに保存されます。</p>
-    </div>
-    <div class="qa">
-      <p class="q">キャストが多すぎて、管理の一覧が長いです</p>
-      <p class="a">一覧はその枠の中でスクロールします。並べ替えの <kbd>↑</kbd> <kbd>↓</kbd> で、よく直す方を上に寄せておくのも手です。</p>
-    </div>
-    <div class="qa">
-      <p class="q">それ以外で困ったとき</p>
-      <p class="a">どんなことでも <b>support.tsumiki@gmail.com</b> までご連絡ください。使いにくいところのご指摘も歓迎です。直してお返しします。</p>
-    </div>
+    <article class="item" id="i7">
+      <figure class="shot">
+        <div class="screen">
+          <div class="bar"><span class="ttl">管理</span><span class="gear">閉じる</span></div>
+          <div class="tabs"><span class="on">キャスト</span><span>稽古日</span><span>場面・通し</span><span>その他</span></div>
+          <div style="display:flex; gap:6px; align-items:center; margin:8px 0">
+            <span style="flex:1; border:1px solid var(--app-line); border-radius:9px; padding:7px 10px; font-size:12px">佐野圭亮（甚兵衛）</span>
+            <span class="btn">↑</span><span class="btn">↓</span><span class="btn" style="color:#b91c1c">×</span>
+          </div>
+          <span class="pin" style="bottom:20px; left:-10px">1</span>
+        </div>
+        <figcaption>管理 → キャスト</figcaption>
+      </figure>
+      <h3><span class="n">7</span>名前を変える</h3>
+      <p>名前の欄をそのまま押して、書き替えるだけです。欄の外を押す（またはEnter）と決まります。</p>
+    </article>
+
+    <article class="item" id="i8">
+      <figure class="shot">
+        <div class="calc" style="font-size:13.5px">
+          小野寺昭（役名） <span class="op">→</span> <span class="res">佐野圭亮（役名）</span>
+          <span class="note2">NGも香盤の●も、そのまま新しい方に引き継がれます</span>
+        </div>
+      </figure>
+      <h3><span class="n">8</span>降板・代役は書き替え</h3>
+      <p>消して入れ直すのではなく、<strong>名前だけを書き替えて</strong>ください。</p>
+      <p class="fine">役名まで同じなら、これだけで入れ替えは終わりです。</p>
+    </article>
+
+    <article class="item" id="i9">
+      <figure class="shot">
+        <div class="screen">
+          <div style="display:flex; gap:6px; align-items:center">
+            <span style="flex:1; border:1px solid var(--app-line); border-radius:9px; padding:7px 10px; font-size:12px; color:var(--app-subtle)">新しい名前</span>
+            <span class="btn pri">足す</span>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">9</span>足す・並べ替え・消す</h3>
+      <ul>
+        <li><b>足す</b>…いちばん下の欄に名前を入れて <kbd>足す</kbd></li>
+        <li><b>並べ替え</b>…<kbd>↑</kbd> <kbd>↓</kbd> で1つずつ（両方の表の並びが変わります）</li>
+        <li><b>消す</b>…<kbd>×</kbd>。確認が出ます</li>
+      </ul>
+    </article>
+
+    <article class="item nofig" id="i10">
+      <h3><span class="n">10</span>名前の書き方のコツ</h3>
+      <p>「<b>俳優名（役名）</b>」の形にしておくと、表では俳優名だけが出て見やすくなります。</p>
+    </article>
+
   </div>
-
-  <p style="margin-top:22px"><a href="teppari-tsukaikata.html">← はじめの使い方ページに戻る</a></p>
 </section>
 
-</main>
-</div><!-- /layout -->
+<!-- ==================== 出番 ==================== -->
+<section class="grp" id="g4">
+  <h2>出番（香盤の●）を直す</h2>
+  <div class="items">
+
+    <article class="item" id="i11">
+      <figure class="shot">
+        <div class="screen" style="text-align:center">
+          <span class="btn pri">✓ 出番を直しています（押すと終わり）</span>
+        </div>
+      </figure>
+      <h3><span class="n">11</span>出番を直すモード</h3>
+      <p>香盤表に切り替えて <kbd>出番を直す</kbd> を押します。押しているあいだだけ直せます。</p>
+      <p class="fine">直し終わったら、もう一度同じボタンを押してください（ふだんは読むだけの表に戻ります）。</p>
+    </article>
+
+    <article class="item" id="i12">
+      <figure class="shot">
+        <div class="screen" style="padding:12px">
+          <div class="tblwrap">
+            <table class="board kouban">
+              <thead><tr><th style="text-align:left">キャスト</th><th>プロ<br>ローグ</th><th class="near">1場<br>△</th><th class="ok">4場<br>◎</th></tr></thead>
+              <tbody>
+                <tr><th>佐野圭亮</th><td class="dot">●</td><td style="color:var(--app-line)">○</td><td style="color:var(--app-line)">○</td></tr>
+                <tr><th>櫂作真帆</th><td class="dot">●</td><td style="color:var(--app-line)">○</td><td class="dot">●</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">12</span>○ を押すと ● に</h3>
+      <p>出番のないマスには薄い ○ が出るので、押せる場所がひと目で分かります。</p>
+      <p class="fine">●を直すと、その場でその日の判定（◎△×）が変わります。</p>
+    </article>
+
+    <article class="item nofig" id="i13">
+      <h3><span class="n">13</span>●を触らなくていい場合</h3>
+      <p>同じ方が役を引き継ぐ場合は、<strong>名前の書き替えだけ</strong>で出番はそのまま引き継がれます。</p>
+      <p class="fine">●を直すのは、だれがどの場面に出るかが実際に変わったときだけです。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 稽古日 ==================== -->
+<section class="grp" id="g5">
+  <h2>稽古日を足す</h2>
+  <div class="items">
+
+    <article class="item" id="i14">
+      <figure class="shot">
+        <div class="screen">
+          <p class="lbl" style="margin-bottom:6px">日を足す</p>
+          <div style="display:flex; gap:7px; align-items:center; margin-bottom:8px; font-size:12px">
+            <span style="flex:1; border:1px solid var(--app-line); border-radius:9px; padding:7px 8px">2026/08/10</span>
+            <span>〜</span>
+            <span style="flex:1; border:1px solid var(--app-line); border-radius:9px; padding:7px 8px">2026/08/16</span>
+          </div>
+          <div style="text-align:center"><span class="btn pri" style="display:block">この期間の日を足す</span></div>
+          <p style="margin-top:9px; font-size:11.5px; color:var(--ok); font-weight:700; text-align:center">✓ 7日ぶん足しました</p>
+        </div>
+        <figcaption>管理 → 稽古日</figcaption>
+      </figure>
+      <h3><span class="n">14</span>まとめて足す</h3>
+      <p>はじめの日とおわりの日を入れて <kbd>この期間の日を足す</kbd>。舞台稽古から千秋楽までを一度に入れられます。</p>
+      <p class="fine">1日だけのときは、両方に同じ日を入れてください。すでにある日を含めて足しても<b>二重にはなりません</b>。</p>
+    </article>
+
+    <article class="item nofig" id="i15">
+      <h3><span class="n">15</span>足した日の時間</h3>
+      <p>足した日の稽古時間は、<strong>その前の日と同じもの</strong>で入ります。</p>
+      <p class="fine">あとから「その日の予定」で直してください。日付の順に自動で並び、表の右へ伸びていきます。</p>
+    </article>
+
+    <article class="item nofig" id="i16">
+      <h3><span class="n">16</span>稽古日を消す</h3>
+      <p>下の一覧の <kbd>×</kbd> で消せます。</p>
+      <p class="caution fine"><b>⚠ その日に入れたNGと「できた場面」の記録も一緒に消えます。</b>確認が出たらお読みのうえでお進みください。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 場面・特別稽古 ==================== -->
+<section class="grp" id="g6">
+  <h2>場面・特別稽古</h2>
+  <div class="items">
+
+    <article class="item" id="i17">
+      <figure class="shot">
+        <div class="screen">
+          <div class="tabs"><span>キャスト</span><span>稽古日</span><span class="on">場面・通し</span><span>その他</span></div>
+          <div style="display:flex; gap:6px; align-items:center; font-size:12px">
+            <span style="width:44px; border:1px solid var(--app-line); border-radius:9px; padding:7px 8px; text-align:center">5</span>
+            <span style="flex:1; border:1px solid var(--app-line); border-radius:9px; padding:7px 10px">祭りの夜</span>
+            <span class="btn" style="color:#b91c1c">×</span>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">17</span>台本の場面を直す</h3>
+      <p>左の小さい欄が<b>場番号</b>、右が<b>題名</b>。どちらも押して直せます。</p>
+      <p class="fine">足したばかりの場面は<b>まだだれも出ない状態</b>です。香盤表の <kbd>出番を直す</kbd> で●を付けてください。</p>
+    </article>
+
+    <article class="item" id="i18">
+      <figure class="shot">
+        <div class="screen">
+          <div style="display:flex; gap:6px; align-items:center; font-size:12px">
+            <span style="flex:1; border:1px solid var(--app-line); border-radius:9px; padding:7px 10px">通し</span>
+            <span style="width:60px; border:1px solid var(--app-line); border-radius:9px; padding:7px 8px; text-align:center">120分</span>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">18</span>特別稽古を直す</h3>
+      <p>名前と<b>長さ（分）</b>を直せます。下の欄から足すこともできます（例：場当たり、ゲネプロ）。</p>
+      <p class="fine">足したものは<b>はじめは全員が出る扱い</b>です。要らない方は香盤表で●を外してください。どの日にやるかは「その日の予定」で選びます。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 別の舞台 ==================== -->
+<section class="grp" id="g7">
+  <h2>別の舞台を始める</h2>
+  <div class="items">
+
+    <article class="item" id="i19">
+      <figure class="shot">
+        <div class="screen">
+          <div class="dash">
+            <div style="font-weight:700; font-size:12.5px; margin-bottom:6px">新しい舞台をはじめる</div>
+            <div style="border:1px solid var(--app-line); border-radius:9px; padding:7px 10px; background:#fff; color:var(--app-subtle); font-size:11.5px">例：JOE Company「つぎの公演」</div>
+            <div style="margin-top:7px"><span class="btn pri" style="display:block; text-align:center">この名前ではじめる</span></div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">19</span>保存して別の舞台へ</h3>
+      <p><kbd>管理</kbd> →「その他」→ <kbd>保存して別の舞台を始める</kbd>。いまの舞台はしまわれ、白紙から始まります。</p>
+      <p class="fine">白紙のあとは、<b>キャスト → 稽古日 → 場面</b> の順に入れていくのが早いです。</p>
+    </article>
+
+    <article class="item" id="i20">
+      <figure class="shot">
+        <div class="screen">
+          <div style="font-weight:700; font-size:12.5px; margin-bottom:6px">しまってある舞台（1）</div>
+          <div style="display:flex; gap:6px; align-items:center; border:1px solid var(--app-line); border-radius:11px; padding:8px 10px">
+            <div style="flex:1; min-width:0">
+              <div style="font-weight:600; font-size:12px">JOE Company「ほろほろ2026」</div>
+              <div style="font-size:10.5px; color:var(--app-subtle)">8/2(日) にしまいました</div>
+            </div>
+            <span class="btn">開く</span>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">20</span>しまった舞台を開く</h3>
+      <p>トップ画面の「しまってある舞台」から <kbd>開く</kbd>。行ったり来たりして構いません。</p>
+      <p class="fine">開くと、いま開いていた舞台は入れ替わりに保存されます。どちらも失われません。いらなくなった舞台は <kbd>×</kbd> で捨てられます（こちらは元に戻せません）。</p>
+    </article>
+
+    <article class="item nofig" id="i21">
+      <h3><span class="n">21</span>舞台の名前</h3>
+      <p><kbd>管理</kbd> →「その他」の「舞台の名前」で、いつでも書き替えられます。</p>
+      <p class="fine">画面のいちばん上に出る名前で、保存したときの見出しにもなります。</p>
+    </article>
+
+    <article class="item nofig" id="i22">
+      <h3><span class="n">22</span>保存はこの端末の中だけ</h3>
+      <p>しまった舞台も、この端末の中に置かれます。</p>
+      <p class="fine">機種を変えるときや、もしもの時にそなえて、<kbd>管理</kbd> →「その他」→ バックアップの <kbd>書き出す</kbd> でファイルにも残しておかれると安心です（あとから <kbd>読み込む</kbd> で戻せます）。<br>
+        ※「お渡し時の状態に戻す」は、<b>いま開いている舞台の中身</b>をお渡し当初の内容に戻すものです。「保存して別の舞台を始める」とは別のものです。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 注意 ==================== -->
+<section class="grp" id="g8">
+  <h2>消すときの注意</h2>
+  <div class="items">
+
+    <article class="item" id="i23">
+      <figure class="shot">
+        <div class="tblwrap">
+          <table class="cmp stack">
+            <thead><tr><th style="width:8em">消すもの</th><th>一緒に消えるもの</th></tr></thead>
+            <tbody>
+              <tr><th>キャスト</th><td data-l="一緒に消えるもの">その方のNG（終日NG・◯時入り／出し）／香盤のその方の●</td></tr>
+              <tr><th>稽古日</th><td data-l="一緒に消えるもの">その日に入れたNG／その日の「できた場面」の記録</td></tr>
+              <tr><th>場面</th><td data-l="一緒に消えるもの">その場面の出番／「できた場面」の記録</td></tr>
+              <tr><th>特別稽古</th><td data-l="一緒に消えるもの">その特別稽古を入れていた日の選択・開始時刻</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </figure>
+      <h3><span class="n">23</span>一緒に消えるもの</h3>
+      <p>残っていると判定が狂うため、消したものに付いていた情報も一緒に片づけます。</p>
+      <p class="fine">名前を書き替えるだけなら、何も消えません。降板・代役は<b>消さずに書き替え</b>がいちばん安全です。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 巻末 ==================== -->
+<section class="appendix" id="qa">
+  <h2>こまったとき</h2>
+  <div class="qa">
+    <div>
+      <div class="q">直したものは、どこに保存されますか</div>
+      <div class="a">お使いの端末の中だけです。押した時点で自動保存されます。別の端末で同じものを見たいときは、<kbd>管理</kbd>→その他→<b>書き出す</b>のファイルをお渡しいただき、その端末で<b>読み込む</b>と同じ内容になります。</div>
+    </div>
+    <div>
+      <div class="q">直したのに、判定が変わりません</div>
+      <div class="a">名前や数字の欄は、<b>欄の外を押した（またはEnterを押した）ときに決まります</b>。キーボードが出たままになっていないかご確認ください。</div>
+    </div>
+    <div>
+      <div class="q">間違えて消してしまいました</div>
+      <div class="a">元に戻す機能はありません。<b>書き出す</b>でとってあるファイルがあれば <b>読み込む</b> で戻せます。無い場合はご連絡ください。お渡し時の内容からお作りします。</div>
+    </div>
+    <div>
+      <div class="q">アプリが新しくなっても、入れた内容は残りますか</div>
+      <div class="a">残ります。こちらが直してお渡しするのはアプリの側だけで、入れられた内容には触れません。</div>
+    </div>
+    <div>
+      <div class="q">前の作品のデータは消えませんか</div>
+      <div class="a"><b>保存して別の舞台を始める</b>を使えば消えません。トップ画面の「しまってある舞台」から、いつでも開き直せます。</div>
+    </div>
+    <div>
+      <div class="q">管理の一覧が長くて探しにくいです</div>
+      <div class="a">一覧はその枠の中でスクロールします。並べ替えの <kbd>↑</kbd> <kbd>↓</kbd> で、よく直す方を上に寄せておくのも手です。</div>
+    </div>
+    <div>
+      <div class="q">それ以外で困ったとき</div>
+      <div class="a">どんなことでも <b>support.tsumiki@gmail.com</b> までご連絡ください。使いにくいところのご指摘も歓迎です。直してお返しします。</div>
+    </div>
+  </div>
+</section>
 
 <footer>
   つみき（Tsumiki）／ support.tsumiki@gmail.com<br>
   てっぱりボード 増えたところの使い方（V2・2026年8月）
 </footer>
 
-</div><!-- /wrap -->
+</main>
+</div>
+</div>
+
+<script>
+/* もくじ：狭い画面ではたたむ／広い画面では開いて左に貼り付ける。
+   いま読んでいる項目のグループを、もくじで色づけする。 */
+(function(){
+  var toc = document.getElementById('toc');
+  if(!toc) return;
+  var wide = window.matchMedia('(min-width:1000px)');
+  function sync(){ toc.open = wide.matches; }
+  sync();
+  (wide.addEventListener ? wide.addEventListener('change', sync) : window.addEventListener('resize', sync));
+  toc.addEventListener('click', function(e){
+    if(e.target.closest('a') && !wide.matches) toc.open = false;
+  });
+  if(!('IntersectionObserver' in window)) return;
+  var links = {}, targets = [];
+  Array.prototype.forEach.call(toc.querySelectorAll('a[href^="#"]'), function(a){
+    var el = document.getElementById(a.getAttribute('href').slice(1));
+    if(el){ links[a.getAttribute('href').slice(1)] = a; targets.push(el); }
+  });
+  var seen = {};
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(en){ seen[en.target.id] = en.isIntersecting; });
+    var cur = null;
+    targets.forEach(function(el){ if(seen[el.id] && !cur) cur = el.id; });
+    for(var k in links) links[k].classList.toggle('on', k === cur);
+  }, {rootMargin:'-10% 0px -70% 0px'});
+  targets.forEach(function(el){ io.observe(el); });
+})();
+</script>
 </body>
 </html>
