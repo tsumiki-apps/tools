@@ -199,6 +199,7 @@
   }
   @media (min-width:1000px){
     body{padding-left:28px; padding-right:28px;}
+    .wrap{max-width:1280px;}
     h1{font-size:32px;}
     .layout{display:grid; grid-template-columns:212px minmax(0,1fr); gap:40px; align-items:start;}
     details.toc{
@@ -207,6 +208,28 @@
     }
     details.toc summary{display:none;}
     .grp{padding-top:40px;}
+
+    /* PCでは項目を1列にして、図を大きく見せる（2列だと図が小さくて読めない）。
+       図の中身は px 直書きが多く、箱を広げるだけでは字が大きくならないので zoom で
+       中身ごと拡大する（幅は親いっぱいのままなので横はみ出しは起きない）。 */
+    .items{grid-template-columns:minmax(0,1fr);}
+    figure.shot > :not(figcaption){zoom:1.25;}
+    figcaption{font-size:12.5px;}
+  }
+  @media (min-width:1120px){
+    /* 横幅に余裕があるときだけ、図を左・文章を右に並べる。
+       HTMLを変えずに済むよう、図に縦方向のスパンを持たせて
+       残りの子（h3/p/ul）を右の列へ流し込む。 */
+    .item{
+      display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);
+      column-gap:30px; align-content:start; padding:18px 22px 20px;
+    }
+    .item > figure.shot{grid-column:1; grid-row:1 / span 30; align-self:center; padding:0 12px;}
+    .item > *:not(figure.shot){grid-column:2;}
+    .item > h3{margin-top:0;}
+    /* 図のない項目は横に伸びすぎないよう、行の長さだけ抑える */
+    .item.nofig{display:block;}
+    .item.nofig p, .item.nofig ul{max-width:58em;}
   }
 
   /* ================= 印刷（そのままA4のPDFになる） ================= */
