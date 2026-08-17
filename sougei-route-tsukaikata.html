@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>送迎ルート下書き — 設計図（使い方の見本）</title>
+<meta name="description" content="送迎の立ち寄り順を決めて、距離とガソリン代の目安を集計。地図なしでも順番を組み立て・共有できる下書き。介護・福祉の現場向けの小さな道具の設計図。">
+<link rel="stylesheet" href="teian.css">
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="kicker">TSUMIKI 道具のたね ／ 送迎まわり</p>
+  <h1>送迎ルート下書き</h1>
+  <p class="lead">
+    立ち寄る<strong>順番を決めて</strong>、区間の距離を入れると
+    <strong>合計距離とガソリン代の目安</strong>が出ます。ベテラン頼みの「回る順」を、みんなで共有できる下書きに。
+  </p>
+  <div class="banner">
+    <span class="ic">✎</span>
+    <span>これは<b>設計図（使い方の見本）</b>です。画面は完成イメージで、まだ動きません。
+      <b>自動で最短ルートは出しません</b>——順番は人が決め、道具は下書きと集計を助けます。</span>
+  </div>
+  <p class="openapp"><a class="ghost" href="dougu-catalog.html">← 道具のカタログにもどる</a></p>
+</header>
+
+<div class="layout">
+
+<aside class="toc">
+  <p class="t">もくじ</p>
+  <ol>
+    <li><a href="#what">どんな道具か</a></li>
+    <li><a href="#order">順番を組む</a></li>
+    <li><a href="#gas">距離とガソリン代</a></li>
+    <li><a href="#diff">送迎ボードとの違い</a></li>
+    <li><a href="#fit">向いている現場</a></li>
+    <li><a href="#safe">安全・データ・お渡し</a></li>
+    <li><a href="#qa">こまったとき</a></li>
+  </ol>
+</aside>
+
+<main>
+
+<!-- 1 -->
+<section id="what" style="padding-top:20px">
+  <h2><span class="num">1</span>どんな道具か</h2>
+
+  <div class="flow" style="margin-bottom:18px">
+    <span class="box">立ち寄り先を並べる</span><span class="arw">→</span>
+    <span class="box">順番をドラッグで決める</span><span class="arw">→</span>
+    <span class="box">距離・ガソリン代が出る</span>
+  </div>
+
+  <div class="split wide">
+    <div>
+      <ul class="tight">
+        <li><strong>やること</strong>：立ち寄る順番の下書き／区間距離の合計／ガソリン代の目安／印刷</li>
+        <li><strong>やらないこと</strong>：地図表示、自動最短ルート、リアルタイムのナビ</li>
+        <li><strong>使う人</strong>：相談員・運転担当（順番を決める人）</li>
+        <li><strong>入れる情報</strong>：立ち寄り先の名前・順番・区間距離。医療情報は入れません</li>
+      </ul>
+    </div>
+
+    <figure class="shot">
+      <div class="screen">
+        <div class="bar"><span class="ttl">送迎ルート下書き</span><span class="gear">🖨 印刷</span></div>
+        <div class="lbl" style="margin-bottom:6px">1号車・往路の順番</div>
+        <div class="row" style="padding:7px 0"><span style="width:22px;height:22px;border-radius:50%;background:var(--app-ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">1</span><span style="flex:1">事業所（出発）</span></div>
+        <div class="row" style="padding:7px 0"><span style="width:22px;height:22px;border-radius:50%;background:var(--app-ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">2</span><span style="flex:1">田中さん宅</span><span class="chip line">2.1km</span></div>
+        <div class="row" style="padding:7px 0"><span style="width:22px;height:22px;border-radius:50%;background:var(--app-ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">3</span><span style="flex:1">佐藤さん宅</span><span class="chip line">1.4km</span></div>
+        <div class="row" style="padding:7px 0"><span style="width:22px;height:22px;border-radius:50%;background:var(--app-ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">4</span><span style="flex:1">事業所（到着）</span><span class="chip line">3.0km</span></div>
+        <span class="pin" style="top:44%; left:-11px">1</span>
+        <span class="pin" style="bottom:14px; right:-11px">2</span>
+      </div>
+      <ol class="pins">
+        <li>ドラッグで順番を入れ替え（番号は自動でふり直し）</li>
+        <li>各区間の距離を入れる（手入力の目安でOK）</li>
+      </ol>
+      <figcaption>立ち寄り順の下書き</figcaption>
+    </figure>
+  </div>
+
+  <div class="note">
+    <span class="title">「回る順」が特定の職員の頭の中だけ、を防ぐ</span>
+    土地勘のあるベテランが休むと送迎が回らない——を、<strong>紙で共有できる下書き</strong>にして和らげます。
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="order">
+  <h2><span class="num">2</span>順番を組む</h2>
+  <div class="split wide flip">
+    <figure class="shot">
+      <div class="screen">
+        <div class="lbl" style="margin-bottom:8px">入れ替えのイメージ</div>
+        <div class="dash" style="font-size:12.5px">
+          <div style="margin:4px 0">田中さん <span style="color:var(--app-subtle)">↕ ドラッグ</span></div>
+          <div style="margin:4px 0">佐藤さん</div>
+          <div style="margin:4px 0; color:var(--app-subtle)">…順番を変えると距離も合計も再計算</div>
+        </div>
+        <span class="pin" style="top:34%; right:-11px">1</span>
+      </div>
+      <ol class="pins">
+        <li>順番を変えるたびに、下の合計も自動で計算し直します</li>
+      </ol>
+    </figure>
+
+    <div>
+      <h3>やることはドラッグだけ</h3>
+      <ul class="tight">
+        <li>立ち寄り先を<strong>上下にドラッグ</strong>して順番を決める</li>
+        <li>当日休みの人は<strong>スキップ</strong>（順番から一時的に外す）</li>
+        <li>複数の車・便それぞれに下書きを作れます</li>
+      </ul>
+      <div class="note">
+        <span class="title">距離は「目安」でかまいません</span>
+        正確なkmでなくても大丈夫。おおよその区間距離を入れておけば、車ごと・月ごとの比較には十分役立ちます。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="gas">
+  <h2><span class="num">3</span>距離とガソリン代の目安</h2>
+  <div class="split wide">
+    <div>
+      <ul class="tight">
+        <li>区間距離を足して<strong>合計距離</strong>を表示</li>
+        <li><strong>燃費</strong>（km/L）と<strong>ガソリン単価</strong>（円/L）を入れると、1回・1か月の<strong>ガソリン代の目安</strong>が出ます</li>
+        <li>車ごとの走行距離の記録づけにも使えます</li>
+      </ul>
+      <div class="note good">
+        <span class="title">経費の話は経営者に効く</span>
+        「送迎にだいたい月いくらかかっているか」が見えると、車の使い方の見直しにつながります。
+      </div>
+    </div>
+    <figure class="shot">
+      <div class="screen">
+        <div class="lbl" style="margin-bottom:8px">1号車・往路の集計</div>
+        <div class="money"><span>合計距離</span><span>6.5 km</span></div>
+        <div class="money"><span>燃費（入力）</span><span>10 km/L</span></div>
+        <div class="money"><span>ガソリン単価（入力）</span><span>175 円/L</span></div>
+        <div class="money total"><span>1回のガソリン代（目安）</span><span>約 114 円</span></div>
+        <div class="money" style="color:var(--app-subtle)"><span>月20日・往復なら</span><span>約 4,550 円</span></div>
+        <span class="pin" style="top:64%; right:-11px">1</span>
+      </div>
+      <ol class="pins">
+        <li>燃費と単価を変えれば、その場で目安が更新されます</li>
+      </ol>
+      <figcaption>ガソリン代の目安（金額は例）</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="diff">
+  <h2><span class="num">4</span>「送迎ボード」との違い</h2>
+  <div class="tblwrap">
+    <table class="cmp">
+      <thead>
+        <tr><th style="width:12em">道具</th><th>得意なこと</th><th style="width:13em">こんなときに</th></tr>
+      </thead>
+      <tbody>
+        <tr><th>送迎ボード</th><td>誰をどの車・便に乗せるかの<strong>割り付け</strong>と印刷</td><td>当日キャンセルが多く、席の組み替えが大変</td></tr>
+        <tr><th>送迎ルート下書き</th><td>立ち寄る<strong>順番</strong>と<strong>距離・ガソリン代</strong>の下書き</td><td>回る順が属人化、経費の目安も知りたい</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="small muted">両方を1つにまとめることもできます（まずはどちらの痛みが大きいかで選ぶのがおすすめ）。</p>
+</section>
+
+<!-- 5 -->
+<section id="fit">
+  <h2><span class="num">5</span>向いている現場</h2>
+  <div class="cols c2">
+    <div class="card">
+      <h3>送迎エリアが広い・順番が難しい現場</h3>
+      <p class="small">立ち寄り先が多く、回る順で時間が大きく変わる現場。順番の下書きを共有できると、新人でも回せるようになります。</p>
+    </div>
+    <div class="card">
+      <h3>車の経費を把握したい現場</h3>
+      <p class="small">送迎のガソリン代・走行距離をざっくり掴みたい経営者に。買い切りで、記録づけの手間も最小です。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="safe">
+  <h2><span class="num">6</span>安全・データ・お渡し</h2>
+  <div class="cols c2">
+    <div class="card">
+      <h3>データのしくみ</h3>
+      <ul class="tight">
+        <li>その端末の中に自動保存。<strong>サーバーには送りません</strong></li>
+        <li>立ち寄り先の名前を入れる場合も、外に出ません</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>お渡しのかたち</h3>
+      <ul class="tight">
+        <li>買い切り・<strong>ソースまで全部お渡し</strong></li>
+        <li>燃費・単価の初期値は施設側で変更可能</li>
+        <li class="muted">目安：15〜25万円ほど</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section id="qa">
+  <h2><span class="num">7</span>こまったとき（想定Q&A）</h2>
+  <div class="cols c2">
+    <div class="qa">
+      <div class="q">距離は自動で入りますか？</div>
+      <div class="a">入りません。地図連携をしない代わりに、身軽で買い切りにできています。距離は目安を手入力してください（一度入れれば毎回使い回せます）。</div>
+    </div>
+    <div class="qa">
+      <div class="q">正確なガソリン代が出ますか？</div>
+      <div class="a">あくまで<strong>目安</strong>です。燃費・単価・距離の入力精度なりの概算として、比較や振り返りに使ってください。</div>
+    </div>
+    <div class="qa">
+      <div class="q">渋滞や時間は考慮されますか？</div>
+      <div class="a">されません。時間・渋滞まで扱うのはナビの領域です。この道具は「順番と距離の下書き」に絞っています。</div>
+    </div>
+    <div class="qa">
+      <div class="q">送迎ボードと一緒に使えますか？</div>
+      <div class="a">はい。割り付けは送迎ボード、順番と経費はこちら、という分担ができます。ご希望なら1本に統合もできます。</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  送迎ルート下書き — 設計図 ／ つみき 道具のたね<br>
+  <a href="dougu-catalog.html">← 道具のカタログにもどる</a><br>
+  2026年7月
+</footer>
+
+</main>
+</div>
+</div>
+</body>
+</html>

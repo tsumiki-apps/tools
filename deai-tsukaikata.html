@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>であい台帳 — 設計図（使い方の見本）</title>
+<meta name="description" content="応募から入職までを取りこぼさない。どの求人媒体が効いたかも分かる。ことのは様向けの採用管理の小さな道具の設計図。">
+<link rel="stylesheet" href="teian.css">
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="kicker">TSUMIKI ご提案 ／ 道具 02</p>
+  <h1>であい台帳</h1>
+  <p class="lead">
+    複数の求人サイトから来る応募を1か所に集めて、<strong>連絡・見学・面接の取りこぼしを防ぐ</strong>。
+    ついでに「<strong>どの求人が効いたか</strong>」も見えるので、効かない媒体を止められます。
+  </p>
+  <div class="banner">
+    <span class="ic">✎</span>
+    <span>これは<b>設計図（使い方の見本）</b>です。画面は完成イメージで、まだ動きません。
+      実際にはことのは様が使っている求人媒体に合わせてお作りします。</span>
+  </div>
+  <p class="openapp"><a class="ghost" href="kotonoha-teian.html">← 3つのご提案にもどる</a></p>
+</header>
+
+<div class="layout">
+
+<aside class="toc">
+  <p class="t">もくじ</p>
+  <ol>
+    <li><a href="#what">どんな道具か</a></li>
+    <li><a href="#add">応募が来たら</a></li>
+    <li><a href="#board">進捗をボードで</a></li>
+    <li><a href="#stat">どの求人が効いたか</a></li>
+    <li><a href="#fit">ことのは様に合う理由</a></li>
+    <li><a href="#safe">安全・データ・お渡し</a></li>
+    <li><a href="#qa">こまったとき</a></li>
+  </ol>
+</aside>
+
+<main>
+
+<!-- 1 -->
+<section id="what" style="padding-top:20px">
+  <h2><span class="num">1</span>どんな道具か</h2>
+
+  <div class="flow" style="margin-bottom:18px">
+    <span class="box">応募を登録</span><span class="arw">→</span>
+    <span class="box">ふだをずらして進捗管理</span><span class="arw">→</span>
+    <span class="box">止まっている人が赤で見える</span>
+  </div>
+
+  <div class="split wide">
+    <div>
+      <ul class="tight">
+        <li><strong>やること</strong>：応募者を1か所に集約／連絡・見学・面接・入職まで進捗を管理／媒体別の集計</li>
+        <li><strong>やらないこと</strong>：求人票の出稿、給与計算、シフト管理</li>
+        <li><strong>使う人</strong>：採用担当（管理者・代表）ひとり</li>
+        <li><strong>入れる情報</strong>：応募者のお名前・連絡先・応募媒体など。利用者様の情報は入りません</li>
+      </ul>
+    </div>
+
+    <figure class="shot">
+      <div class="screen">
+        <div class="bar"><span class="ttl">であい台帳</span><span class="gear">⚙ 設定</span></div>
+        <div class="lbl" style="margin-bottom:8px">連絡が止まっている人</div>
+        <div class="row"><span class="dot r"></span><span style="flex:1">佐藤さん（生活支援員）<br><span class="small muted">リジョブケア・応募から4日 連絡待ち</span></span></div>
+        <div class="row"><span class="dot y"></span><span style="flex:1">鈴木さん（看護師）<br><span class="small muted">ナースパワー・見学日 未定</span></span></div>
+        <span class="pin" style="top:48%; left:-11px">1</span>
+      </div>
+      <ol class="pins">
+        <li>「<strong>応募から◯日、連絡待ち</strong>」が赤で出る。ここが取りこぼし防止の要</li>
+      </ol>
+      <figcaption>開くと最初に出る画面</figcaption>
+    </figure>
+  </div>
+
+  <div class="note warn">
+    <span class="title">採用の取りこぼしは、そのまま人手不足に直結</span>
+    小規模施設では応募対応が後回しになりがち。<strong>「返信が遅れて他に決まった」</strong>を防ぐだけで、
+    採用の歩留まりが変わります。
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="add">
+  <h2><span class="num">2</span>応募が来たら（登録）</h2>
+  <div class="split wide flip">
+    <figure class="shot">
+      <div class="screen">
+        <div class="lbl" style="margin-bottom:8px">新しい応募</div>
+        <div class="dash">
+          <div class="row" style="border:none; padding:4px 0"><span style="width:74px; color:var(--app-subtle); font-size:12px">お名前</span><span class="chip line" style="flex:1">佐藤 ◯◯</span></div>
+          <div class="row" style="border:none; padding:4px 0"><span style="width:74px; color:var(--app-subtle); font-size:12px">職種</span><span class="chip line">生活支援員</span><span class="chip line">夜勤可</span></div>
+          <div class="row" style="border:none; padding:4px 0"><span style="width:74px; color:var(--app-subtle); font-size:12px">応募媒体</span><span class="chip dark">リジョブケア</span></div>
+          <div class="row" style="border:none; padding:4px 0"><span style="width:74px; color:var(--app-subtle); font-size:12px">応募日</span><span class="chip line">7/24</span></div>
+        </div>
+        <div style="margin-top:10px"><span class="btn pri">登録する</span></div>
+        <span class="pin" style="top:40%; right:-11px">1</span>
+      </div>
+      <ol class="pins">
+        <li><strong>応募媒体</strong>を必ず選ぶ。あとで「どこが効いたか」の集計に効きます</li>
+      </ol>
+    </figure>
+
+    <div>
+      <h3>入れるのは4つだけ</h3>
+      <ul class="tight">
+        <li><strong>お名前</strong>／<strong>職種</strong>（生活支援員・世話人・看護師・夜勤専任 など）</li>
+        <li><strong>応募媒体</strong>（リジョブケア・engage・ナースパワー・Indeed・自社サイト…）</li>
+        <li><strong>応募日</strong></li>
+        <li>メモ欄（面接の印象など、自由に）</li>
+      </ul>
+      <div class="note">
+        <span class="title">媒体は施設で足せます</span>
+        ことのは様が使っている求人サイトを、最初にまとめて登録しておきます。増えたら足せます。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="board">
+  <h2><span class="num">3</span>進捗をボードで動かす</h2>
+  <p>応募者の「ふだ」を、左から右へずらしていくだけ。今どの段階に何人いるかが、ひと目で分かります。</p>
+
+  <div class="split wide" style="margin-top:16px">
+    <div>
+      <ol class="tight">
+        <li><strong>応募</strong>：来たばかり。まず連絡</li>
+        <li><strong>連絡・見学</strong>：日程調整中</li>
+        <li><strong>面接</strong>：面接待ち／実施済</li>
+        <li><strong>内定・入職</strong>：決定</li>
+      </ol>
+      <div class="note good">
+        <span class="title">見送りも記録に残す</span>
+        辞退・不採用も「見送り」に置けば、<strong>あとで媒体ごとの歩留まり</strong>が正しく出ます。
+      </div>
+    </div>
+
+    <figure class="shot">
+      <div class="screen">
+        <div class="lbl" style="margin-bottom:8px">採用ボード</div>
+        <div class="kanban">
+          <div class="col"><div class="h"><span>応募</span><span>2</span></div>
+            <div class="cardlet">佐藤さん<span class="m">支援・リジョブ</span></div>
+            <div class="cardlet">田中さん<span class="m">世話人・Indeed</span></div>
+          </div>
+          <div class="col"><div class="h"><span>連絡・見学</span><span>1</span></div>
+            <div class="cardlet">鈴木さん<span class="m">看護・ナースパワー</span></div>
+          </div>
+          <div class="col"><div class="h"><span>面接</span><span>1</span></div>
+            <div class="cardlet">高橋さん<span class="m">夜勤・engage</span></div>
+          </div>
+        </div>
+        <span class="pin" style="top:38%; left:-11px">1</span>
+      </div>
+      <ol class="pins">
+        <li>ふだを右へずらすだけ。列の頭の数字が「今そこに何人か」</li>
+      </ol>
+      <figcaption>採用の進み具合（横スクロールします）</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="stat">
+  <h2><span class="num">4</span>どの求人が効いたか</h2>
+  <p>ここが、ことのは様の<strong>採用コスト</strong>にきく画面です。媒体ごとに「応募が何人来て、何人入職したか」が棒で並びます。<strong>お金を払っているのに入職ゼロの媒体</strong>が見えれば、そこを止められます。</p>
+
+  <div class="split wide" style="margin-top:16px">
+    <div>
+      <ul class="tight">
+        <li><strong>応募数</strong>だけでなく<strong>入職数</strong>まで見る（応募が多くても入職0なら効いていない）</li>
+        <li>期間で絞れる（この3か月、など）</li>
+        <li>印刷して、媒体の契約更新を判断する材料に</li>
+      </ul>
+      <div class="note">
+        <span class="title">見方の例</span>
+        「Indeedは応募12・入職1、ナースパワーは応募3・入職2」なら、
+        <strong>看護師はナースパワーが効いている</strong>と分かります。
+      </div>
+    </div>
+
+    <figure class="shot">
+      <div class="screen">
+        <div class="lbl" style="margin-bottom:10px">媒体別・この3か月（応募 → 入職）</div>
+        <div class="bars">
+          <div class="b"><span class="nm">リジョブケア</span><span class="bar" style="width:60%"></span><span class="v">8→2</span></div>
+          <div class="b"><span class="nm">Indeed</span><span class="bar" style="width:88%"></span><span class="v">12→1</span></div>
+          <div class="b"><span class="nm">ナースパワー</span><span class="bar" style="width:24%"></span><span class="v">3→2</span></div>
+          <div class="b"><span class="nm">engage</span><span class="bar" style="width:40%"></span><span class="v">5→1</span></div>
+          <div class="b"><span class="nm">自社サイト</span><span class="bar" style="width:16%"></span><span class="v">2→1</span></div>
+        </div>
+        <span class="pin" style="top:44%; right:-11px">1</span>
+      </div>
+      <ol class="pins">
+        <li>棒＝応募数、右の数字＝<strong>応募→入職</strong>。ナースパワーは少数だが入職率が高い</li>
+      </ol>
+      <figcaption>効いている求人が分かる</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="fit">
+  <h2><span class="num">5</span>ことのは様に合う理由</h2>
+  <div class="cols c2">
+    <div class="card">
+      <h3>常時、複数媒体で募集しているから</h3>
+      <p class="small">開所時から世話人・支援員・看護師を、複数の求人サイトで継続募集されています。応募の入口が多いほど、1か所での集約と取りこぼし防止が効きます。</p>
+    </div>
+    <div class="card">
+      <h3>採用は経営に直結するから</h3>
+      <p class="small">小規模施設では、1人の採用可否が運営体制を左右します。「効かない媒体を止める」判断ができれば、採用にかける費用のムダも減らせます。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="safe">
+  <h2><span class="num">6</span>安全・データ・お渡し</h2>
+  <div class="cols c2">
+    <div class="card">
+      <h3>データのしくみ</h3>
+      <ul class="tight">
+        <li>その端末の中に自動保存。<strong>サーバーには送りません</strong></li>
+        <li>応募者の個人情報を扱うので、<strong>採用担当の端末1台に限定</strong>して使うのがおすすめ</li>
+        <li>採用が終わった人の情報は、時期を決めて消せます</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>お渡しのかたち</h3>
+      <ul class="tight">
+        <li>買い切り・<strong>ソースまで全部お渡し</strong></li>
+        <li>媒体・職種・ステータスは施設側で変更可能</li>
+        <li class="muted">目安：15〜25万円ほど</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section id="qa">
+  <h2><span class="num">7</span>こまったとき（想定Q&A）</h2>
+  <div class="cols c2">
+    <div class="qa">
+      <div class="q">求人サイトと自動でつながりますか？</div>
+      <div class="a">つながりません。応募が来たら手で1件登録する方式です（30秒ほど）。サイト連携は仕様変更に弱く、この小さな道具の得意分野ではありません。</div>
+    </div>
+    <div class="qa">
+      <div class="q">複数人で同時に使えますか？</div>
+      <div class="a">採用担当ひとりでの利用を想定しています。応募者の個人情報を守るためにも、端末は1台に絞るのがおすすめです。</div>
+    </div>
+    <div class="qa">
+      <div class="q">面接記録も残せますか？</div>
+      <div class="a">はい。応募者ごとのメモ欄に自由に書けます。印刷して面接記録として残すこともできます。</div>
+    </div>
+    <div class="qa">
+      <div class="q">応募者に連絡する機能は？</div>
+      <div class="a">ありません。連絡はいつもの電話・メールで。この道具は「誰にいつ連絡すべきか」を見えるようにする係です。</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  であい台帳 — 設計図 ／ つみき ご提案（ことのは様向け）<br>
+  <a href="kotonoha-teian.html">← 3つのご提案にもどる</a><br>
+  2026年7月
+</footer>
+
+</main>
+</div>
+</div>
+</body>
+</html>

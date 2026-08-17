@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="apple-touch-icon" href="icon-black-apron.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="黒エプロン">
+<title>ブラックエプロンノート</title>
+<meta name="description" content="飲んだコーヒーを記録しながら、豆の知識を覚えるノート。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4F2EE; --surface:#ECE9E3; --ink:#242321; --muted:#77736B;
+    --hair:#D8D4CC; --ghost:#BEB9B0; --control:#F8F7F4;
+    --tabh:64px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html,body{overflow-x:hidden;}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:'Zen Maru Gothic',-apple-system,BlinkMacSystemFont,"Hiragino Maru Gothic ProN","Hiragino Sans",sans-serif;
+    line-height:1.7; -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:100%;
+    padding:0 18px calc(var(--tabh) + 16px + env(safe-area-inset-bottom));
+  }
+  .wrap{max-width:560px; margin:0 auto;}
+  svg{display:block; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;}
+
+  header{padding:20px 0 10px; display:flex; align-items:flex-end; gap:12px;}
+  header .ttl{flex:1; min-width:0;}
+  .kicker{font-size:11px; font-weight:700; letter-spacing:.16em; color:var(--muted);}
+  h1{font-size:21px; font-weight:700; letter-spacing:.03em; margin-top:2px;}
+  .iconbtn{width:38px; height:38px; border-radius:50%; border:1px solid var(--hair);
+    background:var(--control); color:var(--ink); display:flex; align-items:center;
+    justify-content:center; flex-shrink:0; cursor:pointer;}
+  .iconbtn svg{width:17px; height:17px;}
+
+  .card{background:var(--control); border:1px solid var(--hair); border-radius:20px;
+    padding:16px; margin-bottom:12px;}
+  .card.tap{cursor:pointer; transition:transform .12s ease;}
+  .card.tap:active{transform:scale(.985);}
+  h2{font-size:13px; font-weight:700; letter-spacing:.04em; margin:16px 0 8px; color:var(--muted);}
+  h2:first-child{margin-top:4px;}
+  .sub{font-size:12px; color:var(--muted); line-height:1.65;}
+  .row{display:flex; align-items:center; gap:10px;}
+  .grow{flex:1; min-width:0;}
+  .btn{display:block; width:100%; padding:14px; border-radius:16px; border:1px solid var(--ink);
+    background:var(--ink); color:var(--paper); font:inherit; font-size:15px; font-weight:700;
+    cursor:pointer; text-align:center;}
+  .btn:active{opacity:.85;}
+  .btn.ghost{background:transparent; color:var(--ink); border-color:var(--hair);}
+  .btn.warn{background:transparent; color:var(--muted); border-color:var(--hair);}
+  .stars{letter-spacing:.06em; font-size:12px;}
+  .empty{text-align:center; color:var(--ghost); font-size:13px; padding:34px 10px; line-height:1.9;}
+  .pill{display:inline-block; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px;
+    border:1px solid var(--hair); color:var(--muted); background:var(--paper);}
+  .pill.solid{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+
+  /* ---- tabs ---- */
+  nav{position:fixed; left:0; right:0; bottom:0; z-index:40;
+    background:rgba(244,242,238,.94); backdrop-filter:blur(12px);
+    border-top:1px solid var(--hair); padding-bottom:env(safe-area-inset-bottom);}
+  nav .inner{max-width:560px; margin:0 auto; display:flex; height:var(--tabh);}
+  nav button{flex:1; background:none; border:0; font:inherit; color:var(--ghost);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    cursor:pointer; padding:0;}
+  nav button svg{width:20px; height:20px;}
+  nav button span{font-size:10px; font-weight:700;}
+  nav button.on{color:var(--ink);}
+
+  /* ---- home ---- */
+  .stats{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:8px;}
+  .stat{background:var(--control); border:1px solid var(--hair); border-radius:18px;
+    padding:11px 4px 9px; text-align:center;}
+  .stat b{display:block; font-size:21px; font-weight:700; line-height:1.15;}
+  .stat b small{font-size:12px; color:var(--muted); font-weight:400;}
+  .stat span{font-size:10.5px; color:var(--muted);}
+  .big{display:flex; align-items:center; gap:13px; background:var(--ink); color:var(--paper);
+    border-radius:22px; padding:15px 15px; margin-bottom:8px; cursor:pointer;
+    transition:transform .12s ease;}
+  .big:active{transform:scale(.985);}
+  .big .ic{width:42px; height:42px; border-radius:50%; border:1.5px solid rgba(244,242,238,.35);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .big .ic svg{width:20px; height:20px; stroke-width:1.6;}
+  .big .t{font-size:16px; font-weight:700; line-height:1.3;}
+  .big .d{font-size:11.5px; opacity:.68; margin-top:2px;}
+  .duo{display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:0;}
+  /* ホームだけ、iPhone の1画面いっぱいに広がる。
+     余ったぶんは 記録する／クイズ・豆／さいきん が受け持ち、上限で伸びすぎを止める。 */
+  #view.fill{display:flex; flex-direction:column; gap:9px;
+    min-height:calc(100vh - var(--hh,86px) - var(--tabh) - 16px - env(safe-area-inset-bottom));
+    min-height:calc(100dvh - var(--hh,86px) - var(--tabh) - 16px - env(safe-area-inset-bottom));}
+  #view.fill .stats{margin-bottom:0; flex:0 0 auto;}
+  #view.fill .big{margin-bottom:0; flex:1 1 0; min-height:76px; max-height:126px;}
+  #view.fill .duo{flex:1.55 1 0; min-height:116px; max-height:172px;}
+  #view.fill .recent{flex:1.3 1 0; min-height:0; display:flex; flex-direction:column;}
+  #view.fill .recent h2{margin:3px 0 7px;}
+  #view.fill .recent .list{flex:1 1 auto; display:flex; flex-direction:column; gap:7px; min-height:0;}
+  #view.fill .recent .mini{margin-bottom:0; flex:1 1 0; min-height:44px; max-height:66px;}
+  .nonote{display:flex; align-items:center; justify-content:center; text-align:center;
+    border:1px dashed var(--hair); border-radius:16px; color:var(--ghost); font-size:12.5px;
+    line-height:1.7; padding:10px; flex:1 1 auto;}
+  .tile{background:var(--control); border:1px solid var(--hair); border-radius:22px;
+    padding:14px 13px; cursor:pointer; transition:transform .12s ease;
+    display:flex; flex-direction:column; justify-content:center;}
+  .tile:active{transform:scale(.985);}
+  .tile .ic{width:36px; height:36px; border-radius:50%; border:1px solid var(--hair);
+    display:flex; align-items:center; justify-content:center; margin-bottom:8px;}
+  .tile .ic svg{width:19px; height:19px;}
+  .tile .t{font-size:15px; font-weight:700;}
+  .tile .d{font-size:11px; color:var(--muted); margin-top:1px;}
+
+  /* ---- avatar ---- */
+  .av{border-radius:50%; flex-shrink:0; overflow:hidden; display:flex; align-items:center;
+    justify-content:center; background:var(--surface); position:relative;}
+  .av img.mine{width:100%; height:100%; object-fit:cover; display:block;}
+  /* 公式のパッケージ写真。袋は縦長なので全体が入るように収め、届いたら線画を隠す。
+     写真が来たら地を白くして袋を見やすくし、焙煎度は内側の輪の色で残す。 */
+  .av img.pkg{position:absolute; inset:0; width:100%; height:100%;
+    object-fit:contain; padding:15%; display:block;}
+  .av.haspkg svg{display:none;}
+  /* .av.blonde などが後ろにあるので、こちらは2クラス重ねで specificity を上げる */
+  .av.blonde.haspkg{background:#FCFBF9; box-shadow:inset 0 0 0 3px #D8CBB4;}
+  .av.medium.haspkg{background:#FCFBF9; box-shadow:inset 0 0 0 3px #A98A6B;}
+  .av.dark.haspkg{background:#FCFBF9; box-shadow:inset 0 0 0 3px #463A32;}
+  .av.mine.haspkg{background:#FCFBF9; box-shadow:inset 0 0 0 3px #8C837A;}
+  .av svg{stroke:#fff; stroke-width:1.6;}
+  .av.blonde{background:#D8CBB4;} .av.medium{background:#A98A6B;} .av.dark{background:#463A32;}
+  .av.mine{background:#8C837A;}
+
+  /* ---- flavor icons ---- */
+  .ficons{display:flex; gap:6px; align-items:center; flex-wrap:wrap;}
+  .fi{width:31px; height:31px; border-radius:50%; border:1px solid var(--hair);
+    background:var(--paper); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .fi svg{width:18px; height:18px; stroke-width:1.5; color:var(--ink);}
+  .legend{display:flex; gap:14px; justify-content:center; margin:0 0 14px;}
+  .legend span{display:flex; align-items:center; gap:6px; font-size:11px; color:var(--muted);}
+  .legend i{width:13px; height:13px; border-radius:50%; display:block;}
+  .filab{display:flex; flex-direction:column; align-items:center; gap:5px; width:80px;}
+  .filab .fi{width:44px; height:44px; background:var(--control);}
+  .filab .fi svg{width:22px; height:22px;}
+  .filab span{font-size:10px; color:var(--muted); text-align:center; line-height:1.4;}
+  .figrid{display:flex; flex-wrap:wrap; gap:10px 4px;}
+
+  /* ---- inputs ---- */
+  input[type=text],input[type=date],input[type=search],select,textarea{
+    width:100%; font:inherit; font-size:16px; color:var(--ink); background:var(--control);
+    border:1px solid var(--hair); border-radius:14px; padding:11px 13px; -webkit-appearance:none;}
+  textarea{resize:vertical; min-height:70px; line-height:1.7;}
+  label.fl{display:block; font-size:12px; font-weight:700; color:var(--muted); margin:14px 0 6px;}
+  label.fl:first-of-type{margin-top:0;}
+  .half{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+
+  .filters{display:flex; gap:6px; overflow-x:auto; padding:2px 0 12px;}
+  .filters::-webkit-scrollbar{display:none;}
+  .chip{flex-shrink:0; font-size:12px; font-weight:700; padding:7px 13px; border-radius:999px;
+    border:1px solid var(--hair); background:var(--control); color:var(--muted); cursor:pointer;}
+  .chip.on{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+
+  .bean{display:flex; align-items:center; gap:12px; padding:11px 13px; background:var(--control);
+    border:1px solid var(--hair); border-radius:20px; margin-bottom:9px; cursor:pointer;
+    transition:transform .12s ease;}
+  .bean:active{transform:scale(.985);}
+  .bean .av{width:44px; height:44px;}
+  .bean .av svg{width:20px; height:20px;}
+  .bean .nm{font-size:14.5px; font-weight:700; line-height:1.4;}
+  .bean .ck{position:absolute; right:-1px; bottom:-1px; width:15px; height:15px; border-radius:50%;
+    background:var(--ink); border:2px solid var(--control); display:flex; align-items:center; justify-content:center;}
+  .bean .ck svg{width:8px; height:8px; stroke:var(--paper); stroke-width:3;}
+
+  .meter{display:inline-flex; gap:3px; align-items:center; vertical-align:middle;}
+  .meter i{width:16px; height:5px; border-radius:3px; background:var(--hair); display:block;}
+  .meter i.on{background:var(--ink);}
+  .kv{display:flex; gap:10px; padding:9px 0; border-bottom:1px solid var(--hair); font-size:13px;}
+  .kv:last-child{border-bottom:0;}
+  .kv .k{width:72px; flex-shrink:0; color:var(--muted); font-size:12px; font-weight:700; padding-top:1px;}
+  .kv .v{flex:1; min-width:0;}
+  .tags{display:flex; flex-wrap:wrap; gap:5px;}
+  .tag{font-size:11.5px; padding:4px 9px; border-radius:999px; background:var(--surface);
+    border:1px solid var(--hair); color:var(--ink); font-family:inherit; cursor:pointer;}
+  .tag.add{border-style:dashed; color:var(--muted); background:transparent;}
+
+  /* ---- sheet ---- */
+  .sheet{position:fixed; inset:0; z-index:60; display:none;}
+  .sheet.on{display:block;}
+  .sheet .veil{position:absolute; inset:0; background:rgba(36,35,33,.32);}
+  .sheet .panel{position:absolute; left:0; right:0; bottom:0; max-height:92vh; overflow-y:auto;
+    background:var(--paper); border-radius:26px 26px 0 0;
+    padding:10px 18px calc(28px + env(safe-area-inset-bottom)); -webkit-overflow-scrolling:touch;}
+  .sheet .panel .inner{max-width:560px; margin:0 auto;}
+  .grab{width:38px; height:4px; border-radius:3px; background:var(--hair); margin:0 auto 14px;}
+  .sh-h{display:flex; align-items:flex-start; gap:10px; margin-bottom:14px;}
+  .sh-h h3{font-size:18px; font-weight:700; line-height:1.4; flex:1;}
+  .x{width:32px; height:32px; border-radius:50%; border:1px solid var(--hair); background:var(--control);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; cursor:pointer;}
+  .x svg{width:14px; height:14px;}
+
+  .hero{display:flex; align-items:center; gap:14px; margin-bottom:16px;}
+  .hero .av{width:76px; height:76px;}
+  .hero .av svg{width:34px; height:34px;}
+  .photobtn{font:inherit; font-size:11.5px; font-weight:700; color:var(--muted); background:none;
+    border:0; cursor:pointer; padding:4px 0; text-decoration:underline; text-underline-offset:3px;}
+
+  /* ---- quiz ---- */
+  .qprog{display:flex; gap:4px; margin-bottom:18px;}
+  .qprog i{flex:1; height:4px; border-radius:3px; background:var(--hair);}
+  .qprog i.on{background:var(--ink);} .qprog i.bad{background:var(--ghost);}
+  .qtext{font-size:17px; font-weight:700; line-height:1.7; margin-bottom:18px;}
+  .opt{display:block; width:100%; text-align:left; font:inherit; font-size:14.5px; line-height:1.6;
+    background:var(--control); border:1.5px solid var(--hair); border-radius:16px; padding:14px 15px;
+    margin-bottom:9px; cursor:pointer; color:var(--ink);}
+  .opt.correct{border-color:var(--ink); background:var(--ink); color:var(--paper);}
+  .opt.wrong{border-color:var(--ghost); background:var(--surface); color:var(--muted); text-decoration:line-through;}
+  .opt.reveal{border-color:var(--ink);}
+  .expl{background:var(--surface); border-radius:16px; padding:14px; font-size:13px;
+    line-height:1.8; margin-bottom:12px;}
+  .score{text-align:center; padding:24px 0 6px;}
+  .score b{display:block; font-size:44px; font-weight:700; line-height:1.1;}
+  .score span{font-size:13px; color:var(--muted);}
+
+  /* ---- notes ---- */
+  .note{display:flex; gap:11px; align-items:center; background:var(--control); border:1px solid var(--hair);
+    border-radius:20px; padding:9px 11px; margin-bottom:8px; cursor:pointer;}
+  .note .av{width:40px; height:40px;}
+  .note .av svg{width:20px; height:20px;}
+  .mini{display:flex; gap:9px; align-items:center; background:var(--control); border:1px solid var(--hair);
+    border-radius:16px; padding:8px 11px; margin-bottom:7px; cursor:pointer;}
+  .mini .av{width:28px; height:28px;} .mini .av svg{width:13px; height:13px;}
+  .mini .dt{font-size:10.5px; color:var(--muted); font-weight:700; flex-shrink:0;}
+  .mini .nm{font-size:13px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .note .dt{font-size:11px; color:var(--muted); font-weight:700;}
+  .note .nm{font-size:14.5px; font-weight:700; line-height:1.4;}
+  .note .wd{font-size:12px; color:var(--muted); margin-top:3px; line-height:1.5;
+    display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden;}
+  .levelpick{display:flex; gap:7px;}
+  .levelpick button{flex:1; font:inherit; font-size:12.5px; font-weight:700; padding:11px 4px;
+    border-radius:14px; border:1px solid var(--hair); background:var(--control); color:var(--muted); cursor:pointer;}
+  .levelpick button.on{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+  .starpick{display:flex; gap:6px;}
+  .starpick button{font:inherit; font-size:22px; line-height:1; background:none; border:0;
+    color:var(--hair); cursor:pointer; padding:2px;}
+  .starpick button.on{color:var(--ink);}
+  .steplabel{display:flex; align-items:center; gap:8px; margin:20px 0 8px;}
+  .steplabel .n{width:26px; height:26px; border-radius:50%; background:var(--ink); color:var(--paper);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .steplabel .n svg{width:14px; height:14px; stroke:var(--paper);}
+  .steplabel .t{font-size:13.5px; font-weight:700;}
+  .steplabel .h{font-size:11px; color:var(--muted); margin-left:auto;}
+  .shot{width:100%; border-radius:18px; display:block; margin-bottom:14px;}
+
+  .word{padding:12px 0; border-bottom:1px solid var(--hair); display:flex; gap:10px; align-items:flex-start;}
+  .word:last-child{border-bottom:0;}
+  .word .w{font-size:14px; font-weight:700;}
+  .word .m{font-size:12.5px; color:var(--muted); line-height:1.65; margin-top:2px;}
+  .del{font:inherit; font-size:11px; color:var(--ghost); background:none; border:0; cursor:pointer; flex-shrink:0;}
+  .foot{text-align:center; font-size:11px; color:var(--ghost); margin-top:30px; line-height:1.9;}
+  .foot:empty{margin:0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="ttl">
+      <p class="kicker">BLACK APRON NOTE</p>
+      <h1 id="pageTitle">ブラックエプロンノート</h1>
+    </div>
+    <button class="iconbtn" id="gearBtn" aria-label="設定">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5v.2a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H2a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H8a1.6 1.6 0 0 0 1-1.5V2a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V8a1.6 1.6 0 0 0 1.5 1h.2a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>
+    </button>
+  </header>
+  <main id="view"></main>
+  <p class="foot" id="foot"></p>
+</div>
+
+<nav>
+  <div class="inner">
+    <button data-tab="home" class="on">
+      <svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19z"/><path d="M9.5 20.5v-6h5v6"/></svg>
+      <span>ホーム</span>
+    </button>
+    <button data-tab="beans">
+      <svg viewBox="0 0 24 24"><g transform="rotate(35 12 12)"><ellipse cx="12" cy="12" rx="5.2" ry="8.6"/><path d="M12 3.6c-2.6 3-2.6 5.6 0 8.4s2.6 5.4 0 8.4"/></g></svg>
+      <span>豆</span>
+    </button>
+    <button data-tab="notes">
+      <svg viewBox="0 0 24 24"><path d="M6.5 3.5h8L19 8v12.5H6.5z"/><path d="M14 3.5V8h5"/><path d="M9.5 12.5h6M9.5 16h4"/></svg>
+      <span>記録</span>
+    </button>
+    <button data-tab="quiz">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.7-.9 1.3v.4"/><circle cx="12" cy="16.6" r=".7" fill="currentColor" stroke="none"/></svg>
+      <span>クイズ</span>
+    </button>
+    <button data-tab="words">
+      <svg viewBox="0 0 24 24"><path d="M4.5 5.5A2 2 0 0 1 6.5 3.5H19v17H6.5a2 2 0 0 0-2 2z"/><path d="M4.5 5.5v15"/><path d="M8.5 8h6.5M8.5 11.5h5"/></svg>
+      <span>ことば</span>
+    </button>
+  </div>
+</nav>
+
+<div class="sheet" id="sheet">
+  <div class="veil" data-close></div>
+  <div class="panel"><div class="inner"><div class="grab"></div><div id="sheetBody"></div></div></div>
+</div>
+
+<script>
+/* =========================================================================
+   ブラックエプロンノート
+   飲んだ一杯を記録しながら、コーヒーの知識を覚えるノート。
+   豆・ことば・クイズはあとから自分で足せる。写真も端末の中だけに保存する。
+   ========================================================================= */
+
+/* ---------- 絵（線画アイコン） ---------- */
+const G = {
+  bean:'<g transform="rotate(35 12 12)"><ellipse cx="12" cy="12" rx="5.2" ry="8.6"/><path d="M12 3.6c-2.6 3-2.6 5.6 0 8.4s2.6 5.4 0 8.4"/></g>',
+  cup:'<path d="M5 7h11v6a5.5 5.5 0 0 1-11 0z"/><path d="M16 8.5h1.8a2.6 2.6 0 0 1 0 5.2H16"/><path d="M4 20h13"/>',
+  quiz:'<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.7-.9 1.3v.4"/><circle cx="12" cy="16.6" r=".7" fill="currentColor" stroke="none"/>',
+  book:'<path d="M4.5 5.5A2 2 0 0 1 6.5 3.5H19v17H6.5a2 2 0 0 0-2 2z"/><path d="M4.5 5.5v15"/>',
+  nose:'<path d="M13 4v6.5c0 1.5 2.5 2.5 2.5 4.5S13.5 18 12 18"/><path d="M9 18.5a4 4 0 0 0 6 1.5"/>',
+  drop:'<path d="M12 3.5c3 4 5.5 6.5 5.5 10a5.5 5.5 0 0 1-11 0c0-3.5 2.5-6 5.5-10Z"/>',
+  tongue:'<path d="M6 5h12v7a6 6 0 0 1-12 0z"/><path d="M12 12v5.5a2.5 2.5 0 0 0 5 0"/>',
+  pen:'<path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14.5 6.5l3 3"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  check:'<path d="M5 12.5 10 17.5 19 7"/>',
+  camera:'<path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+  /* チョコ＝板チョコ本体＋割れて外れた1片。四角＋十字は「画像を添付」マークに
+     見えてしまうため 2026-08-13 に描き直した（18pxでも潰れない線数にしてある）。 */
+  cocoa:'<g transform="rotate(-14 12 12)"><path d="M3.8 9.4h9.8v8.2a1.6 1.6 0 0 1-1.6 1.6H5.4a1.6 1.6 0 0 1-1.6-1.6Z"/><path d="M8.7 9.4v9.8"/><rect x="14.7" y="5.2" width="5.8" height="5.8" rx="1.3"/></g>',
+  nut:'<path d="M12 20.5c-3.6 0-6.2-3-6.2-7 0-3.4 2.4-6.5 6.2-9.5 3.8 3 6.2 6.1 6.2 9.5 0 4-2.6 7-6.2 7Z"/><path d="M6.1 10.8h11.8"/>',
+  citrus:'<path d="M3.5 12.5a8.5 8.5 0 0 1 17 0Z"/><path d="M12 12.5V4M7.6 12.5c0-3 1.1-6 2.4-7.9M16.4 12.5c0-3-1.1-6-2.4-7.9"/>',
+  berry:'<circle cx="9.5" cy="14.5" r="4"/><circle cx="15.2" cy="12.4" r="3.4"/><path d="M13.4 9.4c.4-2.1 1.9-3.7 3.9-4.4"/>',
+  caramel:'<path d="M12 3.5c3 4 5.5 6.5 5.5 10a5.5 5.5 0 0 1-11 0c0-3.5 2.5-6 5.5-10Z"/>',
+  spice:'<path d="M12 3.5 14.1 9l5.9.4-4.5 3.8 1.4 5.8-4.9-3.1-4.9 3.1L8.5 13.2 4 9.4 9.9 9Z"/>',
+  herb:'<path d="M12 20V9"/><path d="M12 13.5c-3.6 0-6.2-2.1-6.7-6.2 3.6 0 6.2 2.1 6.7 6.2Z"/><path d="M12 11.5c3.6 0 6.2-2.1 6.7-6.2-3.6 0-6.2 2.1-6.7 6.2Z"/>',
+  earth:'<path d="M3.5 17.5c2.6-4.2 4.6-6.3 6.1-6.3s2 1.6 3.5 1.6 2.6-3.6 4.6-3.6 2.5 3.1 3 8.3Z"/><path d="M3 20.5h18"/>',
+  smoke:'<path d="M7.5 19c0-2 2-2.6 2-4.6S7.5 11.5 7.5 9.5s2-3.1 4-3.1"/><path d="M14 19c0-2 2-2.6 2-4.6s-2-2.9-2-4.9 2-3.1 4-3.1"/>',
+  flower:'<circle cx="12" cy="12" r="2.2"/><ellipse cx="12" cy="6.6" rx="2.5" ry="3.2"/><ellipse cx="12" cy="17.4" rx="2.5" ry="3.2"/><ellipse cx="6.6" cy="12" rx="3.2" ry="2.5"/><ellipse cx="17.4" cy="12" rx="3.2" ry="2.5"/>',
+  sugar:'<path d="M12 3.8 20 8v8l-8 4.2L4 16V8Z"/><path d="M4 8l8 4.2L20 8M12 12.2v8"/>',
+  wave:'<path d="M3.5 9.5c2.5-2.6 5-2.6 8 0s5.5 2.6 8 0"/><path d="M3.5 15.5c2.5-2.6 5-2.6 8 0s5.5 2.6 8 0"/>',
+  fruit:'<circle cx="12" cy="14.5" r="6"/><path d="M12 8.5V5.2c2-1.2 3.8 0 3.8 0"/>',
+  strong:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/>',
+  light:'<path d="M3.5 10h9.8a3 3 0 1 0-3-3"/><path d="M3.5 14.5h12.3a3 3 0 1 1-3 3"/>',
+  balance:'<path d="M12 4.5v15M5.5 8.5h13"/><path d="M5.5 8.5 3 14h5Z"/><path d="M18.5 8.5 16 14h5Z"/><path d="M8.5 19.5h7"/>',
+  donut:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
+  cake:'<path d="M4.5 19.5v-6h15v6z"/><path d="M4.5 13.5c0-2 3.4-3 7.5-3s7.5 1 7.5 3"/><path d="M12 10.5V7"/><circle cx="12" cy="5.8" r="1"/>',
+  cheese:'<path d="M4 17.5v-6l16-5.5v11.5z"/><circle cx="9" cy="14" r="1.1"/><circle cx="15" cy="12.3" r="1.1"/>',
+  cookie:'<circle cx="12" cy="12" r="8"/><circle cx="10" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="14.6" cy="12.2" r="1" fill="currentColor" stroke="none"/><circle cx="11" cy="15" r="1" fill="currentColor" stroke="none"/>',
+  sandwich:'<path d="M3.5 9.5 12 5l8.5 4.5-8.5 4.5z"/><path d="M3.5 13.5 12 18l8.5-4.5"/>',
+  waffle:'<rect x="4" y="6" width="16" height="12" rx="2"/><path d="M4 10h16M4 14h16M9.3 6v12M14.6 6v12"/>',
+  roll:'<circle cx="12" cy="12" r="8"/><path d="M15.5 12a3.5 3.5 0 1 0-3.5 3.5"/>',
+  dish:'<path d="M4 11h16a8 8 0 0 1-16 0Z"/><path d="M3 19.5h18"/>',
+};
+const ic = (key, cls='') => `<svg viewBox="0 0 24 24" class="${cls}">${G[key]||G.bean}</svg>`;
+
+/* 風味のことば → 絵 */
+const FLAVOR_MAP = [
+  [['チョコ','ココア'],'cocoa','チョコ'],
+  [['ナッツ','アーモンド','クルミ','ピーカン','ペカン','ヘーゼル'],'nut','ナッツ'],
+  [['シトラス','柑橘','グレープフルーツ','レモン','オレンジ'],'citrus','柑橘'],
+  [['ベリー','カラント','プラム'],'berry','ベリー'],
+  [['キャラメル','メープル','黒糖'],'caramel','キャラメル'],
+  [['スパイス','スパイシー','シナモン','ナツメグ','アニス'],'spice','スパイス'],
+  [['ハーブ','タラゴン','バジル','杉','木の'],'herb','ハーブ'],
+  [['大地','土','トリュフ','きのこ'],'earth','大地'],
+  [['スモーキー','煙','炭'],'smoke','スモーキー'],
+  [['フローラル','花','はちみつ','ハニー'],'flower','フローラル'],
+  [['甘','シュガー','バニラ','キャンディード'],'sugar','甘み'],
+  [['なめらか','シロップ','ジューシー','クリーミー','やわらか'],'wave','なめらか'],
+  [['フルーティ','フルーツ','リンゴ','バター'],'fruit','フルーティ'],
+  [['リッチ','力強','深み','コク','フルボディ','重厚'],'strong','しっかり'],
+  [['軽','さわやか','はじけ','ライト'],'light','軽やか'],
+  [['バランス','ほどよい'],'balance','バランス'],
+];
+function flavorIcon(text){
+  for(const [keys,g] of FLAVOR_MAP) if(keys.some(k=>text.includes(k))) return g;
+  return 'drop';
+}
+const FOOD_MAP = [
+  [['ドーナツ'],'donut'],[['ケーキ','タルト','テリーヌ'],'cake'],[['チーズ'],'cheese'],
+  [['クッキー','ビスコッティ','焼き菓子'],'cookie'],[['サンド'],'sandwich'],[['ワッフル'],'waffle'],
+  [['シナモンロール','ロール','シナモン'],'roll'],[['チョコ'],'cocoa'],[['フルーツ','ヨーグルト','リンゴ'],'fruit'],
+  [['ナッツ','ピーナッツ'],'nut'],[['キャラメル'],'caramel'],[['料理','ベーコン'],'dish'],
+];
+function foodIcon(text){
+  for(const [keys,g] of FOOD_MAP) if(keys.some(k=>text.includes(k))) return g;
+  return 'dish';
+}
+
+/* ---------- 豆データ（最初から入っている分） ---------- */
+const R = {blonde:'ブロンド', medium:'ミディアム', dark:'ダーク'};
+const REGIONS = ['ラテンアメリカ','アフリカ','アジア/太平洋','複数の地域'];
+const PROCESSES = ['水洗式','半水洗式','乾燥式'];
+const BEANS = [
+  { id:'lightnote', name:'ライトノート ブレンド', roast:'blonde', img:'blonde01_Lightnoto', type:'ブレンド',
+    region:'ラテンアメリカ', origin:'ラテンアメリカ産', process:'水洗式', acidity:2, body:1,
+    flavors:['ミルクチョコレート','焙煎ナッツ','やわらかな口あたり'],
+    pairing:['アメリカンワッフル','ハム&チーズサンド'],
+    story:'スターバックスでいちばん浅い焙煎（ブロンド ロースト）。焙煎の香ばしさより、豆そのもののやさしい甘さが立つ。' },
+  { id:'breakfast', name:'ブレックファースト ブレンド', roast:'medium', img:'medium01_BreakfastBlend', type:'ブレンド',
+    region:'ラテンアメリカ', origin:'ラテンアメリカ産', process:'水洗式', acidity:3, body:1,
+    flavors:['柑橘','さわやか','軽やか'], pairing:['フルーツ','ヨーグルト','朝食のサンドイッチ'],
+    story:'その名のとおり「1日のはじまり」のために組み立てられたブレンド。明るい酸味で目が覚める。' },
+  { id:'kenya', name:'ケニア', roast:'medium', img:'medium03_Kenya', type:'シングルオリジン',
+    region:'アフリカ', origin:'ケニア', process:'水洗式', acidity:3, body:2,
+    flavors:['グレープフルーツ','ブラックカラント','ジューシー'], pairing:['レモンケーキ','ベリーのタルト'],
+    story:'標高の高い農園と火山性の土壌が生む、はじけるような酸味。アフリカらしい個性がいちばんわかりやすい豆。' },
+  { id:'siren', name:'サイレン ブレンド', roast:'medium', img:'medium04_SirenBlend', type:'ブレンド',
+    region:'複数の地域', origin:'ラテンアメリカとアフリカ', process:'水洗式', acidity:2, body:2,
+    flavors:['キャンディードシトラス','チョコレート'], pairing:['チョコレートテリーヌ','チョコレートチャンククッキー'],
+    story:'ロゴのサイレン（人魚）にちなんだブレンド。ブランドそのものを表す一杯として作られた。' },
+  { id:'pikeplace', name:'パイクプレイス ロースト', roast:'medium', img:'medium05_PikePlace', type:'ブレンド',
+    region:'ラテンアメリカ', origin:'ラテンアメリカ産', process:'水洗式', acidity:2, body:2,
+    flavors:['ナッツ','ココア','やわらかなスパイス'], pairing:['シュガードーナツ','アメリカンワッフル'],
+    story:'1号店のあるシアトルの市場「パイクプレイス マーケット」の名を冠した、店舗で毎日淹れられる定番。' },
+  { id:'guatemala', name:'グアテマラ アンティグア', roast:'medium', img:'medium06_Guatemala', type:'シングルオリジン',
+    region:'ラテンアメリカ', origin:'グアテマラ・アンティグア地方', process:'水洗式', acidity:2, body:2,
+    flavors:['ココア','やわらかなスパイス','なめらか'], pairing:['チョコレートケーキ','ナッツの焼き菓子'],
+    story:'三方を火山に囲まれたアンティグア渓谷。火山灰の土壌が、バランスのよいやわらかな風味を生む。' },
+  { id:'house', name:'ハウス ブレンド', roast:'medium', img:'medium07_HouseBlend', type:'ブレンド',
+    region:'ラテンアメリカ', origin:'ラテンアメリカ産', process:'水洗式', acidity:2, body:2,
+    flavors:['ナッツ','ココア','リッチ'], pairing:['ナッツの焼き菓子','ドーナツ'],
+    story:'1971年の創業当初からある、いちばん歴史の長いブレンド。スターバックスにとっての「家の味」。' },
+  { id:'decaf', name:'ディカフェ ハウス ブレンド', roast:'medium', img:'medium08_Decaf_HouseBlend', type:'ブレンド',
+    region:'ラテンアメリカ', origin:'ラテンアメリカ産', process:'水洗式', acidity:2, body:2,
+    flavors:['ナッツ','ココア','リッチ'], pairing:['ナッツの焼き菓子','ドーナツ'],
+    story:'ハウス ブレンドからカフェインだけを取り除いたもの。二酸化炭素抽出法やスイスウォータープロセスが使われる。' },
+  { id:'colombia', name:'コロンビア', roast:'medium', img:'medium09_Colombia', type:'シングルオリジン',
+    region:'ラテンアメリカ', origin:'コロンビア', process:'水洗式', acidity:2, body:3,
+    flavors:['ナッツ','ハーブ','しっかりしたコク'], pairing:['チーズ','ナッツ'],
+    story:'アンデスの斜面で育つコロンビア。ラテンアメリカの中では、コクのしっかりした側にいる。' },
+  { id:'tokyo', name:'TOKYO ロースト', roast:'medium', img:'medium10_tokyo02', type:'ブレンド',
+    region:'複数の地域', origin:'複数地域の豆', process:'水洗式', acidity:2, body:2,
+    flavors:['ほどよい甘み','なめらか','バランス'], pairing:['和のスイーツ','焼き菓子'],
+    story:'スターバックス リザーブ® ロースタリー 東京にちなんだブレンド。多様なものが同居する東京の街を表現している。' },
+  { id:'sumatra', name:'スマトラ', roast:'dark', img:'dark04_Sumatra', type:'シングルオリジン',
+    region:'アジア/太平洋', origin:'インドネシア・スマトラ島', process:'半水洗式', acidity:1, body:3,
+    flavors:['大地のような','ハーブ','シロップのようななめらかさ'],
+    pairing:['ニューヨークチーズケーキ','シナモンロール','チーズサンド'],
+    story:'独特の半水洗式（スマトラ式）加工が、酸味をおさえた大地のような香りをつくる。' },
+  { id:'komodo', name:'コモド ドラゴン ブレンド', roast:'dark', img:'dark05_KomodoDragon', type:'ブレンド',
+    region:'複数の地域', origin:'アジア/太平洋とラテンアメリカ', process:'半水洗式', acidity:1, body:3,
+    flavors:['ハーブ','大地のような','スパイシー'], pairing:['スパイスの効いた料理','チーズ'],
+    story:'インドネシアにすむコモドドラゴンから名づけられた、力強くワイルドなブレンド。' },
+  { id:'cafeverona', name:'カフェ ベロナ', roast:'dark', img:'dark06_CaffeVerona', type:'ブレンド',
+    region:'複数の地域', origin:'ラテンアメリカとアジア/太平洋', process:'水洗式', acidity:1, body:2,
+    flavors:['ココア','甘い','なめらか'], pairing:['チョコレートのデザート'],
+    story:'もとは近所のレストランのために作られた「ジェイズ ブレンド」。チョコレートに合うよう設計され、のちにイタリアのヴェローナにちなんで改名された。' },
+  { id:'espresso', name:'エスプレッソ ロースト', roast:'dark', img:'dark01_EspressoRoast', type:'ブレンド',
+    region:'複数の地域', origin:'ラテンアメリカとアジア/太平洋', process:'水洗式', acidity:1, body:3,
+    flavors:['キャラメル','リッチ','スパイス'], pairing:['キャラメル オールドファッションドーナツ'],
+    story:'1975年から変わらないレシピ。ミルクと合わせても風味が負けないように設計されている。' },
+  { id:'italian', name:'イタリアン ロースト', roast:'dark', img:'dark03_ItalianRoast', type:'ブレンド',
+    region:'複数の地域', origin:'複数地域の豆', process:'水洗式', acidity:1, body:3,
+    flavors:['キャラメルのような','甘い','深み'], pairing:['ビスコッティ','ダークチョコレート'],
+    story:'深煎りの中でも「甘さ」が立つ焙煎。イタリアの喫茶文化にちなむ名前。' },
+  { id:'french', name:'フレンチ ロースト', roast:'dark', img:'dark02_FrenchRoast', type:'ブレンド',
+    region:'複数の地域', origin:'複数地域の豆', process:'水洗式', acidity:1, body:3,
+    flavors:['スモーキー','キャラメル','力強い'], pairing:['ダークチョコレート','ベーコンの入った料理'],
+    story:'スターバックスでもっとも深い焙煎。豆の個性より、焙煎そのものの香ばしさが主役になる。' },
+
+  /* ---- ここから季節限定（2026年8月13日までに出ていたもの） ----
+     季節限定は毎年ねらう味に合わせて豆を選び直すので、同じ名前でも年によって産地や
+     風味が変わる。ここは直近の年をもとにしたまとめ。 */
+  { id:'spring', name:'スプリング シーズン ブレンド', roast:'medium', type:'ブレンド', season:'春',
+    region:'複数の地域', origin:'インドネシア・パプアニューギニア ほか',
+    process:'水洗式・半水洗式・乾燥式', acidity:2, body:2,
+    flavors:['フローラル','ココア','バニラ'],
+    pairing:['アメリカンワッフル','プレーンのクッキー'],
+    story:'春だけのブレンド（2月〜4月ごろ）。パプアニューギニアのさわやかな果実味に、インドネシアの深みを重ねている。2024年から年々浅煎りに寄せていて、春らしい明るさを前に出す作りに変わってきた。' },
+
+  { id:'icedcoffee', name:'アイスコーヒー ブレンド', roast:'medium', type:'ブレンド', season:'夏',
+    region:'ラテンアメリカ', origin:'ラテンアメリカ産', process:'水洗式', acidity:2, body:2,
+    flavors:['モルトミルクチョコレート','ブラウンシュガー','香ばしいコク'],
+    pairing:['チョコレートのお菓子','キャラメル','ピーナッツバターのお菓子'],
+    story:'氷で急冷しても風味が負けないように作られた夏のブレンド（4月ごろ）。2025年版はアフリカ産でシトラス寄りだったが、2026年版はラテンアメリカ産で、チョコと黒糖の甘さを軸にした深い方向へ変わった。' },
+
+  { id:'anniversary', name:'アニバーサリー ブレンド', roast:'dark', type:'ブレンド', season:'秋',
+    region:'アジア/太平洋', origin:'インドネシア（スラウェシ・ウェストジャバ）とエイジドスマトラ',
+    process:'半水洗式', acidity:1, body:3,
+    flavors:['杉のようなスパイス','ブラックトリュフ','タラゴン'],
+    pairing:['スパイスの効いた料理','ダークチョコレート'],
+    story:'創業を記念するブレンド（9月ごろ）。数年寝かせた希少な「エイジドスマトラ」を大胆に使うのが最大の特徴で、重厚でスパイシー。パッケージにはやさしい表情のサイレン（人魚）が描かれる。' },
+
+  { id:'autumn', name:'オータム ブレンド', roast:'dark', type:'ブレンド', season:'秋',
+    region:'複数の地域', origin:'インドネシア・エチオピア・グアテマラ', process:'半水洗式', acidity:1, body:3,
+    flavors:['キャンディードピーカン','ハーブ','なめらか'],
+    pairing:['シナモンのお菓子','甘いデザート'],
+    story:'アメリカで2008年に「サンクスギビング ブレンド」として発売されたのがはじまり。感謝祭の料理に合うよう組まれた。シナモンのスパイス感とリンゴのような甘さが秋らしい。' },
+
+  { id:'holiday', name:'ホリデーシーズン ブレンド', roast:'medium', type:'ブレンド', season:'冬',
+    region:'複数の地域', origin:'ラテンアメリカとインドネシア', process:'水洗式', acidity:2, body:2,
+    flavors:['甘いハーブのような香り','メープル','やわらかな奥行き'],
+    pairing:['メープルの焼き菓子','ナッツの焼き菓子'],
+    story:'明るいラテンアメリカと、コクのあるインドネシアを合わせた冬の定番。クリスマス ブレンドよりおだやかで飲みやすい。ディカフェ版が出る年もある。' },
+
+  { id:'christmas', name:'クリスマス ブレンド', roast:'dark', type:'ブレンド', season:'冬',
+    region:'複数の地域', origin:'ラテンアメリカ・アジア/太平洋とエイジドスマトラ',
+    process:'半水洗式', acidity:1, body:3,
+    flavors:['チョコレートのようななめらかさ','スパイス','杉のような木の香り'],
+    pairing:['チョコレートのデザート','ナッツの焼き菓子'],
+    story:'明るいラテンアメリカ、なめらかなアジア/太平洋、そして希少なエイジドスマトラを合わせた、いちばん有名な季節限定。スマトラは3〜5年寝かせて熟成させたものを使う。' },
+];
+
+/* ---------- テイスティングの語彙 ---------- */
+const VOCAB = {
+  aroma:['フローラル','ナッツのような','スパイシー','大地のような','スモーキー','甘い','フルーティ','ハーブを思わせる','ココア','カラメルのような'],
+  acidity:['さわやか','はじけるような','鮮やかな','柑橘','ベリー','ジューシーな','穏やかな','ワインのような'],
+  body:['ライトボディ','ミディアムボディ','フルボディ','クリーミー','シロップのような','なめらかな'],
+  flavor:['シトラス','ココア','ベリー','フルーティ','ハーブ','グレープフルーツ','ブラックカラント','ナッツ','キャラメル','スパイス','メープル','バターのような','旨み','複雑な'],
+};
+const BODY_LEVEL = ['軽い（無脂肪乳のよう）','中くらい（牛乳のよう）','重い（クリームのよう）'];
+const ACID_LEVEL = ['おだやか','ほどよい','はじける'];
+const BREWS = ['ドリップ','コーヒープレス','エスプレッソ','オリガミ','アイスコーヒー','VIA'];
+
+/* ---------- 用語集 ---------- */
+const WORDS = [
+  {c:'表現', w:'鮮やかな', m:'高地の農園産コーヒーに見られる、キリッとした酸味。'},
+  {c:'表現', w:'はじけるような', m:'キリッとした、はっきり感じる酸味。'},
+  {c:'表現', w:'穏やかな', m:'酸味が少ないコーヒーを表す言葉。'},
+  {c:'表現', w:'さっぱりした', m:'後味がほとんど残らないコーヒー。'},
+  {c:'表現', w:'ジューシーな', m:'口が潤うような印象のコーヒー。'},
+  {c:'表現', w:'甘みのある', m:'心地よい風味や口あたりを表す言葉。'},
+  {c:'表現', w:'旨み', m:'味わい深く、おいしさを感じる風味。'},
+  {c:'表現', w:'コク', m:'舌の上で感じる濃厚さや重さ。'},
+  {c:'表現', w:'口あたり', m:'口の中で感じる感覚や重さ。'},
+  {c:'表現', w:'ライトボディ', m:'軽やかで、後味がはかなく消えるコーヒー。'},
+  {c:'表現', w:'ミディアムボディ', m:'なめらかで、ほどよい後味のコーヒー。'},
+  {c:'表現', w:'フルボディ', m:'舌に重量感を感じるコーヒー。'},
+  {c:'表現', w:'バランスのよい', m:'酸味・コク・風味が調和しているコーヒー。'},
+  {c:'表現', w:'なめらかな', m:'丸みがあり、バランスのとれたコーヒー。'},
+  {c:'表現', w:'シロップのような', m:'濃厚で、後味が長く残るコーヒー。'},
+  {c:'表現', w:'複雑な', m:'さまざまな風味をもち合わせたコーヒー。'},
+  {c:'表現', w:'力強い', m:'突出した特徴や個性があることを表す言葉。'},
+  {c:'表現', w:'ワイルドな', m:'きわめて個性的でエキゾチックな風味。'},
+  {c:'表現', w:'エキゾチックな', m:'珍しい香りや風味のコーヒー。'},
+  {c:'表現', w:'上品な', m:'上品な口あたりと、魅惑的な風味。'},
+  {c:'表現', w:'マイルド', m:'親しみやすい風味のコーヒー。'},
+  {c:'表現', w:'大地のような', m:'インドネシア産に見られる、土を思わせる香り。'},
+  {c:'表現', w:'バターのような', m:'インドネシア産に見られる、なめらかな風味。'},
+  {c:'表現', w:'スモーキーさ', m:'深いローストで増す、煙や炭のような香り。'},
+  {c:'表現', w:'カラメルのような', m:'ダークローストに見られる、焦がした風味。'},
+  {c:'表現', w:'ココア', m:'砂糖なしのココアを思わせる風味。'},
+  {c:'表現', w:'ナッツのような', m:'クルミやアーモンドを思わせる風味。'},
+  {c:'表現', w:'フローラルな', m:'花を思わせる、フレッシュで甘い香り。'},
+  {c:'表現', w:'フルーティな', m:'ベリーやトロピカルフルーツのような風味。'},
+  {c:'表現', w:'ワインのような', m:'赤ワインやフルーツに似た風味。'},
+  {c:'表現', w:'ハーブを思わせる', m:'バジルやオレガノを連想させる香り。'},
+  {c:'表現', w:'ベリー', m:'ブラックベリーやブルーベリーを思わせる香り。'},
+  {c:'表現', w:'柑橘類', m:'レモンやグレープフルーツを思わせる香り。'},
+  {c:'表現', w:'スパイシー', m:'スパイスに似た香りや風味。'},
+  {c:'表現', w:'鮮度の落ちた', m:'酸素にふれて酸味が失われたコーヒー。'},
+  {c:'表現', w:'苦味', m:'舌の奥側に印象の残る、基本的な味覚のひとつ。'},
+  {c:'表現', w:'酸味', m:'高地産の水洗式コーヒーに特徴的な味わい。'},
+  {c:'表現', w:'香り／アロマ', m:'コーヒーが放つ香りの表現。'},
+  {c:'表現', w:'風味／フレーバー', m:'コーヒーの味や、全体的な印象。'},
+  {c:'栽培・加工', w:'コーヒーベルト', m:'北回帰線と南回帰線にはさまれた、世界のコーヒーのほとんどが育つ地帯。'},
+  {c:'栽培・加工', w:'アラビカ種', m:'スターバックスが購買する主要な品種。'},
+  {c:'栽培・加工', w:'ロブスタ種', m:'低地で栽培される、2番目の主要品種。'},
+  {c:'栽培・加工', w:'ティピカ種', m:'高地で優れた品質を生み出す栽培品種。'},
+  {c:'栽培・加工', w:'ハイブリッド種', m:'気候変動と病気に強い品種。'},
+  {c:'栽培・加工', w:'栽培品種', m:'種（しゅ）の下に位置する分類。'},
+  {c:'栽培・加工', w:'コーヒーチェリー', m:'コーヒーの木に実る赤い実。'},
+  {c:'栽培・加工', w:'生豆', m:'焙煎する前のコーヒー豆。'},
+  {c:'栽培・加工', w:'パーチメント', m:'果肉を除いたあと、生豆を包んでいる保護膜。'},
+  {c:'栽培・加工', w:'ピーベリー', m:'片方だけ丸く育つ豆。'},
+  {c:'栽培・加工', w:'加工法', m:'コーヒーチェリーから生豆を取り出す工程。'},
+  {c:'栽培・加工', w:'水洗式', m:'水を使って果肉を取り除く加工法。明るい酸味を生む。'},
+  {c:'栽培・加工', w:'半水洗式', m:'インドネシア産に多く使われる加工法。'},
+  {c:'栽培・加工', w:'乾燥式', m:'果肉をつけたまま乾燥させる加工法。'},
+  {c:'栽培・加工', w:'パティオ', m:'コーヒー豆を乾燥させる、広大な場所。'},
+  {c:'栽培・加工', w:'テロワール', m:'土壌や微気候を含む、特定の栽培地の特性。フランス語で「土地」の意味。'},
+  {c:'栽培・加工', w:'シェイド グロウン', m:'日陰樹の下で栽培されたコーヒー。'},
+  {c:'栽培・加工', w:'エイジドコーヒー', m:'3〜5年熟成させた生豆を焙煎したもの。'},
+  {c:'栽培・加工', w:'大農園', m:'栽培から加工まで一か所で管理する生産者。'},
+  {c:'栽培・加工', w:'協同組合', m:'複数の生産者がまとまった組織。'},
+  {c:'栽培・加工', w:'カフェイン除去', m:'二酸化炭素抽出法やスイスウォータープロセスで行う。'},
+  {c:'栽培・加工', w:'マスターロースター', m:'焙煎のプロセスを見張り、調節する職人。'},
+  {c:'調達・組織', w:'C.A.F.E. プラクティス', m:'倫理的な調達のためのガイドライン。'},
+  {c:'調達・組織', w:'エシカルな調達', m:'責任をもって栽培された高品質コーヒーを購買すること。'},
+  {c:'調達・組織', w:'コンサベーション・インターナショナル', m:'環境保全に取り組むNGO。C.A.F.E. プラクティスづくりで協働した。'},
+  {c:'調達・組織', w:'ファーマーサポートセンター', m:'生産者を支援する施設。最初にコスタリカに設立された。'},
+  {c:'調達・組織', w:'ハシエンダ アルサシア農園', m:'2013年に買収したコスタリカの農園。'},
+  {c:'調達・組織', w:'SCTC', m:'スターバックス コーヒー トレーディング カンパニー。スイスのローザンヌにあるテイスティング拠点。'},
+  {c:'調達・組織', w:'GCQチーム', m:'グローバル コーヒー クオリティ チーム。焙煎工場に到着したあとの品質を担当。'},
+  {c:'調達・組織', w:'インポーター', m:'生豆を購買し、ロースト工場へ出荷する業者。'},
+  {c:'調達・組織', w:'エクスポーター', m:'生豆を引き受け、インポーターへ出荷する業者。'},
+  {c:'調達・組織', w:'オーガニック コーヒー', m:'合成殺虫剤や化学肥料を使わずに栽培されたコーヒー。'},
+  {c:'歴史・ブランド', w:'パイクプレイス マーケット', m:'スターバックス創業の地（シアトル）。'},
+  {c:'歴史・ブランド', w:'ハワード・シュルツ', m:'1982年入社。イタリアンエスプレッソバーの体験を持ち込んだ。'},
+  {c:'歴史・ブランド', w:'アルフレッド・ピート', m:'1955年、サンフランシスコでスペシャルティコーヒーを流行させた人物。'},
+  {c:'歴史・ブランド', w:'ピーツ・コーヒー＆ティー', m:'1966年創業のコーヒー会社。創業者たちが焙煎を学んだ。'},
+  {c:'歴史・ブランド', w:'サードプレイス', m:'職場と自宅のあいだにある、コミュニティを感じられる場所。'},
+  {c:'歴史・ブランド', w:'スターバックス リザーブ®', m:'世界でもっとも希少なコーヒー。'},
+  {c:'歴史・ブランド', w:'スターバックス リザーブ® ロースタリー', m:'焙煎所を兼ねたコーヒー体験施設。'},
+  {c:'歴史・ブランド', w:'ブロンド ロースト', m:'軽めのコクと穏やかな風味の、いちばん浅い焙煎。'},
+  {c:'歴史・ブランド', w:'ミディアム ロースト', m:'バランスのとれた風味の焙煎。'},
+  {c:'歴史・ブランド', w:'ダーク ロースト', m:'深い風味が特徴の焙煎。'},
+  {c:'歴史・ブランド', w:'シングルオリジン／ストレート', m:'単一の生産地からのコーヒー。'},
+  {c:'歴史・ブランド', w:'ブレンド', m:'さまざまな生産国のコーヒーを組み合わせたもの。'},
+  {c:'歴史・ブランド', w:'テイスティング', m:'コーヒーの風味を学ぶ方法。'},
+  {c:'歴史・ブランド', w:'アメリカーノ', m:'エスプレッソにお湯や水を加えたビバレッジ。'},
+  {c:'歴史・ブランド', w:'カプチーノ', m:'フォームミルクの層が厚いエスプレッソドリンク。'},
+  {c:'歴史・ブランド', w:'ラテ', m:'フォームミルクの層が薄いエスプレッソドリンク。'},
+  {c:'歴史・ブランド', w:'スチームミルク', m:'正しくスチーミングすると甘くなるミルク。'},
+];
+
+/* ---------- 知識クイズ ---------- */
+const QUIZ = [
+  {c:'grow', q:'世界のコーヒーのほとんどが栽培されている、北回帰線と南回帰線にはさまれた地帯を何という？', o:['コーヒーベルト','コーヒーライン','グリーンベルト','アラビカゾーン'], a:0, e:'コーヒーベルト。この中がラテンアメリカ／アフリカ／アジア・太平洋の3大産地に分かれる。'},
+  {c:'grow', q:'スターバックスが購買する主要なコーヒーの品種は？', o:['ロブスタ種','アラビカ種','リベリカ種','ティピカ種'], a:1, e:'アラビカ種。ティピカ種はその下位にある「栽培品種」。'},
+  {c:'grow', q:'果肉をつけたまま乾燥させる加工法は？', o:['水洗式','半水洗式','乾燥式','スマトラ式'], a:2, e:'乾燥式（ナチュラル）。水を使わず、実ごと乾かしてから取り除く。'},
+  {c:'grow', q:'明るい酸味を生み出しやすい加工法は？', o:['水洗式','乾燥式','半水洗式','エイジド'], a:0, e:'水洗式。ケニアやラテンアメリカの多くの豆がこれ。'},
+  {c:'grow', q:'インドネシア産のコーヒーに多く使われる加工法は？', o:['乾燥式','水洗式','半水洗式','アナエロビック'], a:2, e:'半水洗式（スマトラ式）。大地のような風味と低い酸味はここから生まれる。'},
+  {c:'grow', q:'コーヒーの木に実る赤い実を何という？', o:['コーヒーベリー','コーヒーチェリー','パーチメント','ピーベリー'], a:1, e:'コーヒーチェリー。その中の種がコーヒー豆になる。'},
+  {c:'grow', q:'果肉を取り除いたあと、生豆を包んでいる保護膜を何という？', o:['シルバースキン','パーチメント','パティオ','ハスク'], a:1, e:'パーチメント。乾燥のあと脱穀して取り除く。'},
+  {c:'grow', q:'片方だけ丸く育つ豆を何という？', o:['ピーベリー','フラットビーン','ラウンドビーン','エレファントビーン'], a:0, e:'ピーベリー。通常は2つの種が向き合って入る。'},
+  {c:'grow', q:'焙煎する前のコーヒー豆のことを何という？', o:['青豆','生豆','原豆','素豆'], a:1, e:'生豆（なままめ）。インポーターが購買してロースト工場へ運ぶ。'},
+  {c:'grow', q:'日陰樹の下で栽培されたコーヒーを何という？', o:['オーガニック コーヒー','シェイド グロウン','エイジドコーヒー','ハイランド コーヒー'], a:1, e:'シェイド グロウン。木陰でゆっくり育つことが環境保全にもつながる。'},
+  {c:'grow', q:'土壌や微気候を含む「特定の栽培地の特性」を表すフランス語は？', o:['テロワール','パティオ','クリュ','アペラシオン'], a:0, e:'テロワール。もとは「土地・土壌」の意味。'},
+  {c:'grow', q:'コーヒー豆を乾燥させる広大な場所を何という？', o:['ヤード','パティオ','デッキ','テラス'], a:1, e:'パティオ。天日で豆を乾かす。'},
+  {c:'grow', q:'3〜5年熟成させた生豆を焙煎したコーヒーを何という？', o:['ヴィンテージコーヒー','エイジドコーヒー','マチュアコーヒー','リザーブコーヒー'], a:1, e:'エイジドコーヒー。熟成でまろやかで独特の風味になる。'},
+  {c:'grow', q:'カフェイン除去の方法として使われるのは？', o:['二酸化炭素抽出法／スイスウォータープロセス','蒸留法／遠心分離法','冷凍法／加圧法','発酵法／熟成法'], a:0, e:'二酸化炭素抽出法とスイスウォータープロセス。'},
+  {c:'grow', q:'焙煎のプロセスを見張り、調節する職人を何という？', o:['Qグレーダー','マスターロースター','カッパー','ロースティングマイスター'], a:1, e:'マスターロースター。豆ごとに時間と温度を見極める。'},
+  {c:'brew', q:'コーヒーのいれ方の「4つの基本」に含まれないのは？', o:['コーヒー豆の分量','コーヒー豆の挽き具合','新鮮で正しい温度の水','抽出する部屋の湿度'], a:3, e:'4つの基本は「分量」「挽き具合」「水」「鮮度」。'},
+  {c:'brew', q:'180mlの水に対する、コーヒーの粉の推奨量は？', o:['小さじ1杯（約3g）','大さじ2杯（約10g）','大さじ4杯（約20g）','ひとつまみ'], a:1, e:'180mlに対して大さじ2杯（約10g）。この比率が風味の土台。'},
+  {c:'brew', q:'コーヒーを抽出するのに適したお湯の温度は？', o:['70〜80℃','80〜88℃','90〜96℃','100℃ちょうど'], a:2, e:'90〜96℃。沸騰直後より少し落ち着かせた温度。'},
+  {c:'brew', q:'コーヒープレスに合う挽き具合は？', o:['極細挽き','中細挽き','中挽き','粗挽き'], a:3, e:'粗挽き。接触時間が長い抽出ほど粗く挽く。'},
+  {c:'brew', q:'エスプレッソに合う挽き具合は？', o:['極細挽き','中細挽き','中挽き','粗挽き'], a:0, e:'極細挽き。短時間で一気に抽出するため。'},
+  {c:'brew', q:'ハンドドリップに合う挽き具合は？', o:['極細挽き','細〜中細挽き','粗挽き','極粗挽き'], a:1, e:'細〜中細挽き。'},
+  {c:'brew', q:'コーヒーの風味を落とす4つの敵は？', o:['酸素・光・熱・湿気','塩・砂糖・油・煙','振動・音・風・圧力','鉄・銅・塩素・カルシウム'], a:0, e:'酸素・光・熱・湿気。密閉して常温の暗いところに置く。'},
+  {c:'brew', q:'コーヒー豆は開封後、どれくらいで使い切るのが目安？', o:['1〜2日以内','1〜2週間以内','1〜2か月以内','半年以内'], a:1, e:'1〜2週間以内。挽くのは淹れる直前がよい。'},
+  {c:'brew', q:'コーヒーの約何％が水？', o:['約60％','約80％','約98％','約99.9％'], a:2, e:'約98％。だから水の質がそのまま味に出る。'},
+  {c:'brew', q:'粉とお湯の接触時間が長い抽出方法ほど、挽き目はどうする？', o:['細かくする','粗くする','変えない','2回挽く'], a:1, e:'粗くする。細かいままだと出すぎて雑味になる。'},
+  {c:'taste', q:'コーヒーテイスティングの4つのステップの順番は？', o:['すする→香りをかぐ→広げる→表現する','香りをかぐ→すする→口の中全体に広げる→自分の言葉で表現する','見る→かぐ→飲む→書く','香りをかぐ→飲み込む→余韻→採点する'], a:1, e:'①香りをかぐ ②すする ③口の中全体に広げて風味を感じる ④自分の言葉で表現する。'},
+  {c:'taste', q:'テイスティングで音を立ててすするのはなぜ？', o:['熱いから','口の中全体にコーヒーが広がり、香りと繊細な風味を感じやすいから','苦味を弱めるため','作法として決まっているから'], a:1, e:'空気と一緒に含むことで口の中全体に広がり、細やかな風味を捉えやすくなる。'},
+  {c:'taste', q:'香りをかぐときの正しいやり方は？', o:['カップを鼻に近づけ、片手をコーヒーの上にかざして深く息を吸い込む','カップを遠ざけて浅く吸う','ふたをして振ってからかぐ','鼻をつまんでからかぐ'], a:0, e:'手をかざすと香りが逃げず、集めて感じられる。'},
+  {c:'taste', q:'コクの表現で「軽い」を例えるのに使われるのは？', o:['生クリーム','牛乳','無脂肪乳','練乳'], a:2, e:'無脂肪乳が軽い、牛乳が重い、という例え方をする。'},
+  {c:'taste', q:'舌の上で感じる濃厚さや重さを何という？', o:['酸味','コク','苦味','余韻'], a:1, e:'コク（ボディ）。ライト／ミディアム／フルの3段階で表す。'},
+  {c:'taste', q:'高地の農園産に見られる、キリッとした酸味を表す言葉は？', o:['穏やかな','鮮やかな','なめらかな','マイルド'], a:1, e:'「鮮やかな」。逆に酸味が少ないものは「穏やかな」。'},
+  {c:'taste', q:'インドネシア産に見られる、土を思わせる香りを表す言葉は？', o:['フローラルな','大地のような','柑橘類','ワインのような'], a:1, e:'「大地のような」。スマトラやコモド ドラゴンの特徴。'},
+  {c:'taste', q:'酸味・コク・風味が調和しているコーヒーを表す言葉は？', o:['複雑な','バランスのよい','力強い','エキゾチックな'], a:1, e:'「バランスのよい」。ラテンアメリカの豆によく使われる。'},
+  {c:'taste', q:'濃厚で、後味が長く残るコーヒーを表す言葉は？', o:['さっぱりした','シロップのような','はじけるような','ライトボディ'], a:1, e:'「シロップのような」。アジア・太平洋の豆の特徴のひとつ。'},
+  {c:'taste', q:'深いローストで増す、煙や炭のような香りを何という？', o:['カラメルのような','スモーキーさ','ナッツのような','スパイシー'], a:1, e:'スモーキーさ。フレンチ ローストの主役になる香り。'},
+  {c:'taste', q:'「砂糖なしのココアを思わせる風味」を表す言葉は？', o:['ココア','キャラメル','チョコレートシロップ','ビター'], a:0, e:'ココア。ラテンアメリカの豆によく出る風味。'},
+  {c:'taste', q:'フードペアリングのすすめられた手順は？', o:['フードを食べきってからコーヒーを飲む','それぞれの香り→コーヒーだけ→フードだけ→フードが口にあるうちに再びコーヒー','コーヒーとフードを同時に口に入れる','コーヒーを先に飲み干す'], a:1, e:'最後に「フードが口にあるうちにもう一度コーヒー」で、互いを引き立てる相乗効果がわかる。'},
+  {c:'history', q:'スターバックス1号店がある、創業の地となった市場は？', o:['ファーマーズマーケット','パイクプレイス マーケット','ユニオンスクエア','フィッシャーマンズワーフ'], a:1, e:'シアトルのパイクプレイス マーケット。1971年創業。'},
+  {c:'history', q:'1982年に入社し、イタリアンエスプレッソバーの体験を持ち込んだ人物は？', o:['アルフレッド・ピート','ハワード・シュルツ','ジェリー・ボールドウィン','ハワード・ビーハー'], a:1, e:'ハワード・シュルツ。ミラノの光景から「サードプレイス」の発想が生まれた。'},
+  {c:'history', q:'1955年にスペシャルティコーヒーを流行させ、創業者たちが焙煎を学んだ人物は？', o:['アルフレッド・ピート','ハワード・シュルツ','ドン・ヴァレンシア','デイブ・オルセン'], a:0, e:'アルフレッド・ピート。1966年創業の「ピーツ・コーヒー＆ティー」の人。'},
+  {c:'history', q:'職場と自宅のあいだにある、コミュニティを感じられる場所を何という？', o:['セカンドプレイス','サードプレイス','ホームプレイス','コモンプレイス'], a:1, e:'サードプレイス。スターバックスが目指してきた店のあり方。'},
+  {c:'history', q:'倫理的な調達のためのガイドラインの名前は？', o:['C.A.F.E. プラクティス','フェアトレード認証','レインフォレスト基準','エシカルコード'], a:0, e:'C.A.F.E. プラクティス。'},
+  {c:'history', q:'C.A.F.E. プラクティスづくりで協働した、環境保全に取り組むNGOは？', o:['WWF','コンサベーション・インターナショナル','グリーンピース','レインフォレスト・アライアンス'], a:1, e:'コンサベーション・インターナショナル。'},
+  {c:'history', q:'「ファーマーサポートセンター」が最初に設立された国は？', o:['コロンビア','エチオピア','コスタリカ','インドネシア'], a:2, e:'コスタリカ。専門家が生産者に技術を伝えている。'},
+  {c:'history', q:'2013年にスターバックスが買収したコスタリカの農園は？', o:['ハシエンダ アルサシア農園','フィンカ パルミラ農園','エル インヘルト農園','ラ エスペランサ農園'], a:0, e:'ハシエンダ アルサシア農園。研究開発の拠点にもなっている。'},
+  {c:'history', q:'スイスのローザンヌにある、生豆のテイスティング拠点の略称は？', o:['SCTC','GCQ','SCAA','CQI'], a:0, e:'SCTC（スターバックス コーヒー トレーディング カンパニー）。'},
+  {c:'history', q:'焙煎工場に到着したあとの品質を担当するチームは？', o:['SCTC','GCQ（グローバル コーヒー クオリティ）チーム','FSC','R&D'], a:1, e:'GCQチーム。SCTCが生豆の入口、GCQがそのあとを見る。'},
+  {c:'history', q:'生豆を購買し、ロースト工場へ出荷する業者は？', o:['エクスポーター','インポーター','ディストリビューター','トレーダー'], a:1, e:'インポーター。エクスポーターは生豆を引き受けてインポーターへ出荷する側。'},
+  {c:'history', q:'世界でもっとも希少なコーヒーを扱うラインの名前は？', o:['スターバックス リザーブ®','スターバックス セレクト','マスターズ コレクション','シグネチャー'], a:0, e:'スターバックス リザーブ®。'},
+  {c:'history', q:'エシカルな取り組みとして、毎月何日が「ethically connecting day」？', o:['1日','10日','20日','末日'], a:2, e:'毎月20日。'},
+  {c:'history', q:'合成殺虫剤や化学肥料を使わずに栽培されたコーヒーを何という？', o:['シェイド グロウン','オーガニック コーヒー','ナチュラル コーヒー','ピュア コーヒー'], a:1, e:'オーガニック コーヒー。'},
+  {c:'region', q:'「ナッツやココアの風味、バランスのとれた味わい」が特徴の産地は？', o:['ラテンアメリカ','アフリカ','アジア/太平洋','中東'], a:0, e:'ラテンアメリカ。ブレンドの土台に使われる量がいちばん多い。'},
+  {c:'region', q:'「フローラルな香りやシトラス・ベリー・スパイスの風味」が特徴の産地は？', o:['ラテンアメリカ','アフリカ','アジア/太平洋','カリブ'], a:1, e:'アフリカ。ケニアがその代表。'},
+  {c:'region', q:'「しっかりしたコク、ハーバルで大地を思わせる風味」が特徴の産地は？', o:['ラテンアメリカ','アフリカ','アジア/太平洋','オセアニア'], a:2, e:'アジア/太平洋。スマトラやコモド ドラゴンがその代表。'},
+  {c:'region', q:'次のうち、アフリカの産地に含まれないのは？', o:['ケニア','ルワンダ','タンザニア','パプアニューギニア'], a:3, e:'パプアニューギニアはアジア/太平洋。'},
+  {c:'region', q:'次のうち、アジア/太平洋の産地に含まれないのは？', o:['インドネシア','ベトナム','コスタリカ','パプアニューギニア'], a:2, e:'コスタリカはラテンアメリカ。'},
+];
+const CATS = {
+  core:{nm:'豆のこと', g:'bean'},
+  region:{nm:'産地のちがい', g:'earth'},
+  grow:{nm:'栽培と加工', g:'herb'},
+  history:{nm:'歴史・エシカル', g:'book'},
+  brew:{nm:'いれ方', g:'cup'},
+  taste:{nm:'味わいの表現', g:'tongue'},
+  mine:{nm:'自分でつくった問題', g:'pen'},
+};
+
+/* =========================================================================
+   状態
+   ========================================================================= */
+const KEY = 'blackapron_v1';
+const DEFAULT_STATE = {
+  notes:[], memos:{}, stats:{}, beanStats:{}, wrong:[],
+  beanEdits:{}, customBeans:[], photos:{},
+  customWords:[], customQuiz:[], customVocab:{aroma:[],acidity:[],body:[],flavor:[]}, brews:[],
+  officialImg:true,
+};
+const fresh = () => JSON.parse(JSON.stringify(DEFAULT_STATE));
+let S = load();
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return fresh();
+    const d = Object.assign(fresh(), JSON.parse(raw));
+    d.customVocab = Object.assign({aroma:[],acidity:[],body:[],flavor:[]}, d.customVocab||{});
+    return d;
+  }catch(e){ return fresh(); }
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); return true; }
+  catch(e){
+    alert('保存できませんでした。写真をたくさん入れると容量がいっぱいになります。\n設定からデータを書き出して、いらない写真を消してみてください。');
+    return false;
+  }
+}
+
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(36);
+const todayStr = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+const fmtDate = s => { const [,m,d]=String(s).split('-'); return `${Number(m)}/${Number(d)}`; };
+const meter = n => `<span class="meter">${[1,2,3].map(i=>`<i class="${i<=n?'on':''}"></i>`).join('')}</span>`;
+const shuffle = a => { const x=a.slice(); for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [x[i],x[j]]=[x[j],x[i]];} return x; };
+const splitList = s => String(s||'').split(/[、,・\n]/).map(t=>t.trim()).filter(Boolean);
+
+/* 豆＝はじめから入っている分（編集を反映）＋自分で足した分 */
+function allBeans(){
+  return BEANS.map(b=>Object.assign({}, b, S.beanEdits[b.id]||{})).concat(S.customBeans);
+}
+const beanById = id => allBeans().find(b=>b.id===id);
+const isCustom = id => S.customBeans.some(b=>b.id===id);
+const vocabOf = k => VOCAB[k].concat(S.customVocab[k]||[]);
+const allWords = () => WORDS.concat(S.customWords);
+const brewList = () => BREWS.concat(S.brews);
+
+/* 公式のパッケージ画像は、つみき側にコピーを置かず公式サーバーから直接読む。
+   1枚 約190KB あるので、画面に出るぶんだけ遅れて読む（loading="lazy"）。
+   読めなかったときは焙煎度の色＋豆の線画に戻る。設定で丸ごと切れる。 */
+const PKG_BASE = 'https://www.starbucks.co.jp/coffee/images/';
+
+/* 豆の丸アイコン（自分の写真 → 公式画像 → 焙煎度の色＋豆の線画 の順） */
+function avatar(bean, cls=''){
+  const p = S.photos[bean.id];
+  const kind = isCustom(bean.id) && !R[bean.roast] ? 'mine' : (bean.roast||'medium');
+  let inner;
+  if(p) inner = `<img class="mine" src="${p}" alt="">`;
+  else if(bean.img && S.officialImg !== false)
+    inner = `${ic('bean')}<img class="pkg" data-src="${PKG_BASE}${bean.img}.png" alt="">`;
+  else inner = ic('bean');
+  return `<span class="av ${kind} ${cls}">${inner}</span>`;
+}
+
+/* 描いたあとに呼ぶ。画面に入った丸だけ写真を読みにいく（1枚190KBあるため）。
+   届いたら地を白くし、読めなかったら線画のまま。
+   ※ ブラウザ任せの loading="lazy" は、描き直したあとに読み込まれないことがあったので自前でやる。 */
+const pkgIO = ('IntersectionObserver' in window) ? new IntersectionObserver((es, io)=>{
+  es.forEach(e=>{ if(e.isIntersecting){ io.unobserve(e.target); loadPkg(e.target); } });
+}, {rootMargin:'300px'}) : null;
+
+function loadPkg(img){
+  if(img.dataset.loading) return;
+  img.dataset.loading = '1';
+  img.addEventListener('load', ()=>{ if(img.parentNode) img.parentNode.classList.add('haspkg'); }, {once:true});
+  img.addEventListener('error', ()=>img.remove(), {once:true});
+  img.src = img.dataset.src;
+}
+function syncPkg(root=document){
+  root.querySelectorAll('.av img.pkg[data-src]').forEach(img=>{
+    if(img.src) return;
+    if(pkgIO) pkgIO.observe(img); else loadPkg(img);
+  });
+}
+function flavorRow(bean, n=3){
+  return `<span class="ficons">${bean.flavors.slice(0,n).map(f=>`<span class="fi">${ic(flavorIcon(f))}</span>`).join('')}</span>`;
+}
+
+/* 写真を選ぶ（縮小して端末内に保存） */
+function pickPhoto(cb){
+  const inp = document.createElement('input');
+  inp.type='file'; inp.accept='image/*';
+  inp.onchange = ()=>{
+    const f = inp.files && inp.files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = ()=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const max=360, sc=Math.min(1, max/Math.max(img.width,img.height));
+        const c=document.createElement('canvas');
+        c.width=Math.max(1,Math.round(img.width*sc)); c.height=Math.max(1,Math.round(img.height*sc));
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        try{ cb(c.toDataURL('image/jpeg',0.72)); }catch(e){ alert('この写真は読み込めませんでした。'); }
+      };
+      img.onerror = ()=>alert('この写真は読み込めませんでした。');
+      img.src = r.result;
+    };
+    r.readAsDataURL(f);
+  };
+  inp.click();
+}
+
+/* =========================================================================
+   画面切り替え
+   ========================================================================= */
+let tab = 'home';
+const view = document.getElementById('view');
+const TITLES = {home:'ブラックエプロンノート', beans:'豆', notes:'記録', quiz:'クイズ', words:'ことば'};
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click', ()=>go(b.dataset.tab)));
+function go(t){
+  tab = t; quizSession = null;
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.tab===t));
+  document.getElementById('pageTitle').textContent = TITLES[t];
+  window.scrollTo(0,0); render();
+}
+function render(){
+  ({home:renderHome, beans:renderBeans, notes:renderNotes, quiz:renderQuiz, words:renderWords}[tab])();
+  view.classList.toggle('fill', tab==='home');
+  const hd = document.querySelector('header');
+  if(hd) document.documentElement.style.setProperty('--hh', hd.offsetHeight + 'px');
+  syncPkg(view);
+  document.getElementById('foot').innerHTML = tab==='home' ? ''
+    : '公式サイトなどをもとにした学習用のまとめです。<br>最新の内容は公式の情報でたしかめてください。';
+}
+
+/* ---------- シート ---------- */
+const sheet = document.getElementById('sheet');
+const sheetBody = document.getElementById('sheetBody');
+function openSheet(html){ sheetBody.innerHTML = html; sheet.classList.add('on'); sheet.querySelector('.panel').scrollTop=0; document.body.style.overflow='hidden'; syncPkg(sheetBody); }
+function closeSheet(){ sheet.classList.remove('on'); sheetBody.innerHTML=''; document.body.style.overflow=''; }
+sheet.addEventListener('click', e=>{ if(e.target.closest('[data-close]')) closeSheet(); });
+const sheetHead = (title, extra='') =>
+  `<div class="sh-h"><h3>${esc(title)}${extra}</h3>
+   <button class="x" data-close aria-label="閉じる">
+     <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>`;
+
+/* =========================================================================
+   ホーム（シンプル）
+   ========================================================================= */
+function tastedIds(){ return new Set(S.notes.map(n=>n.beanId).filter(Boolean)); }
+function totalQuiz(){ let c=0,t=0; Object.values(S.stats).forEach(v=>{c+=v.c; t+=v.t;}); return {c,t}; }
+
+/* 画面の高さに合わせて「さいきん」に何件出すか決める（1画面に収めるため） */
+function recentCount(){
+  const h = window.innerHeight || 700;
+  return h >= 900 ? 5 : h >= 820 ? 4 : h >= 700 ? 3 : 2;
+}
+function renderHome(){
+  const tasted = tastedIds(), q = totalQuiz();
+  const beans = allBeans();
+  const recent = S.notes.slice().sort((a,b)=> b.date.localeCompare(a.date) || b.id.localeCompare(a.id)).slice(0, recentCount());
+  view.innerHTML = `
+    <div class="stats">
+      <div class="stat"><b>${S.notes.length}</b><span>杯</span></div>
+      <div class="stat"><b>${tasted.size}<small>/${beans.length}</small></b><span>豆</span></div>
+      <div class="stat"><b>${q.t?Math.round(q.c/q.t*100):'—'}${q.t?'<small>%</small>':''}</b><span>正解</span></div>
+    </div>
+    <div class="big" id="goNew">
+      <span class="ic">${ic('cup')}</span>
+      <span class="grow"><span class="t" style="display:block">記録する</span>
+      <span class="d" style="display:block">香り・酸味・コク・風味</span></span>
+    </div>
+    <div class="duo">
+      <div class="tile" id="goQuiz"><span class="ic">${ic('quiz')}</span>
+        <span class="t" style="display:block">クイズ</span><span class="d" style="display:block">10問</span></div>
+      <div class="tile" id="goBeans"><span class="ic">${ic('bean')}</span>
+        <span class="t" style="display:block">豆</span><span class="d" style="display:block">${beans.length}種類</span></div>
+    </div>
+    <div class="recent">
+      <h2>さいきん</h2>
+      <div class="list">
+        ${recent.length ? recent.map(miniCard).join('')
+          : `<div class="nonote">1杯ずつ、言葉にしていきましょう。</div>`}
+      </div>
+    </div>
+  `;
+  document.getElementById('goQuiz').onclick = ()=>{ go('quiz'); startQuiz('all'); };
+  document.getElementById('goNew').onclick = ()=>{ go('notes'); openNoteForm(); };
+  document.getElementById('goBeans').onclick = ()=>go('beans');
+  view.querySelectorAll('[data-note]').forEach(el=>el.onclick=()=>openNoteDetail(el.dataset.note));
+}
+
+/* =========================================================================
+   豆
+   ========================================================================= */
+let beanFilter = 'all', beanQuery = '';
+function renderBeans(){
+  const tasted = tastedIds();
+  const fs = [['all','すべて'],['season','季節限定'],['blonde','ブロンド'],['medium','ミディアム'],['dark','ダーク'],
+              ['ラテンアメリカ','ラテンアメリカ'],['アフリカ','アフリカ'],['アジア','アジア'],
+              ['tasted','飲んだ'],['mine','自分の豆']];
+  const list = allBeans().filter(b=>{
+    if(beanFilter==='tasted'){ if(!tasted.has(b.id)) return false; }
+    else if(beanFilter==='season'){ if(!b.season) return false; }
+    else if(beanFilter==='mine'){ if(!isCustom(b.id)) return false; }
+    else if(['blonde','medium','dark'].includes(beanFilter)){ if(b.roast!==beanFilter) return false; }
+    else if(['ラテンアメリカ','アフリカ','アジア'].includes(beanFilter)){ if(!String(b.region).includes(beanFilter)) return false; }
+    if(beanQuery){
+      const hay = [b.name,b.origin,b.process,...(b.flavors||[]),...(b.pairing||[]),b.story].join(' ');
+      if(!hay.includes(beanQuery)) return false;
+    }
+    return true;
+  });
+  view.innerHTML = `
+    <input type="search" id="bq" placeholder="豆・風味・フードで探す" value="${esc(beanQuery)}" style="margin-bottom:12px">
+    <div class="filters">${fs.map(([k,l])=>`<button class="chip ${beanFilter===k?'on':''}" data-f="${k}">${l}</button>`).join('')}</div>
+    <div class="legend">
+      <span><i style="background:#D8CBB4"></i>ブロンド</span>
+      <span><i style="background:#A98A6B"></i>ミディアム</span>
+      <span><i style="background:#463A32"></i>ダーク</span>
+    </div>
+    ${list.length ? list.map(b=>`
+      <div class="bean" data-bean="${b.id}">
+        <span style="position:relative;flex-shrink:0">${avatar(b)}
+          ${tasted.has(b.id)?`<span class="ck"><svg viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7"/></svg></span>`:''}</span>
+        <span class="grow">
+          <span class="nm" style="display:block">${esc(b.name)}</span>
+          ${flavorRow(b)}
+        </span>
+      </div>`).join('') : '<p class="empty">見つかりませんでした。</p>'}
+    ${beanFilter==='season' ? `<p class="sub" style="margin-top:12px">季節限定は、同じ名前でも<b>年によって使う豆と風味が変わります</b>。今年の内容はお店の資料でたしかめて、ちがっていたら豆のメモか編集で直してください。</p>` : ''}
+    <button class="btn ghost" id="addBean" style="margin-top:14px">＋ 豆を追加する</button>
+  `;
+  const bq = document.getElementById('bq');
+  bq.oninput = e=>{ beanQuery=e.target.value.trim(); const p=window.scrollY; renderBeans(); window.scrollTo(0,p); document.getElementById('bq').focus(); };
+  view.querySelectorAll('[data-f]').forEach(el=>el.onclick=()=>{ beanFilter=el.dataset.f; renderBeans(); });
+  view.querySelectorAll('[data-bean]').forEach(el=>el.onclick=()=>openBean(el.dataset.bean));
+  document.getElementById('addBean').onclick = ()=>openBeanForm(null);
+}
+
+function openBean(id){
+  const b = beanById(id); if(!b) return;
+  const myNotes = S.notes.filter(n=>n.beanId===id);
+  const st = S.beanStats[id] || {c:0,t:0};
+  openSheet(`
+    <div class="hero">
+      ${avatar(b)}
+      <div class="grow">
+        <div style="font-size:18px;font-weight:700;line-height:1.4">${esc(b.name)}</div>
+        <div style="margin-top:4px"><span class="pill">${esc(R[b.roast]||'—')}</span>
+          <span class="pill">${esc(b.type||'')}</span>
+          ${b.season?`<span class="pill solid">${esc(b.season)}の限定</span>`:''}</div>
+        <button class="photobtn" id="photoBtn">${S.photos[id]?'写真を変える':'＋ 写真を追加'}</button>
+      </div>
+      <button class="x" data-close aria-label="閉じる"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+
+    <div class="figrid" style="margin-bottom:16px">
+      ${(b.flavors||[]).map(f=>{const g=flavorIcon(f);
+        return `<span class="filab"><span class="fi">${ic(g)}</span><span>${esc(f)}</span></span>`;}).join('')}
+    </div>
+
+    <div class="card">
+      <div class="kv"><div class="k">生産地</div><div class="v">${esc(b.origin||'—')}</div></div>
+      <div class="kv"><div class="k">地域</div><div class="v">${esc(b.region||'—')}</div></div>
+      <div class="kv"><div class="k">加工法</div><div class="v">${esc(b.process||'—')}</div></div>
+      <div class="kv"><div class="k">酸味</div><div class="v">${meter(b.acidity)}</div></div>
+      <div class="kv"><div class="k">コク</div><div class="v">${meter(b.body)}</div></div>
+    </div>
+
+    <h2>合うフード</h2>
+    <div class="figrid" style="margin-bottom:8px">
+      ${(b.pairing||[]).map(f=>`<span class="filab"><span class="fi">${ic(foodIcon(f))}</span><span>${esc(f)}</span></span>`).join('')
+        || '<span class="sub">—</span>'}
+    </div>
+
+    ${b.story?`<h2>この豆の話</h2><div class="card"><p style="font-size:13.5px;line-height:1.9">${esc(b.story)}</p></div>`:''}
+
+    <h2>自分のメモ</h2>
+    <textarea id="beanMemo" placeholder="研修で聞いたこと、パッケージの由来、自分なりの覚え方">${esc(S.memos[id]||'')}</textarea>
+    <button class="btn ghost" id="saveMemo" style="margin-top:8px">メモを保存</button>
+
+    <div class="card" style="margin-top:20px">
+      <div class="kv"><div class="k">クイズ</div><div class="v">${st.t? `${st.c} / ${st.t} 問 正解` : 'まだ'}</div></div>
+      <div class="kv"><div class="k">飲んだ</div><div class="v">${myNotes.length? `${myNotes.length} 杯` : 'まだ'}</div></div>
+    </div>
+
+    <button class="btn" id="recordThis" style="margin-top:14px">この豆を記録する</button>
+    <button class="btn ghost" id="editBean" style="margin-top:8px">この豆を編集する</button>
+  `);
+  document.getElementById('photoBtn').onclick = ()=>pickPhoto(d=>{ S.photos[id]=d; if(save()){ openBean(id); render(); } });
+  document.getElementById('saveMemo').onclick = ()=>{
+    S.memos[id] = document.getElementById('beanMemo').value;
+    if(save()){ const btn=document.getElementById('saveMemo'); btn.textContent='保存しました'; setTimeout(()=>btn.textContent='メモを保存',1400); }
+  };
+  document.getElementById('recordThis').onclick = ()=>{ closeSheet(); go('notes'); openNoteForm(null, id); };
+  document.getElementById('editBean').onclick = ()=>openBeanForm(id);
+}
+
+function openBeanForm(id){
+  const b = id ? beanById(id) : {name:'', roast:'medium', type:'ブレンド', region:'ラテンアメリカ',
+    origin:'', process:'水洗式', acidity:2, body:2, flavors:[], pairing:[], story:''};
+  const custom = id ? isCustom(id) : true;
+  const edited = id && !custom && S.beanEdits[id];
+  openSheet(`
+    ${sheetHead(id?'豆を編集する':'豆を追加する')}
+    <div class="row" style="margin-bottom:16px">
+      ${avatar(id?b:{id:'__new', roast:b.roast, flavors:[]})}
+      <button class="photobtn grow" style="text-align:left" id="photoBtn">${(id&&S.photos[id])?'写真を変える':'＋ 写真を追加'}</button>
+    </div>
+    <label class="fl">名前</label>
+    <input type="text" id="b_name" value="${esc(b.name)}" placeholder="例：エチオピア">
+    <div class="half">
+      <div><label class="fl">焙煎度</label>
+        <select id="b_roast">${Object.entries(R).map(([k,v])=>`<option value="${k}" ${b.roast===k?'selected':''}>${v}</option>`).join('')}</select></div>
+      <div><label class="fl">種類</label>
+        <select id="b_type">${['シングルオリジン','ブレンド'].map(v=>`<option ${b.type===v?'selected':''}>${v}</option>`).join('')}</select></div>
+    </div>
+    <label class="fl">生産地</label>
+    <input type="text" id="b_origin" value="${esc(b.origin)}" placeholder="例：エチオピア・イルガチェフェ">
+    <div class="half">
+      <div><label class="fl">地域</label>
+        <select id="b_region">${REGIONS.map(v=>`<option ${b.region===v?'selected':''}>${v}</option>`).join('')}</select></div>
+      <div><label class="fl">加工法</label>
+        <select id="b_process">${PROCESSES.concat(PROCESSES.includes(b.process)?[]:[b.process]).filter(Boolean).map(v=>`<option ${b.process===v?'selected':''}>${v}</option>`).join('')}</select></div>
+    </div>
+    <label class="fl">酸味</label>
+    <div class="levelpick" data-level="acid">${ACID_LEVEL.map((l,i)=>`<button type="button" data-v="${i+1}" class="${b.acidity===i+1?'on':''}">${l}</button>`).join('')}</div>
+    <label class="fl">コク</label>
+    <div class="levelpick" data-level="body">${BODY_LEVEL.map((l,i)=>`<button type="button" data-v="${i+1}" class="${b.body===i+1?'on':''}">${l}</button>`).join('')}</div>
+    <label class="fl">風味（「、」で区切る）</label>
+    <input type="text" id="b_flavors" value="${esc((b.flavors||[]).join('、'))}" placeholder="ベリー、フローラル、レモン">
+    <label class="fl">合うフード（「、」で区切る）</label>
+    <input type="text" id="b_pairing" value="${esc((b.pairing||[]).join('、'))}" placeholder="レモンケーキ、ベリーのタルト">
+    <label class="fl">この豆の話</label>
+    <textarea id="b_story" placeholder="産地の話、パッケージの由来など">${esc(b.story||'')}</textarea>
+    <button class="btn" id="saveBean" style="margin-top:20px">保存する</button>
+    ${custom&&id?`<button class="btn warn" id="delBean" style="margin-top:8px">この豆を削除</button>`:''}
+    ${edited?`<button class="btn warn" id="resetBean" style="margin-top:8px">はじめの内容に戻す</button>`:''}
+  `);
+  let pendingPhoto = null;
+  document.getElementById('photoBtn').onclick = ()=>pickPhoto(d=>{
+    pendingPhoto = d;
+    const av = sheetBody.querySelector('.av'); av.innerHTML = `<img src="${d}" alt="">`;
+    document.getElementById('photoBtn').textContent = '写真を変える';
+  });
+  sheetBody.querySelectorAll('[data-level]').forEach(g=>g.querySelectorAll('button').forEach(btn=>{
+    btn.onclick = ()=>{ g.querySelectorAll('button').forEach(x=>x.classList.remove('on')); btn.classList.add('on'); };
+  }));
+  const lvl = n => { const el = sheetBody.querySelector(`[data-level="${n}"] button.on`); return el?+el.dataset.v:2; };
+
+  document.getElementById('saveBean').onclick = ()=>{
+    const name = document.getElementById('b_name').value.trim();
+    if(!name){ alert('名前を入れてください。'); return; }
+    const data = {
+      name, roast: document.getElementById('b_roast').value,
+      type: document.getElementById('b_type').value,
+      origin: document.getElementById('b_origin').value.trim(),
+      region: document.getElementById('b_region').value,
+      process: document.getElementById('b_process').value,
+      acidity: lvl('acid'), body: lvl('body'),
+      flavors: splitList(document.getElementById('b_flavors').value),
+      pairing: splitList(document.getElementById('b_pairing').value),
+      story: document.getElementById('b_story').value.trim(),
+    };
+    let newId = id;
+    if(!id){ newId = 'u_'+uid(); S.customBeans.push(Object.assign({id:newId}, data)); }
+    else if(isCustom(id)){ S.customBeans = S.customBeans.map(x=>x.id===id?Object.assign({id}, data):x); }
+    else { S.beanEdits[id] = data; }
+    if(pendingPhoto) S.photos[newId] = pendingPhoto;
+    if(save()){ closeSheet(); openBean(newId); render(); }
+  };
+  const db = document.getElementById('delBean');
+  if(db) db.onclick = ()=>{
+    if(!confirm('この豆を削除します。よろしいですか？（記録は残ります）')) return;
+    S.customBeans = S.customBeans.filter(x=>x.id!==id); delete S.photos[id]; delete S.memos[id];
+    if(save()){ closeSheet(); render(); }
+  };
+  const rb = document.getElementById('resetBean');
+  if(rb) rb.onclick = ()=>{
+    if(!confirm('編集した内容を消して、はじめの内容に戻します。')) return;
+    delete S.beanEdits[id];
+    if(save()){ closeSheet(); openBean(id); render(); }
+  };
+}
+
+/* =========================================================================
+   記録
+   ========================================================================= */
+function miniCard(n){
+  const b = n.beanId ? beanById(n.beanId) : null;
+  const name = b ? b.name : (n.beanName||'コーヒー');
+  const av = n.photo ? `<span class="av"><img src="${n.photo}" alt=""></span>`
+                     : (b ? avatar(b) : `<span class="av mine">${ic('cup')}</span>`);
+  return `<div class="mini" data-note="${n.id}">${av}
+    <span class="dt">${fmtDate(n.date)}</span>
+    <span class="nm grow">${esc(name)}</span>
+    <span class="stars">${'★'.repeat(n.rating||0)}</span></div>`;
+}
+function noteCard(n){
+  const b = n.beanId ? beanById(n.beanId) : null;
+  const name = b ? b.name : (n.beanName||'コーヒー');
+  const words = [...(n.aroma||[]), ...(n.acidTags||[]), ...(n.bodyTags||[]), ...(n.flavorTags||[])];
+  const av = n.photo ? `<span class="av"><img src="${n.photo}" alt=""></span>`
+                     : (b ? avatar(b) : `<span class="av mine">${ic('cup')}</span>`);
+  return `<div class="note" data-note="${n.id}">
+    ${av}
+    <span class="grow">
+      <span class="dt" style="display:block">${fmtDate(n.date)}${n.brew?`・${esc(n.brew)}`:''}</span>
+      <span class="nm" style="display:block">${esc(name)}</span>
+      ${n.word?`<span class="wd" style="display:block">${esc(n.word)}</span>`
+              :(words.length?`<span class="wd" style="display:block">${esc(words.slice(0,3).join('・'))}</span>`:'')}
+    </span>
+    <span class="stars">${'★'.repeat(n.rating||0)}</span>
+  </div>`;
+}
+function renderNotes(){
+  const list = S.notes.slice().sort((a,b)=> b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+  view.innerHTML = `
+    <button class="btn" id="newNote">＋ 記録する</button>
+    ${list.length ? `<h2>これまで（${list.length}）</h2>${list.map(noteCard).join('')}`
+      : `<p class="empty">まだ記録がありません。<br>1杯ずつ、言葉にしていきましょう。</p>`}
+  `;
+  document.getElementById('newNote').onclick = ()=>openNoteForm();
+  view.querySelectorAll('[data-note]').forEach(el=>el.onclick=()=>openNoteDetail(el.dataset.note));
+}
+
+function chipRow(name, key, selected){
+  const arr = vocabOf(key);
+  return `<div class="tags" data-chips="${name}" data-vkey="${key}">${
+    arr.map(v=>`<button type="button" class="tag" data-v="${esc(v)}"${selected.includes(v)
+      ?' style="background:var(--ink);color:var(--paper);border-color:var(--ink)"':''}>${esc(v)}</button>`).join('')
+  }<button type="button" class="tag add" data-add="1">＋</button></div>`;
+}
+
+function openNoteForm(editId, presetBean){
+  const n = editId ? S.notes.find(x=>x.id===editId) : null;
+  const d = n || {date:todayStr(), beanId:presetBean||'', beanName:'', brew:'ドリップ',
+                  aroma:[], aromaNote:'', acid:2, acidTags:[], body:2, bodyTags:[],
+                  flavorTags:[], food:'', word:'', rating:0, photo:''};
+  const beans = allBeans();
+  openSheet(`
+    ${sheetHead(n?'記録を編集':'記録する')}
+    <div id="photoWrap">${d.photo?`<img class="shot" src="${d.photo}" alt="">`:''}</div>
+    <button class="btn ghost" id="photoBtn" style="margin-bottom:4px">${d.photo?'写真を変える':'＋ 写真を撮る・選ぶ'}</button>
+
+    <label class="fl">日付</label>
+    <input type="date" id="f_date" value="${esc(d.date)}">
+    <label class="fl">豆</label>
+    <select id="f_bean">
+      <option value="">— 選んでください —</option>
+      ${beans.map(b=>`<option value="${b.id}" ${d.beanId===b.id?'selected':''}>${esc(b.name)}</option>`).join('')}
+      <option value="__other" ${(!d.beanId&&d.beanName)?'selected':''}>その他（自分で書く）</option>
+    </select>
+    <input type="text" id="f_beanName" placeholder="豆の名前" value="${esc(d.beanName)}"
+      style="margin-top:8px;display:${(!d.beanId&&d.beanName)?'block':'none'}">
+    <label class="fl">いれ方</label>
+    <div class="row">
+      <select id="f_brew" class="grow">${brewList().map(b=>`<option ${d.brew===b?'selected':''}>${esc(b)}</option>`).join('')}</select>
+      <button class="tag add" id="addBrew" style="padding:10px 14px">＋</button>
+    </div>
+
+    <div class="steplabel"><span class="n">${ic('nose')}</span><span class="t">香り</span><span class="h">かいでから飲む</span></div>
+    ${chipRow('aroma','aroma', d.aroma)}
+    <input type="text" id="f_aromaNote" placeholder="ほかに感じた香り" value="${esc(d.aromaNote)}" style="margin-top:8px">
+
+    <div class="steplabel"><span class="n">${ic('drop')}</span><span class="t">酸味</span><span class="h">音を立ててすする</span></div>
+    <div class="levelpick" data-level="acid">${ACID_LEVEL.map((l,i)=>`<button type="button" data-v="${i+1}" class="${d.acid===i+1?'on':''}">${l}</button>`).join('')}</div>
+    <div style="margin-top:8px">${chipRow('acidTags','acidity', d.acidTags)}</div>
+
+    <div class="steplabel"><span class="n">${ic('tongue')}</span><span class="t">コク</span><span class="h">口の中全体に広げる</span></div>
+    <div class="levelpick" data-level="body">${BODY_LEVEL.map((l,i)=>`<button type="button" data-v="${i+1}" class="${d.body===i+1?'on':''}">${l}</button>`).join('')}</div>
+    <div style="margin-top:8px">${chipRow('bodyTags','body', d.bodyTags)}</div>
+
+    <div class="steplabel"><span class="n">${ic('pen')}</span><span class="t">風味</span><span class="h">自分の言葉にする</span></div>
+    ${chipRow('flavorTags','flavor', d.flavorTags)}
+    <textarea id="f_word" placeholder="この一杯を、自分の言葉でひとこと" style="margin-top:10px">${esc(d.word)}</textarea>
+
+    <label class="fl">合わせたフード</label>
+    <input type="text" id="f_food" placeholder="例：シナモンロール" value="${esc(d.food)}">
+    <label class="fl">好み</label>
+    <div class="starpick" id="f_rating">${[1,2,3,4,5].map(i=>`<button type="button" data-v="${i}" class="${i<=(d.rating||0)?'on':''}">★</button>`).join('')}</div>
+
+    <button class="btn" id="saveNote" style="margin-top:22px">保存する</button>
+    ${n?`<button class="btn warn" id="delNote" style="margin-top:8px">この記録を削除</button>`:''}
+  `);
+
+  let photo = d.photo || '';
+  document.getElementById('photoBtn').onclick = ()=>pickPhoto(p=>{
+    photo = p;
+    document.getElementById('photoWrap').innerHTML = `<img class="shot" src="${p}" alt="">`;
+    document.getElementById('photoBtn').textContent = '写真を変える';
+  });
+  const selBean = document.getElementById('f_bean');
+  selBean.onchange = ()=>{ document.getElementById('f_beanName').style.display = selBean.value==='__other'?'block':'none'; };
+  document.getElementById('addBrew').onclick = ()=>{
+    const v = prompt('いれ方の名前'); if(!v || !v.trim()) return;
+    S.brews.push(v.trim()); if(!save()) return;
+    const sel = document.getElementById('f_brew');
+    sel.insertAdjacentHTML('beforeend', `<option>${esc(v.trim())}</option>`); sel.value = v.trim();
+  };
+
+  function bindChips(){
+    sheetBody.querySelectorAll('[data-chips]').forEach(g=>{
+      g.querySelectorAll('button').forEach(btn=>{
+        if(btn.dataset.add){
+          btn.onclick = ()=>{
+            const v = prompt('ことばを追加'); if(!v || !v.trim()) return;
+            const key = g.dataset.vkey;
+            if(!vocabOf(key).includes(v.trim())){ S.customVocab[key].push(v.trim()); if(!save()) return; }
+            btn.insertAdjacentHTML('beforebegin',
+              `<button type="button" class="tag" data-v="${esc(v.trim())}" style="background:var(--ink);color:var(--paper);border-color:var(--ink)">${esc(v.trim())}</button>`);
+            bindChips();
+          };
+        }else{
+          btn.onclick = ()=>{
+            const on = btn.style.background !== '';
+            btn.style.background = on?'':'var(--ink)';
+            btn.style.color = on?'':'var(--paper)';
+            btn.style.borderColor = on?'':'var(--ink)';
+          };
+        }
+      });
+    });
+  }
+  bindChips();
+  sheetBody.querySelectorAll('[data-level]').forEach(g=>g.querySelectorAll('button').forEach(btn=>{
+    btn.onclick = ()=>{ g.querySelectorAll('button').forEach(x=>x.classList.remove('on')); btn.classList.add('on'); };
+  }));
+  const rt = document.getElementById('f_rating');
+  rt.querySelectorAll('button').forEach(btn=>{
+    btn.onclick = ()=>{ const v=+btn.dataset.v; rt.querySelectorAll('button').forEach(x=>x.classList.toggle('on', +x.dataset.v<=v)); };
+  });
+
+  const readChips = name => Array.from(sheetBody.querySelectorAll(`[data-chips="${name}"] button`))
+    .filter(b=>!b.dataset.add && b.style.background!=='').map(b=>b.dataset.v);
+  const readLevel = name => { const b = sheetBody.querySelector(`[data-level="${name}"] button.on`); return b?+b.dataset.v:2; };
+
+  document.getElementById('saveNote').onclick = ()=>{
+    const bid = selBean.value;
+    const rec = {
+      id: n?n.id:uid(),
+      date: document.getElementById('f_date').value || todayStr(),
+      beanId: (bid && bid!=='__other') ? bid : '',
+      beanName: bid==='__other' ? document.getElementById('f_beanName').value.trim() : '',
+      brew: document.getElementById('f_brew').value,
+      aroma: readChips('aroma'), aromaNote: document.getElementById('f_aromaNote').value.trim(),
+      acid: readLevel('acid'), acidTags: readChips('acidTags'),
+      body: readLevel('body'), bodyTags: readChips('bodyTags'),
+      flavorTags: readChips('flavorTags'),
+      food: document.getElementById('f_food').value.trim(),
+      word: document.getElementById('f_word').value.trim(),
+      rating: rt.querySelectorAll('button.on').length,
+      photo,
+    };
+    if(!rec.beanId && !rec.beanName){ alert('豆を選ぶか、名前を書いてください。'); return; }
+    if(n) S.notes = S.notes.map(x=>x.id===rec.id?rec:x); else S.notes.push(rec);
+    if(save()){ closeSheet(); render(); }
+  };
+  const del = document.getElementById('delNote');
+  if(del) del.onclick = ()=>{
+    if(!confirm('この記録を削除します。よろしいですか？')) return;
+    S.notes = S.notes.filter(x=>x.id!==editId);
+    if(save()){ closeSheet(); render(); }
+  };
+}
+
+function openNoteDetail(id){
+  const n = S.notes.find(x=>x.id===id); if(!n) return;
+  const b = n.beanId ? beanById(n.beanId) : null;
+  const tagline = arr => arr && arr.length ? `<span class="tags">${arr.map(v=>`<span class="tag" style="cursor:default">${esc(v)}</span>`).join('')}</span>` : '<span class="sub">—</span>';
+  const subTags = arr => arr && arr.length ? `<div style="margin-top:6px">${tagline(arr)}</div>` : '';
+  openSheet(`
+    ${sheetHead(b?b.name:(n.beanName||'コーヒー'))}
+    ${n.photo?`<img class="shot" src="${n.photo}" alt="">`:''}
+    <div class="row" style="margin-bottom:14px">
+      <span class="pill">${fmtDate(n.date)}</span>${n.brew?`<span class="pill">${esc(n.brew)}</span>`:''}
+      <span class="stars grow" style="text-align:right">${'★'.repeat(n.rating||0)}${'☆'.repeat(5-(n.rating||0))}</span>
+    </div>
+    ${n.word?`<div class="expl" style="font-size:14.5px;line-height:1.9">「${esc(n.word)}」</div>`:''}
+    ${n.flavorTags&&n.flavorTags.length?`<div class="figrid" style="margin-bottom:14px">${
+      n.flavorTags.map(f=>`<span class="filab"><span class="fi">${ic(flavorIcon(f))}</span><span>${esc(f)}</span></span>`).join('')}</div>`:''}
+    <div class="card">
+      <div class="kv"><div class="k">香り</div><div class="v">${tagline(n.aroma)}${n.aromaNote?`<div class="sub" style="margin-top:5px">${esc(n.aromaNote)}</div>`:''}</div></div>
+      <div class="kv"><div class="k">酸味</div><div class="v">${meter(n.acid)} <span class="sub">${esc(ACID_LEVEL[(n.acid||2)-1])}</span>${subTags(n.acidTags)}</div></div>
+      <div class="kv"><div class="k">コク</div><div class="v">${meter(n.body)} <span class="sub">${esc(BODY_LEVEL[(n.body||2)-1])}</span>${subTags(n.bodyTags)}</div></div>
+      ${n.food?`<div class="kv"><div class="k">フード</div><div class="v"><span class="fi" style="display:inline-flex;vertical-align:middle;margin-right:6px">${ic(foodIcon(n.food))}</span>${esc(n.food)}</div></div>`:''}
+    </div>
+    ${b?`<h2>公式のプロフィールと見くらべる</h2>
+      <div class="card">
+        <div class="kv"><div class="k">酸味</div><div class="v">${meter(b.acidity)}</div></div>
+        <div class="kv"><div class="k">コク</div><div class="v">${meter(b.body)}</div></div>
+        <div class="kv"><div class="k">風味</div><div class="v">${flavorRow(b, 6)}</div></div>
+      </div>`:''}
+    <button class="btn ghost" id="editNote" style="margin-top:14px">編集する</button>
+  `);
+  document.getElementById('editNote').onclick = ()=>openNoteForm(id);
+}
+
+/* =========================================================================
+   クイズ
+   ========================================================================= */
+function beanQuestions(){
+  const qs = [], beans = allBeans();
+  const roastOpts = ['ブロンド ロースト','ミディアム ロースト','ダーク ロースト'];
+  beans.forEach(b=>{
+    if(!b.name) return;
+    if(R[b.roast]) qs.push({c:'core', bean:b.id, q:`「${b.name}」の焙煎度は？`, o:roastOpts,
+      a:roastOpts.indexOf(R[b.roast]+' ロースト'), e:`${b.name} は ${R[b.roast]} ロースト。${b.story||''}`});
+    if(b.region) qs.push({c:'core', bean:b.id, q:`「${b.name}」の生産地は？`, o:REGIONS,
+      a:Math.max(0,REGIONS.indexOf(b.region)), e:`${b.name} は ${b.origin||b.region}。`});
+    if(PROCESSES.includes(b.process)) qs.push({c:'core', bean:b.id, q:`「${b.name}」の加工法は？`, o:PROCESSES,
+      a:PROCESSES.indexOf(b.process), e:`${b.name} は ${b.process}。`});
+
+    const others = beans.filter(x=>x.id!==b.id);
+    const otherPairs = [...new Set(others.flatMap(x=>x.pairing||[]))].filter(p=>!(b.pairing||[]).includes(p));
+    if((b.pairing||[]).length && otherPairs.length>=3){
+      const correct = b.pairing[Math.floor(Math.random()*b.pairing.length)];
+      const opts = shuffle([correct, ...shuffle(otherPairs).slice(0,3)]);
+      qs.push({c:'core', bean:b.id, q:`「${b.name}」と相性がよいフードは？`, o:opts, a:opts.indexOf(correct),
+        e:`${b.name}（${(b.flavors||[]).join('・')}）には ${b.pairing.join('、')}。似た風味どうしを合わせると、お互いが引き立つ。`});
+    }
+    const otherFlavors = [...new Set(others.flatMap(x=>x.flavors||[]))].filter(f=>!(b.flavors||[]).includes(f));
+    if((b.flavors||[]).length && otherFlavors.length>=3){
+      const correct = b.flavors[Math.floor(Math.random()*b.flavors.length)];
+      const opts = shuffle([correct, ...shuffle(otherFlavors).slice(0,3)]);
+      qs.push({c:'core', bean:b.id, q:`「${b.name}」の風味として正しいのは？`, o:opts, a:opts.indexOf(correct),
+        e:`${b.name} の風味は ${b.flavors.join('・')}。`});
+    }
+    if(b.acidity && b.body){
+      const lv = (x,y)=>`酸味 ${x} ／ コク ${y}`;
+      const correct = lv(b.acidity,b.body);
+      const opts = shuffle([correct, lv(b.acidity===3?1:b.acidity+1,b.body),
+        lv(b.acidity,b.body===3?1:b.body+1), lv(b.acidity===1?3:b.acidity-1,b.body===1?3:b.body-1)]);
+      qs.push({c:'core', bean:b.id, q:`「${b.name}」の酸味とコクは？（3段階）`, o:opts, a:opts.indexOf(correct),
+        e:`${b.name} は 酸味${b.acidity}／コク${b.body}。深く煎るほど酸味は落ち、コクは増えるのが基本。`});
+    }
+  });
+  ['blonde','medium','dark'].forEach(r=>{
+    const same = beans.filter(b=>b.roast===r), other = beans.filter(b=>b.roast!==r);
+    if(same.length && other.length>=3){
+      const correct = same[Math.floor(Math.random()*same.length)];
+      const opts = shuffle([correct.name, ...shuffle(other).slice(0,3).map(b=>b.name)]);
+      qs.push({c:'core', q:`次のうち「${R[r]} ロースト」はどれ？`, o:opts, a:opts.indexOf(correct.name),
+        e:`${correct.name} が ${R[r]} ロースト。`});
+    }
+  });
+  return qs;
+}
+
+let quizSession = null;
+function renderQuiz(){
+  if(quizSession){ renderQuizStep(); return; }
+  const stat = k => { const v=S.stats[k]; return v&&v.t ? `${Math.round(v.c/v.t*100)}%` : '—'; };
+  const cats = Object.entries(CATS).filter(([k])=> k!=='mine' || S.customQuiz.length);
+  view.innerHTML = `
+    <div class="big" data-start="all">
+      <span class="ic">${ic('quiz')}</span>
+      <span class="grow"><span class="t" style="display:block">おまかせ 10問</span>
+      <span class="d" style="display:block">ぜんぶの範囲から</span></span>
+    </div>
+    ${S.wrong.length ? `<div class="card tap" data-start="wrong"><div class="row">
+        <span class="fi" style="width:38px;height:38px">${ic('pen')}</span>
+        <div class="grow"><div style="font-size:14.5px;font-weight:700">まちがえた問題</div>
+        <div class="sub">${S.wrong.length}問</div></div></div></div>` : ''}
+    <h2>分野</h2>
+    ${cats.map(([k,v])=>`
+      <div class="card tap" data-start="${k}"><div class="row">
+        <span class="fi" style="width:38px;height:38px">${ic(v.g)}</span>
+        <div class="grow"><div style="font-size:14.5px;font-weight:700">${esc(v.nm)}</div></div>
+        <span class="sub">${stat(k)}</span>
+      </div></div>`).join('')}
+    <button class="btn ghost" id="addQ" style="margin-top:12px">＋ 問題を作る</button>
+    ${S.customQuiz.length?`<button class="btn ghost" id="mngQ" style="margin-top:8px">作った問題を見る（${S.customQuiz.length}）</button>`:''}
+    ${totalQuiz().t ? `<button class="btn warn" id="resetStats" style="margin-top:8px">成績をリセット</button>` : ''}
+  `;
+  view.querySelectorAll('[data-start]').forEach(el=>el.onclick=()=>startQuiz(el.dataset.start));
+  document.getElementById('addQ').onclick = ()=>openQuizForm();
+  const mq = document.getElementById('mngQ'); if(mq) mq.onclick = ()=>openMyQuiz();
+  const rs = document.getElementById('resetStats');
+  if(rs) rs.onclick = ()=>{ if(confirm('成績とまちがえた問題を消します。記録・豆・ことばは残ります。')){ S.stats={}; S.beanStats={}; S.wrong=[]; if(save()) renderQuiz(); } };
+}
+
+function openQuizForm(){
+  openSheet(`
+    ${sheetHead('問題を作る')}
+    <label class="fl">問題文</label>
+    <textarea id="q_q" placeholder="例：エチオピアの加工法は？"></textarea>
+    <label class="fl">正しい答え</label>
+    <input type="text" id="q_a" placeholder="正解">
+    <label class="fl">ちがう答え（3つ）</label>
+    <input type="text" id="q_w1" placeholder="ちがう答え 1">
+    <input type="text" id="q_w2" placeholder="ちがう答え 2" style="margin-top:8px">
+    <input type="text" id="q_w3" placeholder="ちがう答え 3" style="margin-top:8px">
+    <label class="fl">解説（覚え方）</label>
+    <textarea id="q_e" placeholder="なぜそうなるのか、ひとこと"></textarea>
+    <button class="btn" id="saveQ" style="margin-top:20px">保存する</button>
+  `);
+  document.getElementById('saveQ').onclick = ()=>{
+    const q = document.getElementById('q_q').value.trim();
+    const a = document.getElementById('q_a').value.trim();
+    const w = ['q_w1','q_w2','q_w3'].map(i=>document.getElementById(i).value.trim()).filter(Boolean);
+    if(!q || !a || w.length<3){ alert('問題文・正しい答え・ちがう答え3つを入れてください。'); return; }
+    const opts = shuffle([a, ...w]);
+    S.customQuiz.push({id:uid(), c:'mine', q, o:opts, a:opts.indexOf(a), e:document.getElementById('q_e').value.trim()||`答えは「${a}」。`});
+    if(save()){ closeSheet(); renderQuiz(); }
+  };
+}
+function openMyQuiz(){
+  openSheet(`
+    ${sheetHead('作った問題')}
+    <div class="card">
+      ${S.customQuiz.map(q=>`<div class="word"><div class="grow">
+        <div class="w">${esc(q.q)}</div><div class="m">${esc(q.o[q.a])}</div></div>
+        <button class="del" data-del="${q.id}">削除</button></div>`).join('') || '<p class="empty">まだありません。</p>'}
+    </div>
+  `);
+  sheetBody.querySelectorAll('[data-del]').forEach(el=>el.onclick=()=>{
+    S.customQuiz = S.customQuiz.filter(x=>x.id!==el.dataset.del);
+    if(save()){ openMyQuiz(); renderQuiz(); }
+  });
+}
+
+function startQuiz(cat){
+  const knowledge = QUIZ.concat(S.customQuiz);
+  let pool;
+  if(cat==='wrong'){
+    const all = knowledge.concat(beanQuestions());
+    pool = S.wrong.map(k=>all.find(q=>q.q===k)).filter(Boolean);
+    if(!pool.length){ S.wrong=[]; save(); alert('復習する問題がありません。'); renderQuiz(); return; }
+  }else if(cat==='core') pool = beanQuestions();
+  else if(cat==='all') pool = knowledge.concat(beanQuestions());
+  else pool = knowledge.filter(q=>q.c===cat);
+  if(!pool.length){ alert('この分野の問題がまだありません。'); return; }
+  quizSession = {cat, qs: shuffle(pool).slice(0,10), i:0, correct:0, results:[]};
+  window.scrollTo(0,0); renderQuizStep();
+}
+
+function renderQuizStep(){
+  const s = quizSession;
+  if(s.i >= s.qs.length){ renderQuizResult(); return; }
+  const q = s.qs[s.i];
+  view.innerHTML = `
+    <div class="qprog">${s.qs.map((_,i)=>`<i class="${i<s.i ? (s.results[i]?'on':'bad') : ''}"></i>`).join('')}</div>
+    <p class="sub" style="margin-bottom:6px">${s.i+1} / ${s.qs.length}　${esc((CATS[q.c]||{}).nm||'')}</p>
+    <p class="qtext">${esc(q.q)}</p>
+    <div id="opts">${q.o.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o)}</button>`).join('')}</div>
+    <div id="after"></div>`;
+  view.querySelectorAll('.opt').forEach(el=>el.onclick=()=>answer(+el.dataset.i));
+}
+
+function answer(pick){
+  const s = quizSession, q = s.qs[s.i], ok = pick===q.a;
+  s.results[s.i] = ok; if(ok) s.correct++;
+  S.stats[q.c] = S.stats[q.c] || {c:0,t:0}; S.stats[q.c].t++; if(ok) S.stats[q.c].c++;
+  if(q.bean){ S.beanStats[q.bean] = S.beanStats[q.bean] || {c:0,t:0}; S.beanStats[q.bean].t++; if(ok) S.beanStats[q.bean].c++; }
+  if(ok) S.wrong = S.wrong.filter(x=>x!==q.q);
+  else if(!S.wrong.includes(q.q)) S.wrong.push(q.q);
+  save();
+  view.querySelectorAll('.opt').forEach((el,i)=>{
+    el.disabled = true;
+    if(i===q.a) el.classList.add(ok?'correct':'reveal');
+    else if(i===pick) el.classList.add('wrong');
+  });
+  document.getElementById('after').innerHTML = `
+    <div class="expl" style="margin-top:14px"><b>${ok?'正解':'おしい'}</b>　${esc(q.e)}</div>
+    <button class="btn" id="nextQ">${s.i+1>=s.qs.length?'結果を見る':'次へ'}</button>`;
+  document.getElementById('nextQ').onclick = ()=>{ s.i++; window.scrollTo(0,0); renderQuizStep(); };
+}
+
+function renderQuizResult(){
+  const s = quizSession, pct = Math.round(s.correct/s.qs.length*100);
+  view.innerHTML = `
+    <div class="score"><b>${s.correct}<span style="font-size:20px;color:var(--muted)"> / ${s.qs.length}</span></b>
+      <span>${pct}％</span></div>
+    <div style="margin-top:18px">
+      ${s.qs.map((q,i)=>`<div class="card" style="padding:13px 15px"><div class="row" style="align-items:flex-start">
+        <span style="flex-shrink:0;width:18px;font-weight:700">${s.results[i]?'○':'×'}</span>
+        <span class="grow">
+          <span style="display:block;font-size:13.5px;font-weight:700;line-height:1.6">${esc(q.q)}</span>
+          <span style="display:block;font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.7">${esc(q.o[q.a])}　—　${esc(q.e)}</span>
+        </span></div></div>`).join('')}
+    </div>
+    <button class="btn" id="again" style="margin-top:14px">もう10問</button>
+    <button class="btn ghost" id="backQ" style="margin-top:8px">分野をえらぶ</button>`;
+  quizSession = null;
+  document.getElementById('again').onclick = ()=>startQuiz(s.cat);
+  document.getElementById('backQ').onclick = ()=>renderQuiz();
+}
+
+/* =========================================================================
+   ことば
+   ========================================================================= */
+let wordCat = 'すべて', wordQuery = '';
+function renderWords(){
+  const words = allWords();
+  const cats = ['すべて', ...new Set(words.map(w=>w.c))];
+  const list = words.filter(w=>
+    (wordCat==='すべて' || w.c===wordCat) &&
+    (!wordQuery || w.w.includes(wordQuery) || w.m.includes(wordQuery)));
+  view.innerHTML = `
+    <input type="search" id="wq" placeholder="ことばを探す" value="${esc(wordQuery)}" style="margin-bottom:12px">
+    <div class="filters">${cats.map(c=>`<button class="chip ${wordCat===c?'on':''}" data-c="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+    <div class="card">
+      ${list.length ? list.map(w=>`<div class="word"><div class="grow">
+        <div class="w">${esc(w.w)}</div><div class="m">${esc(w.m)}</div></div>
+        ${w.id?`<button class="del" data-del="${w.id}">削除</button>`:''}</div>`).join('')
+        : '<p class="empty">見つかりませんでした。</p>'}
+    </div>
+    <button class="btn ghost" id="addWord" style="margin-top:14px">＋ ことばを追加する</button>`;
+  const wq = document.getElementById('wq');
+  wq.oninput = e=>{ wordQuery=e.target.value.trim(); const p=window.scrollY; renderWords(); window.scrollTo(0,p); document.getElementById('wq').focus(); };
+  view.querySelectorAll('[data-c]').forEach(el=>el.onclick=()=>{ wordCat=el.dataset.c; renderWords(); });
+  view.querySelectorAll('[data-del]').forEach(el=>el.onclick=()=>{
+    S.customWords = S.customWords.filter(x=>x.id!==el.dataset.del); if(save()) renderWords();
+  });
+  document.getElementById('addWord').onclick = ()=>openWordForm();
+}
+function openWordForm(){
+  const cats = [...new Set(WORDS.map(w=>w.c))];
+  openSheet(`
+    ${sheetHead('ことばを追加する')}
+    <label class="fl">分類</label>
+    <select id="w_c">${cats.map(c=>`<option>${esc(c)}</option>`).join('')}</select>
+    <label class="fl">ことば</label>
+    <input type="text" id="w_w" placeholder="例：カッピング">
+    <label class="fl">意味</label>
+    <textarea id="w_m" placeholder="どういう意味か、ひとことで"></textarea>
+    <button class="btn" id="saveWord" style="margin-top:20px">保存する</button>`);
+  document.getElementById('saveWord').onclick = ()=>{
+    const w = document.getElementById('w_w').value.trim(), m = document.getElementById('w_m').value.trim();
+    if(!w || !m){ alert('ことばと意味を入れてください。'); return; }
+    S.customWords.push({id:uid(), c:document.getElementById('w_c').value, w, m});
+    if(save()){ closeSheet(); renderWords(); }
+  };
+}
+
+/* =========================================================================
+   設定
+   ========================================================================= */
+document.getElementById('gearBtn').onclick = ()=>{
+  const photoCount = Object.keys(S.photos).length + S.notes.filter(n=>n.photo).length;
+  openSheet(`
+    ${sheetHead('このアプリについて')}
+    <a class="btn ghost" href="black-apron-tsukaikata.html" style="text-decoration:none; margin-bottom:14px">使い方を見る</a>
+    <p class="sub" style="line-height:1.9">記録・写真・メモ・成績は、この端末のブラウザの中だけに保存されます（どこにも送られません）。
+    機種変更のときや、消えると困るときは書き出してください。</p>
+    <div class="card" style="margin-top:14px">
+      <div class="kv"><div class="k">記録</div><div class="v">${S.notes.length} 件</div></div>
+      <div class="kv"><div class="k">豆</div><div class="v">${allBeans().length} 種類（自分で追加 ${S.customBeans.length}）</div></div>
+      <div class="kv"><div class="k">写真</div><div class="v">${photoCount} 枚</div></div>
+      <div class="kv"><div class="k">解いた問題</div><div class="v">${totalQuiz().t} 問</div></div>
+    </div>
+    <h2>パッケージの写真</h2>
+    <p class="sub" style="line-height:1.9">豆の丸いところに、スターバックス公式サイトのパッケージ写真を出しています。
+    写真はこのアプリには保存せず、<b>公式のサーバーから直接読み込んでいます</b>。
+    1枚およそ190KBあるので、通信が気になるときや、公式サイトの更新で出なくなったときはここで消せます。</p>
+    <button class="btn ghost" id="pkgBtn">${S.officialImg===false?'公式のパッケージ写真を出す':'公式のパッケージ写真を消す'}</button>
+    <p class="sub" style="margin-top:8px">季節限定の6種は公式サイトに画像が置かれていないため出ません。
+    自分で撮った写真を入れると、そちらが優先されます。</p>
+
+    <h2>データ</h2>
+    <button class="btn ghost" id="expBtn" style="margin-top:0">データを書き出す</button>
+    <button class="btn ghost" id="impBtn" style="margin-top:8px">データを読み込む</button>
+    <input type="file" id="impFile" accept="application/json,.json" style="display:none">
+    <h2>ホーム画面に置くと使いやすい</h2>
+    <p class="sub">iPhone は Safari の共有ボタン →「ホーム画面に追加」。アプリのように開けます。</p>
+    <h2>参考にした情報</h2>
+    <p class="sub" style="line-height:1.9">スターバックス コーヒー ジャパンの公式サイト（コーヒー豆・テイスティング・いれ方の4つの基本・用語集・フードペアリング）と、
+    ブラックエプロン受験者による公開記事をもとに整理しました。試験の内容は年によって変わります。社内の最新資料を必ず優先してください。</p>`);
+  document.getElementById('pkgBtn').onclick = ()=>{
+    S.officialImg = (S.officialImg === false);
+    if(save()){ closeSheet(); render(); }
+  };
+  document.getElementById('expBtn').onclick = ()=>{
+    const blob = new Blob([JSON.stringify(S)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = `black-apron-note-${todayStr()}.json`;
+    a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+  };
+  const file = document.getElementById('impFile');
+  document.getElementById('impBtn').onclick = ()=>file.click();
+  file.onchange = ()=>{
+    const f = file.files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = ()=>{
+      try{
+        const data = JSON.parse(r.result);
+        if(!data || !Array.isArray(data.notes)) throw new Error('形式が違います');
+        if(!confirm('いまのデータを、読み込んだ内容で置きかえます。よろしいですか？')) return;
+        S = Object.assign(fresh(), data);
+        S.customVocab = Object.assign({aroma:[],acidity:[],body:[],flavor:[]}, S.customVocab||{});
+        if(save()){ closeSheet(); go('home'); }
+      }catch(e){ alert('読み込めませんでした：' + e.message); }
+    };
+    r.readAsText(f);
+  };
+};
+
+/* 回転やアドレスバーの出入りで高さが変わったら、ホームを組み直す */
+let lastH = window.innerHeight;
+window.addEventListener('resize', ()=>{
+  if(tab!=='home') return;
+  if(Math.abs(window.innerHeight - lastH) < 40) return;
+  lastH = window.innerHeight; render();
+});
+
+render();
+</script>
+</body>
+</html>

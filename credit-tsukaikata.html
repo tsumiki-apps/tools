@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>クレジット明細マネージャー — 使い方</title>
+<meta name="description" content="クレジット明細マネージャーの使い方。立替と自分の支出を分けて、請求月ごとの実質支出を出します。">
+<link rel="apple-touch-icon" href="icon-credit.png">
+<style>
+  /* ================================================================
+     つみき 取扱説明書 共通スタイル v2（1項目＝1図＋数行）
+     ・外部読み込みゼロ（フォント/CDN/画像すべて無し）
+     ・図はアプリ画面をHTML/CSSで再現（スクショ画像を使わない）
+     ================================================================ */
+  :root{
+    --paper:#F4F2EE; --surface:#ECE9E3; --ink:#242321; --muted:#77736B;
+    --hair:#D8D4CC; --ghost:#BEB9B0; --control:#FBFAF8;
+    --mark:#B4562E;                       /* 図の注釈（番号ピン・矢印） */
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%; scroll-behavior:smooth;}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:'Hiragino Maru Gothic ProN',-apple-system,BlinkMacSystemFont,'Hiragino Sans','Noto Sans JP',sans-serif;
+    line-height:1.75; -webkit-font-smoothing:antialiased;
+    padding:0 18px calc(48px + env(safe-area-inset-bottom));
+    font-size:15px;
+  }
+  .wrap{max-width:1180px; margin:0 auto;}
+  a{color:var(--ink);}
+  /* grid/flex の子は既定 min-width:auto。中身（表など）に押し広げられて
+     375px幅で横スクロールが出るのを防ぐ。 */
+  main,.grp,.items,.item,figure.shot{min-width:0;}
+  .tblwrap{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+
+  /* ================= 見出し ================= */
+  header{padding:40px 0 0;}
+  .kicker{font-size:11px; font-weight:700; letter-spacing:.16em; color:var(--muted); margin-bottom:9px;}
+  h1{font-size:27px; font-weight:700; letter-spacing:.03em; line-height:1.4;}
+  header .lead{margin-top:10px; font-size:14.5px; color:var(--muted); max-width:36em;}
+  .openapp{margin-top:16px; display:flex; gap:9px; flex-wrap:wrap;}
+  .openapp a{
+    display:inline-block; background:var(--ink); color:var(--paper);
+    text-decoration:none; border-radius:999px; padding:9px 20px;
+    font-size:14px; font-weight:700;
+  }
+  .openapp a.ghost{background:none; color:var(--ink); border:1.5px solid var(--hair);}
+
+  /* ================= もくじ ================= */
+  /* 狭い画面ではたたんでおく（項目が多いので本文が遠くならないように）。
+     1000px以上ではサマリを隠して左に貼り付ける。開閉は末尾の script。 */
+  details.toc{
+    margin-top:22px; background:var(--control); border:1px solid var(--hair);
+    border-radius:16px; padding:12px 16px;
+  }
+  details.toc summary{
+    cursor:pointer; list-style:none; font-size:12.5px; font-weight:700;
+    letter-spacing:.08em; color:var(--muted);
+  }
+  details.toc summary::-webkit-details-marker{display:none;}
+  details.toc summary::after{content:'▾'; margin-left:7px; font-size:11px;}
+  details.toc[open] summary::after{content:'▴';}
+  .toc nav{margin-top:10px;}
+  .toc .g{
+    font-size:10.5px; font-weight:700; letter-spacing:.14em; color:var(--ghost);
+    margin:14px 0 3px;
+  }
+  .toc .g:first-child{margin-top:0;}
+  .toc a{
+    display:block; text-decoration:none; font-size:13.5px; padding:2px 0;
+    color:var(--ink);
+  }
+  .toc a .n{display:inline-block; width:1.9em; color:var(--ghost); font-weight:700; font-size:12px;}
+  .toc a.on{color:var(--mark); font-weight:700;}
+  .toc a.on .n{color:var(--mark);}
+
+  /* ================= 項目（1項目＝1図＋数行） ================= */
+  .grp{padding:34px 0 0; scroll-margin-top:14px;}
+  .grp > h2{
+    font-size:12.5px; font-weight:700; letter-spacing:.14em; color:var(--muted);
+    border-bottom:1px solid var(--hair); padding-bottom:8px; margin-bottom:16px;
+  }
+  .items{display:grid; gap:16px;}
+  .item{
+    background:var(--control); border:1px solid var(--hair); border-radius:18px;
+    padding:14px 14px 16px; scroll-margin-top:14px;
+  }
+  .item h3{
+    font-size:15.5px; font-weight:700; line-height:1.55; margin:13px 0 2px;
+    display:flex; gap:9px; align-items:flex-start;
+  }
+  .item h3 .n{
+    flex:none; width:23px; height:23px; border-radius:50%;
+    background:var(--ink); color:var(--paper); font-size:12px; font-weight:700;
+    display:flex; align-items:center; justify-content:center; margin-top:2px;
+  }
+  .item p{font-size:14px; margin:5px 0 0; padding-left:32px;}
+  .item p.fine{font-size:12.5px; color:var(--muted); margin-top:8px; line-height:1.7;}
+  .item p.caution{color:#94301b;}
+  .item p.caution b{color:#94301b;}
+  .item ul{margin:5px 0 0; padding-left:calc(32px + 1.1em); font-size:14px;}
+  .item ul li{margin:3px 0;}
+  .item ul li::marker{color:var(--ghost);}
+  /* 図のないおまけ項目（データの保存など）は番号だけで詰めて見せる */
+  .item.nofig h3{margin-top:2px;}
+
+  kbd{
+    display:inline-block; background:#fff; border:1px solid var(--hair);
+    border-bottom-width:2px; border-radius:7px; padding:0 7px;
+    font-family:inherit; font-size:13px; font-weight:700; white-space:nowrap;
+  }
+  .path{color:var(--muted);}
+  .path b{color:var(--ink); font-weight:700;}
+
+  /* ================= 図（アプリ画面の再現） ================= */
+  /* 番号ピンが枠の外に11px＋影ぶんはみ出す。その余白を figure 側に持たせる。 */
+  figure.shot{margin:0; padding:2px 14px 0;}
+  figcaption{font-size:11.5px; color:var(--ghost); margin-top:7px; text-align:center;}
+  /* 注釈：番号ピンと矢印（使うのは「ここを押す」が言葉で伝わらない図だけ） */
+  .pin{
+    position:absolute; z-index:3; width:21px; height:21px; border-radius:50%;
+    background:var(--mark); color:#fff; font-size:11.5px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 0 3px rgba(255,255,255,.9);
+  }
+  .arrow{position:absolute; z-index:2; height:2px; background:var(--mark); transform-origin:left center;}
+  .arrow::after{
+    content:''; position:absolute; right:-2px; top:-4px;
+    border:5px solid transparent; border-left-color:var(--mark);
+  }
+
+  /* 流れ図（「どんな道具か」の1枚目に使う） */
+  .flow{display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center;
+    background:#fff; border:1px solid var(--hair); border-radius:14px; padding:16px 12px;}
+  .flow .box{background:var(--surface); border-radius:10px; padding:7px 12px; font-size:13px; font-weight:700;}
+  .flow .arw{color:var(--mark); font-weight:700;}
+
+  /* 計算式の図 */
+  .calc{
+    background:#fff; border:1px solid var(--hair); border-radius:14px;
+    padding:13px 14px; font-size:14.5px; font-weight:700;
+    font-variant-numeric:tabular-nums; text-align:center; line-height:2;
+  }
+  .calc .op{color:var(--ghost); margin:0 3px;}
+  .calc .res{color:var(--mark);}
+  .calc small{font-size:11px; color:var(--muted); font-weight:500; margin-left:1px;}
+  .calc .note2{display:block; font-size:11.5px; color:var(--muted); font-weight:500; margin-top:3px;}
+
+  /* 注意（赤の細い帯。多用しない） */
+  .warnbox{
+    border-left:3px solid #B03A22; background:#F7EFEA; border-radius:0 10px 10px 0;
+    padding:9px 12px; margin:9px 0 0 32px; font-size:13px; color:#7d2c19;
+  }
+  .warnbox b{color:#7d2c19;}
+
+  /* 比較表（巻末で使う） */
+  table.cmp{border-collapse:collapse; width:100%; margin:8px 0 0; font-size:13.5px; background:#fff;
+    border:1px solid var(--hair); border-radius:14px; overflow:hidden;}
+  table.cmp th, table.cmp td{border-bottom:1px solid var(--hair); padding:9px 12px; text-align:left; vertical-align:top;}
+  table.cmp thead th{background:var(--surface); font-size:11.5px; color:var(--muted); font-weight:700;}
+  table.cmp tbody tr:last-child th, table.cmp tbody tr:last-child td{border-bottom:none;}
+  table.cmp tbody th{font-weight:700; white-space:nowrap;}
+  /* 表は項目カードの中に入るので、常に行ごとのカードへ積み替える
+     （列が細って1字ずつ縦に折れるのを防ぐ） */
+  table.cmp.stack{display:block;}
+  table.cmp.stack thead{display:none;}
+  table.cmp.stack tbody,table.cmp.stack tbody tr{display:block;}
+  table.cmp.stack tbody tr{padding:11px 13px; border-bottom:1px solid var(--hair);}
+  table.cmp.stack tbody tr:last-child{border-bottom:none;}
+  table.cmp.stack tbody th,table.cmp.stack tbody td{
+    display:block; width:auto!important; padding:0; border:none; white-space:normal;}
+  table.cmp.stack tbody th{font-size:14px;}
+  table.cmp.stack tbody td{margin-top:5px; font-size:13px;}
+  table.cmp.stack tbody td[data-l]::before{
+    content:attr(data-l); display:block; font-size:10.5px; font-weight:700;
+    letter-spacing:.08em; color:var(--muted);}
+
+  /* ================= 巻末（小さく・端に） ================= */
+  .appendix{padding-top:34px;}
+  .appendix > h2{
+    font-size:12.5px; font-weight:700; letter-spacing:.14em; color:var(--muted);
+    border-bottom:1px solid var(--hair); padding-bottom:8px; margin-bottom:14px;
+  }
+  .qa{display:grid; gap:11px;}
+  .qa .q{font-size:13.5px; font-weight:700;}
+  .qa .a{font-size:13px; color:var(--muted); margin-top:2px;}
+  .qa > div{border-bottom:1px dotted var(--hair); padding-bottom:10px;}
+  .qa > div:last-child{border-bottom:none;}
+
+  footer{
+    margin-top:44px; padding-top:18px; border-top:1px solid var(--hair);
+    font-size:12px; color:var(--ghost); text-align:center; line-height:2;
+  }
+
+  /* ================= 横幅を使う ================= */
+  @media (min-width:640px){
+    .items{grid-template-columns:1fr 1fr;}
+    .qa{grid-template-columns:1fr 1fr; gap:11px 26px;}
+  }
+  @media (min-width:1000px){
+    body{padding-left:28px; padding-right:28px;}
+    .wrap{max-width:1280px;}
+    h1{font-size:32px;}
+    .layout{display:grid; grid-template-columns:212px minmax(0,1fr); gap:40px; align-items:start;}
+    details.toc{
+      position:sticky; top:22px; margin-top:40px; background:none; border:none; padding:0;
+      max-height:calc(100vh - 56px); overflow:auto;
+    }
+    details.toc summary{display:none;}
+    .grp{padding-top:40px;}
+
+    /* PCでは項目を1列にして、図を大きく見せる（2列だと図が小さくて読めない）。
+       図の中身は px 直書きが多く、箱を広げるだけでは字が大きくならないので zoom で
+       中身ごと拡大する（幅は親いっぱいのままなので横はみ出しは起きない）。 */
+    .items{grid-template-columns:minmax(0,1fr);}
+    figure.shot > :not(figcaption){zoom:1.25;}
+    figcaption{font-size:12.5px;}
+  }
+  @media (min-width:1120px){
+    /* 横幅に余裕があるときだけ、図を左・文章を右に並べる。
+       HTMLを変えずに済むよう、図に縦方向のスパンを持たせて
+       残りの子（h3/p/ul）を右の列へ流し込む。 */
+    .item{
+      display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);
+      column-gap:30px; align-content:start; padding:18px 22px 20px;
+    }
+    .item > figure.shot{grid-column:1; grid-row:1 / span 30; align-self:center; padding:0 12px;}
+    .item > *:not(figure.shot){grid-column:2;}
+    .item > h3{margin-top:0;}
+    /* 図のない項目は横に伸びすぎないよう、行の長さだけ抑える */
+    .item.nofig{display:block;}
+    .item.nofig p, .item.nofig ul{max-width:58em;}
+  }
+
+  /* ================= 印刷（そのままA4のPDFになる） ================= */
+  @media print{
+    @page{margin:14mm 12mm;}
+    body{background:#fff; color:#000; font-size:9.5pt; padding:0;}
+    .wrap{max-width:none;}
+    .layout{display:block;}
+    details.toc,.openapp{display:none;}
+    header{padding-top:0;}
+    .grp{padding-top:14pt;}
+    .grp > h2{page-break-after:avoid;}
+    .items{grid-template-columns:1fr 1fr; gap:9pt;}
+    .item{background:#fff; page-break-inside:avoid;}
+    .qa{grid-template-columns:1fr 1fr;}
+    .qa > div{page-break-inside:avoid;}
+    .screen{box-shadow:none;}
+    footer{color:#555;}
+  }
+
+  /* credit 本体と同じ色（画面再現に使う） */
+  :root{
+    /* アプリ画面の再現に使う色（本体と同じ値） */
+    --app-bg:#f4f1ea; --app-card:#ffffff; --app-surf:#faf8f2;
+    --app-ink:#2a2a28; --app-subtle:#7d7a70; --app-line:#e8e1d3;
+    --app-blue:#626acb; --app-green:#3f9368; --app-orange:#b8662e; --app-red:#c96e42;
+    --soft-blue:#edecf8; --soft-green:#e7f0e8; --soft-orange:#f6ecdd; --soft-pink:#f3e7e9;
+  }
+
+  /* ================= アプリ画面の再現（図） ================= */
+  .screen{
+    position:relative; border:1px solid var(--app-line); border-radius:18px; background:var(--app-bg);
+    padding:14px; color:var(--app-ink); font-size:13px; line-height:1.55;
+    box-shadow:0 1px 3px rgba(36,35,33,.06);
+  }
+  .screen .sc-card{background:var(--app-card); border:1px solid var(--app-line); border-radius:14px; padding:14px; margin-bottom:10px;}
+  .screen .sc-card:last-child{margin-bottom:0;}
+  .screen h4{font-size:11px; font-weight:800; color:var(--app-subtle); letter-spacing:.02em; margin:0 0 10px; display:flex; align-items:center; justify-content:space-between; gap:8px;}
+
+  /* トップタブ */
+  .sc-tabs{display:flex; gap:5px; background:var(--app-card); border:1px solid var(--app-line); border-radius:12px; padding:4px; margin-bottom:12px;}
+  .sc-tabs span{flex:1; text-align:center; padding:7px 4px; border-radius:8px; font-size:12px; font-weight:500; color:var(--app-subtle);}
+  .sc-tabs span.on{background:var(--app-ink); color:#fff;}
+
+  /* 月タブ（請求期間） */
+  .sc-months{display:flex; gap:6px; margin-bottom:12px; overflow:hidden;}
+  .sc-months .m{flex:0 0 auto; border:1px solid var(--app-line); border-radius:999px; padding:5px 12px; font-size:12px; background:var(--app-card);}
+  .sc-months .m.on{background:var(--app-blue); color:#fff; border-color:var(--app-blue);}
+
+  /* ヒーロー（実質支出） */
+  .sc-hero .lbl{font-size:11px; color:var(--app-subtle);}
+  .sc-hero .ttl{font-size:12px; font-weight:700; color:var(--app-subtle); margin:2px 0 4px;}
+  .sc-hero .amt{font-size:30px; font-weight:800; letter-spacing:-.02em; line-height:1.1;}
+  .sc-hero .amt .yen{font-size:17px; margin-right:2px;}
+  .sc-hero .metrics{display:flex; gap:16px; margin-top:10px; font-size:11px; color:var(--app-subtle);}
+  .sc-hero .metrics strong{font-size:14px; color:var(--app-ink); margin:0 2px;}
+
+  /* stat グリッド */
+  .sc-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .sc-stat{background:var(--app-surf); border:1px solid var(--app-line); border-radius:12px; padding:10px 12px;}
+  .sc-stat .l{font-size:10.5px; color:var(--app-subtle); margin-bottom:3px;}
+  .sc-stat .v{font-size:17px; font-weight:800;}
+  .sc-stat.warn{background:var(--soft-orange);} .sc-stat.warn .v{color:var(--app-orange);}
+  .sc-stat.ok{background:var(--soft-green);} .sc-stat.ok .v{color:var(--app-green);}
+
+  /* 行（明細・立替・注文） */
+  .sc-row{display:flex; align-items:center; gap:10px; padding:9px 0; border-top:1px solid var(--app-line);}
+  .sc-row:first-of-type{border-top:none;}
+  .sc-row .main{flex:1; min-width:0;}
+  .sc-row .nm{font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .sc-row .sub{font-size:10.5px; color:var(--app-subtle);}
+  .sc-row .amt{font-size:14px; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .sc-tag{display:inline-block; font-size:10px; font-weight:700; padding:1px 7px; border-radius:999px; vertical-align:middle;}
+  .sc-tag.loan{background:var(--soft-orange); color:var(--app-orange);}
+  .sc-tag.amz{background:var(--soft-blue); color:var(--app-blue);}
+  .sc-tag.done{background:var(--soft-green); color:var(--app-green);}
+
+  /* ボタン */
+  .sc-btn{display:inline-block; border:1px solid var(--app-line); background:var(--app-card); border-radius:9px; padding:5px 11px; font-size:11.5px; font-weight:600; color:var(--app-ink);}
+  .sc-btn.pri{background:var(--app-ink); color:#fff; border-color:var(--app-ink);}
+  .sc-btn.blue{background:var(--app-blue); color:#fff; border-color:var(--app-blue);}
+
+  /* セグメント（1人/割り勘） */
+  .sc-seg{display:flex; background:var(--app-surf); border:1px solid var(--app-line); border-radius:10px; padding:3px; margin-bottom:10px;}
+  .sc-seg span{flex:1; text-align:center; padding:7px 4px; border-radius:7px; font-size:12px; font-weight:600; color:var(--app-subtle);}
+  .sc-seg span.on{background:var(--app-card); color:var(--app-ink); box-shadow:0 1px 2px rgba(0,0,0,.06);}
+
+  /* フォーム行 */
+  .sc-field{margin-bottom:9px;}
+  .sc-field .fl{font-size:10.5px; color:var(--app-subtle); margin-bottom:3px;}
+  .sc-field .fi{border:1px solid var(--app-line); border-radius:9px; background:var(--app-card); padding:7px 10px; font-size:13px;}
+  .sc-field .fi.ph{color:var(--ghost);}
+
+  /* 分割プレビュー行 */
+  .sc-inst{display:flex; justify-content:space-between; font-size:12px; padding:3px 0;}
+  .sc-inst b{font-variant-numeric:tabular-nums;}
+
+  /* 注釈：番号ピンと矢印 */
+
+  /* Q&A */
+
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="kicker">つみき</p>
+  <h1>クレジット明細マネージャー 使い方</h1>
+  <p class="lead">クレカのCSVを取り込み、<strong>人に立て替えたぶん</strong>を切り分けると、<strong>自分が本当に使ったお金（実質支出）</strong>だけが残って見えます。</p>
+  <p class="openapp"><a href="https://tsumiki-apps.github.io/apps/credit.html">アプリを開く →</a></p>
+</header>
+
+<div class="layout">
+
+<details class="toc" id="toc" open>
+  <summary>もくじ（全22項目）</summary>
+  <nav>
+    <p class="g">まず知る</p>
+    <a href="#i1"><span class="n">1</span>どんな道具か</a>
+    <a href="#i2"><span class="n">2</span>実質支出を見る</a>
+    <a href="#i3"><span class="n">3</span>実質支出の計算</a>
+    <a href="#i4"><span class="n">4</span>3つのタブ</a>
+
+    <p class="g">毎月の流れ</p>
+    <a href="#i5"><span class="n">5</span>明細CSVを取り込む</a>
+    <a href="#i6"><span class="n">6</span>請求期間の区切り</a>
+    <a href="#i7"><span class="n">7</span>立て替えに送る</a>
+    <a href="#i8"><span class="n">8</span>1人に立替／割り勘</a>
+    <a href="#i9"><span class="n">9</span>「立替」の印が付く</a>
+
+    <p class="g">立て替えを回収する</p>
+    <a href="#i10"><span class="n">10</span>未回収と回収済み</a>
+    <a href="#i11"><span class="n">11</span>回収を記録する</a>
+    <a href="#i12"><span class="n">12</span>明細書を送る</a>
+    <a href="#i13"><span class="n">13</span>現金の立替も足せる</a>
+
+    <p class="g">分割払い・Amazon</p>
+    <a href="#i14"><span class="n">14</span>分割払いを登録する</a>
+    <a href="#i15"><span class="n">15</span>手数料の調べ方</a>
+    <a href="#i16"><span class="n">16</span>Amazonを取り込む</a>
+    <a href="#i17"><span class="n">17</span>自動で紐付ける</a>
+
+    <p class="g">整える</p>
+    <a href="#i18"><span class="n">18</span>カテゴリを変える</a>
+    <a href="#i19"><span class="n">19</span>期間を移動する</a>
+
+    <p class="g">保存・引き継ぎ</p>
+    <a href="#i20"><span class="n">20</span>クラウドに自動同期</a>
+    <a href="#i21"><span class="n">21</span>控えを書き出す</a>
+    <a href="#i22"><span class="n">22</span>削除は戻せない</a>
+
+    <p class="g">巻末</p>
+    <a href="#qa"><span class="n">Q</span>こまったとき</a>
+  </nav>
+</details>
+
+<main>
+
+<!-- ==================== まず知る ==================== -->
+<section class="grp" id="g1">
+  <h2>まず知る</h2>
+  <div class="items">
+
+    <article class="item" id="i1">
+      <figure class="shot">
+        <div class="flow">
+          <span class="box">クレカCSVを取り込む</span><span class="arw">→</span>
+          <span class="box">立て替えを切り分ける</span><span class="arw">→</span>
+          <span class="box">実質支出が見える</span>
+        </div>
+      </figure>
+      <h3><span class="n">1</span>どんな道具か</h3>
+      <p>カードの請求額に混ざった<strong>「人のぶん」を引き算</strong>して、自分の本当の出費を見えるようにする道具です。</p>
+      <p class="fine">使うのは自分ひとり（自分の家計用）。同期で複数の端末から使えます。<br>
+        ※ 実質支出＝カードで払った総額から、あとで返ってくる立替ぶんを引いた、自分が本当に負担する金額。</p>
+    </article>
+
+    <article class="item" id="i2">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-card sc-hero">
+            <div class="lbl">6/7〜7/6</div>
+            <div class="ttl">🎯 自分の実質支出</div>
+            <div class="amt"><span class="yen">¥</span>182,400</div>
+            <div class="metrics">
+              <div>総決済額 <strong>¥246,800</strong></div>
+              <div>立替化 <strong>¥64,400</strong></div>
+            </div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">2</span>実質支出を見る</h3>
+      <p><kbd>💳 明細</kbd> タブのいちばん上に、大きく出る数字がそれです。</p>
+      <p class="fine">下に小さく出る「総決済額」「立替化」が、その内訳です。</p>
+    </article>
+
+    <article class="item" id="i3">
+      <figure class="shot">
+        <div class="calc">
+          総決済額 246,800 <span class="op">−</span> 立替化 64,400<br>
+          <span class="op">＝</span> <span class="res">実質支出 182,400</span>
+          <span class="note2">立て替えを切り分けるほど、実質支出は正確になります</span>
+        </div>
+      </figure>
+      <h3><span class="n">3</span>実質支出の計算</h3>
+      <p>払った総額から、立て替えに切り分けたぶんを引いた残りです。</p>
+    </article>
+
+    <article class="item" id="i4">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-tabs">
+            <span class="on">💳 明細</span><span>📦 Amazon</span><span>🤝 立て替え</span>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">4</span>3つのタブ</h3>
+      <p>ふだん使うのは <kbd>💳 明細</kbd> と <kbd>🤝 立て替え</kbd> の2つです。</p>
+      <p class="fine"><b>💳 明細</b>＝取り込みと実質支出。<b>📦 Amazon</b>＝注文の中身の紐付け。<b>🤝 立て替え</b>＝誰にいくらの台帳。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 毎月の流れ ==================== -->
+<section class="grp" id="g2">
+  <h2>毎月の流れ</h2>
+  <div class="items">
+
+    <article class="item" id="i5">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-card">
+            <h4>クレカ明細CSVをアップロード</h4>
+            <div style="border:1px dashed var(--app-line); border-radius:12px; background:var(--app-surf); text-align:center; padding:18px 12px;">
+              <div style="font-size:24px">💳</div>
+              <div style="font-size:12.5px; font-weight:600; margin-top:4px">＋ 新しいCSVを読み込む</div>
+            </div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">5</span>明細CSVを取り込む</h3>
+      <p>カード会社でダウンロードした明細CSVを選ぶだけ。請求期間ごとに自動で振り分けられます。</p>
+      <p class="fine">列名のゆれ（ご利用日／利用日／取引日 など）は自動で吸収します。何度読み込んでも同じ明細は重なりません。</p>
+    </article>
+
+    <article class="item" id="i6">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-months">
+            <span class="m on">6/7〜7/6</span>
+            <span class="m">5/7〜6/6</span>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">6</span>請求期間の区切り</h3>
+      <p>月タブは<strong>毎月7日〜翌月6日</strong>の1回の請求サイクルです。カレンダーの月とは少しずれます。</p>
+      <p class="fine">締めの前後は、利用日ではなくカードの確定日を見て、実際に請求される期間へ入れます（＝カードの請求書と数字が合う）。</p>
+    </article>
+
+    <article class="item" id="i7">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-card">
+            <div class="sc-row">
+              <div class="main"><div class="nm">JR東海 新幹線</div><div class="sub">6/12</div></div>
+              <div class="amt">¥28,600</div>
+            </div>
+            <div style="text-align:right; margin-top:10px"><span class="sc-btn blue">立て替えに送る</span></div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">7</span>立て替えに送る</h3>
+      <p>ここがこの道具の心臓部。明細を開いて <kbd>立て替えに送る</kbd> を押します。</p>
+    </article>
+
+    <article class="item" id="i8">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-card">
+            <h4>立て替えに登録</h4>
+            <div class="sc-seg"><span class="on">1人に立替</span><span>割り勘で分ける</span></div>
+            <div class="sc-field"><div class="fl">相手</div><div class="fi ph">名前を入力</div></div>
+            <div class="sc-field"><div class="fl">立て替え金額</div><div class="fi">28,600</div></div>
+            <div style="text-align:right; margin-top:10px"><span class="sc-btn blue">登録</span></div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">8</span>1人に立替／割り勘</h3>
+      <p>全額を1人に付けるか、複数人で山分けするかを選びます。</p>
+      <p class="fine">割り勘では<b>自分も人数に含める</b>かを選べます（含めれば自分のぶんは実質支出に残ります）。</p>
+    </article>
+
+    <article class="item" id="i9">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-card">
+            <div class="sc-row">
+              <div class="main"><div class="nm">JR東海 新幹線</div><div class="sub">6/12</div></div>
+              <span class="sc-tag loan">立替</span>
+            </div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">9</span>「立替」の印が付く</h3>
+      <p>送った明細には印が付き、「立替化」に加算されて<strong>実質支出から引かれます</strong>。</p>
+      <p class="fine">相手ごとの合計は <kbd>🤝 立て替え</kbd> タブにたまっていきます。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 回収 ==================== -->
+<section class="grp" id="g3">
+  <h2>立て替えを回収する</h2>
+  <div class="items">
+
+    <article class="item" id="i10">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-grid">
+            <div class="sc-stat warn"><div class="l">未回収合計</div><div class="v">¥34,300</div></div>
+            <div class="sc-stat ok"><div class="l">回収済み合計</div><div class="v">¥12,000</div></div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">10</span>未回収と回収済み</h3>
+      <p><kbd>🤝 立て替え</kbd> タブの上に、いま返ってきていない合計が出ます。</p>
+    </article>
+
+    <article class="item" id="i11">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-card">
+            <h4>ゆず <span style="color:var(--app-orange)">未回収 ¥28,600</span></h4>
+            <div class="sc-row">
+              <div class="main"><div class="nm">新幹線2枚</div><div class="sub">6/12</div></div>
+              <div class="amt">¥28,600</div>
+            </div>
+            <div style="display:flex; gap:6px; margin-top:10px">
+              <span class="sc-btn pri">回収を記録</span>
+              <span class="sc-btn">📄 明細書</span>
+            </div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">11</span>回収を記録する</h3>
+      <p>お金を受け取ったら <kbd>回収を記録</kbd> に日付と金額を入れます。</p>
+      <p class="fine"><b>一部だけ</b>の回収もできます。残りは未回収に残り続けます。</p>
+    </article>
+
+    <article class="item" id="i12">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-card">
+            <h4>明細書（画像）</h4>
+            <div class="sc-row">
+              <div class="main"><div class="nm">新幹線2枚</div><div class="sub">6/12</div></div>
+              <div class="amt">¥28,600</div>
+            </div>
+            <div class="sc-row">
+              <div class="main"><div class="nm">合計</div><div class="sub">振込先つき</div></div>
+              <div class="amt">¥28,600</div>
+            </div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">12</span>明細書を送る</h3>
+      <p><kbd>📄 明細書</kbd> で内訳をまとめた<strong>画像</strong>ができ、LINE・メール・写真へ送れます。</p>
+      <p class="fine">画像には振込先も入るので、相手はそのまま振り込めます。</p>
+    </article>
+
+    <article class="item" id="i13">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-card" style="text-align:center">
+            <span class="sc-btn">＋ 立て替えを手動で追加</span>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">13</span>現金の立替も足せる</h3>
+      <p>クレカを通さない立て替え（現金・PayPayなど）は、日付・相手・金額で手動登録できます。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 分割払い・Amazon ==================== -->
+<section class="grp" id="g4">
+  <h2>分割払い・Amazon</h2>
+  <div class="items">
+
+    <article class="item" id="i14">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-card">
+            <h4><span>📆 分割払いの残債</span><span class="sc-btn">+ 分割を追加</span></h4>
+            <div class="sc-row">
+              <div class="main">
+                <div class="nm">アップルストア オンライン</div>
+                <div class="sub">のこり9回 ／ 月々 ¥10,000</div>
+              </div>
+              <div class="amt">¥90,000</div>
+            </div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">14</span>分割払いを登録する</h3>
+      <p>元本・手数料・回数・初回の請求期間を入れると、毎月の請求ぶんが各期間に自動でのります。</p>
+      <p class="fine">月々の額は空なら自動計算です（自分で指定もできます）。</p>
+    </article>
+
+    <article class="item" id="i15">
+      <figure class="shot">
+        <div class="calc">
+          お支払い総額 <span class="op">−</span> ご利用金額<br>
+          <span class="op">＝</span> <span class="res">手数料</span>
+          <span class="note2">分からなければ 0 のままでOK</span>
+        </div>
+      </figure>
+      <h3><span class="n">15</span>手数料の調べ方</h3>
+      <p>カードの明細に出る2つの金額の差が手数料です。</p>
+    </article>
+
+    <article class="item" id="i16">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-card">
+            <div class="sc-row">
+              <div class="main"><div class="nm">Amazon.co.jp</div><div class="sub">6/18</div></div>
+              <div class="amt">¥3,980</div>
+            </div>
+            <div class="sc-row">
+              <div class="main"><div class="nm">爽健美茶 2L ×8本 ほか</div><div class="sub">紐付けた中身</div></div>
+              <span class="sc-tag done">紐付け済</span>
+            </div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">16</span>Amazonを取り込む</h3>
+      <p>「Amazon ¥3,980」だけでは中身が分かりません。注文を取り込むと商品名が紐付きます。</p>
+      <p class="fine">取り込みは<b>ブックマークレット</b>（＝ブラウザに登録しておく小さなボタン）で。Amazonの注文履歴ページで押すだけです。</p>
+    </article>
+
+    <article class="item" id="i17">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-card">
+            <h4><span>注文一覧</span><span class="sc-btn">🔗 自動紐付け</span></h4>
+            <div class="sc-row">
+              <div class="main"><div class="nm">USB-Cケーブル 2m</div><div class="sub">6/22 ・ ¥1,280</div></div>
+              <span class="sc-tag amz">未紐付け</span>
+            </div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">17</span>自動で紐付ける</h3>
+      <p><kbd>🔗 自動紐付け</kbd> で、日付と金額が近い明細とまとめてひも付きます。</p>
+      <p class="fine">残った「未紐付け」は <kbd>+ 手動追加</kbd> で足すか、明細から手で対応できます。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 整える ==================== -->
+<section class="grp" id="g5">
+  <h2>整える</h2>
+  <div class="items">
+
+    <article class="item" id="i18">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-card">
+            <h4>カテゴリ</h4>
+            <div style="display:flex; gap:5px; flex-wrap:wrap">
+              <span class="sc-tag done">食費</span>
+              <span class="sc-tag">日用品</span>
+              <span class="sc-tag">交通費</span>
+              <span class="sc-tag">趣味</span>
+            </div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">18</span>カテゴリを変える</h3>
+      <p>明細を開いて選ぶだけ。選んだカテゴリは<strong>その店名で記憶</strong>されます。</p>
+      <p class="fine">翌月以降に同じ店が来たら自動で同じカテゴリに。今ある同じ店名の明細もまとめて変わります。<br>
+        ※ カテゴリ内訳は実質支出ベース。立替ぶんは除かれています。</p>
+    </article>
+
+    <article class="item" id="i19">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-card">
+            <h4><span>選択中 2件</span><span class="sc-btn">📅 期間移動</span></h4>
+            <div class="sc-row">
+              <div class="main"><div class="nm">6/7〜7/6 へ移動</div><div class="sub">日付はそのまま</div></div>
+            </div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">19</span>期間を移動する</h3>
+      <p>締めの前後で別の期間に入ってしまったときは、<kbd>選択</kbd> → <kbd>📅 期間移動</kbd> で直せます。</p>
+      <p class="fine">移動しても利用日は変わりません。どの請求期間に数えるかだけを付け替えます。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 保存・引き継ぎ ==================== -->
+<section class="grp" id="g6">
+  <h2>保存・引き継ぎ</h2>
+  <div class="items">
+
+    <article class="item" id="i20">
+      <figure class="shot">
+        <div class="screen" style="text-align:center">
+          <span class="sc-tag done">● 同期：接続</span>
+        </div>
+      </figure>
+      <h3><span class="n">20</span>クラウドに自動同期</h3>
+      <p>入力は自動で保存されます。保存ボタンはありません。</p>
+      <p class="fine">iPhoneでもMacでも同じ内容が出ます。自分専用で、他人からは見えません。</p>
+    </article>
+
+    <article class="item" id="i21">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-card">
+            <h4>⚙️ 管理（データ・削除）</h4>
+            <div style="display:flex; gap:6px; flex-wrap:wrap">
+              <span class="sc-btn">📤 エクスポート (JSON)</span>
+              <span class="sc-btn">📥 インポート (JSON)</span>
+            </div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">21</span>控えを書き出す</h3>
+      <p>全データをファイルに書き出し／読み込みできます。</p>
+      <p class="fine">iCloud Drive や AirDrop を使えば、Mac↔iPhone の引き継ぎにも使えます。</p>
+    </article>
+
+    <article class="item nofig" id="i22">
+      <h3><span class="n">22</span>削除は戻せない</h3>
+      <p>次の2つは<strong>元に戻せません</strong>。消す前に <kbd>📤 エクスポート</kbd> で控えを取ってください。</p>
+      <ul>
+        <li><kbd>🗑 表示中の期間の明細を削除</kbd>…その請求期間の明細を消します</li>
+        <li><kbd>📦 Amazon取込データを全削除</kbd>…Amazonの取込をすべて消します</li>
+      </ul>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 巻末 ==================== -->
+<section class="appendix" id="qa">
+  <h2>こまったとき</h2>
+  <div class="qa">
+    <div>
+      <div class="q">CSVが「認識できません」と出る</div>
+      <div class="a">その明細CSVの<b>列の並びが未対応</b>です。出たダイアログのヘッダ（1行目）を控えて知らせてください。対応を足せます。</div>
+    </div>
+    <div>
+      <div class="q">実質支出が思ったより多い</div>
+      <div class="a">人のぶんが<b>まだ切り分けられていない</b>可能性があります。該当の明細を「立て替えに送る」と減ります。</div>
+    </div>
+    <div>
+      <div class="q">明細が違う月に入っている</div>
+      <div class="a">締め（7日〜翌6日）の前後で起きます。<kbd>選択</kbd> → <kbd>📅 期間移動</kbd> で正しい期間へ。日付自体は変わりません。</div>
+    </div>
+    <div>
+      <div class="q">一部だけ返してもらった</div>
+      <div class="a"><kbd>回収を記録</kbd> に受け取った額だけ入れてください。残りは未回収に残ります。</div>
+    </div>
+    <div>
+      <div class="q">Amazonが自動で紐付かない</div>
+      <div class="a">日付や金額がずれていると紐付きません。<kbd>+ 手動追加</kbd> で注文を足すか、明細から手で対応してください。</div>
+    </div>
+    <div>
+      <div class="q">別の端末で内容が出ない</div>
+      <div class="a">同期チップが<b>接続</b>になっているか確認を。オフラインのときは、つながると自動で反映されます。</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  クレジット明細マネージャー 使い方<br>
+  つくったもの：つみき<br>
+  2026年8月3日
+</footer>
+
+</main>
+</div>
+</div>
+
+<script>
+/* もくじ：狭い画面ではたたむ／広い画面では開いて左に貼り付ける。
+   いま読んでいる項目のグループを、もくじで色づけする。 */
+(function(){
+  var toc = document.getElementById('toc');
+  if(!toc) return;
+  var wide = window.matchMedia('(min-width:1000px)');
+  function sync(){ toc.open = wide.matches; }
+  sync();
+  (wide.addEventListener ? wide.addEventListener('change', sync) : window.addEventListener('resize', sync));
+  toc.addEventListener('click', function(e){
+    if(e.target.closest('a') && !wide.matches) toc.open = false;
+  });
+  if(!('IntersectionObserver' in window)) return;
+  var links = {}, targets = [];
+  Array.prototype.forEach.call(toc.querySelectorAll('a[href^="#"]'), function(a){
+    var el = document.getElementById(a.getAttribute('href').slice(1));
+    if(el){ links[a.getAttribute('href').slice(1)] = a; targets.push(el); }
+  });
+  var seen = {};
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(en){ seen[en.target.id] = en.isIntersecting; });
+    var cur = null;
+    targets.forEach(function(el){ if(seen[el.id] && !cur) cur = el.id; });
+    for(var k in links) links[k].classList.toggle('on', k === cur);
+  }, {rootMargin:'-10% 0px -70% 0px'});
+  targets.forEach(function(el){ io.observe(el); });
+})();
+</script>
+</body>
+</html>

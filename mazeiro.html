@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="apple-touch-icon" href="icon-mazeiro.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="まぜいろ">
+<title>まぜいろ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4F2EE; --surface:#ECE9E3; --ink:#242321; --muted:#77736B;
+    --hair:#D8D4CC; --ghost:#BEB9B0; --control:#F8F7F4;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:'Zen Maru Gothic',-apple-system,BlinkMacSystemFont,"Hiragino Maru Gothic ProN","Hiragino Sans",sans-serif;
+    line-height:1.6; -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:100%;
+    padding:env(safe-area-inset-top) 20px calc(48px + env(safe-area-inset-bottom));
+  }
+  .wrap{max-width:560px; margin:0 auto;}
+  svg{display:block; stroke:var(--ink); fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;}
+
+  /* header */
+  header{display:flex; align-items:center; justify-content:space-between; padding:26px 2px 30px;}
+  .brand{display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.06em; font-size:16px;}
+  .brand svg{width:22px; height:22px;}
+  .iconbtn{appearance:none; -webkit-appearance:none; background:none; border:1px solid var(--hair);
+    width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:transform .12s ease;}
+  .iconbtn:active{transform:scale(.92);}
+  .iconbtn svg{width:17px; height:17px; stroke:var(--muted);}
+
+  /* card */
+  .card{background:var(--control); border:1px solid var(--hair); border-radius:24px;
+    padding:22px 18px; margin-bottom:16px;}
+  .cap{display:flex; align-items:center; gap:8px; margin-bottom:18px;}
+  .cap svg{width:20px; height:20px;}
+  .cap span{font-size:12.5px; font-weight:700; letter-spacing:.14em; color:var(--muted);}
+
+  /* 1剤: 全体量 */
+  .total{display:flex; align-items:baseline; justify-content:center; gap:8px; margin-bottom:22px;}
+  .total input{width:150px; border:none; border-bottom:2px solid var(--hair); border-radius:0;
+    background:none; text-align:center; font-family:inherit; font-weight:700; font-size:40px;
+    color:var(--ink); padding:0 4px 2px; caret-color:var(--ink);}
+  .total input:focus{outline:none; border-bottom-color:var(--ink);}
+  .total input::placeholder{color:var(--ghost); font-weight:500;}
+  .total .u{font-size:16px; font-weight:700; color:var(--muted);}
+
+  /* 1剤: 比率カラム */
+  .cols{display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:center;
+    gap:18px 17px; padding-top:2px;}
+  .col{display:flex; flex-direction:column; align-items:center; gap:8px; position:relative;
+    min-width:58px;}
+  /* 「:」はカラムに紐づけて置く（折り返しで行末に取り残されないように） */
+  .col:not(:first-child)::before{content:":"; position:absolute; left:-12px; top:0; height:54px;
+    display:flex; align-items:center; color:var(--ghost); font-size:18px; font-weight:700;}
+  .col input{width:58px; height:54px; border:1px solid var(--hair); border-radius:16px;
+    background:#fff; text-align:center; font-family:inherit; font-weight:700; font-size:20px;
+    color:var(--ink);}
+  .col input:focus{outline:none; border-color:var(--ink);}
+  .col input::placeholder{color:var(--ghost); font-weight:400;}
+  .col .g{font-size:26px; line-height:1.15; font-weight:700; font-variant-numeric:tabular-nums;
+    white-space:nowrap; letter-spacing:-.01em;}
+  .col .g small{font-size:13px; font-weight:500; color:var(--muted); margin-left:2px;}
+  .col .g.off{color:var(--ghost); font-weight:500;}
+  .col .x{position:absolute; top:-8px; right:-8px; width:20px; height:20px; border-radius:50%;
+    background:var(--surface); border:1px solid var(--hair); color:var(--muted);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0;}
+  .col .x svg{width:9px; height:9px; stroke:var(--muted); stroke-width:2;}
+  .addc{width:36px; height:54px; display:flex; align-items:center; justify-content:center;
+    background:none; border:none; cursor:pointer; transition:transform .12s ease;}
+  .addc:active{transform:scale(.9);}
+  .addc svg{width:26px; height:26px; stroke:var(--ghost);}
+
+  /* 2剤 */
+  .dev{display:flex; align-items:center; justify-content:center; gap:12px;}
+  .dev .x{font-size:20px; font-weight:700; color:var(--muted);}
+  .dev input{width:86px; height:54px; border:1px solid var(--hair); border-radius:16px;
+    background:#fff; text-align:center; font-family:inherit; font-weight:700; font-size:22px;
+    color:var(--ink);}
+  .dev input:focus{outline:none; border-color:var(--ink);}
+  .dev input::placeholder{color:var(--ghost); font-weight:400;}
+  .dev .arrow svg{width:18px; height:18px; stroke:var(--ghost);}
+  .dev .g{font-size:30px; line-height:1.15; font-weight:700; font-variant-numeric:tabular-nums;
+    white-space:nowrap; letter-spacing:-.01em;}
+  .dev .g small{font-size:14px; font-weight:500; color:var(--muted); margin-left:2px;}
+  .dev .g.off{color:var(--ghost); font-weight:500;}
+  .pills{display:flex; gap:8px; margin-top:16px; justify-content:center;}
+  .pills button{flex:0 1 76px; border:1px solid var(--hair); background:none; color:var(--muted);
+    font-family:inherit; border-radius:999px; padding:8px 0; font-size:14px; font-weight:700;
+    cursor:pointer; transition:transform .12s ease;}
+  .pills button:active{transform:scale(.94);}
+  .pills button.on{background:var(--ink); border-color:var(--ink); color:var(--paper);}
+
+  /* 合計 */
+  .sum{display:flex; align-items:center; justify-content:center; gap:10px;
+    padding:26px 0 4px; flex-wrap:wrap;}
+  .sum .pc{display:flex; align-items:center; gap:5px; font-size:15px; font-weight:700;
+    font-variant-numeric:tabular-nums; color:var(--muted);}
+  .sum .pc svg{width:16px; height:16px; stroke:var(--muted);}
+  .sum .op{color:var(--ghost); font-size:14px; font-weight:700;}
+  .sum .tot{display:flex; align-items:baseline; gap:3px; font-size:30px; font-weight:700;
+    font-variant-numeric:tabular-nums;}
+  .sum .tot small{font-size:14px; font-weight:500; color:var(--muted);}
+  .sum.off{opacity:.35;}
+
+  /* マウス環境だけホバーを効かせる（タップ端末では出さない） */
+  @media (hover:hover) and (pointer:fine){
+    .iconbtn:hover{border-color:var(--ghost); background:var(--surface);}
+    .addc:hover svg{stroke:var(--muted);}
+    .pills button:hover{border-color:var(--ghost); color:var(--ink);}
+    .pills button.on:hover{color:var(--paper);}
+    .col .x:hover{background:var(--hair);}
+  }
+
+  /* ── PC / 横長タブレット：横幅を使って2カラム ── */
+  @media (min-width:900px){
+    body{padding:env(safe-area-inset-top) 40px 64px;}
+    .wrap{max-width:1280px; display:grid; gap:22px;
+      grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); align-items:start;}
+    header{grid-column:1 / -1; padding:34px 4px 6px;}
+    .brand{font-size:19px; gap:12px;}
+    .brand svg{width:26px; height:26px;}
+    .iconbtn{width:44px; height:44px;}
+    .iconbtn svg{width:19px; height:19px;}
+
+    .card{margin-bottom:0; padding:30px 28px 32px; border-radius:28px;}
+    .cap{margin-bottom:24px;}
+    .cap span{font-size:13.5px;}
+
+    .total{margin-bottom:30px; gap:10px;}
+    .total input{width:230px; font-size:58px; padding:0 6px 4px;}
+    .total .u{font-size:20px;}
+
+    .cols{gap:24px 24px;}
+    .col{min-width:76px;}
+    .col input{width:76px; height:66px; border-radius:18px; font-size:24px;}
+    .col:not(:first-child)::before{height:66px; left:-16px; font-size:22px;}
+    .col .g{font-size:32px;}
+    .col .g small{font-size:15px;}
+    .col .x{width:22px; height:22px; top:-9px; right:-9px;}
+    .addc{width:46px; height:66px;}
+    .addc svg{width:30px; height:30px;}
+
+    .dev{gap:16px;}
+    .dev .x{font-size:24px;}
+    .dev input{width:104px; height:66px; border-radius:18px; font-size:26px;}
+    .dev .arrow svg{width:20px; height:20px;}
+    .dev .g{font-size:34px;}
+    .dev .g small{font-size:16px;}
+    .pills{margin-top:22px; gap:10px;}
+    .pills button{flex:0 1 88px; font-size:15px; padding:10px 0;}
+
+    #sumLine{grid-column:1 / -1; gap:14px; padding:14px 0 4px;
+      border-top:1px solid var(--hair); margin-top:6px;}
+    .sum .pc{font-size:17px;}
+    .sum .pc svg{width:18px; height:18px;}
+    .sum .op{font-size:16px;}
+    .sum .tot{font-size:38px;}
+    .sum .tot small{font-size:16px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 1 9-9c0 2-1.5 3-3 3h-2a2.5 2.5 0 0 0-2 4c.5.8 0 2-2 2z"/><circle cx="8" cy="10" r=".6"/><circle cx="12" cy="7.5" r=".6"/><circle cx="16" cy="10" r=".6"/></svg>
+      まぜいろ
+    </div>
+    <button class="iconbtn" id="resetBtn" title="リセット">
+      <svg viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1-1 5"/><path d="M4 4v6h6"/></svg>
+    </button>
+  </header>
+
+  <!-- 1剤 -->
+  <section class="card">
+    <div class="cap">
+      <svg viewBox="0 0 24 24"><path d="M10 3h4v4h-4z"/><path d="M10 7h4l1.5 3v9a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2v-9z"/><path d="M8.5 14h7"/></svg>
+      <span>1剤</span>
+    </div>
+    <div class="total">
+      <input id="totalG" type="number" inputmode="decimal" min="0" placeholder="0">
+      <span class="u">g</span>
+    </div>
+    <div class="cols" id="cols"></div>
+  </section>
+
+  <!-- 2剤 -->
+  <section class="card">
+    <div class="cap">
+      <svg viewBox="0 0 24 24"><path d="M12 3c3.5 4.6 6 7.7 6 10.7a6 6 0 0 1-12 0C6 10.7 8.5 7.6 12 3z"/></svg>
+      <span>2剤</span>
+    </div>
+    <div class="dev">
+      <span class="x">×</span>
+      <input id="devMult" type="number" inputmode="decimal" min="0" step="0.1" placeholder="0">
+      <span class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h13"/><path d="M13 6l6 6-6 6"/></svg></span>
+      <span class="g off" id="devG">–<small>g</small></span>
+    </div>
+    <div class="pills" id="pills">
+      <button data-v="1">×1</button>
+      <button data-v="1.5">×1.5</button>
+      <button data-v="2">×2</button>
+      <button data-v="3">×3</button>
+    </div>
+  </section>
+
+  <!-- 合計 -->
+  <div class="sum off" id="sumLine">
+    <span class="pc"><svg viewBox="0 0 24 24"><path d="M10 3h4v4h-4z"/><path d="M10 7h4l1.5 3v9a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2v-9z"/></svg><span id="sum1">–</span></span>
+    <span class="op">＋</span>
+    <span class="pc"><svg viewBox="0 0 24 24"><path d="M12 3c3.5 4.6 6 7.7 6 10.7a6 6 0 0 1-12 0C6 10.7 8.5 7.6 12 3z"/></svg><span id="sum2">–</span></span>
+    <span class="op">＝</span>
+    <span class="tot"><span id="sumT">–</span><small>g</small></span>
+  </div>
+</div>
+
+<script>
+(function(){
+  const KEY = "mazeiro_v1";
+  const $ = id => document.getElementById(id);
+  const colsEl = $("cols");
+
+  // ---- 状態（旧形式 {name,ratio} からの引き継ぎあり） ----
+  let state = { total:"", ratios:["",""], mult:"" };
+  try{
+    const saved = JSON.parse(localStorage.getItem(KEY) || "null");
+    if(saved){
+      if(Array.isArray(saved.ratios) && saved.ratios.length >= 2){
+        state = { total:saved.total||"", ratios:saved.ratios, mult:saved.mult||"" };
+      }else if(Array.isArray(saved.parts) && saved.parts.length >= 2){
+        state = { total:saved.total||"", ratios:saved.parts.map(p=>p.ratio||""), mult:saved.mult||"" };
+      }
+    }
+  }catch(e){}
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+
+  // ---- 整形（0.1g単位） ----
+  function fmt(n){
+    if(!isFinite(n)) return "–";
+    const r = Math.round(n*10)/10;
+    return (Math.abs(r - Math.round(r)) < 1e-9) ? String(Math.round(r)) : r.toFixed(1);
+  }
+
+  const XSVG = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+
+  // ---- 比率カラムの描画 ----
+  function renderCols(){
+    colsEl.innerHTML = "";
+    state.ratios.forEach((r, i) => {
+      const col = document.createElement("div");
+      col.className = "col";
+      col.innerHTML = '<input type="number" inputmode="decimal" min="0" step="0.1" placeholder="0">' +
+                      '<span class="g off">–<small>g</small></span>';
+      const inp = col.querySelector("input");
+      inp.value = r;
+      inp.addEventListener("input", () => { state.ratios[i] = inp.value; save(); calc(); });
+      if(state.ratios.length > 2){
+        const x = document.createElement("button");
+        x.className = "x"; x.innerHTML = XSVG;
+        x.addEventListener("click", () => { state.ratios.splice(i,1); save(); renderCols(); calc(); });
+        col.appendChild(x);
+      }
+      colsEl.appendChild(col);
+    });
+    if(state.ratios.length < 8){
+      const add = document.createElement("button");
+      add.className = "addc";
+      add.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8.5v7M8.5 12h7"/></svg>';
+      add.addEventListener("click", () => {
+        state.ratios.push(""); save(); renderCols(); calc();
+      });
+      colsEl.appendChild(add);
+    }
+  }
+
+  // ---- 計算 ----
+  function calc(){
+    const total = parseFloat(state.total);
+    const nums = state.ratios.map(r => parseFloat(r));
+    const sum = nums.reduce((a,b) => a + (isFinite(b) && b > 0 ? b : 0), 0);
+    const mult = parseFloat(state.mult);
+    const okTotal = isFinite(total) && total > 0 && sum > 0;
+
+    // 各色のグラム
+    colsEl.querySelectorAll(".col .g").forEach((el, i) => {
+      const r = nums[i];
+      const ok = okTotal && isFinite(r) && r > 0;
+      el.innerHTML = (ok ? fmt(total * r / sum) : "–") + "<small>g</small>";
+      el.classList.toggle("off", !ok);
+    });
+
+    // 2剤
+    const okDev = isFinite(total) && total > 0 && isFinite(mult) && mult > 0;
+    const devG = okDev ? total * mult : NaN;
+    $("devG").innerHTML = (okDev ? fmt(devG) : "–") + "<small>g</small>";
+    $("devG").classList.toggle("off", !okDev);
+    document.querySelectorAll("#pills button").forEach(b => {
+      b.classList.toggle("on", isFinite(mult) && parseFloat(b.dataset.v) === mult);
+    });
+
+    // 合計
+    const okSum = isFinite(total) && total > 0;
+    $("sum1").textContent = okSum ? fmt(total) : "–";
+    $("sum2").textContent = okDev ? fmt(devG) : "–";
+    $("sumT").textContent = okSum ? fmt(total + (okDev ? devG : 0)) : "–";
+    $("sumLine").classList.toggle("off", !okSum);
+  }
+
+  // ---- イベント ----
+  $("totalG").value = state.total;
+  $("totalG").addEventListener("input", e => { state.total = e.target.value; save(); calc(); });
+
+  $("devMult").value = state.mult;
+  $("devMult").addEventListener("input", e => { state.mult = e.target.value; save(); calc(); });
+
+  document.querySelectorAll("#pills button").forEach(b => {
+    b.addEventListener("click", () => {
+      state.mult = b.dataset.v;
+      $("devMult").value = state.mult;
+      save(); calc();
+    });
+  });
+
+  $("resetBtn").addEventListener("click", () => {
+    state = { total:"", ratios:["",""], mult:"" };
+    save();
+    $("totalG").value = ""; $("devMult").value = "";
+    renderCols(); calc();
+  });
+
+  renderCols();
+  calc();
+})();
+</script>
+<!-- tsumiki-license-gate -->
+<style>
+  #tsumikiLicGate{
+    position:fixed; inset:0; z-index:99990;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--paper,#F4F2EE); color:var(--ink,#242321);
+    font-family:"Zen Maru Gothic",-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
+    padding:24px; box-sizing:border-box;
+  }
+  #tsumikiLicGate .lic-card{ width:100%; max-width:340px; text-align:center; }
+  #tsumikiLicGate .lic-kicker{
+    font-size:11px; letter-spacing:.18em; color:var(--muted,#77736B); margin:0 0 6px;
+  }
+  #tsumikiLicGate h2{ font-size:19px; font-weight:700; margin:0 0 10px; }
+  #tsumikiLicGate .lic-desc{
+    font-size:13px; line-height:1.7; color:var(--muted,#77736B); margin:0 0 20px;
+  }
+  #tsumikiLicGate input{
+    display:block; width:100%; box-sizing:border-box;
+    font-size:16px; letter-spacing:.06em; text-align:center;
+    padding:13px 12px; margin:0 0 12px;
+    color:var(--ink,#242321); background:var(--control,#F8F7F4);
+    border:1px solid var(--hair,#D8D4CC); border-radius:12px; outline:none;
+    text-transform:uppercase;
+  }
+  #tsumikiLicGate input:focus{ border-color:var(--ghost,#BEB9B0); }
+  #tsumikiLicGate button{
+    display:block; width:100%; box-sizing:border-box;
+    font-size:15px; font-weight:700; font-family:inherit;
+    padding:14px 12px; border:none; border-radius:12px;
+    background:var(--ink,#242321); color:var(--paper,#F4F2EE); cursor:pointer;
+  }
+  #tsumikiLicGate button:disabled{ opacity:.5; }
+  #tsumikiLicGate .lic-err{
+    font-size:12px; line-height:1.6; color:#9C4735; min-height:1.6em; margin:12px 0 0;
+  }
+  #tsumikiLicGate .lic-help{
+    font-size:11px; color:var(--ghost,#BEB9B0); margin:18px 0 0;
+  }
+  #tsumikiLicGate .lic-help a{ color:var(--muted,#77736B); }
+  #tsumikiLicMark{
+    position:fixed; right:12px; bottom:10px; z-index:99980;
+    font-size:10px; letter-spacing:.06em; color:var(--ghost,#BEB9B0);
+    font-family:"Zen Maru Gothic",-apple-system,sans-serif;
+    pointer-events:none; user-select:none; -webkit-user-select:none;
+  }
+</style>
+<div id="tsumikiLicGate">
+  <form class="lic-card" id="tsumikiLicForm">
+    <p class="lic-kicker">TSUMIKI TOOLS</p>
+    <h2>プロダクトキー</h2>
+    <p class="lic-desc">このアプリのご利用にはプロダクトキーが必要です。お渡ししたキーを入力してください。</p>
+    <input id="tsumikiLicInput" placeholder="TSUMIKI-XXXX-XXXX-XXXX"
+      autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="done">
+    <button id="tsumikiLicBtn" type="submit">利用をはじめる</button>
+    <p class="lic-err" id="tsumikiLicErr"></p>
+    <p class="lic-help">キーがわからない場合は <a href="mailto:support.tsumiki@gmail.com">support.tsumiki@gmail.com</a></p>
+  </form>
+</div>
+<div id="tsumikiLicMark" hidden></div>
+<script>
+  (function(){
+    var APP = 'mazeiro';
+    var RPC = 'https://okbjqtdirrathscctyvx.supabase.co/rest/v1/rpc/';
+    var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rYmpxdGRpcnJhdGhzY2N0eXZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMjI4NTIsImV4cCI6MjA5NTg5ODg1Mn0.T-1AOK6vCD6uGdqrVGXjPui3L6WPSNrnygS-IHyfZ6Y';
+    var K_TOKEN = 'tsumiki-lic-token:' + APP;
+    var K_CUST  = 'tsumiki-lic-customer:' + APP;
+    var K_DEV   = 'tsumiki-lic-device';
+
+    var gate = document.getElementById('tsumikiLicGate');
+    var form = document.getElementById('tsumikiLicForm');
+    var input = document.getElementById('tsumikiLicInput');
+    var btn  = document.getElementById('tsumikiLicBtn');
+    var err  = document.getElementById('tsumikiLicErr');
+    var mark = document.getElementById('tsumikiLicMark');
+
+    function rpc(name, body){
+      return fetch(RPC + name, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': KEY, 'Authorization': 'Bearer ' + KEY },
+        body: JSON.stringify(body)
+      }).then(function(r){ return r.json(); });
+    }
+    var device = localStorage.getItem(K_DEV);
+    if(!device){
+      device = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+             : 'd-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem(K_DEV, device);
+    }
+    function unlock(customer){
+      gate.style.display = 'none';
+      if(customer){
+        localStorage.setItem(K_CUST, customer);
+        mark.textContent = customer + ' 専用';
+        mark.hidden = false;
+      }
+    }
+    function lock(){
+      localStorage.removeItem(K_TOKEN);
+      localStorage.removeItem(K_CUST);
+      mark.hidden = true;
+      gate.style.display = 'flex';
+    }
+
+    var token = localStorage.getItem(K_TOKEN);
+    if(token){
+      // 解錠済み端末：即表示して裏で照合。ネットワークエラーでは締め出さない。
+      unlock(localStorage.getItem(K_CUST));
+      rpc('license_verify', { p_token: token, p_app: APP, p_device_id: device })
+        .then(function(res){
+          if(res && res.ok === false){ lock(); }
+          else if(res && res.ok && res.customer){ unlock(res.customer); }
+        }).catch(function(){});
+    }
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var v = (input.value || '').trim();
+      if(!v){ err.textContent = 'キーを入力してください'; return; }
+      btn.disabled = true;
+      err.textContent = '';
+      rpc('license_activate', { p_key: v, p_app: APP, p_device_id: device })
+        .then(function(res){
+          btn.disabled = false;
+          if(res && res.ok){
+            localStorage.setItem(K_TOKEN, res.token);
+            unlock(res.customer);
+          }else if(res && res.code === 'device_limit'){
+            err.textContent = 'ご利用できる端末数の上限に達しています。お手数ですがご連絡ください。';
+          }else{
+            err.textContent = 'キーが確認できませんでした。入力内容をお確かめください。';
+          }
+        }).catch(function(){
+          btn.disabled = false;
+          err.textContent = '通信できませんでした。電波の届く場所でもう一度お試しください。';
+        });
+    });
+  })();
+</script>
+<!-- /tsumiki-license-gate -->
+
+</body>
+</html>

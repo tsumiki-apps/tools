@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ブラックエプロンノート — 使い方</title>
+<meta name="description" content="ブラックエプロンノートの使い方。飲んだコーヒーを記録しながら、豆の知識を覚えるためのノートです。">
+<link rel="apple-touch-icon" href="icon-black-apron.png">
+<style>
+  /* ================================================================
+     つみき 取扱説明書 共通スタイル v2（1項目＝1図＋数行）
+     ・外部読み込みゼロ（フォント/CDN/画像すべて無し）
+     ・図はアプリ画面をHTML/CSSで再現（スクショ画像を使わない）
+     ================================================================ */
+  :root{
+    --paper:#F4F2EE; --surface:#ECE9E3; --ink:#242321; --muted:#77736B;
+    --hair:#D8D4CC; --ghost:#BEB9B0; --control:#FBFAF8;
+    --mark:#B4562E;                       /* 図の注釈（番号ピン・矢印） */
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%; scroll-behavior:smooth;}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:'Hiragino Maru Gothic ProN',-apple-system,BlinkMacSystemFont,'Hiragino Sans','Noto Sans JP',sans-serif;
+    line-height:1.75; -webkit-font-smoothing:antialiased;
+    padding:0 18px calc(48px + env(safe-area-inset-bottom));
+    font-size:15px;
+  }
+  .wrap{max-width:1180px; margin:0 auto;}
+  a{color:var(--ink);}
+  /* grid/flex の子は既定 min-width:auto。中身（表など）に押し広げられて
+     375px幅で横スクロールが出るのを防ぐ。 */
+  main,.grp,.items,.item,figure.shot{min-width:0;}
+  .tblwrap{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+
+  /* ================= 見出し ================= */
+  header{padding:40px 0 0;}
+  .kicker{font-size:11px; font-weight:700; letter-spacing:.16em; color:var(--muted); margin-bottom:9px;}
+  h1{font-size:27px; font-weight:700; letter-spacing:.03em; line-height:1.4;}
+  header .lead{margin-top:10px; font-size:14.5px; color:var(--muted); max-width:36em;}
+  .openapp{margin-top:16px; display:flex; gap:9px; flex-wrap:wrap;}
+  .openapp a{
+    display:inline-block; background:var(--ink); color:var(--paper);
+    text-decoration:none; border-radius:999px; padding:9px 20px;
+    font-size:14px; font-weight:700;
+  }
+  .openapp a.ghost{background:none; color:var(--ink); border:1.5px solid var(--hair);}
+
+  /* ================= もくじ ================= */
+  /* 狭い画面ではたたんでおく（項目が多いので本文が遠くならないように）。
+     1000px以上ではサマリを隠して左に貼り付ける。開閉は末尾の script。 */
+  details.toc{
+    margin-top:22px; background:var(--control); border:1px solid var(--hair);
+    border-radius:16px; padding:12px 16px;
+  }
+  details.toc summary{
+    cursor:pointer; list-style:none; font-size:12.5px; font-weight:700;
+    letter-spacing:.08em; color:var(--muted);
+  }
+  details.toc summary::-webkit-details-marker{display:none;}
+  details.toc summary::after{content:'▾'; margin-left:7px; font-size:11px;}
+  details.toc[open] summary::after{content:'▴';}
+  .toc nav{margin-top:10px;}
+  .toc .g{
+    font-size:10.5px; font-weight:700; letter-spacing:.14em; color:var(--ghost);
+    margin:14px 0 3px;
+  }
+  .toc .g:first-child{margin-top:0;}
+  .toc a{
+    display:block; text-decoration:none; font-size:13.5px; padding:2px 0;
+    color:var(--ink);
+  }
+  .toc a .n{display:inline-block; width:1.9em; color:var(--ghost); font-weight:700; font-size:12px;}
+  .toc a.on{color:var(--mark); font-weight:700;}
+  .toc a.on .n{color:var(--mark);}
+
+  /* ================= 項目（1項目＝1図＋数行） ================= */
+  .grp{padding:34px 0 0; scroll-margin-top:14px;}
+  .grp > h2{
+    font-size:12.5px; font-weight:700; letter-spacing:.14em; color:var(--muted);
+    border-bottom:1px solid var(--hair); padding-bottom:8px; margin-bottom:16px;
+  }
+  .items{display:grid; gap:16px;}
+  .item{
+    background:var(--control); border:1px solid var(--hair); border-radius:18px;
+    padding:14px 14px 16px; scroll-margin-top:14px;
+  }
+  .item h3{
+    font-size:15.5px; font-weight:700; line-height:1.55; margin:13px 0 2px;
+    display:flex; gap:9px; align-items:flex-start;
+  }
+  .item h3 .n{
+    flex:none; width:23px; height:23px; border-radius:50%;
+    background:var(--ink); color:var(--paper); font-size:12px; font-weight:700;
+    display:flex; align-items:center; justify-content:center; margin-top:2px;
+  }
+  .item p{font-size:14px; margin:5px 0 0; padding-left:32px;}
+  .item p.fine{font-size:12.5px; color:var(--muted); margin-top:8px; line-height:1.7;}
+  .item p.caution{color:#94301b;}
+  .item p.caution b{color:#94301b;}
+  .item ul{margin:5px 0 0; padding-left:calc(32px + 1.1em); font-size:14px;}
+  .item ul li{margin:3px 0;}
+  .item ul li::marker{color:var(--ghost);}
+  /* 図のないおまけ項目（データの保存など）は番号だけで詰めて見せる */
+  .item.nofig h3{margin-top:2px;}
+
+  kbd{
+    display:inline-block; background:#fff; border:1px solid var(--hair);
+    border-bottom-width:2px; border-radius:7px; padding:0 7px;
+    font-family:inherit; font-size:13px; font-weight:700; white-space:nowrap;
+  }
+  .path{color:var(--muted);}
+  .path b{color:var(--ink); font-weight:700;}
+
+  /* ================= 図（アプリ画面の再現） ================= */
+  /* 番号ピンが枠の外に11px＋影ぶんはみ出す。その余白を figure 側に持たせる。 */
+  figure.shot{margin:0; padding:2px 14px 0;}
+  figcaption{font-size:11.5px; color:var(--ghost); margin-top:7px; text-align:center;}
+  /* 注釈：番号ピンと矢印（使うのは「ここを押す」が言葉で伝わらない図だけ） */
+  .pin{
+    position:absolute; z-index:3; width:21px; height:21px; border-radius:50%;
+    background:var(--mark); color:#fff; font-size:11.5px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 0 3px rgba(255,255,255,.9);
+  }
+  .arrow{position:absolute; z-index:2; height:2px; background:var(--mark); transform-origin:left center;}
+  .arrow::after{
+    content:''; position:absolute; right:-2px; top:-4px;
+    border:5px solid transparent; border-left-color:var(--mark);
+  }
+
+  /* 流れ図（「どんな道具か」の1枚目に使う） */
+  .flow{display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center;
+    background:#fff; border:1px solid var(--hair); border-radius:14px; padding:16px 12px;}
+  .flow .box{background:var(--surface); border-radius:10px; padding:7px 12px; font-size:13px; font-weight:700;}
+  .flow .arw{color:var(--mark); font-weight:700;}
+
+  /* 計算式の図 */
+  .calc{
+    background:#fff; border:1px solid var(--hair); border-radius:14px;
+    padding:13px 14px; font-size:14.5px; font-weight:700;
+    font-variant-numeric:tabular-nums; text-align:center; line-height:2;
+  }
+  .calc .op{color:var(--ghost); margin:0 3px;}
+  .calc .res{color:var(--mark);}
+  .calc small{font-size:11px; color:var(--muted); font-weight:500; margin-left:1px;}
+  .calc .note2{display:block; font-size:11.5px; color:var(--muted); font-weight:500; margin-top:3px;}
+
+  /* 注意（赤の細い帯。多用しない） */
+  .warnbox{
+    border-left:3px solid #B03A22; background:#F7EFEA; border-radius:0 10px 10px 0;
+    padding:9px 12px; margin:9px 0 0 32px; font-size:13px; color:#7d2c19;
+  }
+  .warnbox b{color:#7d2c19;}
+
+  /* 比較表（巻末で使う） */
+  table.cmp{border-collapse:collapse; width:100%; margin:8px 0 0; font-size:13.5px; background:#fff;
+    border:1px solid var(--hair); border-radius:14px; overflow:hidden;}
+  table.cmp th, table.cmp td{border-bottom:1px solid var(--hair); padding:9px 12px; text-align:left; vertical-align:top;}
+  table.cmp thead th{background:var(--surface); font-size:11.5px; color:var(--muted); font-weight:700;}
+  table.cmp tbody tr:last-child th, table.cmp tbody tr:last-child td{border-bottom:none;}
+  table.cmp tbody th{font-weight:700; white-space:nowrap;}
+  /* 表は項目カードの中に入るので、常に行ごとのカードへ積み替える
+     （列が細って1字ずつ縦に折れるのを防ぐ） */
+  table.cmp.stack{display:block;}
+  table.cmp.stack thead{display:none;}
+  table.cmp.stack tbody,table.cmp.stack tbody tr{display:block;}
+  table.cmp.stack tbody tr{padding:11px 13px; border-bottom:1px solid var(--hair);}
+  table.cmp.stack tbody tr:last-child{border-bottom:none;}
+  table.cmp.stack tbody th,table.cmp.stack tbody td{
+    display:block; width:auto!important; padding:0; border:none; white-space:normal;}
+  table.cmp.stack tbody th{font-size:14px;}
+  table.cmp.stack tbody td{margin-top:5px; font-size:13px;}
+  table.cmp.stack tbody td[data-l]::before{
+    content:attr(data-l); display:block; font-size:10.5px; font-weight:700;
+    letter-spacing:.08em; color:var(--muted);}
+
+  /* ================= 巻末（小さく・端に） ================= */
+  .appendix{padding-top:34px;}
+  .appendix > h2{
+    font-size:12.5px; font-weight:700; letter-spacing:.14em; color:var(--muted);
+    border-bottom:1px solid var(--hair); padding-bottom:8px; margin-bottom:14px;
+  }
+  .qa{display:grid; gap:11px;}
+  .qa .q{font-size:13.5px; font-weight:700;}
+  .qa .a{font-size:13px; color:var(--muted); margin-top:2px;}
+  .qa > div{border-bottom:1px dotted var(--hair); padding-bottom:10px;}
+  .qa > div:last-child{border-bottom:none;}
+
+  footer{
+    margin-top:44px; padding-top:18px; border-top:1px solid var(--hair);
+    font-size:12px; color:var(--ghost); text-align:center; line-height:2;
+  }
+
+  /* ================= 横幅を使う ================= */
+  @media (min-width:640px){
+    .items{grid-template-columns:1fr 1fr;}
+    .qa{grid-template-columns:1fr 1fr; gap:11px 26px;}
+  }
+  @media (min-width:1000px){
+    body{padding-left:28px; padding-right:28px;}
+    .wrap{max-width:1280px;}
+    h1{font-size:32px;}
+    .layout{display:grid; grid-template-columns:212px minmax(0,1fr); gap:40px; align-items:start;}
+    details.toc{
+      position:sticky; top:22px; margin-top:40px; background:none; border:none; padding:0;
+      max-height:calc(100vh - 56px); overflow:auto;
+    }
+    details.toc summary{display:none;}
+    .grp{padding-top:40px;}
+
+    /* PCでは項目を1列にして、図を大きく見せる（2列だと図が小さくて読めない）。
+       図の中身は px 直書きが多く、箱を広げるだけでは字が大きくならないので zoom で
+       中身ごと拡大する（幅は親いっぱいのままなので横はみ出しは起きない）。 */
+    .items{grid-template-columns:minmax(0,1fr);}
+    figure.shot > :not(figcaption){zoom:1.25;}
+    figcaption{font-size:12.5px;}
+  }
+  @media (min-width:1120px){
+    /* 横幅に余裕があるときだけ、図を左・文章を右に並べる。
+       HTMLを変えずに済むよう、図に縦方向のスパンを持たせて
+       残りの子（h3/p/ul）を右の列へ流し込む。 */
+    .item{
+      display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);
+      column-gap:30px; align-content:start; padding:18px 22px 20px;
+    }
+    .item > figure.shot{grid-column:1; grid-row:1 / span 30; align-self:center; padding:0 12px;}
+    .item > *:not(figure.shot){grid-column:2;}
+    .item > h3{margin-top:0;}
+    /* 図のない項目は横に伸びすぎないよう、行の長さだけ抑える */
+    .item.nofig{display:block;}
+    .item.nofig p, .item.nofig ul{max-width:58em;}
+  }
+
+  /* ================= 印刷（そのままA4のPDFになる） ================= */
+  @media print{
+    @page{margin:14mm 12mm;}
+    body{background:#fff; color:#000; font-size:9.5pt; padding:0;}
+    .wrap{max-width:none;}
+    .layout{display:block;}
+    details.toc,.openapp{display:none;}
+    header{padding-top:0;}
+    .grp{padding-top:14pt;}
+    .grp > h2{page-break-after:avoid;}
+    .items{grid-template-columns:1fr 1fr; gap:9pt;}
+    .item{background:#fff; page-break-inside:avoid;}
+    .qa{grid-template-columns:1fr 1fr;}
+    .qa > div{page-break-inside:avoid;}
+    .screen{box-shadow:none;}
+    footer{color:#555;}
+  }
+
+  /* ブラックエプロンノート本体と同じ色（画面再現に使う） */
+  :root{
+    --app-ink:#242321; --app-subtle:#77736B; --app-line:#D8D4CC; --app-surface:#ECE9E3;
+    --app-paper:#F4F2EE; --app-control:#F8F7F4; --app-ghost:#BEB9B0;
+    --r1:#D8CBB4; --r2:#A98A6B; --r3:#463A32;   /* ブロンド／ミディアム／ダーク */
+  }
+
+  /* ================= アプリ画面の再現（図） ================= */
+  /* 番号ピンが枠の外に 11px はみ出す（＋影3px）ぶんの余白を figure 側に持たせる。
+     これが無いと375px幅で横スクロールが出る。 */
+  figure.shot{padding:2px 14px 0;}
+  .screen{
+    position:relative; border:1px solid var(--app-line); border-radius:14px;
+    background:var(--app-paper); padding:14px; color:var(--app-ink);
+    font-size:12px; line-height:1.6;
+    font-family:'Hiragino Maru Gothic ProN',-apple-system,'Hiragino Sans',sans-serif;
+  }
+  .screen svg{fill:none; stroke:currentColor; stroke-width:1.7;
+    stroke-linecap:round; stroke-linejoin:round; display:block;}
+  .sc-kick{font-size:8.5px; letter-spacing:.14em; font-weight:700; color:var(--app-subtle);}
+  .sc-ttl{font-size:14px; font-weight:700; margin-bottom:10px;}
+
+  .tiles3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;}
+  .tile3{background:var(--app-control); border:1px solid var(--app-line);
+    border-radius:12px; padding:9px 2px; text-align:center;}
+  .tile3 b{display:block; font-size:17px; font-weight:700; line-height:1.2;}
+  .tile3 b em{font-size:9px; font-style:normal; color:var(--app-subtle);}
+  .tile3 span{font-size:9px; color:var(--app-subtle);}
+
+  .bigrow{display:flex; align-items:center; gap:10px; background:var(--app-ink);
+    color:var(--app-paper); border-radius:16px; padding:12px; margin-top:8px;}
+  .bigrow .cir{width:32px; height:32px; border-radius:50%; flex-shrink:0;
+    border:1px solid rgba(244,242,238,.4); display:flex; align-items:center; justify-content:center;}
+  .bigrow .cir svg{width:16px; height:16px;}
+  .bigrow b{font-size:13.5px;}
+  .bigrow em{display:block; font-style:normal; font-size:9.5px; opacity:.7;}
+
+  .duo2{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;}
+  .tilebox{background:var(--app-control); border:1px solid var(--app-line);
+    border-radius:16px; padding:12px;}
+  .tilebox .cir{width:26px; height:26px; border-radius:50%; border:1px solid var(--app-line);
+    display:flex; align-items:center; justify-content:center; margin-bottom:7px;}
+  .tilebox .cir svg{width:13px; height:13px;}
+  .tilebox b{font-size:12.5px;} .tilebox em{display:block; font-style:normal;
+    font-size:9.5px; color:var(--app-subtle);}
+
+  .beanrow{display:flex; align-items:center; gap:9px; background:var(--app-control);
+    border:1px solid var(--app-line); border-radius:14px; padding:7px 9px; margin-bottom:6px;}
+  .av{width:32px; height:32px; border-radius:50%; flex-shrink:0; overflow:hidden;
+    display:flex; align-items:center; justify-content:center; background:var(--app-surface);}
+  .av svg{width:15px; height:15px; stroke:#fff;}
+  .av.r1{background:var(--r1);} .av.r2{background:var(--r2);} .av.r3{background:var(--r3);}
+  /* 公式のパッケージ写真が入った丸（本体では地が白、輪の色が焙煎度） */
+  .av.pkg{background:#FCFBF9;}
+  .av.pkg svg{stroke:var(--app-subtle); width:17px; height:17px;}
+  .av.pkg.r1{box-shadow:inset 0 0 0 2.5px var(--r1);}
+  .av.pkg.r2{box-shadow:inset 0 0 0 2.5px var(--r2);}
+  .av.pkg.r3{box-shadow:inset 0 0 0 2.5px var(--r3);}
+  .av.pkg.big svg{width:24px; height:24px;}
+  .av.big{width:52px; height:52px;} .av.big svg{width:24px; height:24px;}
+  .bname{font-size:11.5px; font-weight:700;}
+
+  .fis{display:flex; gap:4px; margin-top:3px;}
+  .fi{width:21px; height:21px; border-radius:50%; border:1px solid var(--app-line);
+    background:var(--app-paper); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .fi svg{width:12px; height:12px; stroke-width:1.5;}
+  .filabs{display:flex; gap:6px; flex-wrap:wrap;}
+  .filab{width:58px; text-align:center; font-size:9px; color:var(--app-subtle); line-height:1.4;}
+  .filab .fi{width:30px; height:30px; margin:0 auto 4px; background:var(--app-control);}
+  .filab .fi svg{width:17px; height:17px;}
+
+  .mt{display:inline-flex; gap:2px; vertical-align:middle;}
+  .mt i{width:12px; height:4px; border-radius:2px; background:var(--app-line); display:block;}
+  .mt i.on{background:var(--app-ink);}
+
+  .tg{display:inline-block; font-size:9.5px; padding:3px 7px; border-radius:999px;
+    background:var(--app-surface); border:1px solid var(--app-line); margin:0 3px 3px 0;}
+  .tg.on{background:var(--app-ink); color:var(--app-paper); border-color:var(--app-ink);}
+  .tg.dash{border-style:dashed; background:none; color:var(--app-subtle);}
+
+  .lv{display:flex; gap:5px;}
+  .lv span{flex:1; text-align:center; font-size:9.5px; font-weight:700; padding:7px 2px;
+    border-radius:10px; border:1px solid var(--app-line); background:var(--app-control); color:var(--app-subtle);}
+  .lv span.on{background:var(--app-ink); color:var(--app-paper); border-color:var(--app-ink);}
+
+  .fld{background:var(--app-control); border:1px solid var(--app-line); border-radius:10px;
+    padding:7px 9px; font-size:11px; color:var(--app-ink);}
+  .fld.ph{color:var(--app-ghost);}
+  .lab{font-size:9.5px; font-weight:700; color:var(--app-subtle); margin:9px 0 4px;}
+  .lab:first-child{margin-top:0;}
+  .step{display:flex; align-items:center; gap:7px; margin:10px 0 6px;}
+  .step .n{width:22px; height:22px; border-radius:50%; background:var(--app-ink);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .step .n svg{width:12px; height:12px; stroke:var(--app-paper);}
+  .step b{font-size:11.5px;}
+  .step em{margin-left:auto; font-style:normal; font-size:9px; color:var(--app-subtle);}
+
+  .opt{display:block; border:1.5px solid var(--app-line); background:var(--app-control);
+    border-radius:11px; padding:8px 10px; font-size:11px; margin-bottom:5px;}
+  .opt.ok{background:var(--app-ink); color:var(--app-paper); border-color:var(--app-ink);}
+  .opt.ng{color:var(--app-subtle); text-decoration:line-through; background:var(--app-surface);}
+  .xpl{background:var(--app-surface); border-radius:11px; padding:9px 10px;
+    font-size:10.5px; line-height:1.7;}
+  .prog{display:flex; gap:3px; margin-bottom:9px;}
+  .prog i{flex:1; height:3px; border-radius:2px; background:var(--app-line); display:block;}
+  .prog i.on{background:var(--app-ink);}
+
+  .star{letter-spacing:.06em; font-size:11px;}
+  .lgd{display:flex; gap:10px; justify-content:center; font-size:9px;
+    color:var(--app-subtle); margin:6px 0 8px;}
+  .lgd i{width:10px; height:10px; border-radius:50%; display:inline-block;
+    vertical-align:-1px; margin-right:3px;}
+  .pil{display:inline-block; font-size:9px; font-weight:700; padding:2px 7px;
+    border-radius:999px; border:1px solid var(--app-line); color:var(--app-subtle);}
+  .kv2{display:flex; gap:8px; font-size:10.5px; padding:5px 0; border-bottom:1px solid var(--app-line);}
+  .kv2:last-child{border-bottom:0;}
+  .kv2 .k{width:52px; flex-shrink:0; color:var(--app-subtle); font-weight:700; font-size:9.5px;}
+
+  .tabbar{display:flex; border-top:1px solid var(--app-line); margin:12px -14px -14px; padding:8px 0 4px;}
+  .tabbar span{flex:1; text-align:center; font-size:8.5px; color:var(--app-ghost);}
+  .tabbar span.on{color:var(--app-ink); font-weight:700;}
+  .tabbar svg{width:15px; height:15px; margin:0 auto 2px;}
+  .wordrow{padding:6px 0; border-bottom:1px solid var(--app-line);}
+  .wordrow:last-child{border-bottom:0;}
+  .wordrow b{font-size:11px;} .wordrow em{display:block; font-style:normal;
+    font-size:9.5px; color:var(--app-subtle); line-height:1.6;}
+  .btnrow{display:inline-block; border:1px solid var(--app-line); background:var(--app-control);
+    border-radius:11px; padding:7px 12px; font-size:10.5px; font-weight:700;}
+  .btnrow.pri{background:var(--app-ink); color:var(--app-paper); border-color:var(--app-ink);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="kicker">TSUMIKI TOOLS</p>
+  <h1>ブラックエプロンノート 使い方</h1>
+  <p class="lead">飲んだ一杯を<strong>4つのステップ</strong>で書きとめながら、コーヒー豆の知識をおぼえるためのノートです。</p>
+  <p class="openapp"><a href="black-apron.html">ブラックエプロンノートを開く →</a></p>
+</header>
+
+<div class="layout">
+
+<details class="toc" id="toc" open>
+  <summary>もくじ（全31項目）</summary>
+  <nav>
+    <p class="g">まず知る</p>
+    <a href="#i1"><span class="n">1</span>どんなノートか</a>
+    <a href="#i2"><span class="n">2</span>5つの入口</a>
+    <p class="g">毎日つかう — 記録する</p>
+    <a href="#i3"><span class="n">3</span>「記録する」をおす</a>
+    <a href="#i4"><span class="n">4</span>日付と豆をえらぶ</a>
+    <a href="#i5"><span class="n">5</span>① 香りをかぐ</a>
+    <a href="#i6"><span class="n">6</span>② すすって酸味を見る</a>
+    <a href="#i7"><span class="n">7</span>③ 口に広げてコクを見る</a>
+    <a href="#i8"><span class="n">8</span>④ 自分の言葉にする</a>
+    <a href="#i9"><span class="n">9</span>合わせたフードと好み</a>
+    <a href="#i10"><span class="n">10</span>写真をつける</a>
+    <a href="#i11"><span class="n">11</span>あとから見なおす</a>
+    <p class="g">豆をおぼえる</p>
+    <a href="#i12"><span class="n">12</span>丸の色＝焙煎度</a>
+    <a href="#i13"><span class="n">13</span>風味は絵で見る</a>
+    <a href="#i14"><span class="n">14</span>豆のページ</a>
+    <a href="#i15"><span class="n">15</span>自分のメモを書く</a>
+    <a href="#i16"><span class="n">16</span>豆に写真をつける</a>
+    <a href="#i17"><span class="n">17</span>しぼりこむ・さがす</a>
+    <a href="#i18"><span class="n">18</span>季節限定の豆</a>
+    <a href="#i19"><span class="n">19</span>豆を追加する</a>
+    <a href="#i20"><span class="n">20</span>書きかえる・もどす</a>
+    <p class="g">クイズでたしかめる</p>
+    <a href="#i21"><span class="n">21</span>おまかせ10問</a>
+    <a href="#i22"><span class="n">22</span>答えると解説が出る</a>
+    <a href="#i23"><span class="n">23</span>分野をえらぶ</a>
+    <a href="#i24"><span class="n">24</span>まちがえた問題だけ</a>
+    <a href="#i25"><span class="n">25</span>自分で問題を作る</a>
+    <p class="g">ことばをふやす</p>
+    <a href="#i26"><span class="n">26</span>ことばを引く</a>
+    <a href="#i27"><span class="n">27</span>ことばを追加する</a>
+    <a href="#i28"><span class="n">28</span>記録のことばも増やせる</a>
+    <p class="g">保存する・持ち出す</p>
+    <a href="#i29"><span class="n">29</span>データは端末の中だけ</a>
+    <a href="#i30"><span class="n">30</span>控えの取り方</a>
+    <a href="#i31"><span class="n">31</span>ホーム画面に置く</a>
+
+    <p class="g">巻末</p>
+    <a href="#qa"><span class="n">Q</span>こまったとき</a>
+  </nav>
+</details>
+
+<main>
+
+<!-- ==================== まず知る ==================== -->
+<section class="grp" id="g1">
+  <h2>まず知る</h2>
+  <div class="items">
+
+    <article class="item" id="i1">
+      <figure class="shot">
+        <div class="flow">
+          <span class="box">1杯飲んで記録する</span><span class="arw">→</span>
+          <span class="box">豆のページで見くらべる</span><span class="arw">→</span>
+          <span class="box">クイズでたしかめる</span>
+        </div>
+      </figure>
+      <h3><span class="n">1</span>どんなノートか</h3>
+      <p>飲んだコーヒーの味を言葉にして残し、豆の知識をおぼえていくためのノートです。この3つをぐるぐる回します。</p>
+      <p class="fine">ログインもインストールも要りません。書いたものはこの端末の中だけに残ります。<br>
+        ※ 中身は公式サイトなどをもとにした学習用のまとめです。最新の内容は公式の情報でたしかめてください。</p>
+    </article>
+
+    <article class="item" id="i2">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-kick">BLACK APRON NOTE</div>
+          <div class="sc-ttl">ブラックエプロンノート</div>
+          <div class="tiles3">
+            <div class="tile3"><b>12</b><span>杯</span></div>
+            <div class="tile3"><b>7<em>/16</em></b><span>豆</span></div>
+            <div class="tile3"><b>78<em>%</em></b><span>正解</span></div>
+          </div>
+          <div class="tabbar"><span class="on"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19z"/><path d="M9.5 20.5v-6h5v6"/></svg>ホーム</span><span class=""><svg viewBox="0 0 24 24"><g transform="rotate(35 12 12)"><ellipse cx="12" cy="12" rx="5.2" ry="8.6"/><path d="M12 3.6c-2.6 3-2.6 5.6 0 8.4s2.6 5.4 0 8.4"/></g></svg>豆</span><span class=""><svg viewBox="0 0 24 24"><path d="M6.5 3.5h8L19 8v12.5H6.5z"/><path d="M14 3.5V8h5"/><path d="M9.5 12.5h6M9.5 16h4"/></svg>記録</span><span class=""><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.7-.9 1.3v.4"/><circle cx="12" cy="16.6" r=".7" fill="currentColor" stroke="none"/></svg>クイズ</span><span class=""><svg viewBox="0 0 24 24"><path d="M4.5 5.5A2 2 0 0 1 6.5 3.5H19v17H6.5a2 2 0 0 0-2 2z"/><path d="M4.5 5.5v15"/><path d="M8.5 8h6.5M8.5 11.5h5"/></svg>ことば</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">2</span>5つの入口</h3>
+      <p>下の帯で切り替えます。<b>ホーム</b>＝今の様子／<b>豆</b>＝図鑑／<b>記録</b>＝飲んだ一杯／<b>クイズ</b>／<b>ことば</b>＝用語集。</p>
+      <p class="fine">ホームの3つの数字は左から「記録した杯数」「飲んだ豆の数（全体のうち何種類か）」「クイズの正答率」です。<br>
+        ホームは画面の高さにぴったり収まるようにできています。いちばん下の「さいきん」に出る件数（2〜5件）は、<b>端末の画面の大きさによって変わります</b>。ぜんぶ見たいときは下の帯の <kbd>記録</kbd> へ。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 記録する ==================== -->
+<section class="grp" id="g2">
+  <h2>毎日つかう — 記録する</h2>
+  <div class="items">
+
+    <article class="item" id="i3">
+      <figure class="shot">
+        <div class="screen">
+          <div class="bigrow"><span class="cir"><svg viewBox="0 0 24 24"><path d="M5 7h11v6a5.5 5.5 0 0 1-11 0z"/><path d="M16 8.5h1.8a2.6 2.6 0 0 1 0 5.2H16"/><path d="M4 20h13"/></svg></span>
+            <span><b>記録する</b><em>香り・酸味・コク・風味</em></span></div>
+          <div class="duo2">
+            <div class="tilebox"><span class="cir"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.7-.9 1.3v.4"/><circle cx="12" cy="16.6" r=".7" fill="currentColor" stroke="none"/></svg></span><b>クイズ</b><em>10問</em></div>
+            <div class="tilebox"><span class="cir"><svg viewBox="0 0 24 24"><g transform="rotate(35 12 12)"><ellipse cx="12" cy="12" rx="5.2" ry="8.6"/><path d="M12 3.6c-2.6 3-2.6 5.6 0 8.4s2.6 5.4 0 8.4"/></g></svg></span><b>豆</b><em>22種類</em></div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">3</span>「記録する」をおす</h3>
+      <p>ホームのいちばん大きい黒いところが記録の入口です。<kbd>記録する</kbd> をおすと入力の画面が下から出てきます。</p>
+      <p class="fine">下の帯の <kbd>記録</kbd> からでも同じ画面に入れます。</p>
+    </article>
+
+    <article class="item" id="i4">
+      <figure class="shot">
+        <div class="screen">
+          <div class="lab">日付</div>
+          <div class="fld">2026/08/13</div>
+          <div class="lab">豆</div>
+          <div class="fld">スマトラ</div>
+          <div class="lab">いれ方</div>
+          <div class="fld">ドリップ　　<span class="tg dash">＋</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">4</span>日付と豆をえらぶ</h3>
+      <p>日付は今日が入っています。豆は一覧からえらびます。載っていない豆なら「その他（自分で書く）」で名前を打てます。</p>
+      <p class="fine">いれ方の右の <kbd>＋</kbd> で、自分の入れ方（サイフォン・エアロプレスなど）を足せます。</p>
+    </article>
+
+    <article class="item" id="i5">
+      <figure class="shot">
+        <div class="screen">
+          <div class="step"><span class="n"><svg viewBox="0 0 24 24"><path d="M13 4v6.5c0 1.5 2.5 2.5 2.5 4.5S13.5 18 12 18"/><path d="M9 18.5a4 4 0 0 0 6 1.5"/></svg></span><b>香り</b><em>かいでから飲む</em></div>
+          <span class="tg">フローラル</span><span class="tg on">大地のような</span><span class="tg">ナッツのような</span>
+          <span class="tg">スモーキー</span><span class="tg dash">＋</span>
+          <div class="fld ph" style="margin-top:6px">ほかに感じた香り</div>
+        </div>
+      </figure>
+      <h3><span class="n">5</span>① 香りをかぐ</h3>
+      <p>カップを鼻に近づけ、<b>片手をコーヒーの上にかざして</b>深く吸います。感じた香りのことばをタップして黒くします。</p>
+      <p class="fine">手をかざすと香りが逃げず、集めて感じられます。いくつ選んでもかまいません。</p>
+    </article>
+
+    <article class="item" id="i6">
+      <figure class="shot">
+        <div class="screen">
+          <div class="step"><span class="n"><svg viewBox="0 0 24 24"><path d="M12 3.5c3 4 5.5 6.5 5.5 10a5.5 5.5 0 0 1-11 0c0-3.5 2.5-6 5.5-10Z"/></svg></span><b>酸味</b><em>音を立ててすする</em></div>
+          <div class="lv"><span>おだやか</span><span class="on">ほどよい</span><span>はじける</span></div>
+          <div style="margin-top:6px">
+            <span class="tg">さわやか</span><span class="tg on">柑橘</span><span class="tg">ベリー</span>
+            <span class="tg">ジューシーな</span><span class="tg dash">＋</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">6</span>② すすって酸味を見る</h3>
+      <p><b>音を立ててすする</b>のがコツです。空気といっしょに含むと口の中全体に広がり、細かい風味まで感じられます。</p>
+      <p class="fine">強さは3段階。公式でも酸味とコクは3段階で表されているので、この目盛りのまま覚えられます。</p>
+    </article>
+
+    <article class="item" id="i7">
+      <figure class="shot">
+        <div class="screen">
+          <div class="step"><span class="n"><svg viewBox="0 0 24 24"><path d="M6 5h12v7a6 6 0 0 1-12 0z"/><path d="M12 12v5.5a2.5 2.5 0 0 0 5 0"/></svg></span><b>コク</b><em>口の中全体に広げる</em></div>
+          <div class="lv"><span>軽い</span><span class="on">中くらい</span><span>重い</span></div>
+          <p class="fine" style="margin:6px 0 0; font-size:9.5px">軽い＝無脂肪乳のよう／中くらい＝牛乳のよう／重い＝クリームのよう</p>
+        </div>
+      </figure>
+      <h3><span class="n">7</span>③ 口に広げてコクを見る</h3>
+      <p>コクは「舌の上で感じる濃さ・重さ」です。ミルクにたとえると決めやすくなります。</p>
+      <p class="fine">この「無脂肪乳／牛乳」のたとえは、そのまま試験でも問われる言い回しです。</p>
+    </article>
+
+    <article class="item" id="i8">
+      <figure class="shot">
+        <div class="screen">
+          <div class="step"><span class="n"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg></span><b>風味</b><em>自分の言葉にする</em></div>
+          <span class="tg on">ココア</span><span class="tg">シトラス</span><span class="tg on">メープル</span>
+          <span class="tg">スパイス</span><span class="tg dash">＋</span>
+          <div class="fld" style="margin-top:6px">土のにおいと、シロップみたいななめらかさ</div>
+        </div>
+      </figure>
+      <h3><span class="n">8</span>④ 自分の言葉にする</h3>
+      <p>最後の欄が<b>いちばん大事</b>です。ことばを選ぶだけで終わらせず、自分の文で1行書いてください。</p>
+      <p class="fine">試験では「味わいを言葉で表現する力」が問われます。ここがそのまま練習になります。</p>
+    </article>
+
+    <article class="item" id="i9">
+      <figure class="shot">
+        <div class="screen">
+          <div class="lab">合わせたフード</div>
+          <div class="fld">シナモンロール</div>
+          <div class="lab">好み</div>
+          <div class="star">★★★★☆</div>
+        </div>
+      </figure>
+      <h3><span class="n">9</span>合わせたフードと好み</h3>
+      <p>いっしょに食べたものと、好みを星5つで残します。<kbd>保存する</kbd> でおしまいです。</p>
+      <p class="fine">フードペアリングは試験でよく狙われるところ。食べた組み合わせを残しておくと、あとで思い出しやすくなります。</p>
+    </article>
+
+    <article class="item" id="i10">
+      <figure class="shot">
+        <div class="screen">
+          <div style="border:1px dashed var(--app-line); border-radius:12px; padding:16px;
+            text-align:center; color:var(--app-subtle); font-size:10px">
+            <span style="display:inline-block; width:22px; margin-bottom:4px"><svg viewBox="0 0 24 24"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span><br>写真
+          </div>
+          <div style="margin-top:8px"><span class="btnrow">＋ 写真を撮る・選ぶ</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">10</span>写真をつける</h3>
+      <p>その日のカップやフードの写真を1枚つけられます。カメラで撮るか、写真から選びます。</p>
+      <p class="caution fine">写真はこの端末の中だけに保存されます。どこにも送られません。入れすぎると容量がいっぱいになるので、小さく縮めて保存しています。</p>
+    </article>
+
+    <article class="item" id="i11">
+      <figure class="shot">
+        <div class="screen">
+          <div class="beanrow"><span class="av pkg r3"><svg viewBox="0 0 24 24"><path d="M7 8.2h10v11.3a1.2 1.2 0 0 1-1.2 1.2H8.2A1.2 1.2 0 0 1 7 19.5Z"/><path d="M7 8.2 8.7 4.5h6.6L17 8.2"/><path d="M9.9 12.6h4.2"/></svg></span>
+            <span style="flex:1"><span style="font-size:9px; color:var(--app-subtle)">8/13・ドリップ</span><br>
+              <span class="bname">スマトラ</span><br>
+              <span style="font-size:9.5px; color:var(--app-subtle)">土のにおいと、シロップみたいな…</span></span>
+            <span class="star">★★★★</span></div>
+          <div class="beanrow"><span class="av pkg r2"><svg viewBox="0 0 24 24"><path d="M7 8.2h10v11.3a1.2 1.2 0 0 1-1.2 1.2H8.2A1.2 1.2 0 0 1 7 19.5Z"/><path d="M7 8.2 8.7 4.5h6.6L17 8.2"/><path d="M9.9 12.6h4.2"/></svg></span>
+            <span style="flex:1"><span style="font-size:9px; color:var(--app-subtle)">8/11・コーヒープレス</span><br>
+              <span class="bname">ケニア</span></span>
+            <span class="star">★★★</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">11</span>あとから見なおす</h3>
+      <p><kbd>記録</kbd> に新しい順で並びます。タップすると中身が開き、<kbd>編集する</kbd> で直したり消したりできます。</p>
+      <p class="fine">開いた画面の下に「公式のプロフィールと見くらべる」が出ます。自分が感じた酸味・コクと公式の数字を並べて見られます。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 豆 ==================== -->
+<section class="grp" id="g3">
+  <h2>豆をおぼえる</h2>
+  <div class="items">
+
+    <article class="item" id="i12">
+      <figure class="shot">
+        <div class="screen">
+          <div class="lgd"><span><i style="background:var(--r1)"></i>ブロンド</span>
+            <span><i style="background:var(--r2)"></i>ミディアム</span>
+            <span><i style="background:var(--r3)"></i>ダーク</span></div>
+          <div class="beanrow"><span class="av pkg r1"><svg viewBox="0 0 24 24"><path d="M7 8.2h10v11.3a1.2 1.2 0 0 1-1.2 1.2H8.2A1.2 1.2 0 0 1 7 19.5Z"/><path d="M7 8.2 8.7 4.5h6.6L17 8.2"/><path d="M9.9 12.6h4.2"/></svg></span><span class="bname">ライトノート ブレンド</span></div>
+          <div class="beanrow"><span class="av pkg r2"><svg viewBox="0 0 24 24"><path d="M7 8.2h10v11.3a1.2 1.2 0 0 1-1.2 1.2H8.2A1.2 1.2 0 0 1 7 19.5Z"/><path d="M7 8.2 8.7 4.5h6.6L17 8.2"/><path d="M9.9 12.6h4.2"/></svg></span><span class="bname">パイクプレイス ロースト</span></div>
+          <div class="beanrow"><span class="av pkg r3"><svg viewBox="0 0 24 24"><path d="M7 8.2h10v11.3a1.2 1.2 0 0 1-1.2 1.2H8.2A1.2 1.2 0 0 1 7 19.5Z"/><path d="M7 8.2 8.7 4.5h6.6L17 8.2"/><path d="M9.9 12.6h4.2"/></svg></span><span class="bname">スマトラ</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">12</span>丸＝パッケージ、輪の色＝焙煎度</h3>
+      <p>左の丸には<b>実際のパッケージ</b>が出ます。まわりの輪の色が焙煎度で、<b>うすい＝ブロンド／中くらい＝ミディアム／こい＝ダーク</b>。実際の豆の色と同じ並びです。</p>
+      <p class="fine">パッケージの写真はアプリの中には入っておらず、<b>スターバックス公式サイトから直接読み込んでいます</b>。通信が気になるときは <span class="path">歯車 → パッケージの写真</span> で消せます。<br>
+        深く煎るほど酸味は落ち、コクは増えるのが基本です。色と一緒に覚えると、暗記する量が減ります。</p>
+    </article>
+
+    <article class="item" id="i13">
+      <figure class="shot">
+        <div class="screen">
+          <div class="beanrow"><span class="av pkg r2"><svg viewBox="0 0 24 24"><path d="M7 8.2h10v11.3a1.2 1.2 0 0 1-1.2 1.2H8.2A1.2 1.2 0 0 1 7 19.5Z"/><path d="M7 8.2 8.7 4.5h6.6L17 8.2"/><path d="M9.9 12.6h4.2"/></svg></span>
+            <span style="flex:1"><span class="bname">ケニア</span>
+              <span class="fis"><span class="fi"><svg viewBox="0 0 24 24"><path d="M3.5 12.5a8.5 8.5 0 0 1 17 0Z"/><path d="M12 12.5V4M7.6 12.5c0-3 1.1-6 2.4-7.9M16.4 12.5c0-3-1.1-6-2.4-7.9"/></svg></span><span class="fi"><svg viewBox="0 0 24 24"><circle cx="9.5" cy="14.5" r="4"/><circle cx="15.2" cy="12.4" r="3.4"/><path d="M13.4 9.4c.4-2.1 1.9-3.7 3.9-4.4"/></svg></span><span class="fi"><svg viewBox="0 0 24 24"><path d="M3.5 9.5c2.5-2.6 5-2.6 8 0s5.5 2.6 8 0"/><path d="M3.5 15.5c2.5-2.6 5-2.6 8 0s5.5 2.6 8 0"/></svg></span></span></span></div>
+          <div class="beanrow"><span class="av pkg r3"><svg viewBox="0 0 24 24"><path d="M7 8.2h10v11.3a1.2 1.2 0 0 1-1.2 1.2H8.2A1.2 1.2 0 0 1 7 19.5Z"/><path d="M7 8.2 8.7 4.5h6.6L17 8.2"/><path d="M9.9 12.6h4.2"/></svg></span>
+            <span style="flex:1"><span class="bname">スマトラ</span>
+              <span class="fis"><span class="fi"><svg viewBox="0 0 24 24"><path d="M3.5 17.5c2.6-4.2 4.6-6.3 6.1-6.3s2 1.6 3.5 1.6 2.6-3.6 4.6-3.6 2.5 3.1 3 8.3Z"/><path d="M3 20.5h18"/></svg></span><span class="fi"><svg viewBox="0 0 24 24"><path d="M12 20V9"/><path d="M12 13.5c-3.6 0-6.2-2.1-6.7-6.2 3.6 0 6.2 2.1 6.7 6.2Z"/><path d="M12 11.5c3.6 0 6.2-2.1 6.7-6.2-3.6 0-6.2 2.1-6.7 6.2Z"/></svg></span><span class="fi"><svg viewBox="0 0 24 24"><path d="M3.5 9.5c2.5-2.6 5-2.6 8 0s5.5 2.6 8 0"/><path d="M3.5 15.5c2.5-2.6 5-2.6 8 0s5.5 2.6 8 0"/></svg></span></span></span></div>
+        </div>
+      </figure>
+      <h3><span class="n">13</span>風味は絵で見る</h3>
+      <p>名前の下の小さな丸は、その豆の風味です。柑橘・ベリー・ナッツ・チョコ・大地…と絵で並ぶので、ひと目で見わけられます。</p>
+      <p class="fine">絵は風味のことばから自動でつきます。自分で豆を足したときも、書いた風味に合わせて絵がつきます。</p>
+    </article>
+
+    <article class="item" id="i14">
+      <figure class="shot">
+        <div class="screen">
+          <div style="display:flex; gap:10px; align-items:center; margin-bottom:9px">
+            <span class="av pkg r2 big"><svg viewBox="0 0 24 24"><path d="M7 8.2h10v11.3a1.2 1.2 0 0 1-1.2 1.2H8.2A1.2 1.2 0 0 1 7 19.5Z"/><path d="M7 8.2 8.7 4.5h6.6L17 8.2"/><path d="M9.9 12.6h4.2"/></svg></span>
+            <span><b style="font-size:13px">ケニア</b><br>
+              <span class="pil">ミディアム</span> <span class="pil">シングルオリジン</span></span></div>
+          <div class="filabs" style="margin-bottom:9px"><span class="filab"><span class="fi"><svg viewBox="0 0 24 24"><path d="M3.5 12.5a8.5 8.5 0 0 1 17 0Z"/><path d="M12 12.5V4M7.6 12.5c0-3 1.1-6 2.4-7.9M16.4 12.5c0-3-1.1-6-2.4-7.9"/></svg></span>グレープフルーツ</span><span class="filab"><span class="fi"><svg viewBox="0 0 24 24"><circle cx="9.5" cy="14.5" r="4"/><circle cx="15.2" cy="12.4" r="3.4"/><path d="M13.4 9.4c.4-2.1 1.9-3.7 3.9-4.4"/></svg></span>ブラックカラント</span><span class="filab"><span class="fi"><svg viewBox="0 0 24 24"><path d="M3.5 9.5c2.5-2.6 5-2.6 8 0s5.5 2.6 8 0"/><path d="M3.5 15.5c2.5-2.6 5-2.6 8 0s5.5 2.6 8 0"/></svg></span>ジューシー</span></div>
+          <div class="kv2"><span class="k">生産地</span><span>ケニア</span></div>
+          <div class="kv2"><span class="k">加工法</span><span>水洗式</span></div>
+          <div class="kv2"><span class="k">酸味</span><span class="mt"><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+          <div class="kv2"><span class="k">コク</span><span class="mt"><i class="on"></i><i class="on"></i><i></i></span></div>
+        </div>
+      </figure>
+      <h3><span class="n">14</span>豆のページ</h3>
+      <p>豆をタップすると開きます。<b>焙煎度・生産地・加工法・酸味・コク・風味・合うフード・その豆の話</b>が1ページに入っています。</p>
+      <p class="fine">この7つが、試験でいちばん出るところです。風味と合うフードは絵とことばの両方で出ます。</p>
+    </article>
+
+    <article class="item" id="i15">
+      <figure class="shot">
+        <div class="screen">
+          <div class="lab">自分のメモ</div>
+          <div class="fld" style="min-height:44px">火山灰の土。研修で「はじける酸味」と教わった。</div>
+          <div style="margin-top:7px"><span class="btnrow">メモを保存</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">15</span>自分のメモを書く</h3>
+      <p>どの豆にも自分用のメモ欄があります。研修で聞いたこと、パッケージの由来、自分なりの覚え方を書きためてください。</p>
+      <p class="caution fine">アプリに最初から入っている内容は公開情報からのまとめです。<b>お店で見た最新の情報とちがうときは、こちらを正としてメモに書き足してください。</b></p>
+    </article>
+
+    <article class="item" id="i16">
+      <figure class="shot">
+        <div class="screen">
+          <div style="display:flex; gap:10px; align-items:center">
+            <span class="av pkg r2 big"><svg viewBox="0 0 24 24"><path d="M7 8.2h10v11.3a1.2 1.2 0 0 1-1.2 1.2H8.2A1.2 1.2 0 0 1 7 19.5Z"/><path d="M7 8.2 8.7 4.5h6.6L17 8.2"/><path d="M9.9 12.6h4.2"/></svg></span>
+            <span><b style="font-size:12.5px">ケニア</b><br>
+              <span style="font-size:10px; color:var(--app-subtle); text-decoration:underline">＋ 写真を追加</span></span></div>
+        </div>
+      </figure>
+      <h3><span class="n">16</span>豆に写真をつける</h3>
+      <p>豆のページの <kbd>＋ 写真を追加</kbd> から、自分で撮った写真を入れられます。<b>自分の写真のほうが優先</b>されて、公式の画像と置きかわります。</p>
+      <p class="fine">季節限定の6種は公式サイトに画像が置かれていないので、ここから入れてください。実物を撮るのがいちばん確実です（色・柄・エピソードは試験で問われます）。写真はこの端末の中だけに残ります。</p>
+    </article>
+
+    <article class="item" id="i17">
+      <figure class="shot">
+        <div class="screen">
+          <div class="fld ph">豆・風味・フードで探す</div>
+          <div style="margin-top:7px">
+            <span class="tg on">すべて</span><span class="tg">ブロンド</span><span class="tg">ミディアム</span>
+            <span class="tg">ダーク</span><span class="tg">アフリカ</span><span class="tg">飲んだ</span>
+            <span class="tg">自分の豆</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">17</span>しぼりこむ・さがす</h3>
+      <p>焙煎度や産地でしぼれます。<b>飲んだ</b>＝記録がある豆だけ、<b>自分の豆</b>＝自分で足した豆だけ。</p>
+      <p class="fine">上の検索は風味やフードの名前でも探せます。「チーズケーキ」で引くと、それに合う豆が出ます。</p>
+    </article>
+
+    <article class="item" id="i18">
+      <figure class="shot">
+        <div class="screen">
+          <div style="margin-bottom:7px"><span class="tg">すべて</span><span class="tg on">季節限定</span>
+            <span class="tg">ブロンド</span><span class="tg">ミディアム</span></div>
+          <div class="beanrow"><span class="av r2"><svg viewBox="0 0 24 24"><g transform="rotate(35 12 12)"><ellipse cx="12" cy="12" rx="5.2" ry="8.6"/><path d="M12 3.6c-2.6 3-2.6 5.6 0 8.4s2.6 5.4 0 8.4"/></g></svg></span>
+            <span style="flex:1"><span class="bname">スプリング シーズン ブレンド</span></span>
+            <span class="pil">春</span></div>
+          <div class="beanrow"><span class="av r3"><svg viewBox="0 0 24 24"><g transform="rotate(35 12 12)"><ellipse cx="12" cy="12" rx="5.2" ry="8.6"/><path d="M12 3.6c-2.6 3-2.6 5.6 0 8.4s2.6 5.4 0 8.4"/></g></svg></span>
+            <span style="flex:1"><span class="bname">クリスマス ブレンド</span></span>
+            <span class="pil">冬</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">18</span>季節限定の豆</h3>
+      <p>春・夏・秋・冬の季節限定も6種類入っています。一覧の <kbd>季節限定</kbd> をおすと、それだけ並びます。</p>
+      <p class="caution fine">季節限定は<b>同じ名前でも年によって使う豆と風味が変わります</b>。今年の内容はお店の資料でたしかめて、ちがっていたら <kbd>この豆を編集する</kbd> かメモで直してください。</p>
+    </article>
+
+    <article class="item" id="i19">
+      <figure class="shot">
+        <div class="screen">
+          <div class="lab">名前</div><div class="fld">エチオピア</div>
+          <div class="lab">風味（「、」で区切る）</div><div class="fld">ベリー、フローラル、レモン</div>
+          <div class="lab">合うフード（「、」で区切る）</div><div class="fld">ベリーのタルト、フルーツ</div>
+          <div class="filabs" style="margin-top:8px"><span class="filab"><span class="fi"><svg viewBox="0 0 24 24"><circle cx="9.5" cy="14.5" r="4"/><circle cx="15.2" cy="12.4" r="3.4"/><path d="M13.4 9.4c.4-2.1 1.9-3.7 3.9-4.4"/></svg></span>ブラックカラント</span><span class="filab"><span class="fi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.2"/><ellipse cx="12" cy="6.6" rx="2.5" ry="3.2"/><ellipse cx="12" cy="17.4" rx="2.5" ry="3.2"/><ellipse cx="6.6" cy="12" rx="3.2" ry="2.5"/><ellipse cx="17.4" cy="12" rx="3.2" ry="2.5"/></svg></span>フローラル</span><span class="filab"><span class="fi"><svg viewBox="0 0 24 24"><path d="M3.5 12.5a8.5 8.5 0 0 1 17 0Z"/><path d="M12 12.5V4M7.6 12.5c0-3 1.1-6 2.4-7.9M16.4 12.5c0-3-1.1-6-2.4-7.9"/></svg></span>グレープフルーツ</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">19</span>豆を追加する</h3>
+      <p>豆の一覧のいちばん下 <kbd>＋ 豆を追加する</kbd> から足せます。<b>新しく出た季節限定やリザーブの豆</b>はここに入れてください。</p>
+      <p class="fine">風味とフードは「、」で区切って並べるだけ。書いたことばに合わせて絵が自動でつき、<b>クイズにも自動で出るようになります</b>。</p>
+    </article>
+
+    <article class="item" id="i20">
+      <figure class="shot">
+        <div class="screen">
+          <div><span class="btnrow pri">保存する</span></div>
+          <div style="margin-top:6px"><span class="btnrow">はじめの内容に戻す</span></div>
+          <div style="margin-top:6px"><span class="btnrow">この豆を削除</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">20</span>書きかえる・もどす</h3>
+      <p>最初から入っている豆も <kbd>この豆を編集する</kbd> で書きかえられます。もとに戻したくなったら <kbd>はじめの内容に戻す</kbd>。</p>
+      <p class="fine">削除できるのは自分で足した豆だけです。豆を消しても、その豆で書いた記録は残ります。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== クイズ ==================== -->
+<section class="grp" id="g4">
+  <h2>クイズでたしかめる</h2>
+  <div class="items">
+
+    <article class="item" id="i21">
+      <figure class="shot">
+        <div class="screen">
+          <div class="bigrow"><span class="cir"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.7-.9 1.3v.4"/><circle cx="12" cy="16.6" r=".7" fill="currentColor" stroke="none"/></svg></span>
+            <span><b>おまかせ 10問</b><em>ぜんぶの範囲から</em></span></div>
+          <div class="prog" style="margin-top:10px">
+            <i class="on"></i><i class="on"></i><i></i><i></i><i></i>
+            <i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+      </figure>
+      <h3><span class="n">21</span>おまかせ10問</h3>
+      <p>1回10問です。上の線が進み具合。豆の問題は<b>豆のデータからその場で作られる</b>ので、毎回ちがう組み合わせが出ます。</p>
+      <p class="fine">ホームの <kbd>クイズ</kbd> からでも、そのままおまかせ10問が始まります。</p>
+    </article>
+
+    <article class="item" id="i22">
+      <figure class="shot">
+        <div class="screen">
+          <div style="font-size:11.5px; font-weight:700; margin-bottom:7px">「スマトラ」の加工法は？</div>
+          <span class="opt ng">水洗式</span>
+          <span class="opt ok">半水洗式</span>
+          <div class="xpl" style="margin-top:6px"><b>正解</b>　スマトラ は 半水洗式。酸味をおさえた大地のような香りはここから生まれる。</div>
+        </div>
+      </figure>
+      <h3><span class="n">22</span>答えると解説が出る</h3>
+      <p>選ぶとすぐ答え合わせです。<b>解説はいつも「なぜそうなるか」まで書いてあります</b>。丸暗記せず、理由でつなげて覚えてください。</p>
+      <p class="fine">10問おわると一覧で振り返れます。まちがえた問題は自動でためられます。</p>
+    </article>
+
+    <article class="item" id="i23">
+      <figure class="shot">
+        <div class="screen">
+          <div class="beanrow"><span class="fi"><svg viewBox="0 0 24 24"><g transform="rotate(35 12 12)"><ellipse cx="12" cy="12" rx="5.2" ry="8.6"/><path d="M12 3.6c-2.6 3-2.6 5.6 0 8.4s2.6 5.4 0 8.4"/></g></svg></span><span style="flex:1"><b>豆のこと</b></span><span style="font-size:10px; color:var(--app-subtle)">82%</span></div>
+          <div class="beanrow"><span class="fi"><svg viewBox="0 0 24 24"><path d="M3.5 17.5c2.6-4.2 4.6-6.3 6.1-6.3s2 1.6 3.5 1.6 2.6-3.6 4.6-3.6 2.5 3.1 3 8.3Z"/><path d="M3 20.5h18"/></svg></span><span style="flex:1"><b>産地のちがい</b></span><span style="font-size:10px; color:var(--app-subtle)">60%</span></div>
+          <div class="beanrow"><span class="fi"><svg viewBox="0 0 24 24"><path d="M12 20V9"/><path d="M12 13.5c-3.6 0-6.2-2.1-6.7-6.2 3.6 0 6.2 2.1 6.7 6.2Z"/><path d="M12 11.5c3.6 0 6.2-2.1 6.7-6.2-3.6 0-6.2 2.1-6.7 6.2Z"/></svg></span><span style="flex:1"><b>栽培と加工</b></span><span style="font-size:10px; color:var(--app-subtle)">—</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">23</span>分野をえらぶ</h3>
+      <p>苦手なところだけ集中して解けます。右の数字がこれまでの正答率です。</p>
+      <p class="fine">分野は6つ（豆のこと／産地のちがい／栽培と加工／歴史・エシカル／いれ方／味わいの表現）。試験でよく出る順に並べてあります。</p>
+    </article>
+
+    <article class="item" id="i24">
+      <figure class="shot">
+        <div class="screen">
+          <div class="beanrow"><span class="fi"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg></span>
+            <span style="flex:1"><b>まちがえた問題</b><br>
+              <span style="font-size:9.5px; color:var(--app-subtle)">14問</span></span></div>
+        </div>
+      </figure>
+      <h3><span class="n">24</span>まちがえた問題だけ</h3>
+      <p>まちがえた問題はたまっていきます。ここから、それだけをまとめて解きなおせます。</p>
+      <p class="fine">同じ問題に<b>正解できたら、ひとりでに消えます</b>。0問になったらその範囲は身についた合図です。</p>
+    </article>
+
+    <article class="item" id="i25">
+      <figure class="shot">
+        <div class="screen">
+          <div class="lab">問題文</div><div class="fld">エチオピアの加工法は？</div>
+          <div class="lab">正しい答え</div><div class="fld">乾燥式</div>
+          <div class="lab">ちがう答え（3つ）</div><div class="fld">水洗式</div>
+          <div class="fld" style="margin-top:4px">半水洗式</div>
+        </div>
+      </figure>
+      <h3><span class="n">25</span>自分で問題を作る</h3>
+      <p>クイズの下の <kbd>＋ 問題を作る</kbd> から足せます。正しい答え1つと、ちがう答え3つを入れるだけです。</p>
+      <p class="fine">「出す側の気持ちで問題を作る」のは、受かった人がすすめている勉強法です。作った問題は「自分でつくった問題」と、おまかせ10問にも出ます。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== ことば ==================== -->
+<section class="grp" id="g5">
+  <h2>ことばをふやす</h2>
+  <div class="items">
+
+    <article class="item" id="i26">
+      <figure class="shot">
+        <div class="screen">
+          <div class="fld ph">ことばを探す</div>
+          <div style="margin:7px 0"><span class="tg on">すべて</span><span class="tg">表現</span>
+            <span class="tg">栽培・加工</span><span class="tg">調達・組織</span></div>
+          <div class="wordrow"><b>鮮やかな</b><em>高地の農園産コーヒーに見られる、キリッとした酸味。</em></div>
+          <div class="wordrow"><b>大地のような</b><em>インドネシア産に見られる、土を思わせる香り。</em></div>
+        </div>
+      </figure>
+      <h3><span class="n">26</span>ことばを引く</h3>
+      <p>用語集です。「表現」「栽培・加工」「調達・組織」「歴史・ブランド」の4つに分かれています。</p>
+      <p class="fine">とくに「表現」は、記録を書くときにそのまま使えることばです。迷ったらここを引いてから書いてください。</p>
+    </article>
+
+    <article class="item" id="i27">
+      <figure class="shot">
+        <div class="screen">
+          <div class="lab">ことば</div><div class="fld">カッピング</div>
+          <div class="lab">意味</div><div class="fld">コーヒーの品質を評価する試飲のこと。</div>
+          <div style="margin-top:7px"><span class="btnrow pri">保存する</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">27</span>ことばを追加する</h3>
+      <p>いちばん下の <kbd>＋ ことばを追加する</kbd> から足せます。研修で出てきた用語をその場で足していってください。</p>
+      <p class="fine">自分で足したことばには <kbd>削除</kbd> がつきます。最初から入っていることばは消えません。</p>
+    </article>
+
+    <article class="item" id="i28">
+      <figure class="shot">
+        <div class="screen">
+          <span class="tg">フローラル</span><span class="tg">ナッツのような</span>
+          <span class="tg on">土くさい</span><span class="tg dash">＋</span>
+          <p class="fine" style="margin:6px 0 0; font-size:9.5px">記録の香り・酸味・コク・風味、それぞれに ＋ があります</p>
+        </div>
+      </figure>
+      <h3><span class="n">28</span>記録のことばも増やせる</h3>
+      <p>記録の画面にある4か所（香り・酸味・コク・風味）の <kbd>＋</kbd> から、自分のことばを足せます。</p>
+      <p class="fine">一度足すと次から選べるようになります。自分の口に合う言い方を増やしていくのが、表現の練習になります。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 保存 ==================== -->
+<section class="grp" id="g6">
+  <h2>保存する・持ち出す</h2>
+  <div class="items">
+
+    <article class="item nofig" id="i29">
+      <h3><span class="n">29</span>データは端末の中だけ</h3>
+      <p>記録・写真・メモ・成績・追加した豆は、すべて<b>この端末のブラウザの中</b>に保存されます。サーバーには送られません。</p>
+      <p class="caution fine">別の端末や別のブラウザで開くと、中身は空です。<b>履歴やサイトデータを消すと、記録も消えます。</b>大事な記録がたまったら、次の「控えの取り方」をしてください。</p>
+    </article>
+
+    <article class="item" id="i30">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-ttl" style="font-size:12.5px">このアプリについて</div>
+          <div class="kv2"><span class="k">記録</span><span>32 件</span></div>
+          <div class="kv2"><span class="k">豆</span><span>19 種類（自分で追加 3）</span></div>
+          <div class="kv2"><span class="k">写真</span><span>12 枚</span></div>
+          <div style="margin-top:8px"><span class="btnrow">データを書き出す</span></div>
+          <div style="margin-top:5px"><span class="btnrow">データを読み込む</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">30</span>控えの取り方</h3>
+      <p>右上の歯車 → <kbd>データを書き出す</kbd> で1つのファイルとして保存できます。新しい端末では <kbd>データを読み込む</kbd> で戻せます。</p>
+      <p class="caution fine">読み込むと、いまのデータは<b>置きかわります</b>（足し算にはなりません）。機種変更の前に必ず書き出してください。</p>
+    </article>
+
+    <article class="item nofig" id="i31">
+      <h3><span class="n">31</span>ホーム画面に置く</h3>
+      <p><b>iPhone</b>：Safari で開いて、下の共有ボタン（□に↑）→「ホーム画面に追加」。<br>
+         <b>Android</b>：Chrome で開いて、右上の「⋮」→「ホーム画面に追加」。</p>
+      <p class="fine">アプリのように開けて、上のアドレス欄も消えます。<b>Safari で見ていた記録は、ホーム画面から開いてもそのまま残ります</b>（同じ保存場所を使うため）。ただし Safari と Chrome など<b>別のブラウザは別の保存場所</b>です。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 巻末 ==================== -->
+<section class="appendix" id="qa">
+  <h2>こまったとき</h2>
+  <div class="qa">
+    <div>
+      <div class="q">一覧にない豆を飲んだ</div>
+      <div class="a">記録の「豆」で<b>その他（自分で書く）</b>を選ぶと名前を打てます。これから何度も飲むなら、<span class="path">豆 → ＋ 豆を追加する</span> で登録するとクイズにも出るようになります。</div>
+    </div>
+    <div>
+      <div class="q">お店の情報とちがう気がする</div>
+      <div class="a">中身は公開されている情報からのまとめです。<b>社内の最新の資料が正しい</b>ので、ちがっていたら豆のメモ欄に書き足すか、<kbd>この豆を編集する</kbd> で直してください。</div>
+    </div>
+    <div>
+      <div class="q">季節限定の豆が古い／新しいのが出た</div>
+      <div class="a">2026年8月13日までに出ていた6種類（春・夏・秋・冬）が入っています。<b>毎年中身が変わる</b>ので、新しいものは <span class="path">豆 → ＋ 豆を追加する</span> で足し、変わったものは <kbd>この豆を編集する</kbd> で直してください。試験ではシーズナルもよく出ます。</div>
+    </div>
+    <div>
+      <div class="q">パッケージの写真が出ない</div>
+      <div class="a">公式サイトから直接読んでいるので、電波が弱いときや、公式サイトが画像を差し替えたときは出ません。そのときは豆の色の丸に戻ります。<b>季節限定の6種はもともと公式に画像がありません。</b><kbd>＋ 写真を追加</kbd> で自分の写真を入れると確実です。</div>
+    </div>
+    <div>
+      <div class="q">通信量が気になる</div>
+      <div class="a"><span class="path">歯車 → パッケージの写真</span> で消せます。画像は1枚およそ190KBで、画面に出るぶんだけ読み込む作りです。</div>
+    </div>
+    <div>
+      <div class="q">「保存できませんでした」と出る</div>
+      <div class="a">写真が多くて容量がいっぱいです。<span class="path">歯車 → データを書き出す</span> で控えを取ってから、いらない写真を消してください。</div>
+    </div>
+    <div>
+      <div class="q">まちがえた問題が減らない</div>
+      <div class="a">同じ問題に正解すると消えます。「まちがえた問題」からくり返し解いてください。全部消すだけなら <kbd>成績をリセット</kbd> でも消えます（記録と豆は残ります）。</div>
+    </div>
+    <div>
+      <div class="q">同じ問題ばかり出る</div>
+      <div class="a">豆の問題は登録されている豆から作られます。<b>豆を足すと問題も増えます</b>。自分で問題を作って足すこともできます。</div>
+    </div>
+    <div>
+      <div class="q">編集した豆をもとに戻したい</div>
+      <div class="a">その豆の <kbd>この豆を編集する</kbd> のいちばん下、<kbd>はじめの内容に戻す</kbd> をおしてください。</div>
+    </div>
+    <div>
+      <div class="q">豆を消したら記録も消える？</div>
+      <div class="a">消えません。記録はそのまま残ります（豆の名前だけが表示されなくなります）。</div>
+    </div>
+    <div>
+      <div class="q">記録を1件だけ消したい</div>
+      <div class="a">記録をタップ →<kbd>編集する</kbd>→ いちばん下の <kbd>この記録を削除</kbd>。</div>
+    </div>
+    <div>
+      <div class="q">この内容だけで受かる？</div>
+      <div class="a">受かりません。ここは<b>覚えたことを毎日ころがしておくための道具</b>です。コーヒーマスターモジュールと社内の資料が本体で、これはその横に置く練習帳だと思ってください。</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  ブラックエプロンノート 使い方<br>
+  つくったもの：つみき<br>
+  2026年8月13日
+</footer>
+
+</main>
+</div>
+</div>
+
+<script>
+/* もくじ：狭い画面ではたたむ／広い画面では開いて左に貼り付ける。
+   いま読んでいる項目のグループを、もくじで色づけする。 */
+(function(){
+  var toc = document.getElementById('toc');
+  if(!toc) return;
+  var wide = window.matchMedia('(min-width:1000px)');
+  function sync(){ toc.open = wide.matches; }
+  sync();
+  (wide.addEventListener ? wide.addEventListener('change', sync) : window.addEventListener('resize', sync));
+  toc.addEventListener('click', function(e){
+    if(e.target.closest('a') && !wide.matches) toc.open = false;
+  });
+  if(!('IntersectionObserver' in window)) return;
+  var links = {}, targets = [];
+  Array.prototype.forEach.call(toc.querySelectorAll('a[href^="#"]'), function(a){
+    var el = document.getElementById(a.getAttribute('href').slice(1));
+    if(el){ links[a.getAttribute('href').slice(1)] = a; targets.push(el); }
+  });
+  var seen = {};
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(en){ seen[en.target.id] = en.isIntersecting; });
+    var cur = null;
+    targets.forEach(function(el){ if(seen[el.id] && !cur) cur = el.id; });
+    for(var k in links) links[k].classList.toggle('on', k === cur);
+  }, {rootMargin:'-10% 0px -70% 0px'});
+  targets.forEach(function(el){ io.observe(el); });
+})();
+</script>
+</body>
+</html>

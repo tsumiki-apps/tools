@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>まぜいろ — 使い方</title>
+<meta name="description" content="まぜいろの使い方。カラー剤の全体量と比率を入れるだけで、各色・2剤・合計のグラムを計算します。">
+<link rel="apple-touch-icon" href="icon-mazeiro.png">
+<style>
+  /* ================================================================
+     つみき 取扱説明書 共通スタイル v2（1項目＝1図＋数行）
+     ・外部読み込みゼロ（フォント/CDN/画像すべて無し）
+     ・図はアプリ画面をHTML/CSSで再現（スクショ画像を使わない）
+     ================================================================ */
+  :root{
+    --paper:#F4F2EE; --surface:#ECE9E3; --ink:#242321; --muted:#77736B;
+    --hair:#D8D4CC; --ghost:#BEB9B0; --control:#FBFAF8;
+    --mark:#B4562E;                       /* 図の注釈（番号ピン・矢印） */
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%; scroll-behavior:smooth;}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:'Hiragino Maru Gothic ProN',-apple-system,BlinkMacSystemFont,'Hiragino Sans','Noto Sans JP',sans-serif;
+    line-height:1.75; -webkit-font-smoothing:antialiased;
+    padding:0 18px calc(48px + env(safe-area-inset-bottom));
+    font-size:15px;
+  }
+  .wrap{max-width:1180px; margin:0 auto;}
+  a{color:var(--ink);}
+  /* grid/flex の子は既定 min-width:auto。中身（表など）に押し広げられて
+     375px幅で横スクロールが出るのを防ぐ。 */
+  main,.grp,.items,.item,figure.shot{min-width:0;}
+  .tblwrap{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+
+  /* ================= 見出し ================= */
+  header{padding:40px 0 0;}
+  .kicker{font-size:11px; font-weight:700; letter-spacing:.16em; color:var(--muted); margin-bottom:9px;}
+  h1{font-size:27px; font-weight:700; letter-spacing:.03em; line-height:1.4;}
+  header .lead{margin-top:10px; font-size:14.5px; color:var(--muted); max-width:36em;}
+  .openapp{margin-top:16px; display:flex; gap:9px; flex-wrap:wrap;}
+  .openapp a{
+    display:inline-block; background:var(--ink); color:var(--paper);
+    text-decoration:none; border-radius:999px; padding:9px 20px;
+    font-size:14px; font-weight:700;
+  }
+  .openapp a.ghost{background:none; color:var(--ink); border:1.5px solid var(--hair);}
+
+  /* ================= もくじ ================= */
+  /* 狭い画面ではたたんでおく（項目が多いので本文が遠くならないように）。
+     1000px以上ではサマリを隠して左に貼り付ける。開閉は末尾の script。 */
+  details.toc{
+    margin-top:22px; background:var(--control); border:1px solid var(--hair);
+    border-radius:16px; padding:12px 16px;
+  }
+  details.toc summary{
+    cursor:pointer; list-style:none; font-size:12.5px; font-weight:700;
+    letter-spacing:.08em; color:var(--muted);
+  }
+  details.toc summary::-webkit-details-marker{display:none;}
+  details.toc summary::after{content:'▾'; margin-left:7px; font-size:11px;}
+  details.toc[open] summary::after{content:'▴';}
+  .toc nav{margin-top:10px;}
+  .toc .g{
+    font-size:10.5px; font-weight:700; letter-spacing:.14em; color:var(--ghost);
+    margin:14px 0 3px;
+  }
+  .toc .g:first-child{margin-top:0;}
+  .toc a{
+    display:block; text-decoration:none; font-size:13.5px; padding:2px 0;
+    color:var(--ink);
+  }
+  .toc a .n{display:inline-block; width:1.9em; color:var(--ghost); font-weight:700; font-size:12px;}
+  .toc a.on{color:var(--mark); font-weight:700;}
+  .toc a.on .n{color:var(--mark);}
+
+  /* ================= 項目（1項目＝1図＋数行） ================= */
+  .grp{padding:34px 0 0; scroll-margin-top:14px;}
+  .grp > h2{
+    font-size:12.5px; font-weight:700; letter-spacing:.14em; color:var(--muted);
+    border-bottom:1px solid var(--hair); padding-bottom:8px; margin-bottom:16px;
+  }
+  .items{display:grid; gap:16px;}
+  .item{
+    background:var(--control); border:1px solid var(--hair); border-radius:18px;
+    padding:14px 14px 16px; scroll-margin-top:14px;
+  }
+  .item h3{
+    font-size:15.5px; font-weight:700; line-height:1.55; margin:13px 0 2px;
+    display:flex; gap:9px; align-items:flex-start;
+  }
+  .item h3 .n{
+    flex:none; width:23px; height:23px; border-radius:50%;
+    background:var(--ink); color:var(--paper); font-size:12px; font-weight:700;
+    display:flex; align-items:center; justify-content:center; margin-top:2px;
+  }
+  .item p{font-size:14px; margin:5px 0 0; padding-left:32px;}
+  .item p.fine{font-size:12.5px; color:var(--muted); margin-top:8px; line-height:1.7;}
+  .item p.caution{color:#94301b;}
+  .item p.caution b{color:#94301b;}
+  .item ul{margin:5px 0 0; padding-left:calc(32px + 1.1em); font-size:14px;}
+  .item ul li{margin:3px 0;}
+  .item ul li::marker{color:var(--ghost);}
+  /* 図のないおまけ項目（データの保存など）は番号だけで詰めて見せる */
+  .item.nofig h3{margin-top:2px;}
+
+  kbd{
+    display:inline-block; background:#fff; border:1px solid var(--hair);
+    border-bottom-width:2px; border-radius:7px; padding:0 7px;
+    font-family:inherit; font-size:13px; font-weight:700; white-space:nowrap;
+  }
+  .path{color:var(--muted);}
+  .path b{color:var(--ink); font-weight:700;}
+
+  /* ================= 図（アプリ画面の再現） ================= */
+  /* 番号ピンが枠の外に11px＋影ぶんはみ出す。その余白を figure 側に持たせる。 */
+  figure.shot{margin:0; padding:2px 14px 0;}
+  figcaption{font-size:11.5px; color:var(--ghost); margin-top:7px; text-align:center;}
+  /* 注釈：番号ピンと矢印（使うのは「ここを押す」が言葉で伝わらない図だけ） */
+  .pin{
+    position:absolute; z-index:3; width:21px; height:21px; border-radius:50%;
+    background:var(--mark); color:#fff; font-size:11.5px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 0 3px rgba(255,255,255,.9);
+  }
+  .arrow{position:absolute; z-index:2; height:2px; background:var(--mark); transform-origin:left center;}
+  .arrow::after{
+    content:''; position:absolute; right:-2px; top:-4px;
+    border:5px solid transparent; border-left-color:var(--mark);
+  }
+
+  /* 流れ図（「どんな道具か」の1枚目に使う） */
+  .flow{display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center;
+    background:#fff; border:1px solid var(--hair); border-radius:14px; padding:16px 12px;}
+  .flow .box{background:var(--surface); border-radius:10px; padding:7px 12px; font-size:13px; font-weight:700;}
+  .flow .arw{color:var(--mark); font-weight:700;}
+
+  /* 計算式の図 */
+  .calc{
+    background:#fff; border:1px solid var(--hair); border-radius:14px;
+    padding:13px 14px; font-size:14.5px; font-weight:700;
+    font-variant-numeric:tabular-nums; text-align:center; line-height:2;
+  }
+  .calc .op{color:var(--ghost); margin:0 3px;}
+  .calc .res{color:var(--mark);}
+  .calc small{font-size:11px; color:var(--muted); font-weight:500; margin-left:1px;}
+  .calc .note2{display:block; font-size:11.5px; color:var(--muted); font-weight:500; margin-top:3px;}
+
+  /* 注意（赤の細い帯。多用しない） */
+  .warnbox{
+    border-left:3px solid #B03A22; background:#F7EFEA; border-radius:0 10px 10px 0;
+    padding:9px 12px; margin:9px 0 0 32px; font-size:13px; color:#7d2c19;
+  }
+  .warnbox b{color:#7d2c19;}
+
+  /* 比較表（巻末で使う） */
+  table.cmp{border-collapse:collapse; width:100%; margin:8px 0 0; font-size:13.5px; background:#fff;
+    border:1px solid var(--hair); border-radius:14px; overflow:hidden;}
+  table.cmp th, table.cmp td{border-bottom:1px solid var(--hair); padding:9px 12px; text-align:left; vertical-align:top;}
+  table.cmp thead th{background:var(--surface); font-size:11.5px; color:var(--muted); font-weight:700;}
+  table.cmp tbody tr:last-child th, table.cmp tbody tr:last-child td{border-bottom:none;}
+  table.cmp tbody th{font-weight:700; white-space:nowrap;}
+  /* 表は項目カードの中に入るので、常に行ごとのカードへ積み替える
+     （列が細って1字ずつ縦に折れるのを防ぐ） */
+  table.cmp.stack{display:block;}
+  table.cmp.stack thead{display:none;}
+  table.cmp.stack tbody,table.cmp.stack tbody tr{display:block;}
+  table.cmp.stack tbody tr{padding:11px 13px; border-bottom:1px solid var(--hair);}
+  table.cmp.stack tbody tr:last-child{border-bottom:none;}
+  table.cmp.stack tbody th,table.cmp.stack tbody td{
+    display:block; width:auto!important; padding:0; border:none; white-space:normal;}
+  table.cmp.stack tbody th{font-size:14px;}
+  table.cmp.stack tbody td{margin-top:5px; font-size:13px;}
+  table.cmp.stack tbody td[data-l]::before{
+    content:attr(data-l); display:block; font-size:10.5px; font-weight:700;
+    letter-spacing:.08em; color:var(--muted);}
+
+  /* ================= 巻末（小さく・端に） ================= */
+  .appendix{padding-top:34px;}
+  .appendix > h2{
+    font-size:12.5px; font-weight:700; letter-spacing:.14em; color:var(--muted);
+    border-bottom:1px solid var(--hair); padding-bottom:8px; margin-bottom:14px;
+  }
+  .qa{display:grid; gap:11px;}
+  .qa .q{font-size:13.5px; font-weight:700;}
+  .qa .a{font-size:13px; color:var(--muted); margin-top:2px;}
+  .qa > div{border-bottom:1px dotted var(--hair); padding-bottom:10px;}
+  .qa > div:last-child{border-bottom:none;}
+
+  footer{
+    margin-top:44px; padding-top:18px; border-top:1px solid var(--hair);
+    font-size:12px; color:var(--ghost); text-align:center; line-height:2;
+  }
+
+  /* ================= 横幅を使う ================= */
+  @media (min-width:640px){
+    .items{grid-template-columns:1fr 1fr;}
+    .qa{grid-template-columns:1fr 1fr; gap:11px 26px;}
+  }
+  @media (min-width:1000px){
+    body{padding-left:28px; padding-right:28px;}
+    .wrap{max-width:1280px;}
+    h1{font-size:32px;}
+    .layout{display:grid; grid-template-columns:212px minmax(0,1fr); gap:40px; align-items:start;}
+    details.toc{
+      position:sticky; top:22px; margin-top:40px; background:none; border:none; padding:0;
+      max-height:calc(100vh - 56px); overflow:auto;
+    }
+    details.toc summary{display:none;}
+    .grp{padding-top:40px;}
+
+    /* PCでは項目を1列にして、図を大きく見せる（2列だと図が小さくて読めない）。
+       図の中身は px 直書きが多く、箱を広げるだけでは字が大きくならないので zoom で
+       中身ごと拡大する（幅は親いっぱいのままなので横はみ出しは起きない）。 */
+    .items{grid-template-columns:minmax(0,1fr);}
+    figure.shot > :not(figcaption){zoom:1.25;}
+    figcaption{font-size:12.5px;}
+  }
+  @media (min-width:1120px){
+    /* 横幅に余裕があるときだけ、図を左・文章を右に並べる。
+       HTMLを変えずに済むよう、図に縦方向のスパンを持たせて
+       残りの子（h3/p/ul）を右の列へ流し込む。 */
+    .item{
+      display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);
+      column-gap:30px; align-content:start; padding:18px 22px 20px;
+    }
+    .item > figure.shot{grid-column:1; grid-row:1 / span 30; align-self:center; padding:0 12px;}
+    .item > *:not(figure.shot){grid-column:2;}
+    .item > h3{margin-top:0;}
+    /* 図のない項目は横に伸びすぎないよう、行の長さだけ抑える */
+    .item.nofig{display:block;}
+    .item.nofig p, .item.nofig ul{max-width:58em;}
+  }
+
+  /* ================= 印刷（そのままA4のPDFになる） ================= */
+  @media print{
+    @page{margin:14mm 12mm;}
+    body{background:#fff; color:#000; font-size:9.5pt; padding:0;}
+    .wrap{max-width:none;}
+    .layout{display:block;}
+    details.toc,.openapp{display:none;}
+    header{padding-top:0;}
+    .grp{padding-top:14pt;}
+    .grp > h2{page-break-after:avoid;}
+    .items{grid-template-columns:1fr 1fr; gap:9pt;}
+    .item{background:#fff; page-break-inside:avoid;}
+    .qa{grid-template-columns:1fr 1fr;}
+    .qa > div{page-break-inside:avoid;}
+    .screen{box-shadow:none;}
+    footer{color:#555;}
+  }
+
+  /* mazeiro 本体と同じ色（画面再現に使う） */
+  :root{
+    /* アプリ画面の再現に使う色（まぜいろ本体と同じ値） */
+    --app-ink:#242321; --app-subtle:#77736B; --app-line:#D8D4CC; --app-surface:#ECE9E3;
+  }
+
+  /* ================= アプリ画面の再現（図） ================= */
+  .screen{
+    position:relative; border:1px solid var(--app-line); border-radius:18px; background:var(--control);
+    padding:18px 16px; color:var(--app-ink); font-size:13px; line-height:1.6;
+    box-shadow:0 1px 3px rgba(36,35,33,.06);
+  }
+  .screen .cap{display:flex; align-items:center; gap:7px; margin-bottom:14px;}
+  .screen .cap svg{width:17px; height:17px; stroke:var(--app-ink); fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;}
+  .screen .cap span{font-size:11px; font-weight:700; letter-spacing:.12em; color:var(--app-subtle);}
+
+  /* 全体量（大きな入力） */
+  .sc-total{display:flex; align-items:baseline; justify-content:center; gap:6px; margin-bottom:18px;}
+  .sc-total .box{
+    min-width:120px; border-bottom:2px solid var(--app-line); text-align:center;
+    font-weight:700; font-size:34px; padding:0 6px 2px;
+  }
+  .sc-total .u{font-size:14px; font-weight:700; color:var(--app-subtle);}
+
+  /* 比率カラム */
+  .sc-cols{display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:center; gap:12px 4px;}
+  .sc-col{display:flex; flex-direction:column; align-items:center; gap:6px;}
+  .sc-col .in{
+    width:52px; height:48px; border:1px solid var(--app-line); border-radius:14px; background:#fff;
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:19px;
+  }
+  .sc-col .g{font-size:13px; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .sc-col .g small{font-size:10px; color:var(--app-subtle); font-weight:500;}
+  .sc-col .g.off{color:var(--ghost); font-weight:500;}
+  .sc-sep{height:48px; display:flex; align-items:center; color:var(--ghost); font-size:18px; font-weight:700;}
+  .sc-add{width:34px; height:48px; display:flex; align-items:center; justify-content:center;}
+  .sc-add svg{width:24px; height:24px; stroke:var(--ghost); fill:none; stroke-width:1.7;}
+
+  /* 2剤 */
+  .sc-dev{display:flex; align-items:center; justify-content:center; gap:10px;}
+  .sc-dev .mul{font-size:18px; font-weight:700; color:var(--app-subtle);}
+  .sc-dev .in{
+    width:78px; height:48px; border:1px solid var(--app-line); border-radius:14px; background:#fff;
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:20px;
+  }
+  .sc-dev .arw svg{width:16px; height:16px; stroke:var(--ghost); fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;}
+  .sc-dev .g{font-size:19px; font-weight:700; font-variant-numeric:tabular-nums;}
+  .sc-dev .g small{font-size:11px; color:var(--app-subtle); font-weight:500;}
+  .sc-pills{display:flex; gap:7px; margin-top:14px; justify-content:center;}
+  .sc-pills .pill{
+    border:1px solid var(--app-line); border-radius:999px; padding:6px 14px;
+    font-size:13px; font-weight:700; color:var(--app-subtle); background:none;
+  }
+  .sc-pills .pill.on{background:var(--app-ink); border-color:var(--app-ink); color:var(--paper);}
+
+  /* 合計行 */
+  .sc-sum{display:flex; align-items:center; justify-content:center; gap:9px; flex-wrap:wrap;}
+  .sc-sum svg{width:15px; height:15px; stroke:var(--app-subtle); fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;}
+  .sc-sum .pc{display:flex; align-items:center; gap:4px; font-size:14px; font-weight:700; color:var(--app-subtle); font-variant-numeric:tabular-nums;}
+  .sc-sum .op{color:var(--ghost); font-size:13px; font-weight:700;}
+  .sc-sum .tot{display:flex; align-items:baseline; gap:2px; font-size:26px; font-weight:700; font-variant-numeric:tabular-nums;}
+  .sc-sum .tot small{font-size:13px; color:var(--app-subtle); font-weight:500;}
+
+  /* 注釈：番号ピンと矢印 */
+
+  /* Q&A */
+
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="kicker">TSUMIKI TOOLS</p>
+  <h1>まぜいろ 使い方</h1>
+  <p class="lead">薬剤の<strong>全体量</strong>と<strong>混ぜる比率</strong>を入れるだけ。各色が何グラムか、2剤が何グラムか、全部でいくつかを、その場で計算します。</p>
+  <p class="openapp"><a href="mazeiro.html">まぜいろを開く →</a></p>
+</header>
+
+<div class="layout">
+
+<details class="toc" id="toc" open>
+  <summary>もくじ（全15項目）</summary>
+  <nav>
+    <p class="g">まず知る</p>
+    <a href="#i1"><span class="n">1</span>どんな道具か</a>
+    <a href="#i2"><span class="n">2</span>まず、さわってみる</a>
+
+    <p class="g">1剤（全体量と比率）</p>
+    <a href="#i3"><span class="n">3</span>全体量を入れる</a>
+    <a href="#i4"><span class="n">4</span>比率を入れる</a>
+    <a href="#i5"><span class="n">5</span>比率は「割合」</a>
+    <a href="#i6"><span class="n">6</span>色を増やす・減らす</a>
+    <a href="#i7"><span class="n">7</span>3色以上でも同じ</a>
+
+    <p class="g">2剤（倍率）</p>
+    <a href="#i8"><span class="n">8</span>倍率を入れる</a>
+    <a href="#i9"><span class="n">9</span>よく使う倍率はボタン</a>
+    <a href="#i10"><span class="n">10</span>倍率の基準は全体量</a>
+
+    <p class="g">合計を読む</p>
+    <a href="#i11"><span class="n">11</span>合計＝1剤＋2剤</a>
+    <a href="#i12"><span class="n">12</span>そろうまでは薄い「–」</a>
+
+    <p class="g">かたづけ・保存</p>
+    <a href="#i13"><span class="n">13</span>リセットする</a>
+    <a href="#i14"><span class="n">14</span>数字は端末に自動保存</a>
+    <a href="#i15"><span class="n">15</span>ホーム画面に置く</a>
+
+    <p class="g">巻末</p>
+    <a href="#qa"><span class="n">Q</span>こまったとき</a>
+  </nav>
+</details>
+
+<main>
+
+<!-- ==================== まず知る ==================== -->
+<section class="grp" id="g1">
+  <h2>まず知る</h2>
+  <div class="items">
+
+    <article class="item" id="i1">
+      <figure class="shot">
+        <div class="flow">
+          <span class="box">全体量を入れる</span><span class="arw">→</span>
+          <span class="box">比率を入れる</span><span class="arw">→</span>
+          <span class="box">各色のグラムが出る</span>
+        </div>
+      </figure>
+      <h3><span class="n">1</span>どんな道具か</h3>
+      <p>作りたい量と比率から、各色・2剤・合計のグラムを計算します。暗算もメモも要りません。</p>
+      <p class="fine">レシピの保存や在庫管理はしません。ログイン不要・インストール不要、URLを開くだけです。<br>
+        ※ 比率＝「3：1」のような<b>割合</b>のこと。グラムではありません。<br>
+        ※ 2剤＝オキシ（過酸化水素）など、1剤に混ぜる薬剤。<b>1剤の全体量の◯倍</b>で入れます。</p>
+    </article>
+
+    <article class="item" id="i2">
+      <figure class="shot">
+        <div class="calc">
+          1剤 40<small>g</small> を 3：1 で分ける<br>
+          → <span class="res">30<small>g</small></span> <span class="op">と</span> <span class="res">10<small>g</small></span><br>
+          2剤 40 <span class="op">×</span> 2 = <span class="res">80<small>g</small></span><br>
+          合計 <span class="res">120<small>g</small></span>
+          <span class="note2">この通りに打つと動きが分かります</span>
+        </div>
+      </figure>
+      <h3><span class="n">2</span>まず、さわってみる</h3>
+      <p>いちばん上の大きい欄に <kbd>40</kbd>、下の2マスに <kbd>3</kbd> と <kbd>1</kbd>、2剤に <kbd>×2</kbd>。</p>
+      <p class="fine">数字を打ち替えれば、その場で全部が変わります。まずは自由に触ってみてください。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 1剤 ==================== -->
+<section class="grp" id="g2">
+  <h2>1剤（全体量と比率）</h2>
+  <div class="items">
+
+    <article class="item" id="i3">
+      <figure class="shot">
+        <div class="screen">
+          <div class="cap">
+            <svg viewBox="0 0 24 24"><path d="M10 3h4v4h-4z"/><path d="M10 7h4l1.5 3v9a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2v-9z"/><path d="M8.5 14h7"/></svg>
+            <span>1剤</span>
+          </div>
+          <div class="sc-total"><span class="box">40</span><span class="u">g</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">3</span>全体量を入れる</h3>
+      <p>いちばん上の大きい欄が、作りたい1剤の<strong>合計グラム</strong>です。</p>
+      <p class="fine">比率のマスの合計ではなく、ここがすべての基準になります。</p>
+    </article>
+
+    <article class="item" id="i4">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-total"><span class="box">40</span><span class="u">g</span></div>
+          <div class="sc-cols">
+            <div class="sc-col"><span class="in">3</span><span class="g">30<small>g</small></span></div>
+            <span class="sc-sep">:</span>
+            <div class="sc-col"><span class="in">1</span><span class="g">10<small>g</small></span></div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">4</span>比率を入れる</h3>
+      <p>下のマスに混ぜる色の割合を入れると、<strong>そのグラムが下に出ます</strong>。</p>
+      <p class="fine">40g を 3：1 → 30g と 10g。マスが全部そろって初めてグラムが出ます。</p>
+    </article>
+
+    <article class="item" id="i5">
+      <figure class="shot">
+        <div class="calc">
+          3：1 <span class="op">＝</span> 6：2 <span class="op">＝</span> 30：10<br>
+          <span class="res">どれも同じ結果</span>
+          <span class="note2">各色のg ＝ 全体量 × その比率 ÷ 比率の合計</span>
+        </div>
+      </figure>
+      <h3><span class="n">5</span>比率は「割合」</h3>
+      <p>比率のマスは<strong>割合</strong>を入れる場所です。グラムを直接入れる欄ではありません。</p>
+      <p class="fine">グラムは全体量から自動で割り振られます。手で計算し直す必要はありません。</p>
+    </article>
+
+    <article class="item" id="i6">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-cols">
+            <div class="sc-col"><span class="in">3</span><span class="g">30<small>g</small></span></div>
+            <span class="sc-sep">:</span>
+            <div class="sc-col"><span class="in">1</span><span class="g">10<small>g</small></span></div>
+            <span class="sc-add"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8.5v7M8.5 12h7"/></svg></span>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">6</span>色を増やす・減らす</h3>
+      <p>右の <kbd>＋</kbd> で色を追加（最大8色）。マス右上の <kbd>✕</kbd> でその色を削除します。</p>
+      <p class="fine">✕ が出るのは3色以上のときだけです。</p>
+    </article>
+
+    <article class="item" id="i7">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-total"><span class="box">60</span><span class="u">g</span></div>
+          <div class="sc-cols">
+            <div class="sc-col"><span class="in">2</span><span class="g">30<small>g</small></span></div>
+            <span class="sc-sep">:</span>
+            <div class="sc-col"><span class="in">1</span><span class="g">15<small>g</small></span></div>
+            <span class="sc-sep">:</span>
+            <div class="sc-col"><span class="in">1</span><span class="g">15<small>g</small></span></div>
+          </div>
+        </div>
+        <figcaption>60g を 2：1：1 で分けたところ</figcaption>
+      </figure>
+      <h3><span class="n">7</span>3色以上でも同じ</h3>
+      <p>色が増えても入れ方は変わりません。割合を入れれば、その場で割り振られます。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 2剤 ==================== -->
+<section class="grp" id="g3">
+  <h2>2剤（倍率）</h2>
+  <div class="items">
+
+    <article class="item" id="i8">
+      <figure class="shot">
+        <div class="screen">
+          <div class="cap">
+            <svg viewBox="0 0 24 24"><path d="M12 3c3.5 4.6 6 7.7 6 10.7a6 6 0 0 1-12 0C6 10.7 8.5 7.6 12 3z"/></svg>
+            <span>2剤</span>
+          </div>
+          <div class="sc-dev">
+            <span class="mul">×</span><span class="in">2</span>
+            <span class="arw"><svg viewBox="0 0 24 24"><path d="M5 12h13"/><path d="M13 6l6 6-6 6"/></svg></span>
+            <span class="g">80<small>g</small></span>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">8</span>倍率を入れる</h3>
+      <p>2剤はグラムではなく<strong>倍率</strong>で入れます。矢印の右にグラムが出ます。</p>
+      <p class="fine">全体量40g・倍率2なら、2剤は 40×2＝80g。</p>
+    </article>
+
+    <article class="item" id="i9">
+      <figure class="shot">
+        <div class="screen">
+          <div class="sc-pills">
+            <span class="pill">×1</span><span class="pill on">×1.5</span>
+            <span class="pill">×2</span><span class="pill">×3</span>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">9</span>よく使う倍率はボタン</h3>
+      <p><kbd>×1</kbd> <kbd>×1.5</kbd> <kbd>×2</kbd> <kbd>×3</kbd> は押すだけで入ります。</p>
+      <p class="fine">1.5 のような数字は、マスに直接打ち込んでも構いません。</p>
+    </article>
+
+    <article class="item" id="i10">
+      <figure class="shot">
+        <div class="calc">
+          <span class="res">全体量</span> <span class="op">×</span> 倍率 <span class="op">＝</span> 2剤<br>
+          40 <span class="op">×</span> 1.5 <span class="op">＝</span> <span class="res">60<small>g</small></span>
+          <span class="note2">比率のマスの数字は関係ありません</span>
+        </div>
+      </figure>
+      <h3><span class="n">10</span>倍率の基準は全体量</h3>
+      <p>倍率がかかるのは、いちばん上の<strong>全体量</strong>です。</p>
+      <p class="fine">何倍で使うかは薬剤の指定に合わせてください。この道具は倍率を決めるものではなく、決めた倍率でのグラムを出すものです。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 合計 ==================== -->
+<section class="grp" id="g4">
+  <h2>合計を読む</h2>
+  <div class="items">
+
+    <article class="item" id="i11">
+      <figure class="shot">
+        <div class="screen" style="padding:20px 16px">
+          <div class="sc-sum">
+            <span class="pc"><svg viewBox="0 0 24 24"><path d="M10 3h4v4h-4z"/><path d="M10 7h4l1.5 3v9a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2v-9z"/></svg>40</span>
+            <span class="op">＋</span>
+            <span class="pc"><svg viewBox="0 0 24 24"><path d="M12 3c3.5 4.6 6 7.7 6 10.7a6 6 0 0 1-12 0C6 10.7 8.5 7.6 12 3z"/></svg>80</span>
+            <span class="op">＝</span>
+            <span class="tot">120<small>g</small></span>
+          </div>
+        </div>
+        <figcaption>いちばん下に出る合計行</figcaption>
+      </figure>
+      <h3><span class="n">11</span>合計＝1剤＋2剤</h3>
+      <p>チューブの印が1剤、しずくの印が2剤、右がこのボウルにできる<strong>混ぜ終わりの総量</strong>です。</p>
+    </article>
+
+    <article class="item" id="i12">
+      <figure class="shot">
+        <div class="screen" style="padding:20px 16px">
+          <div class="sc-sum" style="opacity:.4">
+            <span class="pc">–</span><span class="op">＋</span>
+            <span class="pc">–</span><span class="op">＝</span>
+            <span class="tot">–</span>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">12</span>そろうまでは薄い「–」</h3>
+      <p>全体量・比率・倍率のどれかが空だと、合計は薄い「–」のままです。</p>
+      <p class="fine">数字がそろうと、はっきりした表示に変わります。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== かたづけ・保存 ==================== -->
+<section class="grp" id="g5">
+  <h2>かたづけ・保存</h2>
+  <div class="items">
+
+    <article class="item" id="i13">
+      <figure class="shot">
+        <div class="screen" style="text-align:right">
+          <span style="display:inline-flex; width:34px; height:34px; border:1px solid var(--app-line); border-radius:50%; align-items:center; justify-content:center; font-size:17px">↻</span>
+        </div>
+      </figure>
+      <h3><span class="n">13</span>リセットする</h3>
+      <p>右上の<strong>丸い矢印（↻）</strong>で、全体量・比率・倍率がまっさらに戻ります。</p>
+      <p class="fine">次の1人ぶんを計算する前に押すと楽です。押すとすぐ消えます（確認は出ません）。</p>
+    </article>
+
+    <article class="item nofig" id="i14">
+      <h3><span class="n">14</span>数字は端末に自動保存</h3>
+      <p>最後に入れた数字は<strong>その端末の中に自動保存</strong>されます。保存ボタンはありません。</p>
+      <ul>
+        <li>サーバーには送っていません。他の人からは見えません</li>
+        <li>端末ごとに別々です</li>
+        <li>ブラウザの履歴やサイトデータを消すと、一緒に消えることがあります</li>
+      </ul>
+    </article>
+
+    <article class="item nofig" id="i15">
+      <h3><span class="n">15</span>ホーム画面に置く</h3>
+      <p>毎回URLを探さずに、普通のアプリのように開けます。</p>
+      <ul>
+        <li><b>iPhone / iPad</b>：Safariで開く → 共有ボタン（□に↑）→「ホーム画面に追加」</li>
+        <li><b>Android</b>：Chromeで開く → 右上の ⋮ →「ホーム画面に追加」</li>
+      </ul>
+      <p class="fine">追加したあとは、いつも同じアイコンから開いてください。別のブラウザで開くと前回の数字は出ません（消えたわけではありません）。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 巻末 ==================== -->
+<section class="appendix" id="qa">
+  <h2>こまったとき</h2>
+  <div class="qa">
+    <div>
+      <div class="q">グラムが「–」のまま出ない</div>
+      <div class="a">全体量・比率のどれかが<b>空か0</b>になっています。いちばん上の全体量と、比率のマスが埋まっているか見てください。</div>
+    </div>
+    <div>
+      <div class="q">比率にグラムを入れてしまった</div>
+      <div class="a">「30：10」と入れても結果は「3：1」と同じです。グラムは下に自動で出ます。</div>
+    </div>
+    <div>
+      <div class="q">色を1色にしたい</div>
+      <div class="a">マスは最低2つあります。使うマスに比率（例：1）、もう片方を<b>0か空</b>にすればOKです。</div>
+    </div>
+    <div>
+      <div class="q">2剤のグラムが変わらない</div>
+      <div class="a">2剤は全体量にかかります。比率のマスを変えても2剤は動きません。</div>
+    </div>
+    <div>
+      <div class="q">前回の数字を消したい</div>
+      <div class="a">右上の<b>丸い矢印（↻）</b>を押すと、全部まっさらに戻ります。</div>
+    </div>
+    <div>
+      <div class="q">小数はどこまで出る？</div>
+      <div class="a">グラムは<b>0.1g単位</b>で表示されます。はかりの最小目盛りに合わせて読み取ってください。</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  まぜいろ 使い方<br>
+  つくったもの：つみき<br>
+  2026年8月3日
+</footer>
+
+</main>
+</div>
+</div>
+
+<script>
+/* もくじ：狭い画面ではたたむ／広い画面では開いて左に貼り付ける。
+   いま読んでいる項目のグループを、もくじで色づけする。 */
+(function(){
+  var toc = document.getElementById('toc');
+  if(!toc) return;
+  var wide = window.matchMedia('(min-width:1000px)');
+  function sync(){ toc.open = wide.matches; }
+  sync();
+  (wide.addEventListener ? wide.addEventListener('change', sync) : window.addEventListener('resize', sync));
+  toc.addEventListener('click', function(e){
+    if(e.target.closest('a') && !wide.matches) toc.open = false;
+  });
+  if(!('IntersectionObserver' in window)) return;
+  var links = {}, targets = [];
+  Array.prototype.forEach.call(toc.querySelectorAll('a[href^="#"]'), function(a){
+    var el = document.getElementById(a.getAttribute('href').slice(1));
+    if(el){ links[a.getAttribute('href').slice(1)] = a; targets.push(el); }
+  });
+  var seen = {};
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(en){ seen[en.target.id] = en.isIntersecting; });
+    var cur = null;
+    targets.forEach(function(el){ if(seen[el.id] && !cur) cur = el.id; });
+    for(var k in links) links[k].classList.toggle('on', k === cur);
+  }, {rootMargin:'-10% 0px -70% 0px'});
+  targets.forEach(function(el){ io.observe(el); });
+})();
+</script>
+</body>
+</html>
