@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>にいがた旅しおり</title>
+<meta name="description" content="新潟の旅の行き先と乗り継ぎを、地図から組み立てるしおり。">
+<meta name="theme-color" content="#F6F3ED">
+<link rel="apple-touch-icon" href="icon-niigata-tabi.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="にいがた旅">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F6F3ED; --surface:#EFEBE3; --ink:#23211E; --muted:#7C766C;
+  --hair:#DDD8CF; --ghost:#B9B3A8; --control:#FBFAF7;
+  --sea:#CBDEE6; --sea-deep:#B4CCD6; --land:#F4EFE2; --land-line:#B9AE96;
+  --hl:#C97B4E; --hl-soft:#F0D9C8;
+  --ok:#5F8A61; --warn:#C99A3E; --gray:#B0AAA0;
+  --sh:0 2px 10px rgba(35,33,30,.06);
+  --sh-up:0 -6px 26px rgba(35,33,30,.13);
+}
+*{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%; overflow:hidden;}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:'Zen Maru Gothic',-apple-system,BlinkMacSystemFont,"Hiragino Maru Gothic ProN","Hiragino Sans",sans-serif;
+  line-height:1.7; -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:100%;
+  overscroll-behavior:none; touch-action:none;
+}
+button{font:inherit; color:inherit; background:none; border:none; cursor:pointer;}
+.hide{display:none !important;}
+
+/* ===== 画面の土台 ===== */
+.screen{position:fixed; inset:0; display:flex; flex-direction:column;
+  transition:opacity .45s ease, transform .45s ease;}
+.screen.out{opacity:0; pointer-events:none; transform:scale(1.06);}
+
+/* ===== 1. 日本列島 ===== */
+#s-japan{background:var(--sea); z-index:10;}
+#s-japan .top{position:absolute; top:0; left:0; right:0; z-index:3;
+  padding:calc(env(safe-area-inset-top) + 26px) 24px 0; text-align:center; pointer-events:none;}
+#s-japan .kicker{font-size:11px; font-weight:700; letter-spacing:.2em; color:#6E8994;}
+#s-japan h1{font-size:23px; font-weight:700; letter-spacing:.05em; margin-top:8px;}
+#s-japan .sub{font-size:12.5px; color:#6E8994; margin-top:6px;}
+#s-japan .hint{position:absolute; left:0; right:0; bottom:calc(env(safe-area-inset-bottom) + 30px);
+  text-align:center; font-size:13px; color:#5E7A86; z-index:3; pointer-events:none;}
+#s-japan .hint b{display:block; font-size:14.5px; color:var(--hl); margin-bottom:4px;}
+#s-japan .hint .pinch{display:inline-block; animation:breathe 2.4s ease-in-out infinite; font-size:22px;}
+@keyframes breathe{0%,100%{transform:scale(1); opacity:.85} 50%{transform:scale(1.16); opacity:1}}
+.mapwrap{flex:1; position:relative; overflow:hidden; touch-action:none;}
+.mapwrap svg{position:absolute; inset:0; width:100%; height:100%; display:block;}
+#jp-g,#ng-g{transform-box:view-box; transform-origin:0 0; will-change:transform;}
+
+.land{fill:var(--land); stroke:var(--land-line); stroke-width:1.4; stroke-linejoin:round;}
+.land-dim{fill:#DCD5C4; stroke:#C7BEA9; stroke-width:.8;}
+.pref-hl{fill:var(--hl); stroke:var(--hl); stroke-width:3; stroke-linejoin:round; stroke-linecap:round;}
+.pulse{fill:none; stroke:var(--hl); stroke-width:2; opacity:0; transform-origin:center;}
+@keyframes ping{0%{opacity:.7; r:6} 70%{opacity:0; r:34} 100%{opacity:0; r:34}}
+.mapwrap .lbl{font-size:13px; font-weight:700; fill:var(--hl); paint-order:stroke;
+  stroke:var(--paper); stroke-width:3.5px; stroke-linejoin:round;}
+
+/* ===== 2. 新潟マップ ===== */
+#s-map{background:var(--sea); z-index:5;}
+.bar{position:relative; z-index:4; background:rgba(246,243,237,.94); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--hair); padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;}
+.bar-row{display:flex; align-items:center; gap:8px;}
+.daytabs{display:flex; background:var(--surface); border-radius:12px; padding:3px; gap:3px; flex:1;}
+.daytab{flex:1; padding:7px 4px; border-radius:9px; font-size:12.5px; font-weight:700;
+  color:var(--muted); text-align:center; line-height:1.35; transition:.15s;}
+.daytab .dd{display:block; font-size:11.5px; font-weight:500; opacity:.8;}
+.daytab.on{background:var(--control); color:var(--ink); box-shadow:var(--sh);}
+.iconbtn{width:38px; height:38px; border-radius:11px; background:var(--surface);
+  display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0;}
+.iconbtn:active{transform:scale(.94);}
+.fromchip{margin-top:9px; display:flex; align-items:center; gap:7px; background:var(--control);
+  border:1px solid var(--hair); border-radius:12px; padding:8px 11px; font-size:12.5px;}
+.fromchip .k{font-size:11.5px; font-weight:700; color:var(--muted); letter-spacing:.06em;
+  background:var(--surface); padding:2px 7px; border-radius:6px; flex-shrink:0;}
+.fromchip .v{font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.fromchip .n{margin-left:auto; font-size:11px; color:var(--muted); flex-shrink:0;}
+
+.zoomhint{position:absolute; left:50%; transform:translateX(-50%); bottom:16px; z-index:3;
+  background:rgba(35,33,30,.78); color:#fff; font-size:11.5px; padding:6px 14px; border-radius:20px;
+  pointer-events:none; transition:opacity .3s;}
+
+/* ピン */
+.pin{cursor:pointer;}
+.pin .ring{fill:var(--control); stroke-width:2.4;}
+.pin .em{font-size:18px; text-anchor:middle; dominant-baseline:central;}
+.pin .nm{font-size:11px; font-weight:700; text-anchor:middle; fill:var(--ink);
+  paint-order:stroke; stroke:var(--paper); stroke-width:3px; stroke-linejoin:round;}
+.pin.picked .ring{fill:var(--hl); stroke:var(--hl);}
+.pin.shut{opacity:.42;}
+.pin .num{font-size:12px; font-weight:700; text-anchor:middle; dominant-baseline:central; fill:#fff;}
+.cluster .cring{fill:var(--control); stroke:var(--hl); stroke-width:2.2;}
+.cluster .cn{font-size:15px; font-weight:700; text-anchor:middle; dominant-baseline:central; fill:var(--hl);}
+.cluster .cl{font-size:11px; font-weight:700; text-anchor:middle; fill:var(--ink);
+  paint-order:stroke; stroke:var(--paper); stroke-width:3px;}
+.trail{fill:none; stroke:var(--hl); stroke-width:2.2; stroke-dasharray:5 5; opacity:.75; stroke-linecap:round;}
+
+/* ===== ボトムシート ===== */
+.veil{position:fixed; inset:0; background:rgba(35,33,30,.34); z-index:40; opacity:0;
+  pointer-events:none; transition:opacity .28s;}
+.veil.on{opacity:1; pointer-events:auto;}
+.sheet{position:fixed; left:0; right:0; bottom:0; z-index:50; background:var(--paper);
+  border-radius:26px 26px 0 0; box-shadow:var(--sh-up); transform:translateY(101%);
+  transition:transform .34s cubic-bezier(.32,.72,.32,1); max-height:88vh; display:flex; flex-direction:column;}
+.sheet.on{transform:translateY(0);}
+.grip{width:38px; height:4px; border-radius:2px; background:var(--hair); margin:10px auto 2px; flex-shrink:0;}
+.sheet-scroll{overflow-y:auto; -webkit-overflow-scrolling:touch; touch-action:pan-y;
+  padding:8px 22px calc(env(safe-area-inset-bottom) + 22px);}
+
+.sp-head{display:flex; gap:13px; align-items:flex-start; padding-top:6px;}
+.sp-em{width:52px; height:52px; border-radius:16px; background:var(--surface); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:26px;}
+.sp-t h2{font-size:19px; font-weight:700; line-height:1.4;}
+.sp-t .tag{font-size:12.5px; color:var(--hl); font-weight:700; margin-top:2px;}
+.badges{display:flex; flex-wrap:wrap; gap:6px; margin-top:12px;}
+.badge{font-size:11px; font-weight:700; padding:4px 10px; border-radius:8px;
+  background:var(--surface); color:var(--muted);}
+.badge.g{background:#E7F0E7; color:#4A7A4C;}
+.badge.y{background:#F7EDD6; color:#8C6A21;}
+.badge.w{background:#EDEAE4; color:#7A746A;}
+.badge.x{background:#F6DEDA; color:#A24B3C;}
+.why{font-size:13.5px; line-height:1.85; margin-top:14px; color:#3A3733;}
+.facts{margin-top:14px; border:1px solid var(--hair); border-radius:14px; overflow:hidden;}
+.fact{display:flex; gap:10px; padding:9px 13px; font-size:12.5px; border-bottom:1px solid var(--hair);}
+.fact:last-child{border-bottom:none;}
+.fact .fk{width:66px; flex-shrink:0; color:var(--muted); font-weight:700; font-size:11.5px;}
+.fact .fv{flex:1;}
+.note{margin-top:12px; background:#F7EFE3; border-left:3px solid var(--warn);
+  border-radius:0 10px 10px 0; padding:10px 13px; font-size:12.5px; line-height:1.75; color:#6B5730;}
+.note.bad{background:#F9E7E3; border-color:#C4664F; color:#7A3B2D;}
+
+.btn{display:block; width:100%; padding:15px; border-radius:15px; font-size:15px; font-weight:700;
+  text-align:center; margin-top:14px; transition:transform .12s;}
+.btn:active{transform:scale(.98);}
+.btn.p{background:var(--hl); color:#fff;}
+.btn.s{background:var(--surface); color:var(--ink); border:1px solid var(--hair);}
+.btn.d{background:none; color:#A24B3C; border:1px solid #E4C8C2; font-size:13.5px; padding:12px;}
+.btn[disabled]{opacity:.45; pointer-events:none;}
+.btnrow{display:flex; gap:9px;}
+.btnrow .btn{flex:1;}
+
+/* ルート比較 */
+.rt-head{padding-top:6px;}
+.rt-head .ab{display:flex; align-items:center; gap:9px; font-size:13.5px; font-weight:700; flex-wrap:wrap;}
+.rt-head .ab .ar{color:var(--ghost);}
+.rt-head .sm{font-size:11.5px; color:var(--muted); font-weight:500; margin-top:4px;}
+.opt{border:1.5px solid var(--hair); border-radius:16px; padding:13px 15px; margin-top:11px; background:var(--control);}
+.opt.best{border-color:var(--hl); background:#FDF7F2;}
+.opt-top{display:flex; align-items:center; gap:9px;}
+.opt-ic{width:32px; height:32px; border-radius:10px; background:var(--surface); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:16px;}
+.opt-nm{font-size:13.5px; font-weight:700; flex:1;}
+.opt-crown{font-size:10px; font-weight:700; color:#fff; background:var(--hl);
+  padding:2px 8px; border-radius:7px; flex-shrink:0;}
+.opt-num{display:flex; gap:16px; margin-top:9px; align-items:baseline;}
+.opt-num .n{font-size:21px; font-weight:700; line-height:1;}
+.opt-num .n small{font-size:12px; font-weight:500; margin-left:2px; color:var(--muted);}
+.opt-num .u{font-size:11px; color:var(--muted); font-weight:700; display:block; margin-bottom:3px;}
+.opt-det{font-size:12px; color:var(--muted); margin-top:9px; line-height:1.7;}
+.leg{display:flex; gap:8px; font-size:12px; margin-top:7px; align-items:flex-start;}
+.leg .li{flex-shrink:0; width:16px; text-align:center;}
+.opt-warn{font-size:11.5px; color:#8C6A21; background:#F7EFE3; border-radius:8px;
+  padding:7px 10px; margin-top:9px; line-height:1.65;}
+.times{display:flex; flex-wrap:wrap; gap:5px; margin-top:8px;}
+.times .tm{font-size:11.5px; font-weight:700; background:var(--surface); color:var(--ink);
+  padding:3px 9px; border-radius:7px;}
+.estnote{font-size:11px; color:var(--ghost); margin-top:14px; line-height:1.7;}
+
+/* ===== 3. しおり ===== */
+#s-plan{background:var(--paper); z-index:8;}
+.plan-scroll{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; touch-action:pan-y;
+  padding:16px 20px calc(env(safe-area-inset-bottom) + 96px);}
+.sum{display:flex; gap:9px; margin-bottom:16px;}
+.sumcard{flex:1; background:var(--control); border:1px solid var(--hair); border-radius:15px;
+  padding:12px 13px; text-align:center;}
+.sumcard .k{font-size:11.5px; color:var(--muted); font-weight:700;}
+.sumcard .v{font-size:19px; font-weight:700; margin-top:3px; line-height:1.2;}
+.sumcard .v small{font-size:11px; font-weight:500; color:var(--muted); margin-left:1px;}
+
+.tl{position:relative; padding-left:34px;}
+.tl:before{content:''; position:absolute; left:12px; top:14px; bottom:14px; width:2px;
+  background:var(--hair); border-radius:1px;}
+.node{position:relative; margin-bottom:6px;}
+.node .dot{position:absolute; left:-34px; top:12px; width:26px; height:26px; border-radius:50%;
+  background:var(--hl); color:#fff; font-size:11.5px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 4px var(--paper);}
+.node .dot.st{background:var(--ink);}
+.node .card{background:var(--control); border:1px solid var(--hair); border-radius:15px;
+  padding:13px 15px; display:flex; gap:11px; align-items:center;}
+.node .card .e{font-size:22px; flex-shrink:0;}
+.node .card .nm{font-size:14.5px; font-weight:700; line-height:1.4;}
+.node .card .sm{font-size:11.5px; color:var(--muted); margin-top:1px;}
+.node .card .x{margin-left:auto; font-size:16px; color:var(--ghost); padding:10px 8px; flex-shrink:0;}
+.hop{padding:9px 0 9px 2px; font-size:12px; color:var(--muted); line-height:1.7;}
+.hop b{color:var(--ink); font-weight:700;}
+.hop .m{display:inline-block; margin-right:5px;}
+.hop .alt{display:block; font-size:11px; color:var(--ghost); margin-top:2px;}
+.empty{text-align:center; padding:44px 20px; color:var(--muted);}
+.empty .e{font-size:38px; display:block; margin-bottom:12px; opacity:.6;}
+.empty p{font-size:13.5px; line-height:1.9;}
+
+.fab{position:fixed; left:20px; right:20px; bottom:calc(env(safe-area-inset-bottom) + 74px); z-index:20;}
+.tabbar{position:fixed; left:0; right:0; bottom:0; z-index:30; display:flex;
+  background:rgba(246,243,237,.95); backdrop-filter:blur(12px); border-top:1px solid var(--hair);
+  padding-bottom:env(safe-area-inset-bottom);}
+.tab{flex:1; padding:9px 0 8px; text-align:center; color:var(--ghost); font-size:10.5px; font-weight:700;}
+.tab .ti{display:block; font-size:19px; line-height:1.25;}
+.tab.on{color:var(--hl);}
+</style>
+</head>
+<body>
+
+<!-- ===== 1. 日本列島 ===== -->
+<section class="screen" id="s-japan">
+  <div class="top">
+    <p class="kicker">NIIGATA 2026.08.24 - 25</p>
+    <h1>にいがた旅しおり</h1>
+    <p class="sub">ふたりの1泊2日を、地図から組み立てる</p>
+  </div>
+  <div class="mapwrap" id="jp-wrap">
+    <svg id="jp-svg" viewBox="0 0 400 520" preserveAspectRatio="xMidYMid meet">
+      <g id="jp-g"></g>
+    </svg>
+  </div>
+  <div class="hint">
+    <b>新潟を、ふたつの指で広げて</b>
+    <span class="pinch">🤏</span>
+    <div style="font-size:11.5px;margin-top:2px;opacity:.8">タップでも進めます</div>
+  </div>
+</section>
+
+<!-- ===== 2. 新潟マップ ===== -->
+<section class="screen out" id="s-map">
+  <div class="bar">
+    <div class="bar-row">
+      <button class="iconbtn" id="btn-back" aria-label="日本地図へ戻る">‹</button>
+      <div class="daytabs" id="daytabs"></div>
+      <button class="iconbtn" id="btn-fit" aria-label="全体表示">⊙</button>
+    </div>
+    <div class="fromchip">
+      <span class="k">いまここ</span>
+      <span class="v" id="from-name">新潟駅</span>
+      <span class="n" id="from-n"></span>
+    </div>
+  </div>
+  <div class="mapwrap" id="ng-wrap">
+    <svg id="ng-svg" viewBox="0 0 400 620" preserveAspectRatio="xMidYMid meet">
+      <g id="ng-g"></g>
+    </svg>
+    <div class="zoomhint" id="zoomhint">つまんで広げると、新潟市の中が開きます</div>
+  </div>
+</section>
+
+<!-- ===== 3. しおり ===== -->
+<section class="screen out" id="s-plan">
+  <div class="bar">
+    <div class="bar-row">
+      <div class="daytabs" id="daytabs2"></div>
+      <button class="iconbtn" id="btn-share" aria-label="しおりを共有">↗</button>
+    </div>
+  </div>
+  <div class="plan-scroll" id="plan-body"></div>
+  <div class="fab"><button class="btn p" id="btn-add">＋ つぎの行き先を地図から選ぶ</button></div>
+</section>
+
+<!-- ===== タブ ===== -->
+<nav class="tabbar hide" id="tabbar">
+  <button class="tab on" data-go="map"><span class="ti">🗺</span>地図</button>
+  <button class="tab" data-go="plan"><span class="ti">📖</span>しおり</button>
+</nav>
+
+<!-- ===== シート ===== -->
+<div class="veil" id="veil"></div>
+<div class="sheet" id="sheet"><div class="grip"></div><div class="sheet-scroll" id="sheet-body"></div></div>
+<div class="sheet" id="rsheet"><div class="grip"></div><div class="sheet-scroll" id="rsheet-body"></div></div>
+
+<script>
+"use strict";
+/* ============================================================
+   地形データ（経度・緯度の並び。描くときに画面座標へ変換する）
+   ============================================================ */
+const GEO = {
+honshu:[[140.55,41.25],[140.9,41.15],[141.0,41.4],[141.45,41.43],[141.4,40.9],[141.55,40.5],[141.85,39.95],[141.98,39.65],[141.85,39.1],[141.6,38.6],[141.5,38.28],[141.2,38.4],[141.05,38.0],[141.0,37.4],[140.98,36.95],[140.6,36.4],[140.75,35.9],[140.87,35.73],[140.5,35.55],[140.3,35.15],[139.9,34.9],[139.75,35.15],[139.6,35.3],[139.75,35.5],[139.4,35.3],[139.15,35.15],[138.95,34.7],[138.85,34.6],[138.75,34.95],[138.5,34.7],[138.3,34.6],[137.9,34.65],[137.4,34.65],[137.1,34.6],[136.9,34.8],[136.85,34.5],[136.9,34.25],[136.4,34.2],[136.15,33.9],[135.9,33.6],[135.76,33.43],[135.4,33.65],[135.1,33.9],[135.15,34.25],[134.9,34.65],[134.55,34.75],[134.0,34.5],[133.5,34.4],[132.9,34.35],[132.4,34.3],[131.8,34.0],[131.2,33.95],[130.95,33.95],[131.0,34.35],[131.4,34.45],[131.9,34.7],[132.5,35.4],[133.4,35.55],[134.2,35.55],[134.7,35.65],[135.1,35.75],[135.35,35.5],[135.7,35.55],[136.05,35.65],[136.3,36.2],[136.6,36.6],[136.77,36.9],[136.9,37.4],[137.15,37.55],[137.35,37.5],[137.05,37.05],[137.2,36.85],[137.6,36.95],[138.25,37.18],[138.6,37.2],[138.55,37.42],[138.66,37.55],[138.76,37.66],[138.80,37.75],[138.88,37.86],[138.99,37.94],[139.06,37.99],[139.14,38.02],[139.24,38.09],[139.34,38.17],[139.44,38.30],[139.6,38.6],[139.85,38.9],[139.8,39.3],[140.05,39.7],[139.7,39.9],[139.85,40.15],[140.0,40.35],[139.9,40.65],[140.35,41.0]],
+hokkaido:[[140.1,41.42],[140.5,41.55],[140.75,41.75],[141.0,42.0],[140.8,42.3],[141.0,42.55],[141.6,42.6],[142.4,42.35],[143.25,41.92],[143.5,42.3],[144.1,42.9],[144.4,42.98],[145.1,43.15],[145.35,43.3],[145.82,43.38],[145.3,43.6],[145.1,43.9],[145.35,44.35],[144.8,44.1],[144.27,44.02],[143.35,44.35],[142.6,44.7],[141.94,45.52],[141.65,45.25],[141.75,44.9],[141.63,43.94],[141.3,43.3],[140.85,43.35],[140.4,43.35],[140.55,43.0],[140.35,42.8],[140.5,42.4],[140.2,42.35],[139.85,42.1]],
+kyushu:[[131.0,33.95],[131.3,33.7],[131.7,33.55],[131.75,33.25],[131.9,32.95],[131.65,32.4],[131.45,31.9],[131.35,31.37],[131.0,31.35],[130.7,31.5],[130.6,31.25],[130.35,31.15],[130.2,31.0],[130.15,31.4],[130.3,31.6],[130.25,31.85],[130.35,32.2],[130.2,32.5],[130.4,32.6],[129.87,32.75],[129.75,33.0],[129.7,33.17],[129.85,33.3],[130.0,33.5],[130.25,33.55],[130.4,33.6],[130.7,33.75]],
+shikoku:[[134.6,34.2],[134.75,33.85],[134.55,33.55],[134.18,33.25],[133.8,33.5],[133.5,33.5],[133.2,33.4],[133.0,32.72],[132.75,32.95],[132.55,33.22],[132.35,33.25],[132.02,33.35],[132.4,33.6],[132.7,33.85],[133.0,34.07],[133.6,34.2],[134.05,34.35],[134.35,34.25]],
+sado:[[138.25,38.05],[138.35,38.25],[138.55,38.33],[138.5,38.1],[138.3,37.82],[138.2,37.9]],
+awaji:[[134.75,34.6],[135.0,34.55],[135.0,34.3],[134.8,34.25],[134.7,34.4]],
+niigata:[[139.55,38.55],[139.75,38.5],[139.9,38.3],[139.85,38.05],[139.75,37.9],[139.6,37.65],[139.5,37.45],[139.35,37.05],[139.15,36.95],[138.95,36.85],[138.75,36.78],[138.6,36.9],[138.4,36.8],[138.25,36.9],[138.05,36.95],[137.85,37.05],[137.75,37.15],[138.05,37.15],[138.25,37.18],[138.4,37.15],[138.6,37.2],[138.55,37.42],[138.66,37.55],[138.76,37.66],[138.80,37.75],[138.88,37.86],[138.99,37.94],[139.06,37.99],[139.14,38.02],[139.24,38.09],[139.34,38.17],[139.44,38.30]]
+};
+
+/* ============================================================
+   旅の日程
+   ============================================================ */
+const DAYS = [
+  {id:'d1', label:'1日目', date:'8/24', wd:1, wdName:'月'},
+  {id:'d2', label:'2日目', date:'8/25', wd:2, wdName:'火'}
+];
+const WD = ['日','月','火','水','木','金','土'];
+
+/* ============================================================
+   観光地データ
+     sig  … green=駅チカ/本数多い  yellow=乗り継ぎ必要  white=タクシー等が必要
+     shut … 休みの曜日（0=日 … 6=土）
+     routes … 新潟駅からの行き方（時間・運賃は2026年8月調べ）
+   ============================================================ */
+const HUB='niigata-sta';
+const SPOTS=[
+{id:'niigata-sta',name:'新潟駅',emoji:'🚉',cat:'起点',area:'city',lon:139.0625,lat:37.9124,
+ sig:'green',tag:'旅のはじまりの場所',stay:'—',fee:'—',hours:'—',shut:[],base:true,
+ why:'東京駅から上越新幹線「とき」で約2時間。ここが今回の旅すべての起点であり、乗り継ぎの中心になります。新潟の路線は、そのほとんどが新潟駅から放射状に伸びているので、どこへ行くにもいったんここへ戻ってくる形になります。',
+ facts:[['東京から','上越新幹線 約2時間／片道 約10,000〜11,000円（時期・席種で前後）'],['駅の中','ぽんしゅ館・お土産・駅弁がそろう「CoCoLo新潟」']],
+ routes:[]},
+
+{id:'ponshukan',name:'ぽんしゅ館 新潟駅店',emoji:'🍶',cat:'酒',area:'city',lon:139.0640,lat:37.9118,
+ sig:'green',tag:'日本酒100種の利き酒マシン',stay:'30〜60分',fee:'利き酒 500円（おちょこ5杯分）',hours:'9:00〜21:00',shut:[],
+ why:'新潟駅の改札を出てすぐ、駅の中にある「越後のお酒ミュージアム」。新潟県内ほぼ全部の蔵の日本酒がずらりと壁一面に並んでいて、コインを入れるとおちょこ一杯分が出てきます。500円でコイン5枚。ふたりで違う蔵を選んで飲み比べ、気に入った一本をそのまま買って帰る、という遊び方ができます。爆弾おにぎりや、日本酒風呂も同じ建物の中。',
+ facts:[['場所','新潟駅 CoCoLo新潟 西館'],['定休日','なし'],['向いている時間','到着直後／帰る前のすきま時間']],
+ routes:[{mode:'walk',label:'歩く',min:2,yen:0,detail:'新潟駅の改札を出てすぐ。移動なしで行けます'}]},
+
+{id:'pia',name:'ピアBandai',emoji:'🐟',cat:'海鮮',area:'city',lon:139.0575,lat:37.9260,
+ sig:'green',tag:'日本海側で最大級の鮮魚市場',stay:'1〜2時間',fee:'見るのは無料',hours:'店により 9:00〜19:00ごろ',shut:[],
+ why:'地元では「ピア万代」と呼ばれる、みなとのマルシェ。日本海でその朝あがった魚がそのまま並ぶ万代島鮮魚センターを中心に、鮮魚店・青果店・酒屋・土産物屋がぎゅっと集まっています。中の食堂やお寿司屋さんで、市場価格の海鮮丼や回転寿司が食べられるのがいちばんの目当て。新潟で海鮮を食べるなら、まずここが外れません。',
+ facts:[['名物','海鮮丼・回転寿司・のどぐろ・南蛮エビ（甘エビ）'],['ならび','鮮魚／青果／精肉／お土産／飲食店']],
+ note:'人気店はお昼どきに行列ができます。11時前か13時すぎが狙い目です。',
+ routes:[{mode:'walk',label:'歩く',min:16,yen:0,detail:'新潟駅 万代口から万代橋方面へ。信濃川ぞいの気持ちのいい道です'},
+         {mode:'bus',label:'路線バス',min:8,yen:210,detail:'新潟駅前 →「本町」または「万代シテイ」下車。本数は多め',est:true}]},
+
+{id:'imayotsukasa',name:'今代司酒造',emoji:'🍶',cat:'酒',area:'city',lon:139.0490,lat:37.9200,
+ sig:'green',tag:'新潟駅から一番近い酒蔵',stay:'40〜60分',fee:'蔵見学 200円／プレミアム利き酒 1,500円',hours:'見学は 9:10〜15:30 の各回',shut:[],
+ why:'1767年（江戸時代）創業の酒蔵で、新潟駅から歩いて行ける唯一の蔵。無料に近い200円で、酒母室や仕込み蔵を案内してもらえる見学ツアーがあり、30〜40分ほど。全量を純米酒でつくっている蔵なので、話を聞いてから飲むと味の見え方が変わります。10種類以上を飲み比べるプレミアムテイスティング（1,500円）も用意されています。',
+ facts:[['見学の集合時刻','平日 9:10／10:00／11:00／13:00／14:00／15:00／15:30'],['土日祝','上に加えて 12:00 の回あり'],['所要','30〜40分']],
+ note:'見学は予約制です。行くと決めたら、公式の予約ページから枠を押さえておいてください。',
+ routes:[{mode:'walk',label:'歩く',min:15,yen:0,detail:'新潟駅 万代口から沼垂方面へ。沼垂テラスとセットで歩けます'}]},
+
+{id:'nuttari',name:'沼垂テラス商店街',emoji:'🏘',cat:'まち',area:'city',lon:139.0530,lat:37.9160,
+ sig:'green',tag:'長屋をつくり直したレトロ商店街',stay:'1〜1時間半',fee:'無料',hours:'店により 11:00〜17:00ごろ',shut:[],
+ why:'かつて市場だった木造の長屋を、そのままの姿で店に作り直した小さな商店街。90mほどの通りに、カフェ・ベーカリー・居酒屋・手づくりアクセサリー・陶芸やガラスの工房など約30軒がぎゅっと並びます。昭和の路地の空気が残っていて、ふたりで端から端まで冷やかして歩くのに向いています。今代司酒造のすぐ近く。',
+ facts:[['お店の数','約30軒'],['歩く距離','通りは片道100mほど']],
+ note:'⚠️ 定休日が店ごとにバラバラで、火曜・水曜・木曜休みの店が多いです。1日目（月曜）は閉まっている店がそこそこあります。「全部開いている日」を狙うなら金・土。',
+ routes:[{mode:'walk',label:'歩く',min:18,yen:0,detail:'新潟駅 万代口から沼垂方面へ。今代司酒造と隣り合わせ'}]},
+
+{id:'hakusan',name:'新潟総鎮守 白山神社',emoji:'⛩',cat:'神社',area:'city',lon:139.0330,lat:37.9130,
+ sig:'green',tag:'千年超の縁結び・夫婦円満の社',stay:'40〜60分',fee:'参拝無料',hours:'日中いつでも',shut:[],
+ why:'千年以上の歴史をもつ、新潟の街全体の守り神。祀られている菊理媛（くくりひめ）は、けんかをしていた二柱の神をとりもって結びつけた女神で、そこから縁結び・夫婦円満の神さまとして親しまれています。ふたりで行く新潟の旅で、いちばん意味のある一箇所かもしれません。隣は白山公園と日本庭園で、蓮の季節（7月中旬〜8月中旬）の名残がまだ見られるかもしれない時期です。',
+ facts:[['ご利益','縁結び・夫婦円満・厄除け・安産'],['となり','白山公園（日本庭園）・燕喜館'],['近い場所','旧齋藤家別邸・砂丘館まで歩いて10分ほど']],
+ routes:[{mode:'bus',label:'観光循環バス',min:15,yen:260,detail:'新潟駅前バスターミナル →「白山公園前」下車。1日乗車券なら500円で乗り降り自由'},
+         {mode:'walk',label:'歩く',min:33,yen:0,detail:'万代橋を渡って古町方面へ。信濃川の眺めがいい道です',est:true}]},
+
+{id:'banbi',name:'新潟県立万代島美術館',emoji:'🎨',cat:'アート',area:'city',lon:139.0640,lat:37.9330,
+ sig:'green',tag:'朱鷺メッセの上のアート＋無料の展望室',stay:'1〜1時間半',fee:'展覧会により変動',hours:'10:00〜18:00（入場は17:30まで）',shut:[1],
+ why:'信濃川の河口に立つ複合施設・朱鷺メッセの5階にある県立美術館。同じ建物の31階には「Befcoばかうけ展望室」があって、こちらは無料。地上125mから、信濃川・新潟の街・日本海、そして晴れれば佐渡島まで一望できます。美術館が休みの日でも展望室だけは開いているので、夕暮れどきに上がるのがおすすめです。',
+ facts:[['休館日','月曜（展覧会によっては月曜も開館）'],['展望室','31階・無料・美術館とは別'],['からの眺め','信濃川／万代橋／日本海／佐渡島']],
+ note:'⚠️ 1日目（8/24 月）は美術館が休館です。展望室は開いているので、上だけ寄るのも手。展覧会の内容と料金は行く前に公式サイトでご確認を。',
+ routes:[{mode:'walk',label:'歩く',min:20,yen:0,detail:'新潟駅 万代口から信濃川ぞいに。ピアBandaiのすぐ隣です'}]},
+
+{id:'minatopia',name:'みなとぴあ 新潟市歴史博物館',emoji:'🏛',cat:'歴史',area:'city',lon:139.0533,lat:37.9425,
+ sig:'green',tag:'重要文化財の旧税関で港町の歴史を',stay:'1〜1時間半',fee:'常設展 一般300円',hours:'9:30〜18:00',shut:[1],
+ why:'信濃川の河口、かつて船が行き交った場所に建つ歴史博物館。敷地には、開港五港のひとつだった新潟の面影を残す国指定重要文化財「旧新潟税関庁舎」と「旧第四銀行住吉町支店」が移築されていて、建物そのものが見どころです。「柳都（りゅうと）」と呼ばれた水の都・新潟がどんな街だったかが、いちばんよく分かる場所。',
+ facts:[['重要文化財','旧新潟税関庁舎（1869年）'],['常設展','一般300円／高大生200円／小中学生100円'],['休館日','月曜（祝日の場合は翌日）']],
+ note:'⚠️ 1日目（8/24 月）は休館です。2日目（8/25 火）なら開いています。',
+ routes:[{mode:'bus',label:'観光循環バス',min:20,yen:260,detail:'新潟駅前 →「歴史博物館前」下車すぐ。1日乗車券500円',est:true},
+         {mode:'walk',label:'歩く',min:36,yen:0,detail:'万代橋を渡って河口方面へ',est:true}]},
+
+{id:'saitoke',name:'旧齋藤家別邸',emoji:'🏯',cat:'歴史',area:'city',lon:139.0290,lat:37.9230,
+ sig:'green',tag:'豪商が砂丘に建てた大正の別邸と庭',stay:'40〜60分',fee:'一般 300円ほど',hours:'9:30〜17:00',shut:[1],
+ why:'新潟三大財閥のひとつ、豪商・齋藤家が大正7年（1918年）に迎賓館として建てた別邸。敷地1,300坪、砂丘の高低差をそのまま活かした回遊式庭園が座敷の窓いっぱいに広がる造りで、畳に座ると絵のように見えます。国の名勝。「柳都」と呼ばれた頃の新潟がどれだけ豊かだったかが、そのまま残っている場所です。白山神社から歩いて行けます。',
+ facts:[['建てられた年','大正7年（1918年）'],['見どころ','座敷から見る回遊式庭園・二階からの眺め'],['休館日','月曜']],
+ note:'⚠️ 1日目（8/24 月）は休館です。2日目（8/25 火）に。',
+ routes:[{mode:'bus',label:'観光循環バス',min:22,yen:260,detail:'新潟駅前 →「北方文化博物館新潟分館前」あたりで下車',est:true}]},
+
+{id:'sakyukan',name:'砂丘館',emoji:'🎨',cat:'アート',area:'city',lon:139.0270,lat:37.9250,
+ sig:'green',tag:'日銀支店長の家を使った無料のギャラリー',stay:'30〜45分',fee:'無料',hours:'9:00〜21:00（展示は17:00ごろまで）',shut:[1],
+ why:'昭和8年に建てられた日本銀行新潟支店長の役宅を、そのまま芸術文化施設にした場所。建物と庭は無料で見学でき、蔵を改装したギャラリーで年に5〜8回の企画展をやっています。畳の座敷に座って庭を眺めているだけで気持ちがいい、静かな場所。旧齋藤家別邸のすぐ近くなので、二つセットで回れます。',
+ facts:[['入館','無料'],['建物','昭和8年 旧日本銀行新潟支店長役宅'],['休館日','月曜']],
+ note:'⚠️ 1日目（8/24 月）は休館です。展示の入れ替え期間もあるので、内容は公式サイトで。',
+ routes:[{mode:'bus',label:'観光循環バス',min:22,yen:260,detail:'新潟駅前 →「西大畑」方面で下車',est:true}]},
+
+{id:'marinepia',name:'マリンピア日本海',emoji:'🐬',cat:'自然',area:'city',lon:139.0130,lat:37.9350,
+ sig:'green',tag:'日本海の海をまるごと見る水族館',stay:'2〜3時間',fee:'大人 1,500円',hours:'9:00〜17:00',shut:[],
+ why:'日本海に面した、日本海側最大級の水族館。目玉は日本海大水槽と、毎日やっているイルカショー。マゼランペンギン、ラッコ、トド、そして新潟の川と海に住む生きものたちを、上流から日本海までの流れに沿ってたどる展示になっています。海のすぐそばなので、出たあと西海岸公園を海まで歩けるのもいいところ。',
+ facts:[['入館料','大人1,500円／小中学生600円'],['イルカショー','毎日開催'],['休館日','年末年始と3月の第1木曜だけ。8/24・25はどちらも開いています']],
+ routes:[{mode:'bus',label:'路線バス',min:25,yen:260,detail:'新潟駅前バスターミナル9番線 C22系統（浜浦町線）「水族館前」行き 終点。乗り換えなし'},
+         {mode:'bus',label:'観光循環バス',min:32,yen:260,detail:'新潟駅前 →「水族館前」。1日乗車券500円を見せると入館料が2割引きになります'}]},
+
+{id:'hiyoriyama',name:'日和山展望台',emoji:'🌅',cat:'自然',area:'city',lon:139.0345,lat:37.9435,
+ sig:'yellow',tag:'日本海に沈む夕日',stay:'30〜45分',fee:'無料',hours:'いつでも',shut:[],
+ why:'西海岸公園の一角、海抜16.5mの砂丘の上に立つ小さな展望台。展望台の上まで入れて、砂浜と日本海がひらけて見えます。新潟市内でも指折りの夕日スポットで、夏の日本海に沈む夕日はここから見るのがきれい。日が落ちたあとは、朱鷺メッセなど市街地の夜景に切り替わります。',
+ facts:[['高さ','海抜25.5m（台地16.5m＋展望台）'],['見えるもの','日本海・砂浜・新潟市街の夜景'],['8月下旬の日の入り','18時20分ごろ']],
+ note:'夕日を狙うなら、日の入りの30分前には着いていたい場所です。バス停からは少し歩きます。',
+ routes:[{mode:'bus',label:'路線バス＋歩き',min:30,yen:260,detail:'新潟駅前から西海岸公園・二葉町方面のバスへ。降りてから10分ほど歩きます',est:true}]},
+
+{id:'yahiko',name:'彌彦神社',emoji:'⛩',cat:'神社',area:'yahiko',lon:138.8290,lat:37.7080,
+ sig:'yellow',tag:'越後一宮「おやひこさま」',stay:'1〜2時間',fee:'参拝無料',hours:'日中いつでも',shut:[],
+ why:'越後国の一宮。地元では千年以上「おやひこさま」と呼ばれて親しまれてきた、新潟でいちばん格の高い神社です。弥彦山を背にした杉の参道が長く、鳥居をくぐった瞬間に空気が変わるのが分かります。二礼四拍手一礼という珍しい作法（出雲大社と同じ）。参道には温泉街と門前の食べ歩きがあり、弥彦駅からの道には約4万坪の弥彦公園が広がっています。',
+ facts:[['参拝の作法','二礼四拍手一礼'],['駅から','弥彦駅から約1km・歩いて15分'],['まわり','弥彦公園／弥彦温泉／弥彦山ロープウェイ']],
+ note:'⚠️ 弥彦線は1〜3時間に1本しかありません。行きの電車を決めたら、帰りの電車も同時に決めておかないと、駅で2時間待つことになります。',
+ routes:[{mode:'train',label:'信越本線＋弥彦線',min:81,yen:810,detail:'新潟 →〈信越本線 47分〉→ 東三条 →〈弥彦線 28分〉→ 弥彦。乗り換え1回',warn:'弥彦線は本数が非常に少ないです'},
+         {mode:'train',label:'越後線＋弥彦線',min:93,yen:810,detail:'新潟 →〈越後線 51分〉→ 吉田 →〈弥彦線 7分〉→ 弥彦。乗り換え1回',warn:'越後線は1時間に1〜2本'}],
+ tip:'新潟⇔弥彦を往復すると運賃1,620円。「えちごワンデーパス」（1,570円）ならフリーエリア内の普通・快速が1日乗り放題なので、途中でもう一駅寄るなら確実にこちらが得です。'},
+
+{id:'yahiko-rw',name:'弥彦山ロープウェイ',emoji:'🏔',cat:'自然',area:'yahiko',lon:138.8130,lat:37.7080,
+ sig:'yellow',tag:'空から越後平野と佐渡島',stay:'1〜1時間半',fee:'往復 大人1,500円',hours:'8:40〜17:30（4〜11月）',shut:[],
+ why:'弥彦神社の裏手から山頂まで、標高差約1,000mを5分で登るロープウェイ。眼下に越後平野が一面に広がり、晴れていれば日本海の向こうに佐渡島まで見えます。山頂には回転昇降展望塔「パノラマタワー」（高さ100m）と弥彦山頂公園。山頂駅から歩いて15分のところに、標高634mの弥彦山山頂に鎮座する御神廟（彌彦神社の奥宮）があります。',
+ facts:[['料金','往復 大人1,500円／片道800円'],['所要','片道5分'],['山頂まで','ロープウェイ乗り場は彌彦神社から無料シャトルバスで']],
+ note:'弥彦神社とセットで行く場所です。天気が悪いと何も見えないので、当日の空模様で決めるのが正解。',
+ routes:[{mode:'train',label:'信越本線＋弥彦線',min:81,yen:810,detail:'彌彦神社と同じ道で弥彦駅まで。そこから神社の裏手を通り、無料シャトルバスでロープウェイ山麓駅へ',warn:'弥彦線は1〜3時間に1本。帰りの時刻を先に決めてください'}]},
+
+{id:'tsukioka',name:'月岡温泉',emoji:'♨️',cat:'温泉',area:'tsukioka',lon:139.3600,lat:37.8480,
+ sig:'yellow',tag:'エメラルドグリーンの硫黄泉「美人の湯」',stay:'泊まる',fee:'宿により',hours:'—',shut:[],
+ why:'新発田市にある、新潟でいちばん有名な温泉地。湯は硫黄含有量が全国屈指で、透きとおったエメラルドグリーン。とろりとした肌ざわりから「日本一の美人の湯」と呼ばれています。温泉街は歩いて回れる大きさで、日本酒の飲み比べができる蔵や、手ぬぐい・地酒の小さな店が並ぶ「月岡わくわく通り」があります。泊まるならここ。',
+ facts:[['泉質','含硫黄ナトリウム塩化物泉（硫黄泉）'],['湯の色','エメラルドグリーン'],['温泉街','月岡わくわく通り（食べ歩き・地酒）']],
+ note:'⚠️ ここがこの旅の最大の関門です。公共交通の便が1日4本しかありません（下の行き方を必ず読んでください）。乗り遅れるとタクシーしか手がなくなります。',
+ routes:[{mode:'bus',label:'新潟駅から直行バス',min:60,yen:1500,detail:'予約不要・先着50名。現金またはPayPay払い',times:['13:00発','15:25発'],back:['月岡発 10:15','月岡発 14:10'],warn:'1日2本だけ。これを逃すと下の新発田まわりになります'},
+        {mode:'mix',label:'白新線＋新発田駅からバス',min:75,yen:1028,detail:'新潟 →〈JR白新線 33〜36分・528円〉→ 新発田駅 →〈バス 25分・500円〉→ 月岡温泉',times:['新発田駅発 10:50','新発田駅発 15:30'],back:['月岡発 10:20','月岡発 11:15'],warn:'バスは1日2本。15:30の便なら新潟駅を14:45ごろに出れば間に合うので、午前〜昼を新潟市内に使えます'},
+        {mode:'taxi',label:'豊栄駅からタクシー',min:45,yen:4000,detail:'新潟 →〈白新線 21分・253円〉→ 豊栄駅 →〈タクシー 約20分〉→ 月岡温泉。バスの時刻に縛られない最後の手段',est:true,warn:'タクシー代は目安です'}],
+ tip:'かつてあった豊栄駅⇔月岡温泉のシャトルバスは2025年7月で休止しました。古い旅行記事にはまだ載っているので、うのみにしないでください。'},
+
+{id:'hoppou',name:'北方文化博物館',emoji:'🏛',cat:'歴史',area:'konan',lon:139.1290,lat:37.8200,
+ sig:'yellow',tag:'越後一の豪農の館と回遊式庭園',stay:'1時間半〜2時間',fee:'大人 800円',hours:'9:00〜17:00',shut:[2],
+ why:'越後随一の大地主だった伊藤家の屋敷を、そのまま博物館にした場所。8,800坪の敷地に、部屋数65の豪壮な母屋、そして京都の庭師が造った回遊式庭園が広がります。とくに有名なのが、100畳の大広間から柱を一本も挟まずに庭を見わたせる造り。そして樹齢150年を超える大藤棚。日本家屋の贅沢の極みを見るような場所です。',
+ facts:[['入館料','大人800円／小中学生400円'],['敷地','8,800坪・部屋数65'],['休館日','火曜（4月・5月・10月・11月は無休）']],
+ note:'⚠️ 火曜休館なので、2日目（8/25 火）は行けません。行くなら1日目（8/24 月）だけです。バスの本数も少ないので、出発前に必ず時刻を確認してください。',
+ routes:[{mode:'bus',label:'路線バス',min:50,yen:620,detail:'万代シティバスセンター →〈沢海（そうみ）経由 秋葉区役所行き〉→「上沢海博物館前」下車 徒歩2分',warn:'本数が少ないので、行きも帰りも時刻を先に押さえてください'}]},
+
+{id:'murakami',name:'村上（城下町・イヨボヤ会館）',emoji:'🐟',cat:'歴史',area:'murakami',lon:139.4800,lat:38.2240,
+ sig:'yellow',tag:'鮭・酒・人情の城下町',stay:'半日',fee:'イヨボヤ会館 大人600円ほど',hours:'9:00〜16:30',shut:[],
+ why:'「鮭・酒・人情（さけ・さけ・にんじょう）」を掲げる城下町。村上では鮭を「イヨボヤ」と呼び、三面川の鮭とともに千年生きてきた土地です。日本で最初の鮭の博物館「イヨボヤ会館」では、鮭の一生と村上独特の百種類を超える鮭料理の文化が見られます。黒塀の町並みと町屋、そして村上牛。ただし新潟駅から片道1時間以上かかるので、行くなら半日まるごと使う覚悟が要ります。',
+ facts:[['新潟駅から','JR白新線・羽越本線で 1時間10〜16分・1,221円（乗り換えなし）'],['イヨボヤ会館','村上駅から路線バス5分（150円）＋徒歩3分'],['名物','鮭の塩引き・村上牛・村上茶']],
+ note:'1泊2日だと、ここに行くと他がほとんど回れなくなります。「村上だけの日」にするなら成立します。',
+ routes:[{mode:'train',label:'白新線・羽越本線',min:73,yen:1221,detail:'新潟 → 村上。乗り換えなしの直通。IC運賃',warn:'片道1時間超。往復で2時間半が移動に消えます'}]},
+
+{id:'iwamuro',name:'岩室温泉',emoji:'♨️',cat:'温泉',area:'yahiko',lon:138.8760,lat:37.7740,
+ sig:'white',tag:'弥彦の門前に開けた静かな湯',stay:'泊まる／立ち寄り',fee:'日帰り入浴は施設により',hours:'—',shut:[],
+ why:'弥彦山のふもと、彌彦神社への参拝客をもてなす湯として300年前に開かれた温泉。月岡ほど大きくなく、料亭旅館が数軒たたずむ静かな湯治場の雰囲気があります。弥彦とセットにしやすい立地。ただし駅から温泉街までは離れていて、公共交通だけでは行きづらいのが難点です。',
+ facts:[['泉質','含硫黄・ナトリウム塩化物泉'],['歴史','約300年前開湯・弥彦詣での湯'],['弥彦から','車で20分ほど']],
+ note:'⚠️ 岩室駅から温泉街までタクシーで約10分かかります。公共交通だけで行くには一手間。弥彦とセットで泊まるなら候補になります。',
+ routes:[{mode:'mix',label:'越後線＋タクシー',min:55,yen:2100,detail:'新潟 →〈JR越後線 43〜45分・616円〉→ 岩室駅 →〈タクシー 約10分〉→ 岩室温泉',est:true,warn:'タクシー代は目安。駅にタクシーが常駐していないことがあるので、事前に呼んでおくのが安全です'}]}
+];
+
+/* ============================================================
+   地図を描く
+   ============================================================ */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const NS='http://www.w3.org/2000/svg';
+const el=(t,a={})=>{const e=document.createElementNS(NS,t); for(const k in a) e.setAttribute(k,a[k]); return e;};
+
+// 経度緯度 → 画面座標
+function mkProj(lon0,lon1,lat0,lat1,w,h){
+  const cs=Math.cos((lat0+lat1)/2*Math.PI/180);   // 緯度が上がるほど経度1度は短くなる
+  const W=(lon1-lon0)*cs, H=(lat1-lat0);
+  const s=Math.min(w/W,h/H), ox=(w-W*s)/2, oy=(h-H*s)/2;
+  return (lon,lat)=>[ox+(lon-lon0)*cs*s, oy+(lat1-lat)*s];
+}
+function toPath(pts,p,close){
+  let d=pts.map((c,i)=>(i?'L':'M')+p(c[0],c[1]).map(n=>n.toFixed(1)).join(' ')).join(' ');
+  return close===false?d:d+' Z';
+}
+
+const JP_P=mkProj(128.5,146.5,30.3,45.9,400,520);
+const JP_VB=[400,520], NG_VB=[400,620];
+const NG_P=mkProj(137.62,140.0,36.66,38.72,400,620);
+
+/* --- 日本列島 --- */
+(function drawJapan(){
+  const g=$('#jp-g');
+  ['hokkaido','honshu','kyushu','shikoku','awaji','sado'].forEach(k=>{
+    g.appendChild(el('path',{d:toPath(GEO[k],JP_P), class:'land-dim'}));
+  });
+  const c=JP_P(138.95,37.65);
+  // 新潟県は細長いので、まず「ここ」と分かる丸を敷いてから県の形を重ねる
+  g.appendChild(el('circle',{cx:c[0],cy:c[1],r:30,fill:'#C97B4E','fill-opacity':.13}));
+  g.appendChild(el('path',{d:toPath(GEO.niigata,JP_P), class:'pref-hl', id:'jp-ng'}));
+  for(let i=0;i<2;i++){
+    const p=el('circle',{cx:c[0],cy:c[1],r:6,class:'pulse'});
+    p.style.animation=`ping 2.6s ease-out ${i*1.3}s infinite`;
+    g.appendChild(p);
+  }
+  const t=el('text',{x:c[0]+34,y:c[1]-20,class:'lbl'}); t.textContent='新潟'; g.appendChild(t);
+})();
+
+/* ============================================================
+   つまんで動かす（パン・ピンチズーム）
+   ============================================================ */
+function makePanZoom(wrapSel,gSel,vb,opt){
+  const wrap=$(wrapSel), g=$(gSel), svg=wrap.querySelector('svg');
+  const [VBW,VBH]=vb;
+  const st={x:0,y:0,k:1};
+  const cfg=Object.assign({min:.5,max:60,onChange:null,onEnd:null,onZoomPast:null,past:1e9,home:null},opt||{});
+  let pts=new Map(), st0=null, d0=0, c0=null, moved=false, fired=false;
+
+  // 画面の座標を、地図の中の座標に直す（SVGの拡大縮小をそのまま反映）
+  function toUser(cx,cy){
+    const m=svg.getScreenCTM(); if(!m) return [0,0];
+    const p=svg.createSVGPoint(); p.x=cx; p.y=cy;
+    const q=p.matrixTransform(m.inverse()); return [q.x,q.y];
+  }
+  let tid=null;
+  function apply(){
+    g.style.transform=`translate(${st.x.toFixed(2)}px, ${st.y.toFixed(2)}px) scale(${st.k.toFixed(4)})`;
+    cfg.onChange&&cfg.onChange(st);
+  }
+  const noAnim=()=>{ g.style.transition='none'; if(tid){clearTimeout(tid); tid=null;} };
+  const mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];
+  const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+
+  wrap.addEventListener('pointerdown',e=>{
+    noAnim(); wrap.setPointerCapture(e.pointerId); pts.set(e.pointerId,toUser(e.clientX,e.clientY)); moved=false;
+    if(pts.size===2){ const [a,b]=[...pts.values()]; d0=dist(a,b); c0=mid(a,b); st0={...st}; }
+  });
+  wrap.addEventListener('pointermove',e=>{
+    if(!pts.has(e.pointerId)) return;
+    const prev=pts.get(e.pointerId), now=toUser(e.clientX,e.clientY);
+    if(dist(now,prev)>1.5) moved=true;
+    if(pts.size===2 && st0){
+      pts.set(e.pointerId,now);
+      const [a,b]=[...pts.values()], d=dist(a,b), c=mid(a,b);
+      const k=Math.min(cfg.max,Math.max(cfg.min, st0.k*(d/(d0||1))));
+      st.k=k; st.x=c[0]-(c0[0]-st0.x)*(k/st0.k); st.y=c[1]-(c0[1]-st0.y)*(k/st0.k);
+      apply();
+      if(!fired && cfg.onZoomPast && k>=cfg.past){ fired=true; cfg.onZoomPast(); }
+    }else if(pts.size===1){
+      st.x+=now[0]-prev[0]; st.y+=now[1]-prev[1]; apply();
+      pts.set(e.pointerId,toUser(e.clientX,e.clientY));
+    }
+  });
+  const up=e=>{ pts.delete(e.pointerId); if(pts.size<2) st0=null;
+    if(pts.size===0 && moved) cfg.onEnd&&cfg.onEnd(); };
+  wrap.addEventListener('pointerup',up); wrap.addEventListener('pointercancel',up);
+
+  const api={
+    st, apply, wrap, g, vb,
+    get moved(){ return moved; },
+    // 指定した点の集まりが画面いっぱいに入る倍率と中心を出す
+    fit(points,frac){
+      const xs=points.map(p=>p[0]), ys=points.map(p=>p[1]);
+      const span=Math.max(Math.max(...xs)-Math.min(...xs), Math.max(...ys)-Math.min(...ys));
+      const pad=Math.max(span*(frac==null?.2:frac), 2);
+      const x0=Math.min(...xs)-pad, x1=Math.max(...xs)+pad;
+      const y0=Math.min(...ys)-pad, y1=Math.max(...ys)+pad;
+      const k=Math.min(cfg.max, Math.max(cfg.min, Math.min(VBW/(x1-x0), VBH/(y1-y0))));
+      return {k, cx:(x0+x1)/2, cy:(y0+y1)/2};
+    },
+    set(v,animate,ms){
+      ms=ms||620;
+      const to={k:v.k, x:VBW/2-v.cx*v.k, y:VBH/2-v.cy*v.k};
+      noAnim();
+      st.k=to.k; st.x=to.x; st.y=to.y;
+      if(animate) g.style.transition=`transform ${ms}ms cubic-bezier(.32,.72,.32,1)`;
+      apply();
+      if(animate) tid=setTimeout(()=>{ g.style.transition='none'; tid=null; cfg.onEnd&&cfg.onEnd(); }, ms+40);
+    },
+    reset(animate){ fired=false; if(cfg.home) api.set(cfg.home(),animate); else { noAnim(); st.x=0;st.y=0;st.k=1;apply(); } },
+    zoomTo(px,py,k,ms){ api.set({k,cx:px,cy:py},true,ms); }
+  };
+  return api;
+}
+
+/* ============================================================
+   しおりの状態（この端末の中だけに保存されます）
+   ============================================================ */
+const KEY='niigata-tabi-v1';
+const byId=Object.fromEntries(SPOTS.map(s=>[s.id,s]));
+let state={day:'d1', plan:{d1:[], d2:[]}};
+try{ const r=localStorage.getItem(KEY); if(r){ const o=JSON.parse(r); if(o&&o.plan) state=Object.assign(state,o); } }catch(e){}
+const save=()=>{ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} };
+
+const dayOf=id=>DAYS.find(d=>d.id===id);
+function startOf(d){ if(d==='d1') return HUB; const p=state.plan.d1; return p.length?p[p.length-1]:HUB; }
+function baseOf(d){ const p=state.plan[d]; return p.length?p[p.length-1]:startOf(d); }
+function isShut(sp,dayId){ return (sp.shut||[]).includes(dayOf(dayId).wd); }
+
+/* ============================================================
+   行き方を求める
+   ============================================================ */
+function metersBetween(a,b){
+  const R=6371000, r=Math.PI/180;
+  const dLa=(b.lat-a.lat)*r, dLo=(b.lon-a.lon)*r, la=(a.lat+b.lat)/2*r;
+  return Math.round(Math.hypot(dLa, dLo*Math.cos(la))*R);
+}
+function walkOpt(a,b){
+  const m=metersBetween(a,b), min=Math.max(3,Math.round(m*1.3/80));
+  return {mode:'walk',label:'歩く',min,yen:0,est:true,
+    detail:`直線でおよそ${(m/1000).toFixed(1)}km。実際の道のりは多少前後します`};
+}
+const MODE_ICON={walk:'🚶',bus:'🚌',train:'🚃',mix:'🚃',taxi:'🚕',shin:'🚄'};
+
+// A地点 → B地点 の行き方の候補を返す
+function routesBetween(fromId,toId){
+  const A=byId[fromId], B=byId[toId];
+  if(!A||!B||A.id===B.id) return [];
+  // ぽんしゅ館は新潟駅の構内なので、駅とみなす
+  const hubLike=id=>id===HUB||id==='ponshukan';
+  const revLabel=l=>l.replace('新潟駅から','').replace('新潟駅','')+'（戻り）';
+  // 新潟駅 → どこか
+  if(hubLike(A.id) && (B.routes||[]).length) return B.routes.map(r=>({...r,legs:null}));
+  // どこか → 新潟駅（同じ道を戻る）
+  if(hubLike(B.id) && (A.routes||[]).length) return A.routes.map(r=>({...r,
+    detail:r.detail, times:r.back||null, back:null, legs:null,
+    label:revLabel(r.label)}));
+  // 新潟市の中どうし → 歩き（遠ければバスも）
+  if(A.area==='city' && B.area==='city'){
+    const w=walkOpt(A,B), out=[w];
+    if(w.min>22) out.push({mode:'bus',label:'観光循環バス',min:Math.round(w.min*0.55)+6,yen:260,est:true,
+      detail:'新潟駅を発着する循環バス。1日乗車券500円なら乗り降り自由です'});
+    return out;
+  }
+  // それ以外 → 新潟駅で乗り継ぐ
+  const legA=bestRoute(A.id,HUB);
+  const legB=(B.routes||[]);
+  if(!legA||!legB.length) return [];
+  return legB.map(b=>({
+    mode:'mix', label:`新潟駅で乗り継ぎ・${b.label}`,
+    min:legA.min+b.min+12, yen:(legA.yen||0)+(b.yen||0),
+    est:legA.est||b.est, warn:b.warn, times:b.times,
+    legs:[{i:MODE_ICON[legA.mode]||'🚃',t:`${A.name} → 新潟駅`,s:`${legA.label} ${legA.min}分 / ${legA.yen?legA.yen.toLocaleString()+'円':'0円'}`},
+          {i:'⏱',t:'新潟駅での乗り継ぎ',s:'12分ほどみています'},
+          {i:MODE_ICON[b.mode]||'🚃',t:`新潟駅 → ${B.name}`,s:`${b.label} ${b.min}分 / ${b.yen?b.yen.toLocaleString()+'円':'0円'}`}],
+    detail:b.detail
+  }));
+}
+// しおりの合計に使う一本を選ぶ。ほかに手があるならタクシー系は選ばない
+function bestRoute(f,t){
+  let r=routesBetween(f,t); if(!r.length) return null;
+  const noTaxi=r.filter(o=>o.mode!=='taxi' && !/タクシー/.test(o.label));
+  if(noTaxi.length) r=noTaxi;
+  return r.slice().sort((a,b)=>a.min-b.min)[0];
+}
+
+/* ============================================================
+   新潟マップを描く
+   ============================================================ */
+const CAT_COLOR={'神社':'#C0654A','温泉':'#D08A3E','海鮮':'#4E7E92','アート':'#7C6A9C',
+  '歴史':'#8A7A55','自然':'#5F8A61','酒':'#A8894E','まち':'#9A7A6A','起点':'#23211E'};
+const SIG_COLOR={green:'#5F8A61',yellow:'#C99A3E',white:'#B0AAA0'};
+
+// 地図の上では長い名前は入りきらないので、短い呼び名を使う
+const SHORT={'niigata-sta':'新潟駅','ponshukan':'ぽんしゅ館','pia':'ピアBandai','imayotsukasa':'今代司酒造',
+ 'nuttari':'沼垂テラス','hakusan':'白山神社','banbi':'万代島美術館','minatopia':'みなとぴあ',
+ 'saitoke':'旧齋藤家別邸','sakyukan':'砂丘館','marinepia':'マリンピア','hiyoriyama':'日和山',
+ 'yahiko':'彌彦神社','yahiko-rw':'弥彦山ロープウェイ','tsukioka':'月岡温泉','hoppou':'北方文化博物館',
+ 'murakami':'村上','iwamuro':'岩室温泉'};
+// 名前どうしがぶつからないよう、上に出すか下に出すかを決めておく
+const LDY={'tsukioka':-30,'hoppou':36,'murakami':36,'yahiko-rw':36,'iwamuro':-30,'hiyoriyama':-30,
+ 'saitoke':-30,'banbi':-30,'imayotsukasa':36,'pia':-30};
+
+// 近すぎる場所は「束」にまとめて、つまんで広げると開く
+const AREAS={city:{name:'新潟市中心部',ldy:-34},yahiko:{name:'弥彦・岩室',ldy:38}};
+const areaSpots=a=>SPOTS.filter(s=>s.area===a);
+function centroid(list){
+  return [list.reduce((t,s)=>t+s.lon,0)/list.length, list.reduce((t,s)=>t+s.lat,0)/list.length];
+}
+
+let ngPZ=null, openAreas=new Set(), CLUSTER_AT=4, lastKey='';
+
+// 最初に見せる範囲＝束と単独スポットが全部おさまる大きさ
+function homeView(){
+  const pts=[];
+  Object.keys(AREAS).forEach(a=>{ const c=centroid(areaSpots(a)); pts.push(NG_P(c[0],c[1])); });
+  SPOTS.filter(s=>!AREAS[s.area]).forEach(s=>pts.push(NG_P(s.lon,s.lat)));
+  return ngPZ.fit(pts,.22);
+}
+
+function drawNiigata(){
+  const g=$('#ng-g'); g.innerHTML='';
+  g.appendChild(el('path',{d:toPath(GEO.honshu,NG_P),class:'land-dim'}));
+  g.appendChild(el('path',{d:toPath(GEO.sado,NG_P),class:'land-dim'}));
+  g.appendChild(el('path',{d:toPath(GEO.niigata,NG_P),class:'land'}));
+  const sd=el('text',{x:NG_P(138.36,38.18)[0],y:NG_P(138.36,38.18)[1],class:'lbl',
+    fill:'#8E877B','font-size':'11','stroke-width':'2.5'}); sd.textContent='佐渡島'; g.appendChild(sd);
+  g.appendChild(el('g',{id:'ng-trail'}));
+  g.appendChild(el('g',{id:'ng-pins'}));
+}
+
+// 同じ場所にあって潰れるものは、地図の上だけ少しずらす（距離の計算には影響しない）
+const MOFF={'ponshukan':[26,16],'niigata-sta':[-8,-10],'yahiko-rw':[-6,6]};
+// ラベルのだいたいの幅（日本語は1文字ぶん、英数字は半分で見積もる）
+function labelW(t){ let w=0; for(const c of t) w += /[\x20-\x7E]/.test(c)?5.6:11; return w; }
+
+function renderPins(){
+  const host=$('#ng-pins'); if(!host) return;
+  host.innerHTML='';
+  const k=ngPZ?ngPZ.st.k:1, inv=1/k;
+  const day=state.day, plan=state.plan[day], base=baseOf(day);
+  drawTrail();
+
+  // --- どれを出すか決める ---
+  const marks=[], inCluster=new Set();
+  Object.keys(AREAS).forEach(a=>{
+    const mem=areaSpots(a); if(mem.length<2) return;
+    if(openAreas.has(a) || k>=CLUSTER_AT) return;
+    mem.forEach(m=>inCluster.add(m.id));
+    const c=centroid(mem), pt=NG_P(c[0],c[1]);
+    marks.push({type:'cluster', area:a, x:pt[0], y:pt[1], r:23,
+      label:AREAS[a].name, sub:'つまんで開く', n:mem.length,
+      pick:mem.some(m=>plan.includes(m.id)), base:mem.some(m=>m.id===base)});
+  });
+  SPOTS.forEach(sp=>{
+    if(inCluster.has(sp.id)) return;
+    const pt=NG_P(sp.lon,sp.lat), off=MOFF[sp.id]||[0,0];
+    marks.push({type:'pin', sp, x:pt[0]+off[0]*inv, y:pt[1]+off[1]*inv, r:19,
+      label:SHORT[sp.id]||sp.name, idx:plan.indexOf(sp.id),
+      shut:isShut(sp,day), base:sp.id===base});
+  });
+
+  // --- ラベルが重ならない置き場所を探す（下→上→さらに下…）---
+  const boxes=marks.map(m=>({x0:m.x*k-m.r-2, x1:m.x*k+m.r+2, y0:m.y*k-m.r-2, y1:m.y*k+m.r+2}));
+  const hit=b=>boxes.some(o=>!(b.x1<o.x0||b.x0>o.x1||b.y1<o.y0||b.y0>o.y1));
+  // 画面の外に文字がはみ出す置き方は選ばない
+  const VB=ngPZ?ngPZ.vb:[400,620], sx=ngPZ?ngPZ.st.x:0, sy=ngPZ?ngPZ.st.y:0;
+  const outside=b=>(b.x0+sx<4||b.x1+sx>VB[0]-4||b.y0+sy<4||b.y1+sy>VB[1]-4);
+  marks.forEach(m=>{
+    const w=labelW(m.label+(m.sub?' ‧ つまんで開く':'')), h=13;
+    const R=m.r, side=w/2+R+6;
+    // 下 → 上 → もっと下 → もっと上 → 右 → 左 → さらに外側
+    const cands=[];
+    if(m.sp && LDY[m.sp.id]!=null) cands.push([0,LDY[m.sp.id]]);
+    cands.push([0,R+15],[0,-(R+11)],[0,R+30],[0,-(R+26)],[side,5],[-side,5],
+               [0,R+45],[0,-(R+41)],[side,-16],[-side,-16],[side,26],[-side,26]);
+    for(const [dx,dy] of cands){
+      const b={x0:m.x*k+dx-w/2, x1:m.x*k+dx+w/2, y0:m.y*k+dy-h, y1:m.y*k+dy+3};
+      if(!hit(b) && !outside(b)){ m.ldx=dx; m.ldy=dy; boxes.push(b); break; }
+    }
+  });
+
+  // --- 描く ---
+  marks.forEach(m=>{
+    if(m.type==='cluster'){
+      const g=el('g',{class:'cluster',transform:`translate(${m.x} ${m.y}) scale(${inv})`});
+      const r=el('circle',{class:'cring',cx:0,cy:0,r:m.r});
+      if(m.pick) r.setAttribute('stroke','#C97B4E');
+      g.appendChild(r);
+      if(m.base) g.appendChild(el('circle',{cx:0,cy:0,r:m.r+6,fill:'none',stroke:'#23211E','stroke-width':1.6,'stroke-dasharray':'3 3'}));
+      const t=el('text',{class:'cn',x:0,y:1}); t.textContent=m.n; g.appendChild(t);
+      if(m.ldy!=null){
+        const l=el('text',{class:'cl',x:m.ldx||0,y:m.ldy}); l.textContent=m.label+' ‧ つまんで開く'; g.appendChild(l);
+      }
+      g.addEventListener('click',ev=>{ ev.stopPropagation(); if(ngPZ.moved) return; openArea(m.area); });
+      host.appendChild(g);
+    }else{
+      const sp=m.sp;
+      const g=el('g',{class:'pin'+(m.idx>=0?' picked':'')+(m.shut?' shut':''),
+        transform:`translate(${m.x} ${m.y}) scale(${inv})`});
+      const col=m.idx>=0?'#C97B4E':(SIG_COLOR[sp.sig]||'#B0AAA0');
+      const ring=el('circle',{class:'ring',cx:0,cy:0,r:m.r}); ring.setAttribute('stroke',col); g.appendChild(ring);
+      if(m.idx>=0){ const n=el('text',{class:'num',x:0,y:1}); n.textContent=m.idx+1; g.appendChild(n); }
+      else { const e=el('text',{class:'em',x:0,y:1}); e.textContent=sp.emoji; g.appendChild(e); }
+      if(m.base) g.appendChild(el('circle',{cx:0,cy:0,r:m.r+6,fill:'none',stroke:'#23211E','stroke-width':1.6,'stroke-dasharray':'3 3'}));
+      if(m.ldy!=null){ const nm=el('text',{class:'nm',x:m.ldx||0,y:m.ldy}); nm.textContent=m.label; g.appendChild(nm); }
+      g.addEventListener('click',ev=>{ ev.stopPropagation(); if(ngPZ.moved) return; openSpot(sp.id); });
+      host.appendChild(g);
+    }
+  });
+}
+
+// 束をひらく：その中身がちょうど画面に収まるところまで寄る
+function openArea(a){
+  openAreas.add(a); lastKey='';
+  const v=ngPZ.fit(areaSpots(a).map(s=>NG_P(s.lon,s.lat)),.13);
+  renderPins(); ngPZ.set(v,true,680);
+}
+
+// ズーム中はピンを作り直さず、大きさだけ書き換える（カクつき防止）
+function updatePinScale(){
+  const host=$('#ng-pins'); if(!host||!ngPZ) return;
+  const inv=1/ngPZ.st.k;
+  [...host.children].forEach(c=>{
+    const m=(c.getAttribute('transform')||'').match(/translate\(([-\d.]+) ([-\d.]+)\)/);
+    if(m) c.setAttribute('transform',`translate(${m[1]} ${m[2]}) scale(${inv})`);
+  });
+}
+
+function drawTrail(){
+  const host=$('#ng-trail'); if(!host) return; host.innerHTML='';
+  const seq=[startOf(state.day),...state.plan[state.day]];
+  if(seq.length<2) return;
+  const pts=seq.map(id=>byId[id]).filter(Boolean).map(s=>NG_P(s.lon,s.lat));
+  const pa=el('path',{d:toPath(pts,(a,b)=>[a,b],false),class:'trail'});
+  pa.setAttribute('stroke-width',(2.2/(ngPZ?ngPZ.st.k:1)).toFixed(2));
+  pa.setAttribute('stroke-dasharray',(5/(ngPZ?ngPZ.st.k:1)).toFixed(2)+' '+(5/(ngPZ?ngPZ.st.k:1)).toFixed(2));
+  host.appendChild(pa);
+}
+
+/* ============================================================
+   シート（下から出てくるカード）
+   ============================================================ */
+function openSheet(which){
+  $('#veil').classList.add('on');
+  $('#'+which).classList.add('on');
+}
+function closeSheets(){
+  $('#veil').classList.remove('on');
+  $('#sheet').classList.remove('on'); $('#rsheet').classList.remove('on');
+}
+$('#veil').addEventListener('click',closeSheets);
+
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const yen=n=>n?n.toLocaleString()+'円':'0円';
+const hhmm=m=>m>=60?`${Math.floor(m/60)}時間${m%60?m%60+'分':''}`:`${m}分`;
+const gmap=(a,b)=>`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(a)}&destination=${encodeURIComponent(b)}&travelmode=transit`;
+
+/* --- 観光地カード --- */
+let curSpot=null;
+function openSpot(id){
+  const sp=byId[id]; if(!sp) return; curSpot=id;
+  const day=state.day, D=dayOf(day), shut=isShut(sp,day);
+  const inPlan=state.plan[day].indexOf(id);
+  const base=baseOf(day);
+  const sigTxt={green:'駅や本数の多いバスで行ける',yellow:'乗り継ぎと時刻の確認が要る',white:'タクシーがないと厳しい'}[sp.sig];
+  const sigCls={green:'g',yellow:'y',white:'w'}[sp.sig];
+
+  let h=`<div class="sp-head">
+    <div class="sp-em">${sp.emoji}</div>
+    <div class="sp-t"><h2>${esc(sp.name)}</h2><div class="tag">${esc(sp.tag)}</div></div>
+  </div>
+  <div class="badges">
+    <span class="badge">${esc(sp.cat)}</span>
+    <span class="badge ${sigCls}">${sigTxt}</span>
+    ${shut?`<span class="badge x">${D.date}（${D.wdName}）は休み</span>`:''}
+    ${sp.stay!=='—'?`<span class="badge">滞在 ${esc(sp.stay)}</span>`:''}
+  </div>
+  <p class="why">${esc(sp.why)}</p>`;
+
+  const facts=[...(sp.facts||[])];
+  if(sp.fee!=='—') facts.unshift(['料金',sp.fee]);
+  if(sp.hours!=='—') facts.unshift(['時間',sp.hours]);
+  if(facts.length){
+    h+=`<div class="facts">`+facts.map(f=>`<div class="fact"><div class="fk">${esc(f[0])}</div><div class="fv">${esc(f[1])}</div></div>`).join('')+`</div>`;
+  }
+  if(sp.note) h+=`<div class="note${shut?' bad':''}">${esc(sp.note)}</div>`;
+  if(sp.tip) h+=`<div class="note">💡 ${esc(sp.tip)}</div>`;
+
+  if(sp.base && id===base && !state.plan[day].length){
+    h+=`<div class="note">ここが ${D.label}（${D.date}）の出発地です。地図から次の行き先を選んでください。</div>`;
+  }else if(inPlan>=0){
+    h+=`<div class="btnrow">
+      <button class="btn s" onclick="showRoute('${esc(inPlan===0?startOf(day):state.plan[day][inPlan-1])}','${esc(id)}')">この区間の行き方</button>
+    </div>
+    <button class="btn d" onclick="removeStop(${inPlan})">${D.label}の ${inPlan+1}番目 から外す</button>`;
+  }else if(id!==base){
+    h+=`<button class="btn p" onclick="showRoute('${esc(base)}','${esc(id)}')">
+      ここまでの行き方をくらべる<br><span style="font-size:11.5px;font-weight:500;opacity:.85">${esc(byId[base].name)} から</span></button>`;
+  }
+  $('#sheet-body').innerHTML=h;
+  $('#rsheet').classList.remove('on');
+  openSheet('sheet');
+}
+
+/* --- 行き方をくらべるカード --- */
+let pendingTo=null;
+function showRoute(fromId,toId){
+  const A=byId[fromId], B=byId[toId]; if(!A||!B) return;
+  pendingTo=toId;
+  const day=state.day, D=dayOf(day);
+  const opts=routesBetween(fromId,toId);
+  const already=state.plan[day].includes(toId);
+  const byTime=opts.slice().sort((a,b)=>a.min-b.min);
+  const noTaxi=byTime.filter(o=>o.mode!=='taxi' && !/タクシー/.test(o.label));
+  const rec=(noTaxi.length?noTaxi:byTime)[0];                 // しおりが使う一本
+  const fastest=byTime[0];
+  const cheapest=byTime.slice().sort((a,b)=>(a.yen||0)-(b.yen||0))[0];
+  const order=rec?[rec,...byTime.filter(o=>o!==rec)]:byTime;  // おすすめを先頭に
+
+  let h=`<div class="rt-head">
+    <div class="ab"><span>${esc(A.name)}</span><span class="ar">→</span><span>${esc(B.name)}</span></div>
+    <div class="sm">${D.label}・${D.date}（${D.wdName}）の移動</div>
+  </div>`;
+
+  if(!opts.length){
+    h+=`<div class="note bad">公共交通での行き方のデータがありません。下のボタンから乗換案内で調べてください。</div>`;
+  }
+  order.forEach(o=>{
+    const isRec=o===rec, multi=opts.length>1;
+    let crown='';
+    if(isRec) crown='<span class="opt-crown">おすすめ</span>';
+    else if(multi && o===cheapest) crown='<span class="opt-crown" style="background:#5F8A61">いちばん安い</span>';
+    else if(multi && o===fastest) crown='<span class="opt-crown" style="background:#8A8379">いちばん速い</span>';
+    h+=`<div class="opt${isRec?' best':''}">
+      <div class="opt-top">
+        <div class="opt-ic">${MODE_ICON[o.mode]||'🚃'}</div>
+        <div class="opt-nm">${esc(o.label)}</div>
+        ${crown}
+      </div>
+      <div class="opt-num">
+        <div><span class="u">かかる時間</span><span class="n">${hhmm(o.min)}</span></div>
+        <div><span class="u">運賃（ひとり）</span><span class="n">${o.yen?o.yen.toLocaleString():'0'}<small>円</small></span></div>
+        <div><span class="u">ふたり分</span><span class="n">${o.yen?(o.yen*2).toLocaleString():'0'}<small>円</small></span></div>
+      </div>`;
+    if(o.legs) h+=o.legs.map(l=>`<div class="leg"><span class="li">${l.i}</span><span><b>${esc(l.t)}</b><br><span style="color:var(--muted)">${esc(l.s)}</span></span></div>`).join('');
+    if(o.detail) h+=`<div class="opt-det">${esc(o.detail)}</div>`;
+    if(o.times&&o.times.length) h+=`<div class="times">${o.times.map(t=>`<span class="tm">🕐 ${esc(t)}</span>`).join('')}</div>`;
+    if(o.back&&o.back.length) h+=`<div class="times">${o.back.map(t=>`<span class="tm" style="background:#EDEAE4;color:var(--muted)">↩ ${esc(t)}</span>`).join('')}</div>`;
+    if(o.warn) h+=`<div class="opt-warn">⚠️ ${esc(o.warn)}</div>`;
+    if(o.est) h+=`<div class="opt-warn" style="background:#EFEDE8;color:var(--muted)">この数字は目安です。当日の乗換案内で確かめてください</div>`;
+    h+=`</div>`;
+  });
+
+  if(!already && toId!==baseOf(day)){
+    h+=`<button class="btn p" onclick="addStop('${esc(toId)}')">${D.label}の ${state.plan[day].length+1}番目 に決める</button>`;
+  }
+  h+=`<a class="btn s" href="${gmap(A.name+' 新潟',B.name+' 新潟')}" target="_blank" rel="noopener">Googleマップで当日の時刻を見る</a>`;
+  h+=`<div class="estnote">時間と運賃は2026年8月時点で調べたものです。ダイヤ改定や当日の運行状況で変わることがあるので、出発前に乗換案内でもう一度確かめてください。運賃はICカード利用時のものを含みます。</div>`;
+
+  $('#rsheet-body').innerHTML=h;
+  $('#sheet').classList.remove('on');
+  openSheet('rsheet');
+  $('#rsheet-body').scrollTop=0;
+}
+
+function addStop(id){
+  if(!state.plan[state.day].includes(id)) state.plan[state.day].push(id);
+  save(); closeSheets(); updateFrom(); renderPins(); renderPlan();
+  goto('plan');
+}
+function removeStop(i){
+  state.plan[state.day].splice(i,1); save(); closeSheets(); updateFrom(); renderPins(); renderPlan();
+}
+window.showRoute=showRoute; window.addStop=addStop; window.removeStop=removeStop; window.openSpot=openSpot;
+
+/* ============================================================
+   しおり（積み上がった行き先）
+   ============================================================ */
+function renderPlan(){
+  const day=state.day, D=dayOf(day), plan=state.plan[day], startId=startOf(day);
+  const seq=[startId,...plan];
+  let totMin=0, totYen=0;
+  const hops=[];
+  for(let i=1;i<seq.length;i++){
+    const r=bestRoute(seq[i-1],seq[i]);
+    hops.push(r);
+    if(r){ totMin+=r.min; totYen+=(r.yen||0); }
+  }
+
+  let h=`<div class="sum">
+    <div class="sumcard"><div class="k">行き先</div><div class="v">${plan.length}<small>か所</small></div></div>
+    <div class="sumcard"><div class="k">移動の時間</div><div class="v">${totMin?hhmm(totMin):'—'}</div></div>
+    <div class="sumcard"><div class="k">交通費 ふたり</div><div class="v">${totYen?(totYen*2).toLocaleString():'0'}<small>円</small></div></div>
+  </div>`;
+
+  if(!plan.length){
+    h+=`<div class="empty"><span class="e">🗺</span>
+      <p>${D.label}（${D.date} ${D.wdName}）は<br>まだ行き先が入っていません。<br>
+      <b>${esc(byId[startId].name)}</b> を出発点にして、<br>地図から一つめを選んでください。</p></div>`;
+    $('#plan-body').innerHTML=h; return;
+  }
+
+  h+=`<div class="tl">`;
+  seq.forEach((id,i)=>{
+    const sp=byId[id];
+    if(i>0){
+      const r=hops[i-1];
+      h+=`<div class="hop">`;
+      if(r){
+        h+=`<span class="m">${MODE_ICON[r.mode]||'🚃'}</span><b>${esc(r.label)}</b> ・ <b>${hhmm(r.min)}</b> ・ <b>${yen(r.yen)}</b>（ひとり）`;
+        if(r.times&&r.times.length) h+=`<span class="alt">🕐 ${r.times.map(esc).join(' / ')}</span>`;
+        if(r.warn) h+=`<span class="alt" style="color:#8C6A21">⚠️ ${esc(r.warn)}</span>`;
+      }else{
+        h+=`<span class="m">❓</span>行き方のデータがありません`;
+      }
+      h+=`</div>`;
+    }
+    const shut=isShut(sp,day);
+    h+=`<div class="node">
+      <div class="dot${i===0?' st':''}">${i===0?'発':i}</div>
+      <div class="card" onclick="openSpot('${esc(id)}')">
+        <span class="e">${sp.emoji}</span>
+        <span><span class="nm">${esc(sp.name)}</span>
+        <span class="sm">${i===0?'ここから出発':esc(sp.tag)}${shut?' ・ ⚠️この日は休み':''}</span></span>
+        ${i>0?`<span class="x" onclick="event.stopPropagation();removeStop(${i-1})">✕</span>`:''}
+      </div>
+    </div>`;
+  });
+  h+=`</div>`;
+
+  if(day==='d1' && plan.length){
+    h+=`<div class="note" style="margin-top:18px">🌙 1日目の最後にいる <b>${esc(byId[plan[plan.length-1]].name)}</b> が、そのまま2日目の出発地になります。ここが泊まる場所になる想定です。</div>`;
+  }
+  h+=`<div class="estnote" style="padding:0 2px">交通費は各区間の「おすすめ」の行き方で計算しています。ほかの行き方を選ぶ場合は、区間をタップして確かめてください。</div>`;
+  $('#plan-body').innerHTML=h;
+}
+
+/* ============================================================
+   日付タブ・画面の切り替え
+   ============================================================ */
+function buildTabs(sel){
+  const host=$(sel); host.innerHTML='';
+  DAYS.forEach(d=>{
+    const b=document.createElement('button');
+    b.className='daytab'+(d.id===state.day?' on':'');
+    b.innerHTML=`${d.label}<span class="dd">${d.date}（${d.wdName}）</span>`;
+    b.onclick=()=>{ state.day=d.id; save(); buildTabs('#daytabs'); buildTabs('#daytabs2');
+      updateFrom(); renderPins(); renderPlan(); };
+    host.appendChild(b);
+  });
+}
+function updateFrom(){
+  const b=byId[baseOf(state.day)];
+  $('#from-name').textContent=b?b.name:'—';
+  const n=state.plan[state.day].length;
+  $('#from-n').textContent=n?`${n}か所め まで決定`:'出発地';
+}
+
+let cur='japan';
+function goto(name){
+  cur=name;
+  $('#s-japan').classList.toggle('out',name!=='japan');
+  $('#s-map').classList.toggle('out',name!=='map');
+  $('#s-plan').classList.toggle('out',name!=='plan');
+  $('#tabbar').classList.toggle('hide',name==='japan');
+  $$('.tab').forEach(t=>t.classList.toggle('on',t.dataset.go===name));
+  if(name==='map'){ updateFrom(); renderPins(); }
+  if(name==='plan') renderPlan();
+}
+$$('.tab').forEach(t=>t.onclick=()=>goto(t.dataset.go));
+$('#btn-add').onclick=()=>goto('map');
+$('#btn-back').onclick=()=>{ goto('japan'); jpPZ.reset(false); };
+$('#btn-fit').onclick=()=>{ openAreas.clear(); lastKey=''; ngPZ.reset(true); renderPins(); };
+$('#btn-share').onclick=()=>{
+  const day=state.day, D=dayOf(day), seq=[startOf(day),...state.plan[day]];
+  let txt=`【にいがた旅しおり】${D.label} ${D.date}（${D.wdName}）\n`;
+  seq.forEach((id,i)=>{
+    if(i>0){ const r=bestRoute(seq[i-1],seq[i]);
+      if(r) txt+=`   ↓ ${r.label} ${hhmm(r.min)} / ${yen(r.yen)}\n`; }
+    txt+=`${i===0?'発':i+'.'} ${byId[id].name}\n`;
+  });
+  if(navigator.share) navigator.share({text:txt}).catch(()=>{});
+  else if(navigator.clipboard){ navigator.clipboard.writeText(txt); alert('しおりをコピーしました'); }
+};
+
+/* ============================================================
+   はじめる
+   ============================================================ */
+const jpPZ=makePanZoom('#jp-wrap','#jp-g',JP_VB,{min:.9,max:9,past:2.4,onZoomPast:()=>enterNiigata()});
+$('#jp-wrap').addEventListener('click',()=>{ if(!jpPZ.moved) enterNiigata(); });
+
+let entering=false;
+function enterNiigata(){
+  if(entering) return; entering=true;
+  const c=JP_P(138.95,37.65);
+  jpPZ.zoomTo(c[0],c[1],6,700);
+  setTimeout(()=>{ goto('map'); setTimeout(()=>{ jpPZ.reset(false); entering=false; },520); },680);
+}
+
+drawNiigata();
+ngPZ=makePanZoom('#ng-wrap','#ng-g',NG_VB,{min:.6,max:90,home:homeView,onChange:st=>{
+  // 十分に引いたら、開いていた束をまた閉じる
+  {
+    [...openAreas].forEach(a=>{
+      const v=ngPZ.fit(areaSpots(a).map(s=>NG_P(s.lon,s.lat)),.13);
+      if(st.k < v.k*0.5) openAreas.delete(a);
+    });
+  }
+  const key=[...openAreas].sort().join(',')+'|'+(st.k>=CLUSTER_AT);
+  if(key!==lastKey){ lastKey=key; renderPins(); } else updatePinScale();
+  const zh=$('#zoomhint'); if(zh) zh.style.opacity = (openAreas.size||st.k>=CLUSTER_AT)?0:1;
+},onEnd:()=>{ lastKey=''; renderPins(); }});
+// 束をまとめる境目は、最初に見せる大きさを基準に決める
+CLUSTER_AT = homeView().k * 1.9;
+ngPZ.reset(false);
+buildTabs('#daytabs'); buildTabs('#daytabs2');
+updateFrom(); renderPins(); renderPlan();
+</script>
+</body>
+</html>
