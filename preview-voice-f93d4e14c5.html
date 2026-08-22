@@ -56,6 +56,45 @@ body{
 .note{margin-top:14px; border-left:2px solid var(--ghost); padding:2px 0 2px 13px;
   font-size:12.5px; color:var(--sub); line-height:1.8;}
 
+/* 挿絵（本体サイトの .scene / .sc-* をそのまま。ここでは .screen.is-active を介さない） */
+.scene{margin-top:18px;}
+.scene svg{display:block; width:100%; height:auto;}
+@media(min-width:1024px){ .scene{max-width:440px; margin-left:auto; margin-right:auto;} }
+.sc-line{fill:none; stroke:var(--ink); stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;}
+.sc-soft{stroke:var(--ghost);}
+.sc-accent{stroke:var(--accent); color:var(--accent);}
+.sc-bub, .sc-paper{transform-box:fill-box; transform-origin:50% 100%;}
+.sc-bub{opacity:0; animation:sc-pop 9s ease-in-out infinite;}
+@keyframes sc-pop{
+  0%      {opacity:0; transform:scale(.72) translateY(4px);}
+  6%      {opacity:1; transform:scale(1) translateY(0);}
+  9%      {transform:scale(.985) translateY(0);}
+  12%,26% {opacity:1; transform:scale(1) translateY(0);}
+  34%     {opacity:0; transform:scale(.94) translateY(-5px);}
+  100%    {opacity:0; transform:scale(.72) translateY(4px);}
+}
+.sc-paper{animation:sc-float 7s ease-in-out infinite;}
+.sc-paper2{animation-duration:8.4s; animation-delay:-2.1s;}
+@keyframes sc-float{
+  0%,100%{transform:translateY(0) rotate(0deg);}
+  50%    {transform:translateY(-3.5px) rotate(1.4deg);}
+}
+.sc-tick{opacity:0; transform-box:fill-box; transform-origin:50% 50%;
+  animation:sc-tick 7s ease-in-out infinite;}
+.sc-tick2{animation-delay:.45s;} .sc-tick3{animation-delay:.9s;}
+.sc-tick4{animation-delay:1.35s;} .sc-tick5{animation-delay:1.8s;}
+.sc-tick6{animation-delay:2.25s;}
+@keyframes sc-tick{
+  0%      {opacity:0; transform:scale(.55);}
+  7%      {opacity:1; transform:scale(1);}
+  10%     {transform:scale(.95);}
+  13%,72% {opacity:1; transform:scale(1);}
+  82%,100%{opacity:0; transform:scale(.9);}
+}
+@media (prefers-reduced-motion:reduce){
+  .sc-bub,.sc-tick{opacity:1; transform:none;}
+  .sc-bub,.sc-paper,.sc-tick{animation:none;}
+}
 .panel{background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
   padding:20px 18px; margin-top:14px;}
 .dl{display:flex; flex-direction:column;}
@@ -117,6 +156,47 @@ body{
     <div class="frame">
       <p class="sheet-label"><span class="sl-jp">お客様の声</span><span class="sl-en">VOICE</span></p>
       <p class="sheet-lead">実際の現場でお使いいただいた、そのままのお言葉を載せています。</p>
+
+      <div class="scene" aria-hidden="true">
+        <svg viewBox="0 0 320 128" role="img">
+          <g class="sc-line sc-soft">
+            <g class="sc-paper sc-paper1"><g transform="rotate(-10 24 74)">
+              <rect x="14" y="61" width="18" height="24" rx="2.5"/>
+              <path d="M19 69h8M19 74h6"/>
+            </g></g>
+            <g class="sc-paper sc-paper2"><g transform="rotate(9 30 104)">
+              <rect x="21" y="92" width="18" height="24" rx="2.5"/>
+              <path d="M26 100h8M26 105h6"/>
+            </g></g>
+          </g>
+          <g class="sc-line">
+            <circle cx="72" cy="52" r="9"/>
+            <path d="M59 96c-1-18 5-31 13-31s14 13 14 27"/>
+            <path d="M83 74c8 2 15 5 21 9"/>
+          </g>
+          <g class="sc-line">
+            <g class="sc-bub sc-bub1">
+              <rect x="48" y="2" width="52" height="27" rx="9"/>
+              <path d="M62 29l-6 8 14-8"/>
+              <path d="M56 13h32M56 20h20" class="sc-soft"/>
+            </g>
+          </g>
+          <g class="sc-line">
+            <rect x="118" y="52" width="186" height="52" rx="5"/>
+            <path d="M118 66h186" class="sc-soft"/>
+            <path d="M149 66v38M180 66v38M211 66v38M242 66v38M273 66v38" class="sc-soft"/>
+            <path d="M126 60h10M157 60h10M188 60h10M219 60h10M250 60h10M281 60h10" class="sc-soft"/>
+          </g>
+          <g class="sc-line">
+            <path class="sc-tick sc-tick1" d="M127 86l4 4 8-9"/>
+            <path class="sc-tick sc-tick2" d="M158 86l4 4 8-9"/>
+            <path class="sc-tick sc-tick3" d="M189 86l4 4 8-9"/>
+            <path class="sc-tick sc-tick4" d="M220 86l4 4 8-9"/>
+            <path class="sc-tick sc-tick5" d="M251 86l4 4 8-9"/>
+            <path class="sc-tick sc-tick6 sc-accent" d="M282 86l4 4 8-9"/>
+          </g>
+        </svg>
+      </div>
 
       <p class="case-k">導入事例<span class="case-en">CASE 01</span></p>
       <p class="case-t">夏の本多劇場公演／稽古スケジュールの作成</p>
