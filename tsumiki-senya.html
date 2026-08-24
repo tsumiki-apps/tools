@@ -319,6 +319,25 @@
   .fillbar button{margin-left:auto; flex:none; min-height:var(--tap); padding:0 14px; border-radius:10px;
     border:none; background:var(--accent); color:#fff; font-family:inherit; font-size:.82rem;
     font-weight:700; cursor:pointer;}
+
+  /* ===== v3：持ち出し・締切の残り・ホーム画面のご案内 ===== */
+  .pill.soon{background:var(--accent-wash); color:var(--accent-2); border-color:transparent;}
+  .pill.urgent{background:var(--warn-wash); color:var(--warn); border-color:transparent;}
+
+  .outrow{display:flex; gap:8px; margin-bottom:13px;}
+  .outrow button{flex:1 1 0; min-width:0; min-height:var(--tap); border:1px solid var(--line);
+    background:var(--surface-2); color:var(--ink-mid); border-radius:11px; font-family:inherit;
+    font-size:.84rem; font-weight:700; cursor:pointer;}
+  .outrow button.main{background:var(--accent); color:#fff; border-color:transparent;}
+  .outrow button:active{transform:scale(.97);}
+
+  .a2hs{background:var(--accent-wash); border-radius:16px; padding:15px 16px; margin-bottom:var(--gap);}
+  .a2hs .t{font-weight:700; font-size:.95rem; color:var(--accent-2); margin-bottom:6px;}
+  .a2hs .b{font-size:.84rem; color:var(--accent-2); line-height:1.75;}
+  .a2hs .b b{font-weight:700;}
+  .a2hs button{width:100%; min-height:var(--tap); margin-top:12px; border:1px solid var(--accent);
+    background:transparent; color:var(--accent-2); border-radius:11px; font-family:inherit;
+    font-size:.86rem; font-weight:700; cursor:pointer;}
 </style>
 </head>
 <body>
@@ -349,6 +368,8 @@
 
 <!-- ===== 本体 ===== -->
 <main id="appView" hidden>
+  <div id="a2hsBox"></div>
+
   <section class="card" id="calCard">
     <div class="monthbar">
       <button class="navbtn" id="mPrev" aria-label="前の月">‹</button>
@@ -372,6 +393,7 @@
       <button data-t="kakutei">決まったシフト</button>
     </div>
     <div style="font-weight:700; font-size:.95rem; margin-bottom:10px" id="listTitle">出した日</div>
+    <div id="outRow"></div>
     <div id="listBox"></div>
   </section>
 
@@ -421,7 +443,7 @@
 const SUPABASE_URL='https://okbjqtdirrathscctyvx.supabase.co';
 const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rYmpxdGRpcnJhdGhzY2N0eXZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMjI4NTIsImV4cCI6MjA5NTg5ODg1Mn0.T-1AOK6vCD6uGdqrVGXjPui3L6WPSNrnygS-IHyfZ6Y';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
-const LS_CODE='tsumiki_senya_code', LS_THEME='tsumiki_senya_theme';
+const LS_CODE='tsumiki_senya_code', LS_THEME='tsumiki_senya_theme', LS_A2HS='tsumiki_senya_a2hs';
 const WD=['日','月','火','水','木','金','土'];
 
 /* ===== 純粋関数（テストしやすいように副作用なし） ===== */
@@ -439,6 +461,49 @@ function durMin(a,b){ return Math.max(0,b-a); }
 function fmtDur(m){ const h=Math.floor(m/60), mi=m%60; return h+'時間'+(mi?pad2(mi)+'分':''); }
 function fmtDateJP(s){ const p=s.split('-'); return (+p[1])+'月'+(+p[2])+'日'; }
 function wdayOf(s){ const p=s.split('-'); return new Date(+p[0],+p[1]-1,+p[2]).getDay(); }
+
+/* 締切まであと何日か（同じ日なら0・過ぎていたら負） */
+function daysUntil(today, deadline){
+  const a=today.split('-').map(Number), b=deadline.split('-').map(Number);
+  const t=Date.UTC(a[0],a[1]-1,a[2]), d=Date.UTC(b[0],b[1]-1,b[2]);
+  return Math.round((d-t)/86400000);
+}
+/* その月に「まだ何も出していない日」が残っているか（定休日は数えない） */
+function hasEmptyDay(month, byDate, closedWdays){
+  const p=month.split('-'), y=+p[0], m1=+p[1];
+  const last=new Date(y,m1,0).getDate(), closed=new Set(closedWdays||[]);
+  for(let d=1;d<=last;d++){
+    const key=y+'-'+pad2(m1)+'-'+pad2(d);
+    if(closed.has(new Date(y,m1-1,d).getDay())) continue;
+    if(!byDate[key]) return true;
+  }
+  return false;
+}
+/* iOS / Android の見分け（ホーム画面のご案内の出し分けだけに使う） */
+function osKind(ua, standalone){
+  if(standalone) return 'installed';
+  if(/iPhone|iPad|iPod/i.test(ua)) return 'ios';
+  if(/Android/i.test(ua)) return 'android';
+  return 'other';
+}
+/* 確定シフト → カレンダーに取り込める形（.ics）
+   時刻は「浮動時間」で書く＝端末の時間帯でそのまま読まれる（日本の端末ならこれが正しい） */
+function icsText(shopName, rows, slotLabel, stamp){
+  const esc2=t=>String(t).replace(/([,;\\])/g,'\\$1');
+  const dt=(d,min)=>d.replace(/-/g,'')+'T'+pad2(Math.floor(min/60))+pad2(min%60)+'00';
+  const out=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//tsumiki//tsumiki-senya//JA','CALSCALE:GREGORIAN'];
+  rows.forEach((r,i)=>{
+    out.push('BEGIN:VEVENT',
+      'UID:'+r.d.replace(/-/g,'')+'-'+r.k+'-'+i+'@tsumiki-senya',
+      'DTSTAMP:'+stamp,
+      'DTSTART:'+dt(r.d,r.from),
+      'DTEND:'+dt(r.d,r.to),
+      'SUMMARY:'+esc2(shopName+'　'+slotLabel(r.k)),
+      'END:VEVENT');
+  });
+  out.push('END:VCALENDAR');
+  return out.join('\r\n');
+}
 
 /* 希望の配列 → 日付ごと・枠ごとの索引 */
 function indexByDate(rows){
@@ -467,6 +532,15 @@ let toastT; function toast(msg){ const el=document.getElementById('toast'); el.t
   clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),1900); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function slotOf(k){ return (me.slots||[]).find(s=>s.k===k); }
+async function copyText(t){
+  try{ await navigator.clipboard.writeText(t); return true; }
+  catch(e){
+    const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    let ok=false; try{ ok=document.execCommand('copy'); }catch(e2){}
+    document.body.removeChild(ta); return ok;
+  }
+}
 function slotLabel(k){ const s=slotOf(k); return s?s.label:k; }
 
 /* ===== 表示切替（明るい／暗い） ===== */
@@ -515,7 +589,30 @@ function enter(){
   document.getElementById('appView').hidden=false;
   document.getElementById('who').textContent=me.name+'さん・'+me.shop_name;
   month=me.open_month;
+  renderA2hs();
   loadMonth();
+}
+
+/* このページからは、お知らせ（プッシュ通知）を出せない。
+   思い出す手がかりはホーム画面のアイコンだけなので、一度だけご案内する。 */
+function renderA2hs(){
+  const box=document.getElementById('a2hsBox'); box.innerHTML='';
+  if(localStorage.getItem(LS_A2HS)) return;
+  let standalone=false;
+  try{ standalone = window.navigator.standalone===true || matchMedia('(display-mode: standalone)').matches; }catch(e){}
+  const kind=osKind(navigator.userAgent, standalone);
+  if(kind==='installed') return;
+  // 記号（⋮ など）は端末によって字が出ないので、言葉で書く
+  const how = kind==='ios'   ? '画面の下にある <b>共有ボタン</b>（四角に上むきの矢印）→ <b>「ホーム画面に追加」</b>'
+            : kind==='android'? '右上の <b>メニュー</b>（点が3つ縦に並んだ印）→ <b>「ホーム画面に追加」</b>'
+            :                   'ブラウザのメニューから <b>「ホーム画面に追加」</b>';
+  box.innerHTML='<div class="a2hs"><div class="t">ホーム画面に置いておくと、出し忘れません</div>'
+    +'<div class="b">このページは、こちらから<b>お知らせを出すことができません</b>。'
+    +'アイコンが目に入ることが、思い出す手がかりになります。<br>'+how+'</div>'
+    +'<button id="a2hsOk">わかりました</button></div>';
+  document.getElementById('a2hsOk').addEventListener('click',function(){
+    localStorage.setItem(LS_A2HS,'1'); renderA2hs();
+  });
 }
 document.getElementById('logoutBtn').addEventListener('click',()=>{
   if(!confirm('この端末からログアウトします。もう一度入るには合言葉が要ります。')) return;
@@ -548,9 +645,15 @@ function render(){
   /* 状態の札 */
   const st=document.getElementById('stateRow'); st.innerHTML='';
   const dl=fmtDateJP(cur.deadline);
-  st.innerHTML = cur.editable
-    ? '<span class="pill open">'+dl+'まで 受付中</span>'
-    : '<span class="pill closed">締切がすぎました（'+dl+'）</span>';
+  if(cur.editable){
+    // 「あと何日か」を出す。ここが同じ見た目だと、出し忘れに気づけない
+    const left=daysUntil(me.today, cur.deadline);
+    const cls=left<=3?'urgent':(left<=7?'soon':'open');
+    const rest=left<=0?'今日まで':'あと'+left+'日';
+    st.innerHTML='<span class="pill '+cls+'">'+dl+'まで（'+rest+'）</span>';
+  }else{
+    st.innerHTML='<span class="pill closed">締切がすぎました（'+dl+'）</span>';
+  }
   const n=countDays(cur.avail);
   st.innerHTML+='<span class="pill count">'+n+'日 出しました</span>';
   if(n) st.innerHTML+='<span class="pill">'+fmtDur(totalMin(cur.avail))+'</span>';
@@ -586,9 +689,11 @@ function render(){
 
   /* いつもので埋める（まだ1日も出していない・いつもが決まっている・締切前のときだけ） */
   const fb=document.getElementById('fillBar'); fb.innerHTML='';
-  if(cur.editable && n===0 && (cur.usual||[]).length){
-    fb.innerHTML='<div class="fillbar"><span>いつも入れる曜日から、下ごしらえができます。</span>'
-                +'<button id="fillBtn">いつもので埋める</button></div>';
+  if(cur.editable && (cur.usual||[]).length && hasEmptyDay(cur.month, byDate, me.closed_wdays)){
+    fb.innerHTML='<div class="fillbar"><span>'
+                +(n===0?'いつも入れる曜日から、下ごしらえができます。'
+                       :'まだ入れていない日を、いつもので埋められます。')
+                +'</span><button id="fillBtn">いつもので埋める</button></div>';
     document.getElementById('fillBtn').addEventListener('click',doFill);
   }
 
@@ -614,6 +719,16 @@ function renderList(){
   const showAssign=cur.published && tab==='kakutei';
   document.getElementById('listTitle').hidden=!tabs.hidden;
 
+  // 決まったシフトは「持ち出せて」はじめて役に立つ（手でカレンダーに写させない）
+  const or2=document.getElementById('outRow'); or2.innerHTML='';
+  if(showAssign && (cur.assign||[]).length){
+    or2.innerHTML='<div class="outrow">'
+      +'<button class="main" id="icsBtn">カレンダーに追加</button>'
+      +'<button id="cpBtn">コピー</button></div>';
+    document.getElementById('icsBtn').addEventListener('click',saveIcs);
+    document.getElementById('cpBtn').addEventListener('click',copyAssign);
+  }
+
   const src=showAssign?(cur.assign||[]):(cur.avail||[]);
   const box=document.getElementById('listBox');
   if(!src.length){
@@ -636,6 +751,43 @@ function renderList(){
 document.getElementById('tabs').addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b) return; tab=b.dataset.t; render();
 });
+
+/* ===== 決まったシフトの持ち出し ===== */
+function assignRowsSorted(){
+  return (cur.assign||[]).slice().sort((a,b)=> a.d===b.d ? (a.k<b.k?-1:1) : (a.d<b.d?-1:1));
+}
+function saveIcs(){
+  const rows=assignRowsSorted();
+  if(!rows.length){ toast('決まったシフトがありません'); return; }
+  const stamp=new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  const text=icsText(me.shop_name, rows, slotLabel, stamp);
+  try{
+    const blob=new Blob([text],{type:'text/calendar;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download='shift-'+cur.month+'.ics';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url),2000);
+    toast('カレンダーのアプリで開いてください');
+  }catch(e){ toast('うまくいきませんでした'); }
+}
+function assignText(){
+  const {y,m1}=parseMonth(cur.month);
+  const idx=indexByDate(cur.assign);
+  const days=Object.keys(idx).sort();
+  const lines=[me.name+'さんの '+y+'年'+m1+'月のシフト', ''];
+  days.forEach(d=>{
+    const w=wdayOf(d);
+    const parts=(me.slots||[]).filter(s=>idx[d][s.k])
+      .map(s=>s.label+' '+m2hm(idx[d][s.k].from)+'〜'+m2hm(idx[d][s.k].to));
+    lines.push(fmtDateJP(d)+'('+WD[w]+') '+parts.join(' ／ '));
+  });
+  lines.push('', '合計 '+days.length+'日・'+fmtDur(totalMin(cur.assign)));
+  return lines.join('\n');
+}
+async function copyAssign(){
+  toast(await copyText(assignText())?'コピーしました':'コピーできませんでした');
+}
 
 /* いつもの曜日 */
 function renderUsual(){
@@ -691,7 +843,7 @@ document.getElementById('doneBtn').addEventListener('click',async()=>{
 
 /* ===== シート ===== */
 const sheet=document.getElementById('sheet'), backdrop=document.getElementById('backdrop');
-let shDate=null, shState={};
+let shDate=null, shState={}, shOrig='';
 
 function openSheet(key){
   shDate=key;
@@ -712,15 +864,29 @@ function openSheet(key){
                         : {on:false, mark:'o', from:s.from, to:s.to, edit:false};
     });
     renderSlots();
+    shOrig=shSnap();
   }else{
+    shOrig='';
     renderLocked(key);
   }
   backdrop.classList.add('show'); sheet.classList.add('show');
 }
-function closeSheet(){ backdrop.classList.remove('show'); sheet.classList.remove('show'); }
-backdrop.addEventListener('click',closeSheet);
-document.getElementById('shClose').addEventListener('click',closeSheet);
-document.getElementById('shClose2').addEventListener('click',closeSheet);
+/* 選んだのに「この日で出す」を押さずに閉じると、黙って消えていた。
+   背景をタップしただけでも閉じるので、本人は出したつもりになる。 */
+function shSnap(){
+  return JSON.stringify((me.slots||[]).map(s=>{
+    const st=shState[s.k]||{}; return [s.k, !!st.on, st.mark, st.from, st.to];
+  }));
+}
+function shDirty(){ return !!(cur && cur.editable && shOrig && shSnap()!==shOrig); }
+function closeSheet(force){
+  if(force!==true && shDirty() &&
+     !confirm('まだ出していません。\nこのまま閉じると、いま選んだ内容は消えます。\n\n閉じてよろしいですか？')) return;
+  shOrig=''; backdrop.classList.remove('show'); sheet.classList.remove('show');
+}
+backdrop.addEventListener('click',function(){ closeSheet(); });
+document.getElementById('shClose').addEventListener('click',function(){ closeSheet(); });
+document.getElementById('shClose2').addEventListener('click',function(){ closeSheet(true); });
 
 /* 締切前：枠ごとの行 */
 function renderSlots(){
@@ -781,7 +947,7 @@ document.getElementById('shSave').addEventListener('click',async()=>{
   saving=true;
   try{
     await rpc('kibo_staff_set',{p_code:code,p_date:shDate,p_slots:arr});
-    closeSheet();
+    closeSheet(true);
     await loadMonth();
     toast(arr.length?'出しました':'この日を取り消しました');
   }catch(e){ toast(String(e.message||'').indexOf('closed')>=0?'締切がすぎています':'保存できませんでした'); }
@@ -824,13 +990,13 @@ function renderLocked(key){
 async function sendReq(d,k,kind){
   try{
     await rpc('kibo_staff_request',{p_code:code,p_date:d,p_slot:k,p_kind:kind,p_note:''});
-    closeSheet(); await loadMonth(); toast('お店に届けました');
+    closeSheet(true); await loadMonth(); toast('お店に届けました');
   }catch(e){ toast('送れませんでした'); }
 }
 async function cancelReq(id){
   try{
     await rpc('kibo_staff_request_cancel',{p_code:code,p_id:id});
-    closeSheet(); await loadMonth(); toast('取り消しました');
+    closeSheet(true); await loadMonth(); toast('取り消しました');
   }catch(e){ toast('取り消せませんでした'); }
 }
 
