@@ -367,6 +367,85 @@
 
   /* 設定：枠ごと */
   .slotcfg .lab{flex:0 0 auto; font-weight:700; font-size:.95rem; min-width:2.4em;}
+
+  /* ===== v3：シフト表・偏り・まとめて決める・頼めそうな人 ===== */
+  .shiftcard{border:1px solid var(--line); border-radius:14px; padding:13px; margin-top:13px;
+    background:var(--surface);}
+  .shiftcard.on{border-color:var(--good); background:var(--good-wash);}
+  .shiftcard .hd2{font-weight:700; font-size:.92rem; margin-bottom:3px;}
+  .shiftcard.on .hd2{color:var(--good);}
+  .shiftcard .ln{font-size:.82rem; color:var(--ink-mid); line-height:1.55;}
+  .shiftcard.on .ln{color:var(--good);}
+  .shiftcard .acts2{display:flex; gap:8px; flex-wrap:wrap; margin-top:11px;}
+  .shiftcard .acts2 .btn{margin:0; width:auto; flex:1 1 auto; min-width:44%; font-size:.87rem;}
+  .shiftcard .redo{display:block; width:100%; margin-top:9px; background:none; border:none;
+    font-family:var(--sans); font-size:.78rem; color:var(--ink-soft); min-height:var(--tap); cursor:pointer;}
+
+  /* 決めるとき：その人の今月の入り具合 */
+  .who .p .cd2{margin-left:auto; font-size:.74rem; color:var(--ink-soft); flex:none; white-space:nowrap;}
+  .who .p .cd2 + span{margin-left:10px;}
+  .who .p .cd2.few{color:var(--good); font-weight:700;}
+  .who .p .cd2.many{color:var(--warn); font-weight:700;}
+
+  /* 頼めそうな人 */
+  .askbox{margin-top:9px; border:1px dashed var(--line-2); border-radius:11px; padding:10px 11px;}
+  .askbox .ah{font-size:.8rem; font-weight:700; color:var(--ink-mid); margin-bottom:7px;}
+  .askbox .al{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:9px;}
+  .askbox .al i{font-style:normal; font-size:.78rem; background:var(--surface-2); border-radius:8px;
+    padding:6px 9px; color:var(--ink-mid);}
+  .askbox .al i b{font-weight:700; color:var(--ink);}
+  .askbox button{width:100%; min-height:var(--tap); border:1px solid var(--line); background:var(--surface);
+    border-radius:10px; font-family:var(--sans); font-size:.82rem; font-weight:700; color:var(--ink-mid); cursor:pointer;}
+
+  /* ===== シフト表（全画面） ===== */
+  .tableview{position:fixed; inset:0; z-index:70; background:var(--paper); overflow-y:auto;
+    padding:max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right))
+            calc(env(safe-area-inset-bottom) + 24px) max(14px, env(safe-area-inset-left));}
+  .tableview .tvh{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px;}
+  .tableview .tvh h2{margin:0; font-size:1.15rem; font-weight:700;}
+  .tvacts{display:flex; gap:8px; flex-wrap:wrap; margin-left:auto;}
+  .tvacts button{min-height:var(--tap); padding:0 15px; border-radius:11px; font-family:var(--sans);
+    font-size:.85rem; font-weight:700; cursor:pointer; border:1px solid var(--line);
+    background:var(--surface); color:var(--ink);}
+  .tvacts button.main{background:var(--accent); color:#fff; border-color:transparent;}
+  .tvwrap{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  table.sft{width:100%; border-collapse:collapse; font-size:.82rem; background:var(--surface);}
+  table.sft th, table.sft td{border:1px solid var(--line); padding:7px 8px; vertical-align:top; line-height:1.5;}
+  table.sft th{background:var(--surface-2); font-weight:700; text-align:left; white-space:nowrap;}
+  table.sft td.dt{white-space:nowrap; font-weight:700; font-variant-numeric:tabular-nums; width:5.6em;}
+  table.sft td.dt .w{font-weight:400; color:var(--ink-soft); margin-left:3px;}
+  table.sft tr.s0 td.dt{color:var(--sun);} table.sft tr.s6 td.dt{color:var(--sat);}
+  table.sft tr.rest td{background:var(--surface-2); color:var(--ink-soft);}
+  table.sft td.nm{min-width:9em;}
+  table.sft td.nm .t{color:var(--ink-soft); font-size:.76rem; margin-left:4px; font-variant-numeric:tabular-nums;}
+  /* せまい画面では、名前と時刻を必ず別の行に（途中で折れて読みにくくなるため） */
+  @media (max-width:600px){ table.sft td.nm .t{display:block; margin-left:0;} }
+  table.sft td.emp{color:var(--warn); font-weight:700;}
+  .tvsub{margin:20px 0 8px; font-size:.95rem; font-weight:700;}
+  table.tot{width:100%; border-collapse:collapse; font-size:.82rem; background:var(--surface);}
+  table.tot th, table.tot td{border:1px solid var(--line); padding:7px 8px;}
+  table.tot th{background:var(--surface-2); font-weight:700; text-align:left; white-space:nowrap;}
+  table.tot td.n2{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  table.tot .bar{height:7px; border-radius:99px; background:var(--accent); min-width:2px;}
+  table.tot td.bx{width:38%;}
+  .tvnote{margin-top:14px; font-size:.78rem; color:var(--ink-soft); line-height:1.65;}
+
+  @media print{
+    @page{size:A4; margin:12mm;}
+    body > *{display:none !important;}
+    body > .tableview{display:block !important; position:static; inset:auto; padding:0;
+      background:#fff; color:#000; overflow:visible;}
+    .tvacts{display:none !important;}
+    .tableview .tvh h2{font-size:15pt;}
+    table.sft, table.tot{background:#fff; font-size:9pt;}
+    table.sft th, table.tot th{background:#f1f1f1;}
+    table.sft tr.rest td{background:#f6f6f6;}
+    table.sft, table.tot{page-break-inside:auto;}
+    table.sft thead, table.tot thead{display:table-header-group;}
+    table.sft tr, table.tot tr{page-break-inside:avoid;}
+    .tvwrap{overflow:visible;}
+    .tvnote{font-size:8pt;}
+  }
 </style>
 </head>
 <body>
@@ -422,7 +501,7 @@
       <div class="s0">日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div class="s6">土</div>
     </div>
     <div class="cal" id="cal"></div>
-    <div id="pubBox"></div>
+    <div id="shiftBox"></div>
     <p class="muted" style="margin:13px 0 0; line-height:1.65" id="hint1"></p>
   </section>
 
@@ -537,6 +616,22 @@
   </div>
 </div>
 
+<!-- ===== シフト表（貼り出す・印刷する・LINEに貼る） ===== -->
+<div class="tableview" id="tableView" hidden>
+  <div class="tvh">
+    <h2 id="tvTitle">—</h2>
+    <div class="tvacts">
+      <button class="main" id="tvPrint">印刷する</button>
+      <button id="tvCopy">LINEに貼る文をコピー</button>
+      <button id="tvClose">とじる</button>
+    </div>
+  </div>
+  <div class="tvwrap"><table class="sft" id="tvTable"></table></div>
+  <div class="tvsub">ひとりずつの合計</div>
+  <table class="tot" id="tvTotal"></table>
+  <p class="tvnote" id="tvNote"></p>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -558,6 +653,7 @@ function parseMonth(s){ const p=s.split('-'); return {y:+p[0], m1:+p[1]}; }
 function shiftMonth(s,delta){ let {y,m1}=parseMonth(s); m1+=delta;
   while(m1>12){m1-=12;y++;} while(m1<1){m1+=12;y--;} return y+'-'+pad2(m1); }
 function daysInMonth(y,m1){ return new Date(y,m1,0).getDate(); }
+function fmtDur(m){ const h=Math.floor(m/60), mi=m%60; return h+'時間'+(mi?pad2(mi)+'分':''); }
 function fmtDateJP(s){ const p=s.split('-'); return (+p[1])+'月'+(+p[2])+'日'; }
 function firstWday(y,m1){ return new Date(y,m1-1,1).getDay(); }
 function wdayOf(s){ const p=s.split('-'); return new Date(+p[0],+p[1]-1,+p[2]).getDay(); }
@@ -817,24 +913,142 @@ function renderMonth(){
     cal.appendChild(e);
   }
 
-  /* ⑥ 公開 */
-  const pb=document.getElementById('pubBox'); pb.innerHTML='';
-  const assignN=(cur.assign||[]).length;
-  if(assignN || cur.published){
-    const bar=document.createElement('div');
-    bar.className='pubbar'+(cur.published?' on':'');
-    bar.innerHTML='<span>'+(cur.published
-      ? '決まったシフトは、スタッフの画面に出ています。'
-      : 'いま '+assignN+'つ決まっています。知らせるまでスタッフには見えません。')+'</span>';
-    const b=document.createElement('button');
-    b.textContent=cur.published?'知らせを取り消す':'みんなに知らせる';
-    b.addEventListener('click',()=>doPublish(!cur.published));
-    bar.appendChild(b); pb.appendChild(bar);
-  }
+  renderShiftBox(anySubmitted);
 
   document.getElementById('hint1').textContent = anySubmitted
     ? '赤い日は人手が足りない日です。「昼 −1」は、昼にあと1人ほしいという意味。日をタップすると、その日に入れる人が出ます。'
     : '日をタップすると、その日に入れる人が出ます。ほしい人数を下回ると赤くなります（人数は「設定」で決めます）。';
+}
+
+/* ===== ⑥＋B：シフトを組む・配る ===== */
+function fixedOf(sid){ const s2=staffList.find(x=>x.id===sid); return s2?(s2.fixed_days||0):0; }
+function fixedMinOf(sid){ const s2=staffList.find(x=>x.id===sid); return s2?(s2.fixed_min||0):0; }
+
+function renderShiftBox(anySubmitted){
+  const box=document.getElementById('shiftBox'); box.innerHTML='';
+  if(!staffList.length) return;
+  const slotsN=(cur.assign||[]).length;
+  const peopleN=new Set((cur.assign||[]).map(a=>a.staff_id)).size;
+
+  const card=document.createElement('div');
+  card.className='shiftcard'+(cur.published?' on':'');
+  card.innerHTML='<div class="hd2">'+(cur.published?'✓ シフトを知らせました':'シフトを組む')+'</div>';
+
+  const ln=document.createElement('div'); ln.className='ln';
+  if(cur.published) ln.textContent='スタッフの画面に出ています。中身を直すと、その場で相手の画面も変わります。';
+  else if(slotsN) ln.textContent=slotsN+'コマ・'+peopleN+'人ぶん決まっています。知らせるまでスタッフには見えません。';
+  else if(!anySubmitted) ln.textContent='希望が出そろってから組みはじめられます。';
+  else ln.textContent='まだ決まっていません。希望どおりに月まるごと入れて、そこから外していくのが早いです。';
+  card.appendChild(ln);
+
+  const acts=document.createElement('div'); acts.className='acts2';
+  const mk=(label,cls,fn)=>{ const b=document.createElement('button'); b.className='btn '+cls; b.textContent=label;
+    b.addEventListener('click',fn); acts.appendChild(b); return b; };
+
+  if(!slotsN){
+    if(anySubmitted) mk('希望どおり、月まるごと入れる','',assignMonth);
+  }else{
+    mk('シフト表を見る','sub',openTable);
+    mk(cur.published?'知らせを取り消す':'みんなに知らせる', cur.published?'sub':'', ()=>doPublish(!cur.published));
+  }
+  card.appendChild(acts);
+
+  if(slotsN){
+    const r=document.createElement('button'); r.className='redo'; r.textContent='この月のシフトを全部やり直す';
+    r.addEventListener('click',clearMonth); card.appendChild(r);
+  }
+  box.appendChild(card);
+}
+
+async function assignMonth(){
+  if(busy) return;
+  if(!confirm('「入れます」で出ている希望を、この月ぜんぶシフトに入れます。\n（「行けたら」の方と定休日は入りません）\n\nこのあと、多いところを外していってください。')) return;
+  busy=true;
+  try{ const r=await arpc('kibo_admin_assign_month',{p_month:month});
+       await loadMonth(); toast((r&&r.n?r.n:0)+'コマ入れました'); }
+  catch(e){ toast('できませんでした'); }
+  finally{ busy=false; }
+}
+async function clearMonth(){
+  if(busy) return;
+  if(!confirm('この月に決めたシフトを、全部消します。\n希望は消えません。よろしいですか？')) return;
+  busy=true;
+  try{ await arpc('kibo_admin_assign_clear_month',{p_month:month});
+       await loadMonth(); toast('やり直せます'); }
+  catch(e){ toast('できませんでした'); }
+  finally{ busy=false; }
+}
+
+/* ===== A：シフト表（貼り出す・印刷する・LINEに貼る） ===== */
+function assignRows(){
+  const {y,m1}=parseMonth(cur.month);
+  const last=daysInMonth(y,m1), closed=new Set(shop.closed_wdays||[]);
+  const out=[];
+  for(let d=1;d<=last;d++){
+    const key=ymd(y,m1,d), w=new Date(y,m1-1,d).getDay();
+    const byK={};
+    slots().forEach(s=>{
+      const got=(assign[key]||{})[s.k]||{};
+      byK[s.k]=staffList.filter(x=>got[x.id]).map(x=>({name:x.name,from:got[x.id].from,to:got[x.id].to}));
+    });
+    out.push({d:d, key:key, w:w, rest:closed.has(w), byK:byK});
+  }
+  return out;
+}
+function openTable(){
+  const {y,m1}=parseMonth(cur.month);
+  document.getElementById('tvTitle').textContent=shop.name+'　'+y+'年'+m1+'月 シフト表';
+
+  const rows=assignRows();
+  let h='<thead><tr><th>日</th>'+slots().map(s=>'<th>'+esc(s.label)+' '+m2hm(s.from)+'〜'+m2hm(s.to)+'</th>').join('')+'</tr></thead><tbody>';
+  rows.forEach(r=>{
+    h+='<tr class="s'+r.w+(r.rest?' rest':'')+'"><td class="dt">'+r.d+'日<span class="w">('+WD[r.w]+')</span></td>';
+    slots().forEach(s=>{
+      const list=r.byK[s.k];
+      if(r.rest && !list.length){ h+='<td>定休日</td>'; return; }
+      if(!list.length){ h+='<td class="emp">未定</td>'; return; }
+      h+='<td class="nm">'+list.map(p=>esc(p.name)+'<span class="t">'+m2hm(p.from)+'〜'+m2hm(p.to)+'</span>').join('<br>')+'</td>';
+    });
+    h+='</tr>';
+  });
+  h+='</tbody>';
+  document.getElementById('tvTable').innerHTML=h;
+
+  /* C：ひとりずつの合計（偏りを目で見る） */
+  const maxMin=Math.max(1, ...staffList.map(s2=>s2.fixed_min||0));
+  let t='<thead><tr><th>お名前</th><th style="text-align:right">出る日</th><th style="text-align:right">時間</th><th>　</th></tr></thead><tbody>';
+  staffList.slice().sort((a,b)=>(b.fixed_min||0)-(a.fixed_min||0)).forEach(s2=>{
+    const mi=s2.fixed_min||0;
+    t+='<tr><td>'+esc(s2.name)+'</td><td class="n2">'+(s2.fixed_days||0)+'日</td>'+
+       '<td class="n2">'+(mi?fmtDur(mi):'—')+'</td>'+
+       '<td class="bx"><div class="bar" style="width:'+Math.round(mi/maxMin*100)+'%"></div></td></tr>';
+  });
+  document.getElementById('tvTotal').innerHTML=t+'</tbody>';
+
+  const undecided=rows.filter(r=>!r.rest && slots().some(s=>!r.byK[s.k].length)).length;
+  document.getElementById('tvNote').textContent =
+    (undecided?'⚠ まだ人が決まっていない枠が '+undecided+'日ぶん あります。　':'')+
+    (cur.published?'この内容は、スタッフの画面にも出ています。':'⚠ まだスタッフには知らせていません。');
+
+  document.getElementById('tableView').hidden=false;
+  document.body.style.overflow='hidden';
+}
+function closeTable(){ document.getElementById('tableView').hidden=true; document.body.style.overflow=''; }
+document.getElementById('tvClose').addEventListener('click',closeTable);
+document.getElementById('tvPrint').addEventListener('click',()=>window.print());
+document.getElementById('tvCopy').addEventListener('click',async()=>{
+  toast(await copyText(lineText())?'コピーしました':'コピーできませんでした');
+});
+function lineText(){
+  const {y,m1}=parseMonth(cur.month);
+  const lines=[y+'年'+m1+'月のシフトです。', ''];
+  assignRows().forEach(r=>{
+    const parts=slots().filter(s=>r.byK[s.k].length)
+      .map(s=>s.label+' '+r.byK[s.k].map(p=>p.name).join('、'));
+    if(parts.length) lines.push(r.d+'日('+WD[r.w]+') '+parts.join(' ／ '));
+  });
+  lines.push('', '※ ご自分のぶんは、いつものURLからも見られます。');
+  return lines.join('\n');
 }
 
 async function doPublish(on){
@@ -872,6 +1086,27 @@ function slotKiboHtml(s){
   return h+'</div>';
 }
 
+/* C：いま決まっている日数の平均（多い/少ないの目印に使う） */
+function avgFixed(){
+  const a=staffList.filter(x=>x.active); if(!a.length) return 0;
+  return a.reduce((t,x)=>t+(x.fixed_days||0),0)/a.length;
+}
+/* D：その日その枠に希望が無い人＝声をかける当たり先。今月の少ない順 */
+function askCandidates(key,k){
+  const m=avail[key]||{}, got=(assign[key]||{})[k]||{};
+  return staffList
+    .filter(s2=>s2.active && !(m[s2.id]&&m[s2.id][k]) && !got[s2.id])
+    .map(s2=>({id:s2.id, name:s2.name, fixed:s2.fixed_days||0}))
+    .sort((a,b)=>a.fixed-b.fixed);
+}
+function askText(key,k,cand){
+  const sl=slotOf(k), w=wdayOf(key);
+  return 'おつかれさまです。\n'+fmtDateJP(key)+'（'+WD[w]+'）の'+(sl?sl.label:k)+
+    '（'+m2hm(sl.from)+'〜'+m2hm(sl.to)+'）が、あと'+Math.max(1,needOf(key,k)-((assign[key]&&assign[key][k])?Object.keys(assign[key][k]).length:0))+
+    '人足りていません。\nどなたか入れる方はいらっしゃいますか。\n\n'+
+    'お声がけ先：'+cand.map(c=>c.name+'さん').join('、');
+}
+
 /* --- その日：シフトを決める --- */
 function renderKime(){
   const box=document.getElementById('slots'); box.innerHTML='';
@@ -891,8 +1126,11 @@ function renderKime(){
         const on=!!got[p.id];
         const b=document.createElement('button');
         b.className='p pick'+(on?' on':'');
+        const fd=fixedOf(p.id), avg=avgFixed();
+        const cls=fd<=avg-2?' few':(fd>=avg+2?' many':'');
         b.innerHTML='<span class="ck">'+(on?'✓':'')+'</span><b>'+esc(p.name)+'</b>'+
           (p.mark==='t'?'<span class="mk">行けたら</span>':'')+
+          '<span class="cd2'+cls+'">今月'+fd+'日</span>'+
           '<span>'+m2hm(on?got[p.id].from:p.from)+'〜'+m2hm(on?got[p.id].to:p.to)+'</span>';
         b.addEventListener('click',()=>toggleAssign(s.k,p.id,!on));
         who.appendChild(b);
@@ -905,6 +1143,21 @@ function renderKime(){
       all.textContent='希望どおり、○の'+okList.length+'人を全員入れる';
       all.addEventListener('click',()=>assignAuto(s.k));
       wrap.appendChild(all);
+    }
+    // D：足りていないときだけ「頼めそうな人」を出す（＝当たり先）
+    if(chosen<need){
+      const cand=askCandidates(shDate,s.k);
+      if(cand.length){
+        const ab=document.createElement('div'); ab.className='askbox';
+        ab.innerHTML='<div class="ah">頼めそうな人（今月の少ない順）</div>'+
+          '<div class="al">'+cand.slice(0,6).map(c=>'<i><b>'+esc(c.name)+'</b> 今月'+c.fixed+'日</i>').join('')+'</div>';
+        const cb=document.createElement('button');
+        cb.textContent='この'+esc(s.label)+'を頼む文をコピー';
+        cb.addEventListener('click',async()=>{
+          toast(await copyText(askText(shDate,s.k,cand.slice(0,6)))?'コピーしました':'コピーできませんでした');
+        });
+        ab.appendChild(cb); wrap.appendChild(ab);
+      }
     }
     box.appendChild(wrap);
   });
@@ -1147,9 +1400,12 @@ function renderStaff(){
     const el=document.createElement('div'); el.className='staff'+(s2.active?'':' off');
     const st=submitState(s2);
     const stTxt={none:'まだ出していません', part:s2.days+'日 出した（途中）', done:'✓ 出し終わり'}[st];
+    const fx=(s2.fixed_days||0)
+      ? '　／　シフト '+s2.fixed_days+'日'+(s2.fixed_min?'（'+fmtDur(s2.fixed_min)+'）':'')
+      : '';
     el.innerHTML='<div class="nm">'+esc(s2.name)+(s2.active?'':' <span class="muted">（休止中）</span>')+
       (s2.active?'<span class="st '+st+'">'+stTxt+'</span>':'')+'</div>'+
-      '<div class="cd">合言葉 '+esc(s2.code)+'</div><div class="acts"></div>';
+      '<div class="cd">合言葉 '+esc(s2.code)+esc(fx)+'</div><div class="acts"></div>';
     const acts=el.querySelector('.acts');
     const mk=(label,cls,fn)=>{ const b=document.createElement('button'); b.className='btn sm '+cls; b.textContent=label;
       b.addEventListener('click',fn); acts.appendChild(b); };
