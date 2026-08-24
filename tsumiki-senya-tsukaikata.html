@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>つみき&amp;せんや — 使い方</title>
+<meta name="description" content="つみき&amp;せんやの使い方。スタッフは働ける日をタップするだけ、店長は人手が足りない日がひと目で分かります。">
+<link rel="apple-touch-icon" href="icon-tsumiki-senya.png">
+<style>
+<style>
+  /* ================================================================
+     つみき 取扱説明書 共通スタイル v2（1項目＝1図＋数行）
+     ・外部読み込みゼロ（フォント/CDN/画像すべて無し）
+     ・図はアプリ画面をHTML/CSSで再現（スクショ画像を使わない）
+     ================================================================ */
+  :root{
+    --paper:#F4F2EE; --surface:#ECE9E3; --ink:#242321; --muted:#77736B;
+    --hair:#D8D4CC; --ghost:#BEB9B0; --control:#FBFAF8;
+    --mark:#B4562E;                       /* 図の注釈（番号ピン・矢印） */
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%; scroll-behavior:smooth;}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:'Hiragino Maru Gothic ProN',-apple-system,BlinkMacSystemFont,'Hiragino Sans','Noto Sans JP',sans-serif;
+    line-height:1.75; -webkit-font-smoothing:antialiased;
+    padding:0 18px calc(48px + env(safe-area-inset-bottom));
+    font-size:15px;
+  }
+  .wrap{max-width:1180px; margin:0 auto;}
+  a{color:var(--ink);}
+  /* grid/flex の子は既定 min-width:auto。中身（表など）に押し広げられて
+     375px幅で横スクロールが出るのを防ぐ。 */
+  main,.grp,.items,.item,figure.shot{min-width:0;}
+  .tblwrap{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+
+  /* ================= 見出し ================= */
+  header{padding:40px 0 0;}
+  .kicker{font-size:11px; font-weight:700; letter-spacing:.16em; color:var(--muted); margin-bottom:9px;}
+  h1{font-size:27px; font-weight:700; letter-spacing:.03em; line-height:1.4;}
+  header .lead{margin-top:10px; font-size:14.5px; color:var(--muted); max-width:36em;}
+  .openapp{margin-top:16px; display:flex; gap:9px; flex-wrap:wrap;}
+  .openapp a{
+    display:inline-block; background:var(--ink); color:var(--paper);
+    text-decoration:none; border-radius:999px; padding:9px 20px;
+    font-size:14px; font-weight:700;
+  }
+  .openapp a.ghost{background:none; color:var(--ink); border:1.5px solid var(--hair);}
+
+  /* ================= もくじ ================= */
+  /* 狭い画面ではたたんでおく（項目が多いので本文が遠くならないように）。
+     1000px以上ではサマリを隠して左に貼り付ける。開閉は末尾の script。 */
+  details.toc{
+    margin-top:22px; background:var(--control); border:1px solid var(--hair);
+    border-radius:16px; padding:12px 16px;
+  }
+  details.toc summary{
+    cursor:pointer; list-style:none; font-size:12.5px; font-weight:700;
+    letter-spacing:.08em; color:var(--muted);
+  }
+  details.toc summary::-webkit-details-marker{display:none;}
+  details.toc summary::after{content:'▾'; margin-left:7px; font-size:11px;}
+  details.toc[open] summary::after{content:'▴';}
+  .toc nav{margin-top:10px;}
+  .toc .g{
+    font-size:10.5px; font-weight:700; letter-spacing:.14em; color:var(--ghost);
+    margin:14px 0 3px;
+  }
+  .toc .g:first-child{margin-top:0;}
+  .toc a{
+    display:block; text-decoration:none; font-size:13.5px; padding:2px 0;
+    color:var(--ink);
+  }
+  .toc a .n{display:inline-block; width:1.9em; color:var(--ghost); font-weight:700; font-size:12px;}
+  .toc a.on{color:var(--mark); font-weight:700;}
+  .toc a.on .n{color:var(--mark);}
+
+  /* ================= 項目（1項目＝1図＋数行） ================= */
+  .grp{padding:34px 0 0; scroll-margin-top:14px;}
+  .grp > h2{
+    font-size:12.5px; font-weight:700; letter-spacing:.14em; color:var(--muted);
+    border-bottom:1px solid var(--hair); padding-bottom:8px; margin-bottom:16px;
+  }
+  .items{display:grid; gap:16px;}
+  .item{
+    background:var(--control); border:1px solid var(--hair); border-radius:18px;
+    padding:14px 14px 16px; scroll-margin-top:14px;
+  }
+  .item h3{
+    font-size:15.5px; font-weight:700; line-height:1.55; margin:13px 0 2px;
+    display:flex; gap:9px; align-items:flex-start;
+  }
+  .item h3 .n{
+    flex:none; width:23px; height:23px; border-radius:50%;
+    background:var(--ink); color:var(--paper); font-size:12px; font-weight:700;
+    display:flex; align-items:center; justify-content:center; margin-top:2px;
+  }
+  .item p{font-size:14px; margin:5px 0 0; padding-left:32px;}
+  .item p.fine{font-size:12.5px; color:var(--muted); margin-top:8px; line-height:1.7;}
+  .item p.caution{color:#94301b;}
+  .item p.caution b{color:#94301b;}
+  .item ul{margin:5px 0 0; padding-left:calc(32px + 1.1em); font-size:14px;}
+  .item ul li{margin:3px 0;}
+  .item ul li::marker{color:var(--ghost);}
+  /* 図のないおまけ項目（データの保存など）は番号だけで詰めて見せる */
+  .item.nofig h3{margin-top:2px;}
+
+  kbd{
+    display:inline-block; background:#fff; border:1px solid var(--hair);
+    border-bottom-width:2px; border-radius:7px; padding:0 7px;
+    font-family:inherit; font-size:13px; font-weight:700; white-space:nowrap;
+  }
+  .path{color:var(--muted);}
+  .path b{color:var(--ink); font-weight:700;}
+
+  /* ================= 図（アプリ画面の再現） ================= */
+  /* 番号ピンが枠の外に11px＋影ぶんはみ出す。その余白を figure 側に持たせる。 */
+  figure.shot{margin:0; padding:2px 14px 0;}
+  figcaption{font-size:11.5px; color:var(--ghost); margin-top:7px; text-align:center;}
+  /* 注釈：番号ピンと矢印（使うのは「ここを押す」が言葉で伝わらない図だけ） */
+  .pin{
+    position:absolute; z-index:3; width:21px; height:21px; border-radius:50%;
+    background:var(--mark); color:#fff; font-size:11.5px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 0 3px rgba(255,255,255,.9);
+  }
+  .arrow{position:absolute; z-index:2; height:2px; background:var(--mark); transform-origin:left center;}
+  .arrow::after{
+    content:''; position:absolute; right:-2px; top:-4px;
+    border:5px solid transparent; border-left-color:var(--mark);
+  }
+
+  /* 流れ図（「どんな道具か」の1枚目に使う） */
+  .flow{display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center;
+    background:#fff; border:1px solid var(--hair); border-radius:14px; padding:16px 12px;}
+  .flow .box{background:var(--surface); border-radius:10px; padding:7px 12px; font-size:13px; font-weight:700;}
+  .flow .arw{color:var(--mark); font-weight:700;}
+
+  /* 計算式の図 */
+  .calc{
+    background:#fff; border:1px solid var(--hair); border-radius:14px;
+    padding:13px 14px; font-size:14.5px; font-weight:700;
+    font-variant-numeric:tabular-nums; text-align:center; line-height:2;
+  }
+  .calc .op{color:var(--ghost); margin:0 3px;}
+  .calc .res{color:var(--mark);}
+  .calc small{font-size:11px; color:var(--muted); font-weight:500; margin-left:1px;}
+  .calc .note2{display:block; font-size:11.5px; color:var(--muted); font-weight:500; margin-top:3px;}
+
+  /* 注意（赤の細い帯。多用しない） */
+  .warnbox{
+    border-left:3px solid #B03A22; background:#F7EFEA; border-radius:0 10px 10px 0;
+    padding:9px 12px; margin:9px 0 0 32px; font-size:13px; color:#7d2c19;
+  }
+  .warnbox b{color:#7d2c19;}
+
+  /* 比較表（巻末で使う） */
+  table.cmp{border-collapse:collapse; width:100%; margin:8px 0 0; font-size:13.5px; background:#fff;
+    border:1px solid var(--hair); border-radius:14px; overflow:hidden;}
+  table.cmp th, table.cmp td{border-bottom:1px solid var(--hair); padding:9px 12px; text-align:left; vertical-align:top;}
+  table.cmp thead th{background:var(--surface); font-size:11.5px; color:var(--muted); font-weight:700;}
+  table.cmp tbody tr:last-child th, table.cmp tbody tr:last-child td{border-bottom:none;}
+  table.cmp tbody th{font-weight:700; white-space:nowrap;}
+  /* 表は項目カードの中に入るので、常に行ごとのカードへ積み替える
+     （列が細って1字ずつ縦に折れるのを防ぐ） */
+  table.cmp.stack{display:block;}
+  table.cmp.stack thead{display:none;}
+  table.cmp.stack tbody,table.cmp.stack tbody tr{display:block;}
+  table.cmp.stack tbody tr{padding:11px 13px; border-bottom:1px solid var(--hair);}
+  table.cmp.stack tbody tr:last-child{border-bottom:none;}
+  table.cmp.stack tbody th,table.cmp.stack tbody td{
+    display:block; width:auto!important; padding:0; border:none; white-space:normal;}
+  table.cmp.stack tbody th{font-size:14px;}
+  table.cmp.stack tbody td{margin-top:5px; font-size:13px;}
+  table.cmp.stack tbody td[data-l]::before{
+    content:attr(data-l); display:block; font-size:10.5px; font-weight:700;
+    letter-spacing:.08em; color:var(--muted);}
+
+  /* ================= 巻末（小さく・端に） ================= */
+  .appendix{padding-top:34px;}
+  .appendix > h2{
+    font-size:12.5px; font-weight:700; letter-spacing:.14em; color:var(--muted);
+    border-bottom:1px solid var(--hair); padding-bottom:8px; margin-bottom:14px;
+  }
+  .qa{display:grid; gap:11px;}
+  .qa .q{font-size:13.5px; font-weight:700;}
+  .qa .a{font-size:13px; color:var(--muted); margin-top:2px;}
+  .qa > div{border-bottom:1px dotted var(--hair); padding-bottom:10px;}
+  .qa > div:last-child{border-bottom:none;}
+
+  footer{
+    margin-top:44px; padding-top:18px; border-top:1px solid var(--hair);
+    font-size:12px; color:var(--ghost); text-align:center; line-height:2;
+  }
+
+  /* ================= 横幅を使う ================= */
+  @media (min-width:640px){
+    .items{grid-template-columns:1fr 1fr;}
+    .qa{grid-template-columns:1fr 1fr; gap:11px 26px;}
+  }
+  @media (min-width:1000px){
+    body{padding-left:28px; padding-right:28px;}
+    .wrap{max-width:1280px;}
+    h1{font-size:32px;}
+    .layout{display:grid; grid-template-columns:212px minmax(0,1fr); gap:40px; align-items:start;}
+    details.toc{
+      position:sticky; top:22px; margin-top:40px; background:none; border:none; padding:0;
+      max-height:calc(100vh - 56px); overflow:auto;
+    }
+    details.toc summary{display:none;}
+    .grp{padding-top:40px;}
+
+    /* PCでは項目を1列にして、図を大きく見せる（2列だと図が小さくて読めない）。
+       図の中身は px 直書きが多く、箱を広げるだけでは字が大きくならないので zoom で
+       中身ごと拡大する（幅は親いっぱいのままなので横はみ出しは起きない）。 */
+    .items{grid-template-columns:minmax(0,1fr);}
+    figure.shot > :not(figcaption){zoom:1.25;}
+    figcaption{font-size:12.5px;}
+  }
+  @media (min-width:1120px){
+    /* 横幅に余裕があるときだけ、図を左・文章を右に並べる。
+       HTMLを変えずに済むよう、図に縦方向のスパンを持たせて
+       残りの子（h3/p/ul）を右の列へ流し込む。 */
+    .item{
+      display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);
+      column-gap:30px; align-content:start; padding:18px 22px 20px;
+    }
+    .item > figure.shot{grid-column:1; grid-row:1 / span 30; align-self:center; padding:0 12px;}
+    .item > *:not(figure.shot){grid-column:2;}
+    .item > h3{margin-top:0;}
+    /* 図のない項目は横に伸びすぎないよう、行の長さだけ抑える */
+    .item.nofig{display:block;}
+    .item.nofig p, .item.nofig ul{max-width:58em;}
+  }
+
+  /* ================= 印刷（そのままA4のPDFになる） ================= */
+  @media print{
+    @page{margin:14mm 12mm;}
+    body{background:#fff; color:#000; font-size:9.5pt; padding:0;}
+    .wrap{max-width:none;}
+    .layout{display:block;}
+    details.toc,.openapp{display:none;}
+    header{padding-top:0;}
+    .grp{padding-top:14pt;}
+    .grp > h2{page-break-after:avoid;}
+    .items{grid-template-columns:1fr 1fr; gap:9pt;}
+    .item{background:#fff; page-break-inside:avoid;}
+    .qa{grid-template-columns:1fr 1fr;}
+    .qa > div{page-break-inside:avoid;}
+    .screen{box-shadow:none;}
+    footer{color:#555;}
+  }
+
+  /* つみき&せんや 本体と同じ色（画面再現に使う） */
+  :root{
+    --app-paper:#f5f4f0; --app-surface:#fffefb; --app-surface2:#efece5;
+    --app-ink:#1d1a15; --app-mid:#5b554a; --app-soft:#8f8877;
+    --app-line:#e2ded4; --app-line2:#d8d3c7;
+    --acc:#b06f26; --acc2:#8a5a24; --acc-wash:#f0e4d1;
+    --good:#4c7a51; --good-wash:#dde9dd; --warn:#b0522a; --warn-wash:#f2e0d4;
+    --sat:#3f6b8a; --sun:#a2513f;
+  }
+
+  /* ================= アプリ画面の再現（図） ================= */
+  .screen{
+    position:relative; border:1px solid var(--app-line); border-radius:14px;
+    background:var(--app-surface); padding:13px; color:var(--app-ink);
+    font-size:12.5px; line-height:1.6; box-shadow:0 1px 3px rgba(36,35,33,.06);
+  }
+  .screen .bar{
+    display:flex; align-items:center; gap:7px; margin:-13px -13px 11px; padding:9px 13px;
+    border-bottom:1px solid var(--app-line); border-radius:14px 14px 0 0; background:var(--app-paper);
+  }
+  .screen .bar .mk{width:17px; height:17px; border-radius:5px; background:#242321; flex:none;}
+  .screen .bar .ttl{font-weight:800; font-size:12.5px; line-height:1.25;}
+  .screen .bar .ttl small{display:block; font-size:9px; font-weight:400; color:var(--app-soft);}
+  .screen .bar .dot{margin-left:auto; width:7px; height:7px; border-radius:50%; background:var(--good); flex:none;}
+  .screen .tabs{display:flex; gap:5px; background:var(--app-surface2); border-radius:11px; padding:3px; margin-bottom:11px;}
+  .screen .tabs span{flex:1; text-align:center; font-size:11px; font-weight:700; color:var(--app-soft); padding:6px 2px; border-radius:8px;}
+  .screen .tabs .on{background:var(--app-surface); color:var(--app-ink); box-shadow:0 1px 2px rgba(40,32,18,.1);}
+
+  /* 月バーとピル */
+  .mbar{display:flex; align-items:center; gap:7px; margin-bottom:9px;}
+  .mbar .nv{width:26px; height:26px; flex:none; border:1px solid var(--app-line); border-radius:8px;
+    background:var(--app-surface2); color:var(--app-mid); text-align:center; line-height:24px; font-size:12px;}
+  .mbar .mt{flex:1; text-align:center; font-weight:800; font-size:14px;}
+  .pills{display:flex; flex-wrap:wrap; gap:5px; margin-bottom:9px;}
+  .pills i{font-style:normal; font-size:10px; font-weight:700; padding:3px 9px; border-radius:999px;
+    background:var(--app-surface2); color:var(--app-mid); border:1px solid var(--app-line);}
+  .pills i.ok{background:var(--good-wash); color:var(--good); border-color:transparent;}
+  .pills i.cnt{background:var(--acc-wash); color:var(--acc2); border-color:transparent;}
+  .pills i.ng{background:var(--warn-wash); color:var(--warn); border-color:transparent;}
+
+  /* 足りない日のまとめ */
+  .lackbox{background:var(--warn-wash); border-radius:12px; padding:10px 12px; margin-bottom:10px;}
+  .lackbox.okbox{background:var(--good-wash);}
+  .lackbox .hd{font-weight:800; font-size:12px; color:var(--warn);}
+  .lackbox.okbox .hd{color:var(--good);}
+  .lackbox .cs{display:flex; flex-wrap:wrap; gap:5px; margin-top:7px;}
+  .lackbox .cs i{font-style:normal; font-size:11px; font-weight:700; color:var(--warn);
+    border:1.5px solid var(--warn); background:var(--app-surface); border-radius:9px; padding:3px 9px;}
+  .lackbox .rest{font-size:10px; color:var(--app-soft); margin-top:6px;}
+
+  /* カレンダー */
+  .cal7{display:grid; grid-template-columns:repeat(7,1fr); gap:3px;}
+  .cal7.hd7{margin-bottom:3px;}
+  .cal7.hd7 i{font-style:normal; text-align:center; font-size:9.5px; font-weight:700; color:var(--app-soft);}
+  .cal7.hd7 i.sat{color:var(--sat);} .cal7.hd7 i.sun{color:var(--sun);}
+  .cal7 .c{border:1px solid var(--app-line); border-radius:7px; background:var(--app-surface);
+    min-height:40px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:1px; padding:2px 1px;}
+  .cal7 .c .d{font-size:10.5px; font-weight:800; line-height:1.05;}
+  .cal7 .c .s{font-size:8.5px; color:var(--app-soft); line-height:1.2; text-align:center;}
+  .cal7 .c.bl{border:none; background:transparent;}
+  .cal7 .c.rest{background:var(--app-surface2); border-style:dashed;}
+  .cal7 .c.rest .d{color:var(--app-soft);}
+  .cal7 .c.ng{background:var(--warn-wash); border-color:var(--warn); border-width:1.5px;}
+  .cal7 .c.ng .d, .cal7 .c.ng .s{color:var(--warn); font-weight:800;}
+  .cal7 .c.on{background:var(--acc-wash); border-color:var(--acc); border-width:1.5px;}
+  .cal7 .c.on .d, .cal7 .c.on .s{color:var(--acc2); font-weight:800;}
+  .cal7 .c.sat .d{color:var(--sat);} .cal7 .c.sun .d{color:var(--sun);}
+
+  /* 日の詳細（昼／夜） */
+  .slotbox{border-top:1px solid var(--app-line); padding:9px 0 2px;}
+  .slotbox:first-child{border-top:none; padding-top:2px;}
+  .slotbox .sh{display:flex; align-items:baseline; gap:6px; margin-bottom:6px;}
+  .slotbox .sh b{font-size:13px;}
+  .slotbox .sh .tm{font-size:10px; color:var(--app-soft);}
+  .slotbox .sh .ct{margin-left:auto; font-size:10.5px; font-weight:800; color:var(--good); white-space:nowrap;}
+  .slotbox .sh .ct.ng{color:var(--warn);}
+  .slotbox .pp{display:flex; align-items:center; background:var(--app-surface2); border-radius:9px;
+    padding:6px 10px; margin-bottom:4px; font-size:11.5px;}
+  .slotbox .pp b{font-weight:800;}
+  .slotbox .pp span{margin-left:auto; color:var(--app-soft); font-size:10.5px;}
+  .slotbox .nobody{color:var(--warn); font-weight:700; font-size:11px; padding:4px 2px;}
+
+  /* 入力まわり */
+  .prebtns{display:flex; gap:5px; margin-bottom:7px;}
+  .prebtns i{flex:1; font-style:normal; text-align:center; font-size:11.5px; font-weight:700;
+    border:1.5px solid var(--app-line2); border-radius:9px; background:var(--app-surface2); padding:7px 2px;}
+  .prebtns i.on{background:var(--acc-wash); border-color:var(--acc); color:var(--acc2);}
+  .tmrow{display:flex; align-items:center; gap:6px;}
+  .tmrow b{flex:1; text-align:center; font-size:13px; font-weight:800; border:1.5px solid var(--app-line2);
+    border-radius:9px; background:var(--app-surface); padding:7px 3px; min-width:0;}
+  .tmrow b.hit{border-color:var(--acc);}
+  .tmrow span{color:var(--app-soft); flex:none;}
+  .bigbtn{display:block; text-align:center; background:var(--acc); color:#fff; font-weight:800;
+    border-radius:11px; padding:9px; font-size:12.5px; margin-top:8px;}
+  .subbtns{display:flex; gap:6px; margin-top:8px;}
+  .subbtns i{flex:1; font-style:normal; text-align:center; background:var(--app-surface2); color:var(--app-mid);
+    border:1px solid var(--app-line); border-radius:9px; padding:8px 4px; font-size:11px; font-weight:700;}
+
+  /* 合言葉とURL */
+  .codechip{display:inline-block; background:var(--app-surface); border:1px dashed var(--acc); color:var(--acc2);
+    font-weight:800; letter-spacing:.14em; border-radius:9px; padding:5px 14px; font-size:15px;}
+  .urlchip{display:block; background:var(--app-surface2); border:1px solid var(--app-line); border-radius:9px;
+    padding:7px 10px; font-size:10.5px; color:var(--app-mid); word-break:break-all; line-height:1.55;}
+
+  /* スタッフのカード */
+  .stcard{border:1px solid var(--app-line); border-radius:11px; padding:9px 11px; background:var(--app-surface);}
+  .stcard + .stcard{margin-top:7px;}
+  .stcard .nm{font-weight:800; font-size:12.5px;}
+  .stcard .cd{font-size:10px; color:var(--app-soft); letter-spacing:.06em;}
+  .stcard .acts{display:flex; flex-wrap:wrap; gap:5px; margin-top:7px;}
+  .stcard .acts i{font-style:normal; font-size:10px; font-weight:700; border-radius:7px; padding:4px 8px;
+    background:var(--app-surface2); border:1px solid var(--app-line); color:var(--app-mid);}
+  .stcard .acts i.pri{background:var(--acc); color:#fff; border-color:var(--acc);}
+  .stcard .acts i.dg{background:transparent; color:var(--warn); border-color:var(--warn);}
+  .addrow{display:flex; gap:6px; margin-bottom:9px;}
+  .addrow .bx{flex:1; min-width:0; border:1.5px solid var(--app-line2); border-radius:9px;
+    background:var(--app-surface); padding:8px 10px; font-size:12px; color:var(--app-soft);}
+  .addrow i{font-style:normal; flex:none; background:var(--acc); color:#fff; font-weight:800;
+    border-radius:9px; padding:8px 14px; font-size:12px;}
+
+  /* 設定 */
+  .fld{margin-bottom:10px;}
+  .fld .lb{font-size:10.5px; font-weight:700; color:var(--app-mid); margin-bottom:4px;}
+  .fld .bx{border:1.5px solid var(--app-line2); border-radius:9px; background:var(--app-surface);
+    padding:7px 10px; font-size:12px;}
+  .fld .row{display:flex; align-items:center; gap:6px 6px; flex-wrap:wrap;}
+  .fld .np{display:flex; align-items:center; gap:6px; flex:0 0 auto;}
+  .fld .row .bx{flex:1 1 78px; text-align:center; min-width:0;}
+  .fld .row .n{flex:0 0 auto; width:50px;}
+  .fld .row .u{font-size:10.5px; color:var(--app-soft); flex:none; white-space:nowrap;}
+  .wdrow{display:flex; gap:4px;}
+  .wdrow i{flex:1; font-style:normal; text-align:center; font-size:11px; font-weight:700;
+    border:1.5px solid var(--app-line2); border-radius:8px; padding:6px 0; color:var(--app-soft);}
+  .wdrow i.on{background:var(--warn-wash); border-color:var(--warn); color:var(--warn);}
+
+  /* 2つのアプリを並べる図 */
+  .two{display:flex; gap:9px;}
+  .two > div{flex:1; min-width:0;}
+  .two .cap{font-size:10.5px; font-weight:700; color:var(--muted); text-align:center; margin-bottom:5px;}
+  @media (max-width:430px){ .two{flex-direction:column;} }
+
+  /* 誰がやるかの札（スタッフ／店長） */
+  .who-tag{display:inline-block; font-size:10.5px; font-weight:700; border-radius:999px;
+    padding:1px 9px; vertical-align:middle; margin-left:6px; white-space:nowrap;}
+  .who-tag.w{background:var(--good-wash); color:#356b3b;}
+  .who-tag.m{background:var(--acc-wash); color:var(--acc2);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="kicker">TSUMIKI TOOLS</p>
+  <h1>つみき&amp;せんや 使い方</h1>
+  <p class="lead">シフトの希望を集めるアプリです。スタッフは<strong>働ける日をタップするだけ</strong>。店長は<strong>人手が足りない日が、開いた瞬間に赤で分かります</strong>。アプリは<strong>スタッフ用</strong>と<strong>店長用</strong>の2つです。</p>
+  <p class="openapp">
+    <a href="tsumiki-senya.html">スタッフ用を開く →</a>
+    <a class="ghost" href="tsumiki-senya-kanri.html">店長用を開く →</a>
+  </p>
+</header>
+
+<div class="layout">
+
+<details class="toc" id="toc" open>
+  <summary>もくじ（全27項目）</summary>
+  <nav>
+    <p class="g">まず知る</p>
+    <a href="#i1"><span class="n">1</span>どんな道具か</a>
+    <a href="#i2"><span class="n">2</span>アプリは2つある</a>
+    <a href="#i3"><span class="n">3</span>この説明書の見かた</a>
+
+    <p class="g">はじめの準備（店長・最初の1回だけ）</p>
+    <a href="#i4"><span class="n">4</span>店長の画面をひらく</a>
+    <a href="#i5"><span class="n">5</span>昼と夜、ほしい人数を決める</a>
+    <a href="#i6"><span class="n">6</span>締切と定休日を決める</a>
+    <a href="#i7"><span class="n">7</span>スタッフを追加する</a>
+    <a href="#i8"><span class="n">8</span>ひとりずつURLを渡す</a>
+
+    <p class="g">スタッフの使い方</p>
+    <a href="#i9"><span class="n">9</span>届いたURLをひらく</a>
+    <a href="#i10"><span class="n">10</span>働ける日をタップする</a>
+    <a href="#i11"><span class="n">11</span>昼・夜・通しのボタン</a>
+    <a href="#i12"><span class="n">12</span>時間を手で直す</a>
+    <a href="#i13"><span class="n">13</span>出した日を見返す</a>
+    <a href="#i14"><span class="n">14</span>まちがえた日を取り消す</a>
+    <a href="#i15"><span class="n">15</span>締切をすぎたら</a>
+
+    <p class="g">店長の使い方（毎月）</p>
+    <a href="#i16"><span class="n">16</span>足りない日がすぐ分かる</a>
+    <a href="#i17"><span class="n">17</span>カレンダーの読み方</a>
+    <a href="#i18"><span class="n">18</span>入れる人を見る</a>
+    <a href="#i19"><span class="n">19</span>代わりに入れる</a>
+    <a href="#i20"><span class="n">20</span>その日だけ人数を増やす</a>
+    <a href="#i21"><span class="n">21</span>まだ出していない人</a>
+    <a href="#i22"><span class="n">22</span>前の月・次の月</a>
+
+    <p class="g">そのほか</p>
+    <a href="#i23"><span class="n">23</span>URLを無くしたとき</a>
+    <a href="#i24"><span class="n">24</span>やめた人・お休みの人</a>
+    <a href="#i25"><span class="n">25</span>データはどこにあるか</a>
+
+    <p class="g">ホーム画面に置く</p>
+    <a href="#i26"><span class="n">26</span>iPhoneの場合</a>
+    <a href="#i27"><span class="n">27</span>Androidの場合</a>
+
+    <p class="g">巻末</p>
+    <a href="#qa"><span class="n">Q</span>こまったとき</a>
+  </nav>
+</details>
+
+<main>
+
+<!-- ============ 1 まず知る ============ -->
+<section class="grp" id="g1">
+  <h2>まず知る</h2>
+  <div class="items">
+
+    <article class="item" id="i1">
+      <figure class="shot">
+        <div class="flow">
+          <div class="box">スタッフが<br>働ける日を出す</div>
+          <div class="arw">→</div>
+          <div class="box">店長が<br>1枚で見る</div>
+          <div class="arw">→</div>
+          <div class="box">足りない日が<br>赤く出る</div>
+        </div>
+      </figure>
+      <h3><span class="n">1</span>どんな道具か</h3>
+      <p>シフトを組む前の「<strong>希望を集める</strong>」ところだけを引き受ける道具です。LINEや紙で集めて書き写す手間が消えます。</p>
+      <p class="fine">シフトを自動で組む機能は入っていません。組むのは今までどおり店長です。この道具は「誰がいつ入れるか」を、書き写さずに1枚にまとめます。</p>
+    </article>
+
+    <article class="item" id="i2">
+      <figure class="shot">
+        <div class="two">
+          <div>
+            <div class="cap">スタッフ用</div>
+            <div class="screen">
+              <div class="bar"><div class="mk"></div><div class="ttl">つみき&amp;せんや<small>さとうさん</small></div><div class="dot"></div></div>
+              <div class="mbar"><i class="nv">‹</i><div class="mt">10月分</div><i class="nv">›</i></div>
+              <div class="cal7 hd7"><i class="sun">日</i><i>月</i><i>火</i><i>水</i><i>木</i><i>金</i><i class="sat">土</i></div>
+              <div class="cal7">
+                <div class="c bl"></div><div class="c bl"></div><div class="c bl"></div><div class="c bl"></div>
+                <div class="c on"><span class="d">1</span><span class="s">17:30<br>21:00</span></div>
+                <div class="c"><span class="d">2</span></div>
+                <div class="c sat on"><span class="d">3</span><span class="s">11:00<br>14:30</span></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="cap">店長用</div>
+            <div class="screen">
+              <div class="bar"><div class="mk"></div><div class="ttl">つみき&amp;せんや 店長<small>せんや</small></div><div class="dot"></div></div>
+              <div class="tabs"><span class="on">一覧</span><span>スタッフ</span><span>設定</span></div>
+              <div class="lackbox"><div class="hd">人手が足りない日が 3日 あります</div>
+                <div class="cs"><i>14日</i><i>21日</i><i>28日</i></div></div>
+            </div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">2</span>アプリは2つある</h3>
+      <p>URLが2本あります。<strong>スタッフ用</strong>は希望を出す画面、<strong>店長用</strong>は全員ぶんを見る画面です。入口も別々なので、まざることはありません。</p>
+      <p class="fine">スタッフからは、ほかの人の名前も希望も見えません。見えるのは自分のぶんだけです。</p>
+    </article>
+
+    <article class="item nofig" id="i3">
+      <h3><span class="n">3</span>この説明書の見かた</h3>
+      <p>項目ごとに <span class="who-tag w">スタッフ</span> <span class="who-tag m">店長</span> の札で「誰がやるか」を出しています。自分の札のところだけ読めば大丈夫です。</p>
+      <p class="fine">用語は「用語（＝かんたんに言うと◯◯）」の形で説明します。上から順に読まなくても、もくじから必要なところだけ開けます。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ============ 2 はじめの準備 ============ -->
+<section class="grp" id="g2">
+  <h2>はじめの準備（最初の1回だけ）</h2>
+  <div class="items">
+
+    <article class="item" id="i4">
+      <figure class="shot">
+        <div class="screen">
+          <div class="bar"><div class="mk"></div><div class="ttl">つみき&amp;せんや 店長</div></div>
+          <p style="font-weight:800;font-size:13px">店長の画面</p>
+          <p style="font-size:11px;color:var(--app-soft);margin:5px 0 9px">店長用の合言葉を入れてください。<br>スタッフの合言葉では入れません。</p>
+          <div style="text-align:center;margin-bottom:8px"><span class="codechip">BKZX8JLV</span></div>
+          <div class="bigbtn">はいる</div>
+        </div>
+      </figure>
+      <h3><span class="n">4</span>店長の画面をひらく<span class="who-tag m">店長</span></h3>
+      <p>店長用のURLを開き、<strong>8文字の合言葉</strong>を入れて <kbd>はいる</kbd> を押します。次からは自動で開きます。</p>
+      <p class="fine">合言葉は店長と奥様で共有して大丈夫です。おふたりとも同じ画面が見られます。</p>
+    </article>
+
+    <article class="item" id="i5">
+      <figure class="shot">
+        <div class="screen">
+          <div class="tabs"><span>一覧</span><span>スタッフ</span><span class="on">設定</span></div>
+          <div class="fld">
+            <div class="lb">昼の時間帯と、ほしい人数</div>
+            <div class="row"><div class="bx">11:00</div><span class="u">〜</span><div class="bx">14:30</div>
+              <span class="np"><span class="bx n">2</span><span class="u">人ほしい</span></span></div>
+          </div>
+          <div class="fld">
+            <div class="lb">夜の時間帯と、ほしい人数</div>
+            <div class="row"><div class="bx">17:30</div><span class="u">〜</span><div class="bx">21:00</div>
+              <span class="np"><span class="bx n">3</span><span class="u">人ほしい</span></span></div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">5</span>昼と夜、ほしい人数を決める<span class="who-tag m">店長</span></h3>
+      <p><span class="path"><b>設定</b></span> で、昼と夜の時間帯と「<strong>その枠に何人ほしいか</strong>」を入れます。<strong>この人数を下回った日が、一覧で赤くなります。</strong></p>
+      <p class="fine">スタッフの画面に出る「昼／夜／通し」のボタンも、ここの時間帯から自動で作られます。設定するのはここ1か所だけです。</p>
+    </article>
+
+    <article class="item" id="i6">
+      <figure class="shot">
+        <div class="screen">
+          <div class="fld">
+            <div class="lb">締切（前の月の何日まで）</div>
+            <div class="row"><div class="bx" style="flex:1 1 auto;text-align:left">20</div><span class="u">日まで</span></div>
+          </div>
+          <div class="fld">
+            <div class="lb">定休日</div>
+            <div class="wdrow"><i>日</i><i class="on">月</i><i>火</i><i>水</i></div>
+            <div class="wdrow" style="margin-top:4px"><i>木</i><i>金</i><i>土</i><i style="visibility:hidden">-</i></div>
+          </div>
+          <div class="bigbtn">この内容にする</div>
+        </div>
+      </figure>
+      <h3><span class="n">6</span>締切と定休日を決める<span class="who-tag m">店長</span></h3>
+      <p>締切を <strong>20</strong> にすると「10月分は9月20日まで」になります。定休日はタップして選びます。選んだ曜日は人数を数えません。</p>
+      <p class="fine">祝日で臨時営業する月曜などは、その日をタップして「この日の必要人数」を入れれば数えるようになります（項目20）。</p>
+    </article>
+
+    <article class="item" id="i7">
+      <figure class="shot">
+        <div class="screen">
+          <div class="addrow"><div class="bx">スタッフのお名前</div><i>追加</i></div>
+          <div class="stcard">
+            <div class="nm">やまだ はな</div>
+            <div class="cd">合言葉 TEST01</div>
+            <div class="acts"><i class="pri">送る文をコピー</i><i>URLだけコピー</i><i>名前を直す</i></div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">7</span>スタッフを追加する<span class="who-tag m">店長</span></h3>
+      <p><span class="path"><b>スタッフ</b></span> で名前を入れて <kbd>追加</kbd>。追加した瞬間に、<strong>その人だけの合言葉と専用URL</strong>ができます。</p>
+      <p class="fine">合言葉は自動で作られます。似た文字（I・O・0・1）は使わないので、口で伝えるときも間違えにくくなっています。</p>
+    </article>
+
+    <article class="item" id="i8">
+      <figure class="shot">
+        <div class="screen">
+          <div class="urlchip">やまだ はなさん<br>せんや高崎インター店のシフト希望は、こちらから出してください。<br><br>https://tools.tsumiki-apps.com/tsumiki-senya.html?c=TEST01<br><br>・2026年10月分をお願いします<br>・働ける日をタップして、時間を入れるだけです</div>
+          <div class="subbtns"><i>送る文をコピー</i><i>URLだけコピー</i></div>
+        </div>
+      </figure>
+      <h3><span class="n">8</span>ひとりずつURLを渡す<span class="who-tag m">店長</span></h3>
+      <p><kbd>送る文をコピー</kbd> を押して、<strong>LINEに貼るだけ</strong>です。あいさつ・URL・締切・合言葉が入った文ができています。</p>
+      <p class="caution fine">⚠ URLは<b>ひとりにつき1本</b>です。他の人に転送すると、その人の希望として入ってしまいます。ひとりずつ送ってください。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ============ 3 スタッフ ============ -->
+<section class="grp" id="g3">
+  <h2>スタッフの使い方</h2>
+  <div class="items">
+
+    <article class="item" id="i9">
+      <figure class="shot">
+        <div class="screen">
+          <div class="bar"><div class="mk"></div><div class="ttl">つみき&amp;せんや<small>やまだ はなさん・せんや高崎インター店</small></div><div class="dot"></div></div>
+          <div class="mbar"><i class="nv">‹</i><div class="mt">2026年10月分</div><i class="nv">›</i></div>
+          <div class="pills"><i class="ok">9月20日まで 受付中</i><i class="cnt">0日 出しました</i></div>
+        </div>
+      </figure>
+      <h3><span class="n">9</span>届いたURLをひらく<span class="who-tag w">スタッフ</span></h3>
+      <p>LINEで届いたURLをタップするだけです。<strong>合言葉を打つ必要はありません。</strong>自分の名前が上に出ていれば、それであなたの画面です。</p>
+      <p class="fine">URLが開けないときだけ、スタッフ用のトップページで6文字の合言葉を入れてください。合言葉はメッセージの最後に書いてあります。</p>
+    </article>
+
+    <article class="item" id="i10">
+      <figure class="shot">
+        <div class="cal7 hd7"><i class="sun">日</i><i>月</i><i>火</i><i>水</i><i>木</i><i>金</i><i class="sat">土</i></div>
+        <div class="cal7">
+          <div class="c bl"></div><div class="c bl"></div><div class="c bl"></div><div class="c bl"></div>
+          <div class="c on"><span class="d">1</span><span class="s">17:30<br>21:00</span></div>
+          <div class="c"><span class="d">2</span></div>
+          <div class="c sat on"><span class="d">3</span><span class="s">11:00<br>14:30</span></div>
+          <div class="c sun"><span class="d">4</span></div>
+          <div class="c rest"><span class="d">5</span><span class="s">休</span></div>
+          <div class="c"><span class="d">6</span></div>
+          <div class="c on"><span class="d">7</span><span class="s">17:30<br>21:00</span></div>
+          <div class="c"><span class="d">8</span></div>
+          <div class="c on"><span class="d">9</span><span class="s">11:00<br>14:30</span></div>
+          <div class="c sat"><span class="d">10</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">10</span>働ける日をタップする<span class="who-tag w">スタッフ</span></h3>
+      <p>カレンダーで<strong>働ける日をタップ</strong>します。入れた日には色がつき、時間が小さく出ます。点線の「休」はお店の定休日です。</p>
+      <p class="fine">出していない日は「その日は働けない」として店長に伝わります。×をつける必要はありません。</p>
+    </article>
+
+    <article class="item" id="i11">
+      <figure class="shot">
+        <div class="screen">
+          <p style="font-weight:800;font-size:13px">10月8日（木）</p>
+          <div class="prebtns" style="margin-top:8px"><i>昼</i><i class="on">夜</i><i>通し</i></div>
+          <div class="tmrow"><b class="hit">17:30</b><span>〜</span><b class="hit">21:00</b></div>
+          <div class="bigbtn">この日で出す</div>
+        </div>
+      </figure>
+      <h3><span class="n">11</span>昼・夜・通しのボタン<span class="who-tag w">スタッフ</span></h3>
+      <p>日をタップすると、<kbd>昼</kbd> <kbd>夜</kbd> <kbd>通し</kbd> の3つが出ます。押すと時間が入るので、<kbd>この日で出す</kbd> を押せば終わりです。<strong>2タップで済みます。</strong></p>
+      <p class="fine">「通し」は、昼のはじまりから夜のおわりまで（＝その日はいつでも入れます）という意味です。</p>
+    </article>
+
+    <article class="item" id="i12">
+      <figure class="shot">
+        <div class="screen">
+          <div class="prebtns"><i>昼</i><i>夜</i><i>通し</i></div>
+          <div class="tmrow"><b class="hit">18:00</b><span>〜</span><b class="hit">20:00</b></div>
+          <p style="font-size:10.5px;color:var(--app-soft);margin-top:7px">お店があいている時間は 11:00 〜 21:00 です。時間はご自由に直せます。</p>
+        </div>
+      </figure>
+      <h3><span class="n">12</span>時間を手で直す<span class="who-tag w">スタッフ</span></h3>
+      <p>ボタンを押したあと、<strong>時間をタップすれば自由に直せます</strong>。「18時から20時まで」のような中途半端な時間もそのまま出せます。</p>
+      <p class="fine">短い時間でも大丈夫です。夜の時間帯に少しでもかかっていれば、店長の画面では「夜に入れる1人」として数えられます。</p>
+    </article>
+
+    <article class="item" id="i13">
+      <figure class="shot">
+        <div class="screen">
+          <p style="font-weight:800;font-size:12.5px;margin-bottom:6px">出した日</p>
+          <div class="slotbox" style="border:none;padding:0">
+            <div class="pp"><b>10月1日(木)</b><span>17:30〜21:00</span></div>
+            <div class="pp"><b>10月3日(土)</b><span>11:00〜14:30</span></div>
+            <div class="pp"><b>10月7日(水)</b><span>17:30〜21:00</span></div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">13</span>出した日を見返す<span class="who-tag w">スタッフ</span></h3>
+      <p>カレンダーの下に、<strong>出した日の一覧</strong>が出ます。上のほうには「何日出したか」「合計で何時間か」も出るので、出し忘れに気づけます。</p>
+      <p class="fine">あとから何度でも開けます。締切までなら、何回直しても大丈夫です。</p>
+    </article>
+
+    <article class="item" id="i14">
+      <figure class="shot">
+        <div class="screen">
+          <p style="font-weight:800;font-size:13px">10月8日（木）</p>
+          <div class="tmrow" style="margin-top:8px"><b>17:30</b><span>〜</span><b>21:00</b></div>
+          <div class="bigbtn">この時間に直す</div>
+          <div class="subbtns"><i>とじる</i><i style="color:var(--warn);border-color:var(--warn);background:transparent">この日をやめる</i></div>
+        </div>
+      </figure>
+      <h3><span class="n">14</span>まちがえた日を取り消す<span class="who-tag w">スタッフ</span></h3>
+      <p>出した日をもう一度タップすると <kbd>この日をやめる</kbd> が出ます。押せばその日の希望は消えます。時間だけ直したいときは <kbd>この時間に直す</kbd> です。</p>
+      <p class="fine">取り消してもお店に通知は飛びません。締切までに正しい形になっていれば大丈夫です。</p>
+    </article>
+
+    <article class="item" id="i15">
+      <figure class="shot">
+        <div class="screen">
+          <div class="pills"><i class="ng">締切がすぎました（9月20日）</i><i class="cnt">14日 出しました</i></div>
+          <div style="background:var(--warn-wash);color:var(--warn);font-size:11px;font-weight:700;border-radius:9px;padding:9px 11px;line-height:1.55">締切がすぎています（17:30 〜 21:00 で出しています）。直すときはお店にご連絡ください。</div>
+        </div>
+      </figure>
+      <h3><span class="n">15</span>締切をすぎたら<span class="who-tag w">スタッフ</span></h3>
+      <p>締切をすぎた月は<strong>読むだけ</strong>になります。自分が何を出したかは、いつでも確認できます。</p>
+      <p class="caution fine">⚠ 締切後の変更は、店長に直接ご連絡ください。店長の画面からなら入れられます。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ============ 4 店長 ============ -->
+<section class="grp" id="g4">
+  <h2>店長の使い方（毎月）</h2>
+  <div class="items">
+
+    <article class="item" id="i16">
+      <figure class="shot">
+        <div class="screen">
+          <div class="pills"><i class="ok">9月20日まで 受付中</i><i class="cnt">8 / 8 人が提出</i></div>
+          <div class="lackbox">
+            <div class="hd">人手が足りない日が 5日 あります</div>
+            <div class="cs"><i>14日</i><i>16日</i><i>21日</i><i>24日</i><i>28日</i></div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">16</span>足りない日がすぐ分かる<span class="who-tag m">店長</span></h3>
+      <p>開くといちばん上に「<strong>人手が足りない日が◯日あります</strong>」と出ます。日のボタンを押すと、その日の画面がすぐ開きます。</p>
+      <p class="fine">足りない日が多いときは、先頭の6日だけ出して「ほか◯日」と表示します。全部はカレンダーで赤くなっています。</p>
+    </article>
+
+    <article class="item" id="i17">
+      <figure class="shot">
+        <div class="cal7 hd7"><i class="sun">日</i><i>月</i><i>火</i><i>水</i><i>木</i><i>金</i><i class="sat">土</i></div>
+        <div class="cal7">
+          <div class="c bl"></div><div class="c bl"></div><div class="c bl"></div><div class="c bl"></div>
+          <div class="c"><span class="d">1</span><span class="s">4人</span></div>
+          <div class="c"><span class="d">2</span><span class="s">5人</span></div>
+          <div class="c sat"><span class="d">3</span><span class="s">4人</span></div>
+          <div class="c sun"><span class="d">4</span><span class="s">4人</span></div>
+          <div class="c rest"><span class="d">5</span><span class="s">休</span></div>
+          <div class="c"><span class="d">6</span><span class="s">3人</span></div>
+          <div class="c"><span class="d">7</span><span class="s">4人</span></div>
+          <div class="c ng"><span class="d">8</span><span class="s">夜 −1</span></div>
+          <div class="c"><span class="d">9</span><span class="s">4人</span></div>
+          <div class="c sat ng"><span class="d">10</span><span class="s">昼 −1<br>夜 −2</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">17</span>カレンダーの読み方<span class="who-tag m">店長</span></h3>
+      <p>足りている日は<strong>その日に入れる人数だけ</strong>。足りない日は<strong>赤くなって「夜 −1」</strong>と出ます。これは「夜にあと1人ほしい」という意味です。</p>
+      <p class="fine">点線の「休」は定休日で、人数は数えません。四角い枠が出ている日は今日です。</p>
+    </article>
+
+    <article class="item" id="i18">
+      <figure class="shot">
+        <div class="screen">
+          <p style="font-weight:800;font-size:13px">10月14日（水）</p>
+          <p style="font-size:10.5px;color:var(--app-soft);margin-bottom:8px">ほしい人数　昼 2人・夜 3人</p>
+          <div class="slotbox">
+            <div class="sh"><b>昼</b><span class="tm">11:00〜14:30</span><span class="ct ng">1 / 2人（あと1人）</span></div>
+            <div class="pp"><b>たなか けん</b><span>11:00〜14:30</span></div>
+          </div>
+          <div class="slotbox">
+            <div class="sh"><b>夜</b><span class="tm">17:30〜21:00</span><span class="ct">3 / 3人</span></div>
+            <div class="pp"><b>すずき たろう</b><span>17:30〜21:00</span></div>
+            <div class="pp"><b>わたなべ ゆう</b><span>18:00〜21:00</span></div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">18</span>入れる人を見る<span class="who-tag m">店長</span></h3>
+      <p>日をタップすると、<strong>昼と夜に分けて名前と時間</strong>が出ます。「1 / 2人（あと1人）」は「2人ほしいのに1人しかいない」という意味です。</p>
+      <p class="fine">18:00〜21:00 のように一部だけの人も、夜の1人として数えます。実際の時間はそのまま出るので、組むときはそちらを見てください。</p>
+    </article>
+
+    <article class="item" id="i19">
+      <figure class="shot">
+        <div class="screen">
+          <p style="font-size:10.5px;color:var(--app-soft);margin-bottom:6px">誰の希望を入れますか</p>
+          <div class="pp" style="background:var(--app-surface);border:1px solid var(--app-line)"><b>やまだ はな</b><span>出ていません</span></div>
+          <div class="pp" style="background:var(--app-surface);border:1px solid var(--app-line)"><b>さとう みお</b><span>出ていません</span></div>
+          <div class="pp" style="background:var(--app-surface);border:1px solid var(--app-line)"><b>たなか けん</b><span>11:00〜14:30</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">19</span>代わりに入れる<span class="who-tag m">店長</span></h3>
+      <p>電話で「入れます」と言われたら、日の下の <kbd>代わりに入れる</kbd> から店長が入れられます。<strong>まだ出していない人が上に並びます</strong>（頼む相手を探す画面なので）。</p>
+      <p class="fine">締切をすぎた月でも、店長からは入れられます。スタッフ側の画面にもすぐ反映されます。</p>
+    </article>
+
+    <article class="item" id="i20">
+      <figure class="shot">
+        <div class="screen">
+          <p style="font-weight:800;font-size:13px">10月18日（土）</p>
+          <p style="font-size:10.5px;color:var(--app-soft);margin-bottom:9px">この日だけの人数です。ふだんは設定の人数を使います。</p>
+          <div class="fld"><div class="row"><span class="u" style="width:26px;font-weight:700;color:var(--app-ink)">昼</span><span class="u">11:00〜14:30</span><div class="bx n">3</div></div></div>
+          <div class="fld"><div class="row"><span class="u" style="width:26px;font-weight:700;color:var(--app-ink)">夜</span><span class="u">17:30〜21:00</span><div class="bx n">5</div></div></div>
+          <div class="bigbtn">この日はこの人数にする</div>
+        </div>
+      </figure>
+      <h3><span class="n">20</span>その日だけ人数を増やす<span class="who-tag m">店長</span></h3>
+      <p>宴会が入った日などは、日の下の <kbd>この日の必要人数</kbd> でその日だけ増やせます。変えた日は「（この日だけの設定）」と出ます。</p>
+      <p class="fine">もとに戻したいときは <kbd>ふだんに戻す</kbd>。設定の人数に戻ります。</p>
+    </article>
+
+    <article class="item" id="i21">
+      <figure class="shot">
+        <div class="screen">
+          <div class="pills"><i class="ok">9月20日まで 受付中</i><i class="cnt">5 / 8 人が提出</i></div>
+          <div class="lackbox okbox"><div class="hd">まだ3人が出していません</div></div>
+        </div>
+      </figure>
+      <h3><span class="n">21</span>まだ出していない人<span class="who-tag m">店長</span></h3>
+      <p>上の「<strong>5 / 8 人が提出</strong>」で、何人が出し終えたか分かります。締切前に声をかける目安になります。</p>
+      <p class="fine">誰が出していないかは、日をタップして <kbd>代わりに入れる</kbd> を開くと分かります（上に並ぶのが未提出の人です）。</p>
+    </article>
+
+    <article class="item" id="i22">
+      <figure class="shot">
+        <div class="screen">
+          <div class="mbar"><i class="nv">‹</i><div class="mt">2026年10月分</div><i class="nv">›</i></div>
+          <div class="pills"><i class="ng">締切ずみ（8月20日）</i><i class="cnt">8 / 8 人が提出</i></div>
+        </div>
+      </figure>
+      <h3><span class="n">22</span>前の月・次の月<span class="who-tag m">店長</span></h3>
+      <p>上の <kbd>‹</kbd> <kbd>›</kbd> で月を移動できます。過ぎた月も残っているので、あとから見返せます。</p>
+      <p class="fine">開いたときに出るのは「いま募集している月」です。締切をすぎると、自動で次の月に切り替わります。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ============ 5 そのほか ============ -->
+<section class="grp" id="g5">
+  <h2>そのほか</h2>
+  <div class="items">
+
+    <article class="item" id="i23">
+      <figure class="shot">
+        <div class="screen">
+          <div class="stcard">
+            <div class="nm">やまだ はな</div>
+            <div class="cd">合言葉 TEST01</div>
+            <div class="acts"><i>合言葉を再発行</i><i class="dg">削除</i></div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">23</span>URLを無くしたとき<span class="who-tag m">店長</span></h3>
+      <p><span class="path"><b>スタッフ</b></span> でその人の <kbd>送る文をコピー</kbd> を押して、もう一度LINEで送るだけです。</p>
+      <p class="caution fine">⚠ <kbd>合言葉を再発行</kbd> を押すと<b>古いURLはその瞬間に開けなくなります</b>。スマホを人に譲ったときなど、本当に無効にしたいときだけ使ってください。出した希望は消えません。</p>
+    </article>
+
+    <article class="item" id="i24">
+      <figure class="shot">
+        <div class="screen">
+          <div class="stcard" style="opacity:.55">
+            <div class="nm">すずき たろう <span style="font-size:10px;color:var(--app-soft);font-weight:400">（休止中）</span></div>
+            <div class="cd">合言葉 TEST02</div>
+            <div class="acts"><i>再開する</i><i class="dg">削除</i></div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">24</span>やめた人・お休みの人<span class="who-tag m">店長</span></h3>
+      <p>しばらく入れない人は <kbd>休止する</kbd>。一覧から消えますが、出した希望は残ります。戻ってきたら <kbd>再開する</kbd> です。</p>
+      <p class="caution fine">⚠ <kbd>削除</kbd> は、その人が出した希望も<b>いっしょに消えます</b>。迷ったら休止のほうを使ってください。</p>
+    </article>
+
+    <article class="item nofig" id="i25">
+      <h3><span class="n">25</span>データはどこにあるか</h3>
+      <p>希望はインターネット上（＝クラウド）に保存されます。だから<strong>スタッフのスマホと店長の画面が、すぐにつながります</strong>。スマホを換えても、URLさえあれば同じ内容が出ます。</p>
+      <p class="fine">スタッフの合言葉では、自分のぶんしか取り出せない作りになっています。ほかの人の名前も希望も、サーバー側から返ってきません。</p>
+      <p class="caution fine">⚠ 電波がないところでは新しく出せません。電波の届くところで開いてください。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ============ 6 ホーム画面 ============ -->
+<section class="grp" id="g6">
+  <h2>ホーム画面に置く</h2>
+  <div class="items">
+
+    <article class="item nofig" id="i26">
+      <h3><span class="n">26</span>iPhoneの場合</h3>
+      <p>Safariで開いて、下の <kbd>共有</kbd>（四角に↑）→ <kbd>ホーム画面に追加</kbd>。アプリのように1タップで開けます。</p>
+      <p class="caution fine">⚠ Chromeなど<b>Safari以外では「ホーム画面に追加」が出ません</b>。うまくいかないときは、URLをSafariで開き直してください。</p>
+    </article>
+
+    <article class="item nofig" id="i27">
+      <h3><span class="n">27</span>Androidの場合</h3>
+      <p>Chromeで開いて、右上の <kbd>⋮</kbd> → <kbd>ホーム画面に追加</kbd>。</p>
+      <p class="fine">機種によっては「アプリをインストール」と出ます。どちらでも同じです。</p>
+    </article>
+
+  </div>
+</section>
+
+<section class="appendix" id="qa">
+  <h2>こまったとき</h2>
+  <div class="qa">
+    <div>
+      <div class="q">URLをタップしても自分の名前が出ない</div>
+      <div class="a">ほかの人のURLを開いている可能性があります。自分あてに届いたメッセージのURLをもう一度開いてください。分からなければ店長にご連絡を。</div>
+    </div>
+    <div>
+      <div class="q">日をタップしても入れられない</div>
+      <div class="a"><b>締切をすぎています。</b>その月は読むだけになります。店長に連絡すれば、店長側から入れられます。</div>
+    </div>
+    <div>
+      <div class="q">出したはずの日が消えている</div>
+      <div class="a">月がちがうかもしれません。上の <b>‹ ›</b> で月を確認してください。それでも無ければ、店長側から入れ直せます。</div>
+    </div>
+    <div>
+      <div class="q">全部の日が赤くなってしまう</div>
+      <div class="a"><b>ほしい人数が多すぎます。</b><span class="path"><b>設定</b></span> で昼・夜のほしい人数を見直してください。まだ誰も出していない月は、赤くなりません。</div>
+    </div>
+    <div>
+      <div class="q">定休日なのに営業する日がある</div>
+      <div class="a">その日をタップして <b>この日の必要人数</b> を入れると、数えるようになります。定休日そのものを変えたいときは設定から。</div>
+    </div>
+    <div>
+      <div class="q">スタッフの合言葉で店長画面に入れない</div>
+      <div class="a">そういう作りです。店長用と スタッフ用は別の合言葉で、混ざらないようになっています。</div>
+    </div>
+    <div>
+      <div class="q">昼と夜の両方に数えられている人がいる</div>
+      <div class="a">「通し」で出した人です。昼にも夜にも入れるので、両方に1人として数えます。</div>
+    </div>
+    <div>
+      <div class="q">スタッフを間違えて削除した</div>
+      <div class="a">もう一度追加してください。ただし<b>合言葉は新しくなり、出した希望は戻りません</b>。URLを渡し直してください。</div>
+    </div>
+  </div>
+</section>
+
+</main>
+</div><!-- /.layout -->
+
+<footer>
+  つみき&amp;せんや 使い方<br>
+  つくったもの：つみき<br>
+  2026年8月24日
+</footer>
+
+</div><!-- /.wrap -->
+
+<script>
+/* もくじ：狭い画面ではたたむ／広い画面では開いて左に貼り付ける。
+   いま読んでいる項目のグループを、もくじで色づけする。 */
+(function(){
+  var toc = document.getElementById('toc');
+  if(!toc) return;
+  var wide = window.matchMedia('(min-width:1000px)');
+  function sync(){ toc.open = wide.matches; }
+  sync();
+  (wide.addEventListener ? wide.addEventListener('change', sync) : window.addEventListener('resize', sync));
+  toc.addEventListener('click', function(e){
+    if(e.target.closest('a') && !wide.matches) toc.open = false;
+  });
+  if(!('IntersectionObserver' in window)) return;
+  var links = {}, targets = [];
+  Array.prototype.forEach.call(toc.querySelectorAll('a[href^="#"]'), function(a){
+    var el = document.getElementById(a.getAttribute('href').slice(1));
+    if(el){ links[a.getAttribute('href').slice(1)] = a; targets.push(el); }
+  });
+  var seen = {};
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(en){ seen[en.target.id] = en.isIntersecting; });
+    var cur = null;
+    targets.forEach(function(el){ if(seen[el.id] && !cur) cur = el.id; });
+    for(var k in links) links[k].classList.toggle('on', k === cur);
+  }, {rootMargin:'-10% 0px -70% 0px'});
+  targets.forEach(function(el){ io.observe(el); });
+})();
+</script>
+</body>
+</html>
