@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="apple-touch-icon" href="icon-kibobako-kanri.png">
+<meta name="apple-mobile-web-app-title" content="きぼうばこ 店長">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f5f4f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#131109" media="(prefers-color-scheme: dark)">
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<title>きぼうばこ 店長</title>
+<style>
+  :root{
+    --paper:#f5f4f0; --surface:#fffefb; --surface-2:#efece5; --ink:#1d1a15;
+    --ink-mid:#5b554a; --ink-soft:#8f8877; --line:#e2ded4; --line-2:#d8d3c7;
+    --accent:#b06f26; --accent-2:#8a5a24; --accent-wash:#f0e4d1;
+    --good:#4c7a51; --good-wash:#dde9dd; --warn:#b0522a; --warn-wash:#f2e0d4;
+    --sat:#3f6b8a; --sun:#a2513f;
+    --shadow:0 1px 2px rgba(40,32,18,.05), 0 10px 26px -16px rgba(40,32,18,.18);
+    --sans:'Zen Maru Gothic',-apple-system,BlinkMacSystemFont,"Hiragino Maru Gothic ProN","Hiragino Sans","Helvetica Neue",Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#131109; --surface:#1d1a12; --surface-2:#26221a; --ink:#efe8da;
+      --ink-mid:#a89e8b; --ink-soft:#7d7566; --line:#2f2b21; --line-2:#3a352a;
+      --accent:#d59a4d; --accent-2:#e0ab63; --accent-wash:#3c2d18;
+      --good:#7fae82; --good-wash:#23301f; --warn:#d9825a; --warn-wash:#39251a;
+      --sat:#7fa8c4; --sun:#d4867a;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px -18px rgba(0,0,0,.65);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#131109; --surface:#1d1a12; --surface-2:#26221a; --ink:#efe8da;
+    --ink-mid:#a89e8b; --ink-soft:#7d7566; --line:#2f2b21; --line-2:#3a352a;
+    --accent:#d59a4d; --accent-2:#e0ab63; --accent-wash:#3c2d18;
+    --good:#7fae82; --good-wash:#23301f; --warn:#d9825a; --warn-wash:#39251a;
+    --sat:#7fa8c4; --sun:#d4867a;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px -18px rgba(0,0,0,.65);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.6;
+    -webkit-font-smoothing:antialiased; font-feature-settings:"palt" 1; -webkit-text-size-adjust:100%;}
+  .tnum{font-variant-numeric:tabular-nums;}
+
+  .topbar{position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter:saturate(1.3) blur(10px); -webkit-backdrop-filter:saturate(1.3) blur(10px);
+    border-bottom:1px solid var(--line); padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;
+    display:flex; align-items:center; gap:10px;}
+  .brand{display:flex; align-items:center; gap:10px; min-width:0;}
+  .brand .mark{width:26px; height:26px; flex:none; display:block; border-radius:7px; box-shadow:0 2px 7px rgba(36,35,33,.18);}
+  .brand h1{font-weight:700; font-size:1.05rem; margin:0; letter-spacing:.02em; white-space:nowrap;}
+  .brand .who{font-size:.72rem; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .spacer{flex:1;}
+  .iconbtn{width:34px; height:34px; flex:none; border:1px solid var(--line); background:var(--surface);
+    border-radius:9px; color:var(--ink-mid); display:grid; place-items:center; cursor:pointer;}
+  .iconbtn:active{transform:scale(.94);}
+  .sync-dot{width:8px; height:8px; border-radius:50%; background:var(--ink-soft); flex:none;}
+  .sync-dot.ok{background:var(--good);} .sync-dot.off{background:var(--warn);}
+
+  main{max-width:1100px; margin:0 auto; padding:14px 14px calc(env(safe-area-inset-bottom) + 48px); display:grid; gap:14px;}
+  /* グリッドの子は既定で min-width:auto ＝ 中の表の幅ぶん広がってしまう。
+     0 にしておかないと、スタッフが増えたときにページ全体が横にはみ出す（375pxで実測） */
+  main > *{min-width:0;}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow); padding:16px; min-width:0;}
+  .card.flush{padding:16px 0;}
+  .card.flush > .pad{padding:0 16px;}
+  .muted{color:var(--ink-soft); font-size:.8rem;}
+
+  .login{max-width:400px; margin:0 auto; padding:48px 18px;}
+  .login .lead{font-size:.9rem; color:var(--ink-mid); margin:14px 0 22px; line-height:1.75;}
+  .login input{width:100%; font-family:var(--sans); font-size:1.4rem; font-weight:700; letter-spacing:.22em;
+    text-align:center; padding:15px 12px; border:1.5px solid var(--line-2); border-radius:14px;
+    background:var(--surface); color:var(--ink); text-transform:uppercase;}
+  .login input:focus{outline:none; border-color:var(--accent);}
+  .btn{width:100%; font-family:var(--sans); font-size:1rem; font-weight:700; padding:14px;
+    border:none; border-radius:13px; background:var(--accent); color:#fff; cursor:pointer;}
+  .btn:active{transform:scale(.985);}
+  .btn.sub{background:var(--surface-2); color:var(--ink-mid); border:1px solid var(--line);}
+  .btn.danger{background:transparent; color:var(--warn); border:1px solid var(--warn);}
+  .btn.sm{font-size:.83rem; padding:9px 12px; width:auto; border-radius:10px;}
+  .err{color:var(--warn); font-size:.84rem; margin-top:10px; min-height:1.2em;}
+
+  /* タブ */
+  .tabs{display:flex; gap:6px; background:var(--surface-2); padding:4px; border-radius:13px; margin-bottom:2px;}
+  .tabs button{flex:1; font-family:var(--sans); font-size:.9rem; font-weight:700; padding:10px 4px;
+    border:none; border-radius:10px; background:transparent; color:var(--ink-soft); cursor:pointer;}
+  .tabs button.on{background:var(--surface); color:var(--ink); box-shadow:0 1px 3px rgba(40,32,18,.1);}
+
+  .monthbar{display:flex; align-items:center; gap:8px;}
+  .monthbar .mv{flex:1; text-align:center;}
+  .monthbar .mt{font-size:1.15rem; font-weight:700;}
+  .navbtn{width:38px; height:38px; flex:none; border:1px solid var(--line); background:var(--surface-2);
+    border-radius:11px; color:var(--ink-mid); font-size:1rem; cursor:pointer;}
+  .state{margin-top:11px; display:flex; gap:8px; flex-wrap:wrap;}
+  .pill{font-size:.76rem; font-weight:700; padding:5px 11px; border-radius:999px;
+    background:var(--surface-2); color:var(--ink-mid); border:1px solid var(--line);}
+  .pill.open{background:var(--good-wash); color:var(--good); border-color:transparent;}
+  .pill.closed{background:var(--warn-wash); color:var(--warn); border-color:transparent;}
+  .pill.count{background:var(--accent-wash); color:var(--accent-2); border-color:transparent;}
+
+  /* 一覧の表 */
+  .tablewrap{overflow-x:auto; -webkit-overflow-scrolling:touch; margin-top:13px; border-top:1px solid var(--line); min-width:0; max-width:100%;}
+  table.grid{border-collapse:separate; border-spacing:0; width:max-content; min-width:100%;}
+  table.grid th, table.grid td{border-bottom:1px solid var(--line); padding:0; text-align:center; font-size:.8rem;}
+  table.grid thead th{position:sticky; top:0; z-index:3; background:var(--surface); border-bottom:1.5px solid var(--line-2);
+    font-size:.76rem; font-weight:700; padding:9px 6px; white-space:nowrap;}
+  table.grid thead th.nm{cursor:pointer; min-width:78px; max-width:110px; overflow:hidden; text-overflow:ellipsis;}
+  table.grid thead th.nm.sel{background:var(--accent-wash); color:var(--accent-2);}
+  /* 左の2列（日付・人数）は横スクロールしても居残る。
+     ⚠️ 本文側は td なので、th だけに書くと効かない（375pxの実測で発覚） */
+  .dcol{position:sticky; left:0; z-index:2; background:var(--surface); width:58px; min-width:58px; max-width:58px;
+    text-align:left; padding:7px 8px !important; font-weight:700; font-size:.82rem;}
+  /* `table.grid thead th` のほうが指定が強いので、同じ強さで上書きしないと見出しが名前の下に隠れる */
+  table.grid thead th.dcol{z-index:5;}
+  .ccol{position:sticky; left:58px; z-index:2; background:var(--surface); width:40px; min-width:40px; max-width:40px;
+    padding:5px 2px !important; border-right:1px solid var(--line);}
+  table.grid thead th.ccol{z-index:5;}
+  tr.rest .dcol, tr.rest td, tr.rest .ccol{background:var(--surface-2);}
+  tr.rest .dcol{color:var(--ink-soft);}
+  .dcol .w{font-size:.72rem; color:var(--ink-soft); margin-left:3px; font-weight:500;}
+  .dcol.s6 .n{color:var(--sat);} .dcol.s0 .n{color:var(--sun);}
+  td.cell{cursor:pointer; -webkit-tap-highlight-color:transparent; padding:5px 3px !important;
+    font-variant-numeric:tabular-nums; line-height:1.24; font-size:.7rem;}
+  td.cell.on{background:var(--accent-wash); color:var(--accent-2); font-weight:700;}
+  td.cell:active{opacity:.6;}
+  .cnt{font-weight:700; font-variant-numeric:tabular-nums; font-size:.84rem;}
+  .cnt.zero{color:var(--warn);}
+  .cnt.thin{color:var(--accent-2);}
+
+  /* スタッフ */
+  .staff{border:1px solid var(--line); border-radius:14px; padding:13px; margin-bottom:10px; background:var(--surface);}
+  .staff.off{opacity:.55;}
+  .staff .nm{font-weight:700; font-size:1rem;}
+  .staff .cd{font-size:.78rem; color:var(--ink-soft); font-variant-numeric:tabular-nums; letter-spacing:.05em; margin-top:1px;}
+  .staff .acts{display:flex; gap:7px; flex-wrap:wrap; margin-top:11px;}
+  .addrow{display:flex; gap:8px; margin-bottom:14px;}
+  .addrow input{flex:1; min-width:0; font-family:var(--sans); font-size:1rem; padding:12px;
+    border:1.5px solid var(--line-2); border-radius:12px; background:var(--surface); color:var(--ink);}
+  .addrow input:focus{outline:none; border-color:var(--accent);}
+  .addrow .btn{width:auto; flex:none; padding:12px 18px;}
+
+  /* 設定 */
+  .field{margin-bottom:15px;}
+  .field label{display:block; font-size:.82rem; font-weight:700; color:var(--ink-mid); margin-bottom:6px;}
+  .field input[type=text], .field input[type=number], .field input[type=time]{
+    width:100%; font-family:var(--sans); font-size:1rem; padding:12px;
+    border:1.5px solid var(--line-2); border-radius:12px; background:var(--surface); color:var(--ink);}
+  .field input:focus{outline:none; border-color:var(--accent);}
+  .inline{display:flex; gap:9px; align-items:center;}
+  .inline input{flex:1; min-width:0;}
+  .wdays{display:flex; gap:5px;}
+  .wdays button{flex:1; font-family:var(--sans); font-size:.9rem; font-weight:700; padding:11px 0;
+    border:1.5px solid var(--line-2); border-radius:11px; background:var(--surface); color:var(--ink-soft); cursor:pointer;}
+  .wdays button.on{background:var(--warn-wash); border-color:var(--warn); color:var(--warn);}
+  .pset{display:grid; grid-template-columns:74px 1fr auto 1fr; gap:7px; align-items:center; margin-bottom:8px;}
+  .pset input{font-family:var(--sans); font-size:1rem; padding:10px 8px; min-width:0; width:100%;
+    border:1.5px solid var(--line-2); border-radius:10px; background:var(--surface); color:var(--ink);}
+
+  .backdrop{position:fixed; inset:0; background:rgba(20,16,8,.42); z-index:40; opacity:0; pointer-events:none; transition:opacity .18s;}
+  .backdrop.show{opacity:1; pointer-events:auto;}
+  .sheet{position:fixed; left:0; right:0; bottom:0; z-index:50; background:var(--surface);
+    border-radius:22px 22px 0 0; border-top:1px solid var(--line);
+    padding:18px 18px calc(env(safe-area-inset-bottom) + 20px);
+    transform:translateY(102%); transition:transform .22s cubic-bezier(.3,.9,.3,1);
+    max-width:520px; margin:0 auto; box-shadow:0 -12px 40px -20px rgba(30,22,10,.5);}
+  .sheet.show{transform:translateY(0);}
+  .sheet .grip{width:38px; height:4px; border-radius:99px; background:var(--line-2); margin:0 auto 14px;}
+  .sheet h2{margin:0 0 3px; font-size:1.1rem; font-weight:700;}
+  .sheet .sub{font-size:.8rem; color:var(--ink-soft); margin-bottom:15px;}
+  .presets{display:flex; gap:8px; margin-bottom:13px;}
+  .presets button{flex:1; font-family:var(--sans); font-size:.92rem; font-weight:700; padding:12px 4px;
+    border:1.5px solid var(--line-2); border-radius:12px; background:var(--surface-2); color:var(--ink); cursor:pointer;}
+  .presets button.on{background:var(--accent-wash); border-color:var(--accent); color:var(--accent-2);}
+  .times{display:flex; align-items:center; gap:9px;}
+  .times input{flex:1; min-width:0; font-family:var(--sans); font-size:1.15rem; font-weight:700; text-align:center;
+    padding:12px 6px; border:1.5px solid var(--line-2); border-radius:12px; background:var(--surface); color:var(--ink);
+    font-variant-numeric:tabular-nums;}
+  .times input:focus{outline:none; border-color:var(--accent);}
+  .times span{color:var(--ink-soft); font-weight:700; flex:none;}
+  .sheet .row2{display:flex; gap:9px; margin-top:12px;}
+  .sheet .note{font-size:.78rem; color:var(--ink-soft); margin:10px 0 0; line-height:1.6;}
+  .empty{text-align:center; color:var(--ink-soft); font-size:.85rem; padding:26px 0;}
+
+  .toast{position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom) + 26px); transform:translate(-50%,14px);
+    background:var(--ink); color:var(--paper); font-size:.86rem; font-weight:700; padding:11px 19px;
+    border-radius:999px; opacity:0; pointer-events:none; transition:.2s; z-index:60; white-space:nowrap;}
+  .toast.show{opacity:1; transform:translate(-50%,0);}
+  [hidden]{display:none !important;}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <svg class="mark" viewBox="0 0 100 100" aria-label="つみき"><rect width="100" height="100" rx="24" fill="#242321"/><g fill="#242321" stroke="#F4F2EE" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"><polygon points="35,46 50,53.5 35,61 20,53.5"/><polygon points="20,53.5 35,61 35,76 20,68.5"/><polygon points="50,53.5 35,61 35,76 50,68.5"/><polygon points="65,46 80,53.5 65,61 50,53.5"/><polygon points="50,53.5 65,61 65,76 50,68.5"/><polygon points="80,53.5 65,61 65,76 80,68.5"/><polygon points="50,24 65,31.5 50,39 35,31.5"/><polygon points="35,31.5 50,39 50,54 35,46.5"/><polygon points="65,31.5 50,39 50,54 65,46.5"/></g></svg>
+    <div style="min-width:0">
+      <h1>きぼうばこ 店長</h1>
+      <div class="who" id="who"></div>
+    </div>
+  </div>
+  <span class="spacer"></span>
+  <span class="sync-dot" id="syncDot" title="同期"></span>
+  <button class="iconbtn" id="themeBtn" aria-label="表示切替">
+    <svg viewBox="0 0 24 24" style="width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M19 13.5A7 7 0 1 1 10.5 5a5.5 5.5 0 0 0 8.5 8.5z"/></svg>
+  </button>
+</header>
+
+<section class="login" id="loginView">
+  <div style="font-size:1.22rem;font-weight:700">店長の画面</div>
+  <p class="lead">店長用の合言葉を入れてください。<br>スタッフの合言葉では入れません。</p>
+  <input id="codeInput" inputmode="latin" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="8" placeholder="ABCD1234" aria-label="店長の合言葉">
+  <button class="btn" id="loginBtn" style="margin-top:12px">はいる</button>
+  <div class="err" id="loginErr"></div>
+</section>
+
+<main id="appView" hidden>
+  <div class="tabs">
+    <button id="tab1" class="on">一覧</button>
+    <button id="tab2">スタッフ</button>
+    <button id="tab3">設定</button>
+  </div>
+
+  <!-- ===== 一覧 ===== -->
+  <section class="card flush" id="view1">
+    <div class="pad">
+      <div class="monthbar">
+        <button class="navbtn" id="mPrev" aria-label="前の月">‹</button>
+        <div class="mv"><div class="mt" id="mLabel">—</div></div>
+        <button class="navbtn" id="mNext" aria-label="次の月">›</button>
+      </div>
+      <div class="state" id="stateRow"></div>
+    </div>
+    <div class="tablewrap" id="tableWrap"></div>
+    <div class="pad"><p class="muted" style="margin:12px 0 0; line-height:1.65" id="hint1"></p></div>
+  </section>
+
+  <!-- ===== スタッフ ===== -->
+  <section class="card" id="view2" hidden>
+    <div class="addrow">
+      <input id="newName" placeholder="スタッフのお名前" autocomplete="off">
+      <button class="btn" id="addBtn">追加</button>
+    </div>
+    <div id="staffBox"></div>
+    <p class="muted" style="margin-top:14px; line-height:1.65">
+      追加すると、その人だけの合言葉と専用URLができます。「送る文をコピー」でLINEに貼って、ひとりずつお渡しください。
+    </p>
+  </section>
+
+  <!-- ===== 設定 ===== -->
+  <section class="card" id="view3" hidden>
+    <div class="field">
+      <label>お店の名前</label>
+      <input type="text" id="cfName" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>締切（前の月の何日まで）</label>
+      <div class="inline">
+        <input type="number" id="cfDeadline" min="1" max="31" inputmode="numeric">
+        <span class="muted" style="flex:none">日まで</span>
+      </div>
+      <p class="muted" style="margin:6px 0 0; line-height:1.6" id="cfDlHint"></p>
+    </div>
+    <div class="field">
+      <label>お店があいている時間</label>
+      <div class="inline">
+        <input type="time" id="cfFrom" step="900">
+        <span class="muted" style="flex:none">〜</span>
+        <input type="time" id="cfTo" step="900">
+      </div>
+    </div>
+    <div class="field">
+      <label>定休日</label>
+      <div class="wdays" id="cfWdays"></div>
+    </div>
+    <div class="field">
+      <label>かんたんボタン（スタッフの画面に出る3つ）</label>
+      <div id="cfPresets"></div>
+    </div>
+    <button class="btn" id="saveCfg">この内容にする</button>
+    <div style="height:10px"></div>
+    <button class="btn sub" id="logoutBtn">この端末からログアウト</button>
+  </section>
+</main>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="sheet" id="sheet">
+  <div class="grip"></div>
+  <h2 id="shTitle">—</h2>
+  <div class="sub" id="shSub"></div>
+  <div class="presets" id="shPresets"></div>
+  <div class="times">
+    <input type="time" id="shFrom" step="900" aria-label="はじまり">
+    <span>〜</span>
+    <input type="time" id="shTo" step="900" aria-label="おわり">
+  </div>
+  <p class="note">電話や口頭でもらった希望を、店長が代わりに入れられます（締切のあとでも入れられます）。</p>
+  <button class="btn" id="shSave" style="margin-top:12px">この時間で入れる</button>
+  <div class="row2">
+    <button class="btn sub" id="shClose">とじる</button>
+    <button class="btn danger" id="shDel" hidden>この日を消す</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL='https://okbjqtdirrathscctyvx.supabase.co';
+const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rYmpxdGRpcnJhdGhzY2N0eXZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMjI4NTIsImV4cCI6MjA5NTg5ODg1Mn0.T-1AOK6vCD6uGdqrVGXjPui3L6WPSNrnygS-IHyfZ6Y';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+const LS_CODE='kibobako_admin', LS_THEME='kibobako_theme';
+const WD=['日','月','火','水','木','金','土'];
+const STAFF_URL=location.href.split('?')[0].split('#')[0].replace(/kibobako-kanri\.html$/,'kibobako.html');
+
+/* ===== 純粋関数 ===== */
+function pad2(n){ return String(n).padStart(2,'0'); }
+function m2hm(m){ return pad2(Math.floor(m/60))+':'+pad2(m%60); }
+function hm2m(s){ if(!s) return null; const p=s.split(':'); if(p.length<2) return null;
+  const h=parseInt(p[0],10), mi=parseInt(p[1],10); if(isNaN(h)||isNaN(mi)) return null; return h*60+mi; }
+function ymd(y,m1,d){ return y+'-'+pad2(m1)+'-'+pad2(d); }
+function parseMonth(s){ const p=s.split('-'); return {y:+p[0], m1:+p[1]}; }
+function shiftMonth(s,delta){ let {y,m1}=parseMonth(s); m1+=delta;
+  while(m1>12){m1-=12;y++;} while(m1<1){m1+=12;y--;} return y+'-'+pad2(m1); }
+function daysInMonth(y,m1){ return new Date(y,m1,0).getDate(); }
+function fmtDateJP(s){ const p=s.split('-'); return (+p[1])+'月'+(+p[2])+'日'; }
+function indexAvail(list){ const m={}; (list||[]).forEach(a=>{ (m[a.d]=m[a.d]||{})[a.staff_id]={from:a.from,to:a.to}; }); return m; }
+function countPerDay(map){ const o={}; Object.keys(map).forEach(d=>{ o[d]=Object.keys(map[d]).length; }); return o; }
+
+/* ===== 状態 ===== */
+let admin=null, shop=null, month=null, cur=null, avail={}, staffList=[], only=null;
+
+async function rpc(fn,params){ const {data,error}=await sb.rpc(fn,params); setSync(!error); if(error) throw error; return data; }
+function setSync(ok){ document.getElementById('syncDot').className='sync-dot '+(ok?'ok':'off'); }
+let toastT; function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),1900); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+async function copyText(t){
+  try{ await navigator.clipboard.writeText(t); return true; }
+  catch(e){
+    const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    let ok=false; try{ ok=document.execCommand('copy'); }catch(e2){}
+    document.body.removeChild(ta); return ok;
+  }
+}
+
+(function(){ const t=localStorage.getItem(LS_THEME); if(t) document.documentElement.dataset.theme=t; })();
+document.getElementById('themeBtn').addEventListener('click',()=>{
+  const el=document.documentElement;
+  const now=el.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+  const next=now==='dark'?'light':'dark';
+  el.dataset.theme=next; localStorage.setItem(LS_THEME,next);
+});
+
+/* ===== ログイン ===== */
+const codeInput=document.getElementById('codeInput');
+codeInput.addEventListener('input',()=>{ codeInput.value=codeInput.value.toUpperCase().replace(/[^A-Z0-9]/g,''); });
+codeInput.addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+document.getElementById('loginBtn').addEventListener('click',()=>doLogin());
+
+async function doLogin(c){
+  const err=document.getElementById('loginErr'); err.textContent='';
+  const v=(typeof c==='string'?c:codeInput.value).trim().toUpperCase();
+  if(v.length<4){ err.textContent='合言葉を入れてください'; return; }
+  try{
+    const info=await rpc('kibo_admin_login',{p_admin:v});
+    if(!info){ err.textContent='その合言葉は見つかりません'; return; }
+    admin=v; shop=info; localStorage.setItem(LS_CODE,v); enter();
+  }catch(e){ err.textContent='つながりませんでした。もう一度お試しください'; }
+}
+function enter(){
+  document.getElementById('loginView').hidden=true;
+  document.getElementById('appView').hidden=false;
+  document.getElementById('who').textContent=shop.name;
+  month=shop.open_month;
+  fillConfig();
+  loadMonth();
+}
+document.getElementById('logoutBtn').addEventListener('click',()=>{
+  if(!confirm('この端末からログアウトします。')) return;
+  localStorage.removeItem(LS_CODE); location.reload();
+});
+
+/* ===== タブ ===== */
+[['tab1','view1'],['tab2','view2'],['tab3','view3']].forEach(([t,v],i)=>{
+  document.getElementById(t).addEventListener('click',()=>{
+    [1,2,3].forEach(n=>{
+      document.getElementById('tab'+n).classList.toggle('on', n===i+1);
+      document.getElementById('view'+n).hidden = (n!==i+1);
+    });
+    if(i===1) loadStaff();
+  });
+});
+
+/* ===== 一覧 ===== */
+document.getElementById('mPrev').addEventListener('click',()=>{ month=shiftMonth(month,-1); loadMonth(); });
+document.getElementById('mNext').addEventListener('click',()=>{ month=shiftMonth(month,+1); loadMonth(); });
+
+let seq=0;
+async function loadMonth(){
+  const s=++seq;
+  try{ const r=await rpc('kibo_admin_month',{p_admin:admin,p_month:month}); if(s!==seq) return; cur=r; }
+  catch(e){ toast('読み込みに失敗しました'); return; }
+  avail=indexAvail(cur.avail); staffList=cur.staff||[];
+  if(only && !staffList.some(s2=>s2.id===only)) only=null;
+  renderGrid();
+}
+
+function renderGrid(){
+  const {y,m1}=parseMonth(cur.month);
+  document.getElementById('mLabel').textContent=y+'年'+m1+'月分';
+
+  const st=document.getElementById('stateRow'); st.innerHTML='';
+  const past=(shop.today > cur.deadline);
+  st.innerHTML = past
+    ? '<span class="pill closed">締切ずみ（'+fmtDateJP(cur.deadline)+'）</span>'
+    : '<span class="pill open">'+fmtDateJP(cur.deadline)+'まで 受付中</span>';
+  const submitted=new Set(); (cur.avail||[]).forEach(a=>submitted.add(a.staff_id));
+  st.innerHTML+='<span class="pill count">'+submitted.size+' / '+staffList.length+' 人が提出</span>';
+  if(only){ const s2=staffList.find(x=>x.id===only);
+    st.innerHTML+='<span class="pill">'+esc(s2?s2.name:'')+' だけ表示中</span>'; }
+
+  // まだ誰も出していない月は、0が全部赤くなって騒がしいので色をつけない
+  const anySubmitted = submitted.size > 0;
+  const shown = only ? staffList.filter(s2=>s2.id===only) : staffList;
+  const wrap=document.getElementById('tableWrap');
+  if(!staffList.length){ wrap.innerHTML='<div class="empty">スタッフがまだ登録されていません<br>「スタッフ」から追加してください</div>'; }
+  else{
+    const closed=new Set(shop.closed_wdays||[]);
+    const last=daysInMonth(y,m1);
+    let h='<table class="grid"><thead><tr><th class="dcol">日</th><th class="ccol">人</th>';
+    shown.forEach(s2=>{ h+='<th class="nm'+(only===s2.id?' sel':'')+'" data-sid="'+s2.id+'">'+esc(s2.name)+'</th>'; });
+    h+='</tr></thead><tbody>';
+    for(let d=1;d<=last;d++){
+      const key=ymd(y,m1,d), w=new Date(y,m1-1,d).getDay(), rest=closed.has(w);
+      const dayMap=avail[key]||{};
+      const n=shown.filter(s2=>dayMap[s2.id]).length;
+      h+='<tr class="'+(rest?'rest':'')+'">';
+      h+='<th class="dcol s'+w+'"><span class="n tnum">'+d+'</span><span class="w">'+WD[w]+'</span></th>';
+      const ccls = !anySubmitted ? '' : (n===0?'zero':(n===1?'thin':''));
+      h+='<td class="ccol"><span class="cnt '+ccls+'">'+(rest&&n===0?'—':n)+'</span></td>';
+      shown.forEach(s2=>{
+        const a=dayMap[s2.id];
+        h+='<td class="cell'+(a?' on':'')+'" data-sid="'+s2.id+'" data-d="'+key+'">'+
+           (a? m2hm(a.from)+'<br>'+m2hm(a.to) : '')+'</td>';
+      });
+      h+='</tr>';
+    }
+    h+='</tbody></table>';
+    wrap.innerHTML=h;
+    wrap.querySelectorAll('th.nm').forEach(th=>{
+      th.addEventListener('click',()=>{ only = (only===th.dataset.sid) ? null : th.dataset.sid; renderGrid(); });
+    });
+    wrap.querySelectorAll('td.cell').forEach(td=>{
+      td.addEventListener('click',()=>openSheet(td.dataset.sid, td.dataset.d));
+    });
+  }
+  document.getElementById('hint1').textContent =
+    '「人」の列がその日に出せる人数です。0の日は赤く出ます。名前を押すと、その人だけを表示します。マスを押すと店長が代わりに入れられます。';
+}
+
+/* ===== シート（代理入力） ===== */
+const sheet=document.getElementById('sheet'), backdrop=document.getElementById('backdrop');
+let shSid=null, shDate=null;
+function openSheet(sid,d){
+  shSid=sid; shDate=d;
+  const s2=staffList.find(x=>x.id===sid), got=(avail[d]||{})[sid];
+  const w=new Date(+d.split('-')[0], +d.split('-')[1]-1, +d.split('-')[2]).getDay();
+  document.getElementById('shTitle').textContent=(s2?s2.name:'')+'　'+fmtDateJP(d)+'（'+WD[w]+'）';
+  document.getElementById('shSub').textContent=got?('いまは '+m2hm(got.from)+' 〜 '+m2hm(got.to)):'まだ出ていません';
+  const pv=document.getElementById('shPresets'); pv.innerHTML='';
+  (shop.presets||[]).forEach(p=>{
+    const b=document.createElement('button'); b.textContent=p.label;
+    b.addEventListener('click',()=>{ setTimes(p.from,p.to); markPreset(); }); pv.appendChild(b);
+  });
+  if(got) setTimes(got.from,got.to);
+  else{ const p=(shop.presets||[])[0]; setTimes(p?p.from:shop.open_from, p?p.to:shop.open_to); }
+  markPreset();
+  document.getElementById('shDel').hidden=!got;
+  backdrop.classList.add('show'); sheet.classList.add('show');
+}
+function closeSheet(){ backdrop.classList.remove('show'); sheet.classList.remove('show'); }
+backdrop.addEventListener('click',closeSheet);
+document.getElementById('shClose').addEventListener('click',closeSheet);
+function setTimes(a,b){ document.getElementById('shFrom').value=m2hm(a); document.getElementById('shTo').value=m2hm(b); }
+function markPreset(){
+  const a=hm2m(document.getElementById('shFrom').value), b=hm2m(document.getElementById('shTo').value);
+  [...document.getElementById('shPresets').children].forEach((btn,i)=>{
+    const p=(shop.presets||[])[i]; btn.classList.toggle('on', !!p && p.from===a && p.to===b);
+  });
+}
+document.getElementById('shFrom').addEventListener('change',markPreset);
+document.getElementById('shTo').addEventListener('change',markPreset);
+
+let busy=false;
+document.getElementById('shSave').addEventListener('click',async()=>{
+  if(busy) return;
+  const a=hm2m(document.getElementById('shFrom').value), b=hm2m(document.getElementById('shTo').value);
+  if(a==null||b==null){ toast('時間を入れてください'); return; }
+  if(b<=a){ toast('おわりが、はじまりより前になっています'); return; }
+  busy=true;
+  try{
+    await rpc('kibo_admin_set',{p_admin:admin,p_staff:shSid,p_date:shDate,p_from:a,p_to:b});
+    (avail[shDate]=avail[shDate]||{})[shSid]={from:a,to:b};
+    cur.avail=cur.avail.filter(x=>!(x.staff_id===shSid&&x.d===shDate)).concat([{staff_id:shSid,d:shDate,from:a,to:b}]);
+    closeSheet(); renderGrid(); toast('入れました');
+  }catch(e){ toast('保存できませんでした'); }
+  finally{ busy=false; }
+});
+document.getElementById('shDel').addEventListener('click',async()=>{
+  if(busy) return; busy=true;
+  try{
+    await rpc('kibo_admin_clear',{p_admin:admin,p_staff:shSid,p_date:shDate});
+    if(avail[shDate]) delete avail[shDate][shSid];
+    cur.avail=cur.avail.filter(x=>!(x.staff_id===shSid&&x.d===shDate));
+    closeSheet(); renderGrid(); toast('消しました');
+  }catch(e){ toast('消せませんでした'); }
+  finally{ busy=false; }
+});
+
+/* ===== スタッフ ===== */
+async function loadStaff(){
+  try{ staffList=await rpc('kibo_admin_staff',{p_admin:admin}); }
+  catch(e){ toast('読み込みに失敗しました'); return; }
+  renderStaff();
+}
+function staffUrl(code){ return STAFF_URL+'?c='+code; }
+function inviteText(s2){
+  const {y,m1}=parseMonth(shop.open_month);
+  return s2.name+'さん\n'+shop.name+'のシフト希望は、こちらから出してください。\n\n'+
+    staffUrl(s2.code)+'\n\n'+
+    '・'+y+'年'+m1+'月分をお願いします\n'+
+    '・働ける日をタップして、時間を入れるだけです\n'+
+    '・あとから何度でも直せます\n'+
+    '・合言葉は '+s2.code+' です（リンクが開かないときに使ってください）';
+}
+function renderStaff(){
+  const box=document.getElementById('staffBox');
+  if(!staffList.length){ box.innerHTML='<div class="empty">まだ誰も登録されていません</div>'; return; }
+  box.innerHTML='';
+  staffList.forEach(s2=>{
+    const el=document.createElement('div'); el.className='staff'+(s2.active?'':' off');
+    el.innerHTML='<div class="nm">'+esc(s2.name)+(s2.active?'':' <span class="muted">（休止中）</span>')+'</div>'+
+      '<div class="cd">合言葉 '+esc(s2.code)+'</div><div class="acts"></div>';
+    const acts=el.querySelector('.acts');
+    const mk=(label,cls,fn)=>{ const b=document.createElement('button'); b.className='btn sm '+cls; b.textContent=label;
+      b.addEventListener('click',fn); acts.appendChild(b); };
+    mk('送る文をコピー','',async()=>{ toast(await copyText(inviteText(s2))?'コピーしました':'コピーできませんでした'); });
+    mk('URLだけコピー','sub',async()=>{ toast(await copyText(staffUrl(s2.code))?'コピーしました':'コピーできませんでした'); });
+    mk('名前を直す','sub',async()=>{
+      const v=prompt('お名前',s2.name); if(v===null) return;
+      try{ await rpc('kibo_admin_update_staff',{p_admin:admin,p_staff:s2.id,p_name:v,p_active:null}); loadStaff(); toast('直しました'); }
+      catch(e){ toast('直せませんでした'); }
+    });
+    mk(s2.active?'休止する':'再開する','sub',async()=>{
+      try{ await rpc('kibo_admin_update_staff',{p_admin:admin,p_staff:s2.id,p_name:null,p_active:!s2.active}); loadStaff(); }
+      catch(e){ toast('変えられませんでした'); }
+    });
+    mk('合言葉を再発行','sub',async()=>{
+      if(!confirm(s2.name+'さんの合言葉を作り直します。\nいまのURLはこの瞬間から開けなくなります。よろしいですか？')) return;
+      try{ await rpc('kibo_admin_reissue',{p_admin:admin,p_staff:s2.id}); loadStaff(); toast('作り直しました'); }
+      catch(e){ toast('できませんでした'); }
+    });
+    mk('削除','danger',async()=>{
+      if(!confirm(s2.name+'さんを削除します。\nこれまでに出した希望も一緒に消えます。よろしいですか？')) return;
+      try{ await rpc('kibo_admin_delete_staff',{p_admin:admin,p_staff:s2.id}); loadStaff(); loadMonth(); toast('削除しました'); }
+      catch(e){ toast('削除できませんでした'); }
+    });
+    box.appendChild(el);
+  });
+}
+document.getElementById('addBtn').addEventListener('click',addStaff);
+document.getElementById('newName').addEventListener('keydown',e=>{ if(e.key==='Enter') addStaff(); });
+async function addStaff(){
+  const el=document.getElementById('newName'), v=el.value.trim();
+  if(!v){ toast('お名前を入れてください'); return; }
+  try{ await rpc('kibo_admin_add_staff',{p_admin:admin,p_name:v}); el.value=''; loadStaff(); loadMonth(); toast('追加しました'); }
+  catch(e){ toast('追加できませんでした'); }
+}
+
+/* ===== 設定 ===== */
+function fillConfig(){
+  document.getElementById('cfName').value=shop.name;
+  document.getElementById('cfDeadline').value=shop.deadline_day;
+  document.getElementById('cfFrom').value=m2hm(shop.open_from);
+  document.getElementById('cfTo').value=m2hm(shop.open_to);
+  const wd=document.getElementById('cfWdays'); wd.innerHTML='';
+  const closed=new Set(shop.closed_wdays||[]);
+  WD.forEach((w,i)=>{
+    const b=document.createElement('button'); b.textContent=w; b.dataset.w=i;
+    if(closed.has(i)) b.classList.add('on');
+    b.addEventListener('click',()=>b.classList.toggle('on')); wd.appendChild(b);
+  });
+  const pv=document.getElementById('cfPresets'); pv.innerHTML='';
+  (shop.presets||[]).forEach((p,i)=>{
+    const row=document.createElement('div'); row.className='pset';
+    row.innerHTML='<input type="text" value="'+esc(p.label)+'" data-k="label" maxlength="4">'+
+      '<input type="time" step="900" value="'+m2hm(p.from)+'" data-k="from">'+
+      '<span class="muted">〜</span>'+
+      '<input type="time" step="900" value="'+m2hm(p.to)+'" data-k="to">';
+    pv.appendChild(row);
+  });
+  updateDlHint();
+}
+document.getElementById('cfDeadline').addEventListener('input',updateDlHint);
+function updateDlHint(){
+  const d=parseInt(document.getElementById('cfDeadline').value,10);
+  document.getElementById('cfDlHint').textContent = isNaN(d) ? '' :
+    '例：10月分は 9月'+d+'日まで。締切をすぎると、その月はスタッフが直せなくなります。';
+}
+document.getElementById('saveCfg').addEventListener('click',async()=>{
+  const name=document.getElementById('cfName').value.trim();
+  const dd=parseInt(document.getElementById('cfDeadline').value,10);
+  const of=hm2m(document.getElementById('cfFrom').value), ot=hm2m(document.getElementById('cfTo').value);
+  if(!name){ toast('お店の名前を入れてください'); return; }
+  if(isNaN(dd)||dd<1||dd>31){ toast('締切は1〜31の数で入れてください'); return; }
+  if(of==null||ot==null||ot<=of){ toast('あいている時間を見直してください'); return; }
+  const closed=[...document.getElementById('cfWdays').children].filter(b=>b.classList.contains('on')).map(b=>+b.dataset.w);
+  const presets=[...document.getElementById('cfPresets').children].map(row=>{
+    const g=k=>row.querySelector('[data-k="'+k+'"]').value;
+    return {label:g('label').trim()||'—', from:hm2m(g('from')), to:hm2m(g('to'))};
+  }).filter(p=>p.from!=null&&p.to!=null&&p.to>p.from);
+  try{
+    await rpc('kibo_admin_update_shop',{p_admin:admin,p_name:name,p_deadline_day:dd,
+      p_open_from:of,p_open_to:ot,p_presets:presets,p_closed:closed});
+    const info=await rpc('kibo_admin_login',{p_admin:admin});
+    shop=info; document.getElementById('who').textContent=shop.name;
+    fillConfig(); loadMonth(); toast('変えました');
+  }catch(e){ toast('保存できませんでした'); }
+});
+
+/* ===== 起動 ===== */
+(function(){ const saved=localStorage.getItem(LS_CODE); if(saved) doLogin(saved); })();
+</script>
+</body>
+</html>

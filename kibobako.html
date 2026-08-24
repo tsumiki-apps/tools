@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="apple-touch-icon" href="icon-kibobako.png">
+<meta name="apple-mobile-web-app-title" content="きぼうばこ">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f5f4f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#131109" media="(prefers-color-scheme: dark)">
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<title>きぼうばこ</title>
+<style>
+  :root{
+    --paper:#f5f4f0; --surface:#fffefb; --surface-2:#efece5; --ink:#1d1a15;
+    --ink-mid:#5b554a; --ink-soft:#8f8877; --line:#e2ded4; --line-2:#d8d3c7;
+    --accent:#b06f26; --accent-2:#8a5a24; --accent-wash:#f0e4d1;
+    --good:#4c7a51; --good-wash:#dde9dd; --warn:#b0522a; --warn-wash:#f2e0d4;
+    --sat:#3f6b8a; --sun:#a2513f;
+    --shadow:0 1px 2px rgba(40,32,18,.05), 0 10px 26px -16px rgba(40,32,18,.18);
+    --sans:'Zen Maru Gothic',-apple-system,BlinkMacSystemFont,"Hiragino Maru Gothic ProN","Hiragino Sans","Helvetica Neue",Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#131109; --surface:#1d1a12; --surface-2:#26221a; --ink:#efe8da;
+      --ink-mid:#a89e8b; --ink-soft:#7d7566; --line:#2f2b21; --line-2:#3a352a;
+      --accent:#d59a4d; --accent-2:#e0ab63; --accent-wash:#3c2d18;
+      --good:#7fae82; --good-wash:#23301f; --warn:#d9825a; --warn-wash:#39251a;
+      --sat:#7fa8c4; --sun:#d4867a;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px -18px rgba(0,0,0,.65);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#131109; --surface:#1d1a12; --surface-2:#26221a; --ink:#efe8da;
+    --ink-mid:#a89e8b; --ink-soft:#7d7566; --line:#2f2b21; --line-2:#3a352a;
+    --accent:#d59a4d; --accent-2:#e0ab63; --accent-wash:#3c2d18;
+    --good:#7fae82; --good-wash:#23301f; --warn:#d9825a; --warn-wash:#39251a;
+    --sat:#7fa8c4; --sun:#d4867a;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px -18px rgba(0,0,0,.65);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0; padding:0;}
+  body{
+    background:var(--paper); color:var(--ink); font-family:var(--sans);
+    line-height:1.6; -webkit-font-smoothing:antialiased; font-feature-settings:"palt" 1;
+    -webkit-text-size-adjust:100%;
+  }
+  .tnum{font-variant-numeric:tabular-nums;}
+
+  .topbar{
+    position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter:saturate(1.3) blur(10px); -webkit-backdrop-filter:saturate(1.3) blur(10px);
+    border-bottom:1px solid var(--line); padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; min-width:0;}
+  .brand .mark{width:26px; height:26px; flex:none; display:block; border-radius:7px; box-shadow:0 2px 7px rgba(36,35,33,.18);}
+  .brand h1{font-weight:700; font-size:1.05rem; margin:0; letter-spacing:.02em; white-space:nowrap;}
+  .brand .who{font-size:.72rem; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .spacer{flex:1;}
+  .iconbtn{width:34px; height:34px; flex:none; border:1px solid var(--line); background:var(--surface);
+    border-radius:9px; color:var(--ink-mid); display:grid; place-items:center; cursor:pointer;}
+  .iconbtn:active{transform:scale(.94);}
+  .sync-dot{width:8px; height:8px; border-radius:50%; background:var(--ink-soft); flex:none;}
+  .sync-dot.ok{background:var(--good);} .sync-dot.off{background:var(--warn);}
+
+  main{max-width:560px; margin:0 auto; padding:16px 14px calc(env(safe-area-inset-bottom) + 48px); display:grid; gap:14px;}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow); padding:16px;}
+  .muted{color:var(--ink-soft); font-size:.8rem;}
+
+  /* ---------- ログイン ---------- */
+  .login{max-width:400px; margin:0 auto; padding:48px 18px;}
+  .login .lead{font-size:.9rem; color:var(--ink-mid); margin:14px 0 22px; line-height:1.75;}
+  .login input{
+    width:100%; font-family:var(--sans); font-size:1.5rem; font-weight:700; letter-spacing:.28em;
+    text-align:center; padding:15px 12px; border:1.5px solid var(--line-2); border-radius:14px;
+    background:var(--surface); color:var(--ink); text-transform:uppercase;
+  }
+  .login input:focus{outline:none; border-color:var(--accent);}
+  .btn{
+    width:100%; font-family:var(--sans); font-size:1rem; font-weight:700; padding:15px;
+    border:none; border-radius:14px; background:var(--accent); color:#fff; cursor:pointer; margin-top:12px;
+  }
+  .btn:active{transform:scale(.985);}
+  .btn.sub{background:var(--surface-2); color:var(--ink-mid); border:1px solid var(--line);}
+  .btn.danger{background:transparent; color:var(--warn); border:1px solid var(--warn);}
+  .err{color:var(--warn); font-size:.84rem; margin-top:10px; min-height:1.2em;}
+
+  /* ---------- 月の見出し ---------- */
+  .monthbar{display:flex; align-items:center; gap:8px;}
+  .monthbar .mv{flex:1; text-align:center;}
+  .monthbar .mt{font-size:1.15rem; font-weight:700; letter-spacing:.02em;}
+  .navbtn{width:38px; height:38px; flex:none; border:1px solid var(--line); background:var(--surface-2);
+    border-radius:11px; color:var(--ink-mid); font-size:1rem; cursor:pointer;}
+  .navbtn:disabled{opacity:.32;}
+  .state{margin-top:11px; display:flex; gap:8px; flex-wrap:wrap;}
+  .pill{font-size:.76rem; font-weight:700; padding:5px 11px; border-radius:999px;
+    background:var(--surface-2); color:var(--ink-mid); border:1px solid var(--line);}
+  .pill.open{background:var(--good-wash); color:var(--good); border-color:transparent;}
+  .pill.closed{background:var(--warn-wash); color:var(--warn); border-color:transparent;}
+  .pill.count{background:var(--accent-wash); color:var(--accent-2); border-color:transparent;}
+
+  /* ---------- カレンダー ---------- */
+  .wd{display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin:14px 0 5px;}
+  .wd div{text-align:center; font-size:.72rem; font-weight:700; color:var(--ink-soft);}
+  .wd .s6{color:var(--sat);} .wd .s0{color:var(--sun);}
+  .cal{display:grid; grid-template-columns:repeat(7,1fr); gap:4px;}
+  .cell{
+    position:relative; aspect-ratio:1/1.16; border:1px solid var(--line); border-radius:11px;
+    background:var(--surface); display:flex; flex-direction:column; align-items:center;
+    padding:4px 1px 3px; cursor:pointer; -webkit-tap-highlight-color:transparent; overflow:hidden;
+  }
+  .cell.blank{border:none; background:transparent; cursor:default;}
+  .cell .dn{font-size:.82rem; font-weight:700; line-height:1.1; font-variant-numeric:tabular-nums;}
+  .cell.s6 .dn{color:var(--sat);} .cell.s0 .dn{color:var(--sun);}
+  .cell.rest{background:var(--surface-2); border-style:dashed;}
+  .cell.rest .dn{color:var(--ink-soft);}
+  .cell.on{background:var(--accent-wash); border-color:var(--accent); border-width:1.5px;}
+  .cell.on .dn{color:var(--accent-2);}
+  .cell .tm{margin-top:2px; font-size:.6rem; line-height:1.22; font-weight:700; color:var(--accent-2);
+    font-variant-numeric:tabular-nums; text-align:center;}
+  .cell .restmark{margin-top:3px; font-size:.58rem; color:var(--ink-soft);}
+  .cell.today{box-shadow:0 0 0 2px var(--ink) inset;}
+  .cell:active{transform:scale(.95);}
+  .cal.locked .cell{cursor:default;}
+
+  /* ---------- 出した一覧 ---------- */
+  .listrow{display:flex; align-items:center; gap:10px; padding:9px 0; border-top:1px solid var(--line);}
+  .listrow:first-of-type{border-top:none;}
+  .listrow .d{font-weight:700; font-size:.9rem; width:74px; flex:none; font-variant-numeric:tabular-nums;}
+  .listrow .d .w{font-size:.74rem; color:var(--ink-soft); margin-left:3px;}
+  .listrow .t{font-weight:700; color:var(--accent-2); font-variant-numeric:tabular-nums;}
+  .listrow .h{margin-left:auto; font-size:.78rem; color:var(--ink-soft);}
+  .empty{text-align:center; color:var(--ink-soft); font-size:.85rem; padding:22px 0;}
+
+  /* ---------- シート ---------- */
+  .backdrop{position:fixed; inset:0; background:rgba(20,16,8,.42); z-index:40; opacity:0; pointer-events:none; transition:opacity .18s;}
+  .backdrop.show{opacity:1; pointer-events:auto;}
+  .sheet{
+    position:fixed; left:0; right:0; bottom:0; z-index:50; background:var(--surface);
+    border-radius:22px 22px 0 0; border-top:1px solid var(--line);
+    padding:18px 18px calc(env(safe-area-inset-bottom) + 20px);
+    transform:translateY(102%); transition:transform .22s cubic-bezier(.3,.9,.3,1);
+    max-width:560px; margin:0 auto; box-shadow:0 -12px 40px -20px rgba(30,22,10,.5);
+  }
+  .sheet.show{transform:translateY(0);}
+  .sheet .grip{width:38px; height:4px; border-radius:99px; background:var(--line-2); margin:0 auto 14px;}
+  .sheet h2{margin:0 0 3px; font-size:1.12rem; font-weight:700;}
+  .sheet .sub{font-size:.8rem; color:var(--ink-soft); margin-bottom:15px;}
+  .presets{display:flex; gap:8px; margin-bottom:14px;}
+  .presets button{
+    flex:1; font-family:var(--sans); font-size:.92rem; font-weight:700; padding:12px 4px;
+    border:1.5px solid var(--line-2); border-radius:12px; background:var(--surface-2); color:var(--ink); cursor:pointer;
+  }
+  .presets button.on{background:var(--accent-wash); border-color:var(--accent); color:var(--accent-2);}
+  .presets button:active{transform:scale(.96);}
+  .times{display:flex; align-items:center; gap:9px; margin-bottom:6px;}
+  .times input{
+    flex:1; min-width:0; font-family:var(--sans); font-size:1.15rem; font-weight:700; text-align:center;
+    padding:12px 6px; border:1.5px solid var(--line-2); border-radius:12px;
+    background:var(--surface); color:var(--ink); font-variant-numeric:tabular-nums;
+  }
+  .times input:focus{outline:none; border-color:var(--accent);}
+  .times span{color:var(--ink-soft); font-weight:700; flex:none;}
+  .sheet .note{font-size:.78rem; color:var(--ink-soft); margin:8px 0 0; line-height:1.6;}
+  .sheet .row2{display:flex; gap:9px; margin-top:14px;}
+  .sheet .row2 .btn{margin-top:0;}
+  .sheet .warn{background:var(--warn-wash); color:var(--warn); font-size:.83rem; font-weight:700;
+    padding:11px 13px; border-radius:12px; margin-bottom:14px; line-height:1.55;}
+
+  .toast{
+    position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom) + 26px); transform:translate(-50%,14px);
+    background:var(--ink); color:var(--paper); font-size:.86rem; font-weight:700; padding:11px 19px;
+    border-radius:999px; opacity:0; pointer-events:none; transition:.2s; z-index:60; white-space:nowrap;
+  }
+  .toast.show{opacity:1; transform:translate(-50%,0);}
+  [hidden]{display:none !important;}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <svg class="mark" viewBox="0 0 100 100" aria-label="つみき"><rect width="100" height="100" rx="24" fill="#242321"/><g fill="#242321" stroke="#F4F2EE" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"><polygon points="35,46 50,53.5 35,61 20,53.5"/><polygon points="20,53.5 35,61 35,76 20,68.5"/><polygon points="50,53.5 35,61 35,76 50,68.5"/><polygon points="65,46 80,53.5 65,61 50,53.5"/><polygon points="50,53.5 65,61 65,76 50,68.5"/><polygon points="80,53.5 65,61 65,76 80,68.5"/><polygon points="50,24 65,31.5 50,39 35,31.5"/><polygon points="35,31.5 50,39 50,54 35,46.5"/><polygon points="65,31.5 50,39 50,54 65,46.5"/></g></svg>
+    <div style="min-width:0">
+      <h1>きぼうばこ</h1>
+      <div class="who" id="who"></div>
+    </div>
+  </div>
+  <span class="spacer"></span>
+  <span class="sync-dot" id="syncDot" title="同期"></span>
+  <button class="iconbtn" id="themeBtn" aria-label="表示切替">
+    <svg viewBox="0 0 24 24" style="width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M19 13.5A7 7 0 1 1 10.5 5a5.5 5.5 0 0 0 8.5 8.5z"/></svg>
+  </button>
+</header>
+
+<!-- ===== ログイン ===== -->
+<section class="login" id="loginView">
+  <div style="font-size:1.22rem;font-weight:700">シフトの希望を出す</div>
+  <p class="lead">お店から届いた <b>6文字の合言葉</b> を入れてください。<br>あなた専用の入口です。ほかの人の希望は見えません。</p>
+  <input id="codeInput" inputmode="latin" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="6" placeholder="ABC123" aria-label="合言葉">
+  <button class="btn" id="loginBtn">はいる</button>
+  <div class="err" id="loginErr"></div>
+</section>
+
+<!-- ===== 本体 ===== -->
+<main id="appView" hidden>
+  <section class="card">
+    <div class="monthbar">
+      <button class="navbtn" id="mPrev" aria-label="前の月">‹</button>
+      <div class="mv"><div class="mt" id="mLabel">—</div></div>
+      <button class="navbtn" id="mNext" aria-label="次の月">›</button>
+    </div>
+    <div class="state" id="stateRow"></div>
+
+    <div class="wd">
+      <div class="s0">日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div class="s6">土</div>
+    </div>
+    <div class="cal" id="cal"></div>
+    <p class="note muted" style="margin:12px 0 0; line-height:1.65" id="hint"></p>
+  </section>
+
+  <section class="card">
+    <div style="font-weight:700; font-size:.95rem; margin-bottom:8px">出した日</div>
+    <div id="listBox"></div>
+  </section>
+
+  <section class="card" style="padding:13px 16px">
+    <button class="btn sub" id="logoutBtn" style="margin:0">この端末からログアウト</button>
+  </section>
+</main>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="sheet" id="sheet">
+  <div class="grip"></div>
+  <h2 id="shTitle">—</h2>
+  <div class="sub" id="shSub"></div>
+  <div class="warn" id="shWarn" hidden></div>
+  <div id="shEdit">
+    <div class="presets" id="shPresets"></div>
+    <div class="times">
+      <input type="time" id="shFrom" step="900" aria-label="はじまり">
+      <span>〜</span>
+      <input type="time" id="shTo" step="900" aria-label="おわり">
+    </div>
+    <p class="note" id="shNote"></p>
+    <button class="btn" id="shSave">この日で出す</button>
+    <div class="row2">
+      <button class="btn sub" id="shClose">とじる</button>
+      <button class="btn danger" id="shDel" hidden>この日をやめる</button>
+    </div>
+  </div>
+  <div id="shView" hidden>
+    <button class="btn sub" id="shClose2" style="margin-top:0">とじる</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL='https://okbjqtdirrathscctyvx.supabase.co';
+const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rYmpxdGRpcnJhdGhzY2N0eXZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMjI4NTIsImV4cCI6MjA5NTg5ODg1Mn0.T-1AOK6vCD6uGdqrVGXjPui3L6WPSNrnygS-IHyfZ6Y';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+const LS_CODE='kibobako_code', LS_THEME='kibobako_theme';
+const WD=['日','月','火','水','木','金','土'];
+
+/* ===== 純粋関数（テストしやすいように副作用なし） ===== */
+function pad2(n){ return String(n).padStart(2,'0'); }
+function m2hm(m){ return pad2(Math.floor(m/60))+':'+pad2(m%60); }
+function hm2m(s){ if(!s) return null; const p=s.split(':'); if(p.length<2) return null;
+  const h=parseInt(p[0],10), mi=parseInt(p[1],10); if(isNaN(h)||isNaN(mi)) return null; return h*60+mi; }
+function ymd(y,m1,d){ return y+'-'+pad2(m1)+'-'+pad2(d); }
+function parseMonth(s){ const p=s.split('-'); return {y:+p[0], m1:+p[1]}; }
+function shiftMonth(s,delta){ let {y,m1}=parseMonth(s); m1+=delta;
+  while(m1>12){m1-=12;y++;} while(m1<1){m1+=12;y--;} return y+'-'+pad2(m1); }
+function daysInMonth(y,m1){ return new Date(y,m1,0).getDate(); }
+function firstWday(y,m1){ return new Date(y,m1-1,1).getDay(); }
+function durMin(a,b){ return Math.max(0,b-a); }
+function fmtDur(m){ const h=Math.floor(m/60), mi=m%60; return h+'時間'+(mi?pad2(mi)+'分':''); }
+function totalMin(days){ return days.reduce((s,d)=>s+durMin(d.from,d.to),0); }
+function fmtDateJP(s){ const p=s.split('-'); return (+p[1])+'月'+(+p[2])+'日'; }
+function wdayOf(s){ const p=s.split('-'); return new Date(+p[0],+p[1]-1,+p[2]).getDay(); }
+
+/* ===== 状態 ===== */
+let code=null, me=null, month=null, cur=null, byDate={};
+
+/* ===== 通信 ===== */
+async function rpc(fn,params){ const {data,error}=await sb.rpc(fn,params); setSync(!error); if(error) throw error; return data; }
+function setSync(ok){ const d=document.getElementById('syncDot'); d.className='sync-dot '+(ok?'ok':'off'); }
+let toastT; function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),1900); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ===== 表示切替（明るい／暗い） ===== */
+(function(){ const t=localStorage.getItem(LS_THEME); if(t) document.documentElement.dataset.theme=t; })();
+document.getElementById('themeBtn').addEventListener('click',()=>{
+  const el=document.documentElement;
+  const now=el.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+  const next=now==='dark'?'light':'dark';
+  el.dataset.theme=next; localStorage.setItem(LS_THEME,next);
+});
+
+/* ===== ログイン ===== */
+const codeInput=document.getElementById('codeInput');
+codeInput.addEventListener('input',()=>{ codeInput.value=codeInput.value.toUpperCase().replace(/[^A-Z0-9]/g,''); });
+codeInput.addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+document.getElementById('loginBtn').addEventListener('click',doLogin);
+
+async function doLogin(c){
+  const err=document.getElementById('loginErr'); err.textContent='';
+  const v=(typeof c==='string'?c:codeInput.value).trim().toUpperCase();
+  if(v.length<4){ err.textContent='合言葉を入れてください'; return; }
+  try{
+    const info=await rpc('kibo_staff_login',{p_code:v});
+    if(!info){ err.textContent='その合言葉は見つかりません。お店にご確認ください'; return; }
+    code=v; me=info; localStorage.setItem(LS_CODE,v);
+    history.replaceState(null,'',location.pathname);
+    enter();
+  }catch(e){ err.textContent='つながりませんでした。電波のよい所で、もう一度お試しください'; }
+}
+function enter(){
+  document.getElementById('loginView').hidden=true;
+  document.getElementById('appView').hidden=false;
+  document.getElementById('who').textContent=me.name+'さん・'+me.shop_name;
+  month=me.open_month;
+  loadMonth();
+}
+document.getElementById('logoutBtn').addEventListener('click',()=>{
+  if(!confirm('この端末からログアウトします。もう一度入るには合言葉が要ります。')) return;
+  localStorage.removeItem(LS_CODE); location.replace(location.pathname);
+});
+
+/* ===== 月の読み込み ===== */
+document.getElementById('mPrev').addEventListener('click',()=>{ month=shiftMonth(month,-1); loadMonth(); });
+document.getElementById('mNext').addEventListener('click',()=>{ month=shiftMonth(month,+1); loadMonth(); });
+
+let seq=0;
+async function loadMonth(){
+  const s=++seq;
+  try{ const r=await rpc('kibo_staff_month',{p_code:code,p_month:month});
+       if(s!==seq) return; cur=r; }
+  catch(e){ toast('読み込みに失敗しました'); return; }
+  byDate={}; (cur.days||[]).forEach(d=>{ byDate[d.d]=d; });
+  render();
+}
+
+function render(){
+  const {y,m1}=parseMonth(cur.month);
+  document.getElementById('mLabel').textContent=y+'年'+m1+'月分';
+
+  const st=document.getElementById('stateRow'); st.innerHTML='';
+  const dl=fmtDateJP(cur.deadline);
+  if(cur.editable){
+    st.innerHTML='<span class="pill open">'+dl+'まで 受付中</span>';
+  }else{
+    st.innerHTML='<span class="pill closed">締切がすぎました（'+dl+'）</span>';
+  }
+  const n=(cur.days||[]).length;
+  st.innerHTML+='<span class="pill count">'+n+'日 出しました</span>';
+  if(n) st.innerHTML+='<span class="pill">'+fmtDur(totalMin(cur.days))+'</span>';
+
+  document.getElementById('hint').textContent = cur.editable
+    ? '働ける日をタップして、時間を入れてください。出していない日は「その日は働けない」として伝わります。'
+    : 'この月は締切をすぎたので、直せません。変更があるときはお店にご連絡ください。';
+
+  // カレンダー
+  const cal=document.getElementById('cal'); cal.className='cal'+(cur.editable?'':' locked'); cal.innerHTML='';
+  const lead=firstWday(y,m1), last=daysInMonth(y,m1);
+  const closed=new Set(me.closed_wdays||[]);
+  for(let i=0;i<lead;i++){ const e=document.createElement('div'); e.className='cell blank'; cal.appendChild(e); }
+  for(let d=1;d<=last;d++){
+    const key=ymd(y,m1,d), w=new Date(y,m1-1,d).getDay(), got=byDate[key];
+    const e=document.createElement('div');
+    e.className='cell s'+w+(got?' on':'')+(closed.has(w)&&!got?' rest':'')+(key===me.today?' today':'');
+    let inner='<div class="dn">'+d+'</div>';
+    if(got) inner+='<div class="tm">'+m2hm(got.from)+'<br>'+m2hm(got.to)+'</div>';
+    else if(closed.has(w)) inner+='<div class="restmark">休</div>';
+    e.innerHTML=inner;
+    e.addEventListener('click',()=>openSheet(key));
+    cal.appendChild(e);
+  }
+
+  // 出した日の一覧
+  const box=document.getElementById('listBox');
+  const days=(cur.days||[]).slice().sort((a,b)=>a.d<b.d?-1:1);
+  if(!days.length){ box.innerHTML='<div class="empty">まだ1日も出していません</div>'; return; }
+  box.innerHTML=days.map(x=>{
+    const w=wdayOf(x.d);
+    return '<div class="listrow"><div class="d tnum">'+fmtDateJP(x.d)+'<span class="w">('+WD[w]+')</span></div>'+
+           '<div class="t tnum">'+m2hm(x.from)+' 〜 '+m2hm(x.to)+'</div>'+
+           '<div class="h">'+fmtDur(durMin(x.from,x.to))+'</div></div>';
+  }).join('');
+}
+
+/* ===== シート ===== */
+const sheet=document.getElementById('sheet'), backdrop=document.getElementById('backdrop');
+let shDate=null;
+
+function openSheet(key){
+  shDate=key;
+  const got=byDate[key], w=wdayOf(key);
+  const closed=(me.closed_wdays||[]).indexOf(w)>=0;
+  document.getElementById('shTitle').textContent=fmtDateJP(key)+'（'+WD[w]+'）';
+  document.getElementById('shSub').textContent=closed?'この曜日は定休日です':'';
+
+  const editable=cur.editable;
+  document.getElementById('shEdit').hidden=!editable;
+  document.getElementById('shView').hidden=editable;
+  const warn=document.getElementById('shWarn');
+  if(!editable){
+    warn.hidden=false;
+    warn.textContent=got
+      ? '締切がすぎています（'+m2hm(got.from)+' 〜 '+m2hm(got.to)+' で出しています）。直すときはお店にご連絡ください。'
+      : '締切がすぎています。この日は出していません。';
+  }else{
+    warn.hidden=true;
+    // プリセット
+    const pv=document.getElementById('shPresets'); pv.innerHTML='';
+    (me.presets||[]).forEach(p=>{
+      const b=document.createElement('button'); b.textContent=p.label;
+      b.addEventListener('click',()=>{ setTimes(p.from,p.to); markPreset(); });
+      pv.appendChild(b);
+    });
+    if(got) setTimes(got.from,got.to);
+    else{ const p=(me.presets||[])[0]; setTimes(p?p.from:me.open_from, p?p.to:me.open_to); }
+    markPreset();
+    document.getElementById('shDel').hidden=!got;
+    document.getElementById('shSave').textContent=got?'この時間に直す':'この日で出す';
+    document.getElementById('shNote').textContent='お店があいている時間は '+m2hm(me.open_from)+' 〜 '+m2hm(me.open_to)+' です。時間はご自由に直せます。';
+  }
+  backdrop.classList.add('show'); sheet.classList.add('show');
+}
+function closeSheet(){ backdrop.classList.remove('show'); sheet.classList.remove('show'); }
+backdrop.addEventListener('click',closeSheet);
+document.getElementById('shClose').addEventListener('click',closeSheet);
+document.getElementById('shClose2').addEventListener('click',closeSheet);
+
+function setTimes(a,b){ document.getElementById('shFrom').value=m2hm(a); document.getElementById('shTo').value=m2hm(b); }
+function markPreset(){
+  const a=hm2m(document.getElementById('shFrom').value), b=hm2m(document.getElementById('shTo').value);
+  [...document.getElementById('shPresets').children].forEach((btn,i)=>{
+    const p=(me.presets||[])[i];
+    btn.classList.toggle('on', !!p && p.from===a && p.to===b);
+  });
+}
+document.getElementById('shFrom').addEventListener('change',markPreset);
+document.getElementById('shTo').addEventListener('change',markPreset);
+
+let saving=false;
+document.getElementById('shSave').addEventListener('click',async()=>{
+  if(saving) return;
+  const a=hm2m(document.getElementById('shFrom').value), b=hm2m(document.getElementById('shTo').value);
+  if(a==null||b==null){ toast('時間を入れてください'); return; }
+  if(b<=a){ toast('おわりの時間が、はじまりより前になっています'); return; }
+  saving=true;
+  try{
+    await rpc('kibo_staff_set',{p_code:code,p_date:shDate,p_from:a,p_to:b});
+    byDate[shDate]={d:shDate,from:a,to:b};
+    cur.days=Object.values(byDate);
+    closeSheet(); render(); toast('出しました');
+  }catch(e){ toast(String(e.message||'').indexOf('closed')>=0?'締切がすぎています':'保存できませんでした'); }
+  finally{ saving=false; }
+});
+document.getElementById('shDel').addEventListener('click',async()=>{
+  if(saving) return; saving=true;
+  try{
+    await rpc('kibo_staff_clear',{p_code:code,p_date:shDate});
+    delete byDate[shDate]; cur.days=Object.values(byDate);
+    closeSheet(); render(); toast('取り消しました');
+  }catch(e){ toast('取り消せませんでした'); }
+  finally{ saving=false; }
+});
+
+/* ===== 起動 ===== */
+(function(){
+  const q=new URLSearchParams(location.search).get('c');
+  const saved=localStorage.getItem(LS_CODE);
+  if(q) doLogin(q);
+  else if(saved) doLogin(saved);
+})();
+</script>
+</body>
+</html>
