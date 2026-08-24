@@ -17,9 +17,13 @@
 <style>
   :root{
     --paper:#f5f4f0; --surface:#fffefb; --surface-2:#efece5; --ink:#1d1a15;
-    --ink-mid:#5b554a; --ink-soft:#8f8877; --line:#e2ded4; --line-2:#d8d3c7;
+    /* 色の上に載せる文字の色。暗い表示では地の色が明るくなるので、白のままだと読みにくい */
+    --on-accent:#ffffff;
+    /* 薄い文字は白地で 3.5 しか差が無く読みにくかった（目安4.5）。少し濃くする。
+       ⚠️ 屋号の色（--accent）は変えない。読みやすさは文字側で稼ぐ。 */
+    --ink-mid:#5b554a; --ink-soft:#7c7464; --line:#e2ded4; --line-2:#d8d3c7;
     --accent:#b06f26; --accent-2:#8a5a24; --accent-wash:#f0e4d1;
-    --good:#4c7a51; --good-wash:#dde9dd; --warn:#b0522a; --warn-wash:#f2e0d4;
+    --good:#3f6a44; --good-wash:#dde9dd; --warn:#9b4520; --warn-wash:#f2e0d4;
     --sat:#3f6b8a; --sun:#a2513f;
     --shadow:0 1px 2px rgba(40,32,18,.05), 0 10px 26px -16px rgba(40,32,18,.18);
     --sans:'Zen Maru Gothic',-apple-system,BlinkMacSystemFont,"Hiragino Maru Gothic ProN","Hiragino Sans","Helvetica Neue",Arial,sans-serif;
@@ -35,16 +39,22 @@
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
       --paper:#131109; --surface:#1d1a12; --surface-2:#26221a; --ink:#efe8da;
-      --ink-mid:#a89e8b; --ink-soft:#7d7566; --line:#2f2b21; --line-2:#3a352a;
+      --ink-mid:#a89e8b;
+      /* 3.8 しか差が無く読みにくかったので明るくした（目安は4.5） */
+      --ink-soft:#9a9382;
+      /* 明るい琥珀の上に白だと 2.5 しか差が無い。暗い文字に切り替える */
+      --on-accent:#17140c; --line:#2f2b21; --line-2:#3a352a;
       --accent:#d59a4d; --accent-2:#e0ab63; --accent-wash:#3c2d18;
       --good:#7fae82; --good-wash:#23301f; --warn:#d9825a; --warn-wash:#39251a;
       --sat:#7fa8c4; --sun:#d4867a;
       --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px -18px rgba(0,0,0,.65);
     }
   }
+  /* ⚠️ 暗い色の定義はここと @media の2か所にある。片方だけ直すと、
+     OSの設定によって見え方が食い違う。必ず両方そろえる。 */
   :root[data-theme="dark"]{
     --paper:#131109; --surface:#1d1a12; --surface-2:#26221a; --ink:#efe8da;
-    --ink-mid:#a89e8b; --ink-soft:#7d7566; --line:#2f2b21; --line-2:#3a352a;
+    --ink-mid:#a89e8b; --ink-soft:#9a9382; --on-accent:#17140c; --line:#2f2b21; --line-2:#3a352a;
     --accent:#d59a4d; --accent-2:#e0ab63; --accent-wash:#3c2d18;
     --good:#7fae82; --good-wash:#23301f; --warn:#d9825a; --warn-wash:#39251a;
     --sat:#7fa8c4; --sun:#d4867a;
@@ -118,7 +128,10 @@
   .monthbar .mt{font-size:1.15rem; font-weight:700;}
   .navbtn{width:var(--tap); height:var(--tap); flex:none; border:1px solid var(--line); background:var(--surface-2);
     border-radius:12px; color:var(--ink-mid); font-size:1.05rem; cursor:pointer;}
-  .state{margin-top:11px; display:flex; gap:8px; flex-wrap:wrap;}
+  /* ⚠️ 札の数で1行→2行に変わると、下のカレンダーがまるごと動く
+     （初めて1日を出した瞬間に39px下がっていた）。2行ぶんの高さを先に取っておく。 */
+  .state{margin-top:11px; display:flex; gap:8px; flex-wrap:wrap;
+    align-content:flex-start; min-height:70px;}
   .pill{font-size:.76rem; font-weight:700; padding:5px 11px; border-radius:999px;
     background:var(--surface-2); color:var(--ink-mid); border:1px solid var(--line);}
   .pill.open{background:var(--good-wash); color:var(--good); border-color:transparent;}
@@ -126,36 +139,45 @@
   .pill.count{background:var(--accent-wash); color:var(--accent-2); border-color:transparent;}
 
   /* ---------- 足りない日のまとめ（開いて最初に目に入るところ） ---------- */
-  .short{margin-top:13px; border-radius:14px; padding:12px 14px; background:var(--warn-wash);}
-  .short.ok{background:var(--good-wash);}
-  .short .hd{font-weight:700; font-size:.95rem; color:var(--warn);}
-  .short.ok .hd{color:var(--good);}
-  .short .chips{display:flex; flex-wrap:wrap; gap:7px; margin-top:10px;}
-  .short .chips button{min-height:var(--tap); padding:6px 13px; border-radius:12px; border:1.5px solid var(--warn);
+  /* ⚠️ 以前はこれを .short と呼んでいたが、カレンダーのマスの .cell.short と
+     名前がぶつかり、margin-top:13px が「足りない日」のマスにも効いて
+     カレンダーが13pxガタついていた。名前を分けた。 */
+  .sumbox{margin-top:13px; border-radius:14px; padding:12px 14px; background:var(--warn-wash);}
+  .sumbox.ok{background:var(--good-wash);}
+  .sumbox .hd{font-weight:700; font-size:.95rem; color:var(--warn);}
+  .sumbox.ok .hd{color:var(--good);}
+  .sumbox .chips{display:flex; flex-wrap:wrap; gap:7px; margin-top:10px;}
+  .sumbox .chips button{min-height:var(--tap); padding:6px 13px; border-radius:12px; border:1.5px solid var(--warn);
     background:var(--surface); color:var(--warn); font-family:var(--sans); font-weight:700; font-size:.92rem;
     cursor:pointer; font-variant-numeric:tabular-nums;}
-  .short .chips button:active{transform:scale(.96);}
+  .sumbox .chips button:active{transform:scale(.96);}
 
   /* ---------- 月のカレンダー ---------- */
   :root{--cellgap:clamp(3px, 1.1vw, 6px);}
-  .wd{display:grid; grid-template-columns:repeat(7,1fr); gap:var(--cellgap); margin:15px 0 5px;}
+  .wd{display:grid; grid-template-columns:repeat(7,1fr); gap:var(--cellgap); margin:15px 0 5px;
+    max-width:620px; margin-left:auto; margin-right:auto;}
   .wd div{text-align:center; font-size:.72rem; font-weight:700; color:var(--ink-soft);}
   .wd .s6{color:var(--sat);} .wd .s0{color:var(--sun);}
-  .cal{display:grid; grid-template-columns:repeat(7,1fr); gap:var(--cellgap);}
-  .cell{position:relative; min-height:clamp(54px, 14.5vw, 82px);
+  /* 比率を固定した以上、横に広い画面ではマスが巨大になってしまう。
+     カレンダーそのものの幅に上限を置いて中央に寄せる（＝紙のカレンダーの見え方）。 */
+  .cal{display:grid; grid-template-columns:repeat(7,1fr); gap:var(--cellgap);
+    max-width:620px; margin-left:auto; margin-right:auto;}
+  /* マスの高さは「幅から決まる一定の比率」にする。
+     min-height だけだと、中身の量で高さが変わり、行ごとにガタつく。 */
+  .cell{position:relative; aspect-ratio:1 / 1.12; min-height:var(--tap);
     border:1px solid var(--line); border-radius:clamp(8px,2.4vw,12px); background:var(--surface);
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
-    padding:4px 1px; cursor:pointer; -webkit-tap-highlight-color:transparent; overflow:hidden;}
+    padding:3px 1px; cursor:pointer; -webkit-tap-highlight-color:transparent; overflow:hidden;}
   .cell.blank{border:none; background:transparent; cursor:default;}
   .cell .dn{font-size:.84rem; font-weight:700; line-height:1.05; font-variant-numeric:tabular-nums;}
   .cell.s6 .dn{color:var(--sat);} .cell.s0 .dn{color:var(--sun);}
-  .cell .num{font-size:.66rem; color:var(--ink-soft); font-variant-numeric:tabular-nums; line-height:1.2;}
+  .cell .num{font-size:clamp(.58rem,2.2vw,.7rem); color:var(--ink-soft); font-variant-numeric:tabular-nums; line-height:1.2;}
   .cell.rest{background:var(--surface-2); border-style:dashed;}
   .cell.rest .dn{color:var(--ink-soft);}
   .cell.short{background:var(--warn-wash); border-color:var(--warn); border-width:1.5px;}
   .cell.short .dn{color:var(--warn);}
-  .cell .lack{font-size:.63rem; font-weight:700; color:var(--warn); line-height:1.18; text-align:center;
-    font-variant-numeric:tabular-nums;}
+  .cell .lack{font-size:clamp(.54rem,2.1vw,.66rem); font-weight:700; color:var(--warn);
+    line-height:1.15; text-align:center; font-variant-numeric:tabular-nums;}
   .cell.today{box-shadow:0 0 0 2px var(--ink) inset;}
   .cell:active{transform:scale(.96);}
 
@@ -315,8 +337,8 @@
   .cell .num.mix{font-size:.62rem;}
 
   /* お願いの箱（足りない日の箱と同じ形で、色だけ変える） */
-  .short.req{background:var(--warn-wash); border-color:var(--warn);}
-  .short.req .hd{color:var(--warn);}
+  .sumbox.req{background:var(--warn-wash); border-color:var(--warn);}
+  .sumbox.req .hd{color:var(--warn);}
 
   /* 公開の帯 */
   .pubbar{display:flex; align-items:center; gap:10px; margin-top:12px; padding:11px 13px;
@@ -918,7 +940,7 @@ function renderMonth(){
   const rb=document.getElementById('reqBox'); rb.innerHTML='';
   const reqs=cur.requests||[];
   if(reqs.length){
-    rb.className='short req';
+    rb.className='sumbox req';
     rb.innerHTML='<div class="hd">スタッフからのお願いが '+reqs.length+'件 あります</div>'
       +'<div class="chips"></div>';
     const chips=rb.querySelector('.chips');
@@ -946,19 +968,19 @@ function renderMonth(){
 
   const box=document.getElementById('shortBox');
   if(!act.length){
-    box.className='short';
+    box.className='sumbox';
     box.innerHTML='<div class="hd">スタッフがまだ登録されていません</div>'+
       '<div class="muted" style="margin-top:6px">「スタッフ」から追加してください</div>';
   }else if(!anySubmitted){
-    box.className='short ok';
+    box.className='sumbox ok';
     box.innerHTML='<div class="hd">まだ誰も出していません</div>'+
       '<div class="muted" style="margin-top:6px">出そろうと、足りない日がここに出ます</div>';
   }else if(!shortDays.length){
-    box.className='short ok';
+    box.className='sumbox ok';
     box.innerHTML='<div class="hd">足りない日はありません</div>';
   }else{
     const CAP=6, head=shortDays.slice(0,CAP), rest=shortDays.length-head.length;
-    box.className='short';
+    box.className='sumbox';
     box.innerHTML='<div class="hd">人手が足りない日が '+shortDays.length+'日 あります</div><div class="chips"></div>'+
       (rest>0 ? '<div class="muted" style="margin-top:8px">ほか '+rest+'日。下のカレンダーで赤くなっています</div>' : '');
     const chips=box.querySelector('.chips');

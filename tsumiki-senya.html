@@ -17,9 +17,13 @@
 <style>
   :root{
     --paper:#f5f4f0; --surface:#fffefb; --surface-2:#efece5; --ink:#1d1a15;
-    --ink-mid:#5b554a; --ink-soft:#8f8877; --line:#e2ded4; --line-2:#d8d3c7;
+    /* 色の上に載せる文字の色。暗い表示では地の色が明るくなるので、白のままだと読みにくい */
+    --on-accent:#ffffff;
+    /* 薄い文字は白地で 3.5 しか差が無く読みにくかった（目安4.5）。少し濃くする。
+       ⚠️ 屋号の色（--accent）は変えない。読みやすさは文字側で稼ぐ。 */
+    --ink-mid:#5b554a; --ink-soft:#7c7464; --line:#e2ded4; --line-2:#d8d3c7;
     --accent:#b06f26; --accent-2:#8a5a24; --accent-wash:#f0e4d1;
-    --good:#4c7a51; --good-wash:#dde9dd; --warn:#b0522a; --warn-wash:#f2e0d4;
+    --good:#3f6a44; --good-wash:#dde9dd; --warn:#9b4520; --warn-wash:#f2e0d4;
     --sat:#3f6b8a; --sun:#a2513f;
     --shadow:0 1px 2px rgba(40,32,18,.05), 0 10px 26px -16px rgba(40,32,18,.18);
     --sans:'Zen Maru Gothic',-apple-system,BlinkMacSystemFont,"Hiragino Maru Gothic ProN","Hiragino Sans","Helvetica Neue",Arial,sans-serif;
@@ -33,16 +37,22 @@
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
       --paper:#131109; --surface:#1d1a12; --surface-2:#26221a; --ink:#efe8da;
-      --ink-mid:#a89e8b; --ink-soft:#7d7566; --line:#2f2b21; --line-2:#3a352a;
+      --ink-mid:#a89e8b;
+      /* 3.8 しか差が無く読みにくかったので明るくした（目安は4.5） */
+      --ink-soft:#9a9382;
+      /* 明るい琥珀の上に白だと 2.5 しか差が無い。暗い文字に切り替える */
+      --on-accent:#17140c; --line:#2f2b21; --line-2:#3a352a;
       --accent:#d59a4d; --accent-2:#e0ab63; --accent-wash:#3c2d18;
       --good:#7fae82; --good-wash:#23301f; --warn:#d9825a; --warn-wash:#39251a;
       --sat:#7fa8c4; --sun:#d4867a;
       --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px -18px rgba(0,0,0,.65);
     }
   }
+  /* ⚠️ 暗い色の定義はここと @media の2か所にある。片方だけ直すと、
+     OSの設定によって見え方が食い違う。必ず両方そろえる。 */
   :root[data-theme="dark"]{
     --paper:#131109; --surface:#1d1a12; --surface-2:#26221a; --ink:#efe8da;
-    --ink-mid:#a89e8b; --ink-soft:#7d7566; --line:#2f2b21; --line-2:#3a352a;
+    --ink-mid:#a89e8b; --ink-soft:#9a9382; --on-accent:#17140c; --line:#2f2b21; --line-2:#3a352a;
     --accent:#d59a4d; --accent-2:#e0ab63; --accent-wash:#3c2d18;
     --good:#7fae82; --good-wash:#23301f; --warn:#d9825a; --warn-wash:#39251a;
     --sat:#7fa8c4; --sun:#d4867a;
@@ -112,7 +122,10 @@
   .navbtn{width:var(--tap); height:var(--tap); flex:none; border:1px solid var(--line); background:var(--surface-2);
     border-radius:12px; color:var(--ink-mid); font-size:1.05rem; cursor:pointer;}
   .navbtn:disabled{opacity:.32;}
-  .state{margin-top:11px; display:flex; gap:8px; flex-wrap:wrap;}
+  /* ⚠️ 札の数で1行→2行に変わると、下のカレンダーがまるごと動く
+     （初めて1日を出した瞬間に39px下がっていた）。2行ぶんの高さを先に取っておく。 */
+  .state{margin-top:11px; display:flex; gap:8px; flex-wrap:wrap;
+    align-content:flex-start; min-height:70px;}
   .pill{font-size:.76rem; font-weight:700; padding:5px 11px; border-radius:999px;
     background:var(--surface-2); color:var(--ink-mid); border:1px solid var(--line);}
   .pill.open{background:var(--good-wash); color:var(--good); border-color:transparent;}
@@ -120,18 +133,24 @@
   .pill.count{background:var(--accent-wash); color:var(--accent-2); border-color:transparent;}
 
   /* ---------- カレンダー ---------- */
-  .wd{display:grid; grid-template-columns:repeat(7,1fr); gap:var(--cellgap); margin:14px 0 5px;}
+  .wd{display:grid; grid-template-columns:repeat(7,1fr); gap:var(--cellgap); margin:14px 0 5px;
+    max-width:620px; margin-left:auto; margin-right:auto;}
   .wd div{text-align:center; font-size:.72rem; font-weight:700; color:var(--ink-soft);}
   .wd .s6{color:var(--sat);} .wd .s0{color:var(--sun);}
   /* 7列は固定なので、マスの幅＝(画面幅 − 余白 − すきま) ÷ 7。
      せまい画面では余白とすきまを削って、指で押せる大きさを稼ぐ。 */
   :root{--cellgap:clamp(3px, 1.1vw, 6px);}
-  .cal{display:grid; grid-template-columns:repeat(7,1fr); gap:var(--cellgap);}
+  /* 比率を固定した以上、横に広い画面ではマスが巨大になってしまう。
+     カレンダーそのものの幅に上限を置いて中央に寄せる（＝紙のカレンダーの見え方）。 */
+  .cal{display:grid; grid-template-columns:repeat(7,1fr); gap:var(--cellgap);
+    max-width:620px; margin-left:auto; margin-right:auto;}
+  /* マスの高さは「幅から決まる一定の比率」にする。
+     min-height だけだと、中身の量で高さが変わり、幅によって縦横比も崩れる。 */
   .cell{
-    position:relative; min-height:clamp(50px, 13.5vw, 74px);
+    position:relative; aspect-ratio:1 / 1.12; min-height:var(--tap);
     border:1px solid var(--line); border-radius:clamp(8px,2.4vw,12px);
     background:var(--surface); display:flex; flex-direction:column; align-items:center; justify-content:center;
-    padding:4px 1px 3px; cursor:pointer; -webkit-tap-highlight-color:transparent; overflow:hidden;
+    padding:3px 1px; cursor:pointer; -webkit-tap-highlight-color:transparent; overflow:hidden;
   }
   .cell.blank{border:none; background:transparent; cursor:default;}
   .cell .dn{font-size:.82rem; font-weight:700; line-height:1.1; font-variant-numeric:tabular-nums;}
@@ -247,11 +266,13 @@
   [hidden]{display:none !important;}
 
   /* ===== v2：枠（昼/夜）まわり ===== */
-  .cell .mk{display:flex; gap:2px; justify-content:center; margin-top:3px; flex-wrap:wrap;}
-  .cell .k{font-size:.54rem; font-weight:700; line-height:1; padding:2px 3px; border-radius:4px;}
-  .cell .k.o{background:var(--accent); color:#fff;}
+  /* ⚠️ 折り返させると、札2つの日だけ高さが増えて行がガタつく。折り返さない。 */
+  .cell .mk{display:flex; gap:2px; justify-content:center; margin-top:3px; flex-wrap:nowrap;}
+  .cell .k{font-size:clamp(.5rem,1.9vw,.6rem); font-weight:700; line-height:1;
+    padding:2px 3px; border-radius:4px; white-space:nowrap;}
+  .cell .k.o{background:var(--accent); color:var(--on-accent);}
   .cell .k.t{background:transparent; color:var(--accent-2); box-shadow:0 0 0 1px var(--accent) inset;}
-  .cell .k.a{background:var(--good); color:#fff;}
+  .cell .k.a{background:var(--good); color:var(--on-accent);}
   .cell.req{box-shadow:0 0 0 2px var(--warn) inset;}
 
   /* 出し終わりの印 */
@@ -736,7 +757,7 @@ function render(){
     const rest=left<=0?'今日まで':'あと'+left+'日';
     st.innerHTML='<span class="pill '+cls+'">'+dl+'まで（'+rest+'）</span>';
   }else{
-    st.innerHTML='<span class="pill closed">締切がすぎました（'+dl+'）</span>';
+    st.innerHTML='<span class="pill closed">締切ずみ（'+dl+'）</span>';
   }
   const n=countDays(cur.avail);
   st.innerHTML+='<span class="pill count">'+n+'日 出しました</span>';
