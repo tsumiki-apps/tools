@@ -245,6 +245,80 @@
   }
 
   [hidden]{display:none !important;}
+
+  /* ===== v2：枠（昼/夜）まわり ===== */
+  .cell .mk{display:flex; gap:2px; justify-content:center; margin-top:3px; flex-wrap:wrap;}
+  .cell .k{font-size:.54rem; font-weight:700; line-height:1; padding:2px 3px; border-radius:4px;}
+  .cell .k.o{background:var(--accent); color:#fff;}
+  .cell .k.t{background:transparent; color:var(--accent-2); box-shadow:0 0 0 1px var(--accent) inset;}
+  .cell .k.a{background:var(--good); color:#fff;}
+  .cell.req{box-shadow:0 0 0 2px var(--warn) inset;}
+
+  /* 出し終わりの印 */
+  .pill.done{background:var(--good-wash); color:var(--good); border-color:transparent;}
+  .pill.req{background:var(--warn-wash); color:var(--warn); border-color:transparent;}
+
+  /* シート：枠ごとの行 */
+  .slotrow{border-top:1px solid var(--line); padding:13px 0 3px;}
+  .slotrow:first-child{border-top:none; padding-top:0;}
+  .sl-top{display:flex; align-items:baseline; gap:9px; margin-bottom:9px;}
+  .sl-top b{font-size:.98rem;}
+  .sl-time{margin-left:auto; font-size:.84rem; font-weight:700; color:var(--accent-2);
+           font-variant-numeric:tabular-nums; background:none; border:none; padding:0 0 0 10px;
+           min-height:var(--tap); display:flex; align-items:center; cursor:pointer;}
+  .sl-time.off{color:var(--ink-soft); font-weight:400;}
+  .seg{display:flex; gap:6px;}
+  .seg button{flex:1 1 0; min-width:0; min-height:var(--tap); border:1px solid var(--line);
+    background:var(--surface-2); color:var(--ink-mid); border-radius:11px; font-family:inherit;
+    font-size:.82rem; font-weight:700; cursor:pointer;}
+  .seg button.on{background:var(--accent-wash); border-color:var(--accent); color:var(--accent-2);}
+  .seg button.on.t{background:var(--surface); border-color:var(--accent); color:var(--accent-2);}
+  .seg button:active{transform:scale(.96);}
+
+  /* 締切後：お願い */
+  .reqrow{border-top:1px solid var(--line); padding:13px 0;}
+  .reqrow:first-child{border-top:none;}
+  .reqrow .rt{display:flex; align-items:baseline; gap:9px; margin-bottom:9px; font-size:.88rem;}
+  .reqrow .rt b{font-size:.98rem;}
+  .reqrow .rs{margin-left:auto; color:var(--ink-soft); font-size:.82rem; font-variant-numeric:tabular-nums;}
+  .reqrow .pend{background:var(--warn-wash); color:var(--warn); border-radius:11px; padding:10px 12px;
+                font-size:.82rem; font-weight:700; display:flex; align-items:center; gap:10px;}
+  .reqrow .pend button{margin-left:auto; min-height:var(--tap); padding:0 12px; border-radius:9px;
+    border:1px solid var(--warn); background:transparent; color:var(--warn); font-family:inherit;
+    font-size:.78rem; font-weight:700; cursor:pointer;}
+
+  /* 一覧のタブ */
+  .tabs{display:flex; gap:6px; margin-bottom:12px;}
+  .tabs button{flex:1 1 0; min-height:var(--tap); border:1px solid var(--line); background:var(--surface-2);
+    color:var(--ink-soft); border-radius:11px; font-family:inherit; font-size:.86rem; font-weight:700; cursor:pointer;}
+  .tabs button.on{background:var(--accent-wash); border-color:var(--accent); color:var(--accent-2);}
+
+  .listrow .slots{margin-left:auto; text-align:right; display:flex; flex-direction:column; gap:3px;}
+  .listrow .sl{font-size:.8rem; font-weight:700; color:var(--accent-2); font-variant-numeric:tabular-nums;}
+  .listrow .sl i{font-style:normal; font-size:.68rem; background:var(--accent-wash); color:var(--accent-2);
+                 border-radius:4px; padding:2px 4px; margin-right:5px;}
+  .listrow .sl.t i{background:transparent; box-shadow:0 0 0 1px var(--accent) inset;}
+
+  /* いつもの曜日 */
+  .usual .urow{display:flex; align-items:center; gap:8px; padding:5px 0; border-top:1px solid var(--line);}
+  .usual .urow:first-of-type{border-top:none;}
+  .usual .uw{flex:0 0 clamp(38px,12vw,54px); font-weight:700; font-size:.88rem;}
+  .usual .urow button{flex:1 1 0; min-width:0; min-height:var(--tap); border:1px solid var(--line);
+    background:var(--surface-2); color:var(--ink-soft); border-radius:11px; font-family:inherit;
+    font-size:.84rem; font-weight:700; cursor:pointer;}
+  .usual .urow button.on{background:var(--accent-wash); border-color:var(--accent); color:var(--accent-2);}
+  .usual .urow button:active{transform:scale(.96);}
+  .fold{width:100%; display:flex; align-items:center; gap:8px; min-height:var(--tap); background:none;
+        border:none; padding:0; font-family:inherit; font-size:.95rem; font-weight:700; color:var(--ink);
+        cursor:pointer; text-align:left;}
+  .fold .ch{margin-left:auto; color:var(--ink-soft); transition:transform .18s;}
+  .fold.open .ch{transform:rotate(90deg);}
+
+  .fillbar{display:flex; align-items:center; gap:10px; margin-top:12px; padding:11px 13px;
+    background:var(--accent-wash); border-radius:13px; font-size:.83rem; color:var(--accent-2); line-height:1.5;}
+  .fillbar button{margin-left:auto; flex:none; min-height:var(--tap); padding:0 14px; border-radius:10px;
+    border:none; background:var(--accent); color:#fff; font-family:inherit; font-size:.82rem;
+    font-weight:700; cursor:pointer;}
 </style>
 </head>
 <body>
@@ -287,12 +361,30 @@
       <div class="s0">日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div class="s6">土</div>
     </div>
     <div class="cal" id="cal"></div>
+    <div id="fillBar"></div>
     <p class="note muted" style="margin:12px 0 0; line-height:1.65" id="hint"></p>
+    <button class="btn sub" id="doneBtn" style="margin-top:14px" hidden></button>
   </section>
 
   <section class="card" id="listCard">
-    <div style="font-weight:700; font-size:.95rem; margin-bottom:8px">出した日</div>
+    <div class="tabs" id="tabs" hidden>
+      <button data-t="kibo" class="on">出した日</button>
+      <button data-t="kakutei">決まったシフト</button>
+    </div>
+    <div style="font-weight:700; font-size:.95rem; margin-bottom:10px" id="listTitle">出した日</div>
     <div id="listBox"></div>
+  </section>
+
+  <section class="card usual" id="usualCard">
+    <button class="fold" id="usualFold" aria-expanded="false">
+      いつも入れる曜日<span class="ch">›</span>
+    </button>
+    <div id="usualBody" hidden>
+      <p class="note muted" style="margin:4px 0 12px; line-height:1.65">
+        決めておくと、毎月「いつもので埋める」だけで下ごしらえができます。<br>埋めたあとは、いつもどおり日ごとに直せます。
+      </p>
+      <div id="usualRows"></div>
+    </div>
   </section>
 
   <section class="card" id="outCard">
@@ -305,23 +397,20 @@
   <div class="grip"></div>
   <h2 id="shTitle">—</h2>
   <div class="sub" id="shSub"></div>
-  <div class="warn" id="shWarn" hidden></div>
+
+  <!-- 締切前：枠ごとに ○ / △ / 休み -->
   <div id="shEdit">
-    <div class="presets" id="shPresets"></div>
-    <div class="times">
-      <input type="time" id="shFrom" step="900" aria-label="はじまり">
-      <span>〜</span>
-      <input type="time" id="shTo" step="900" aria-label="おわり">
-    </div>
-    <p class="note" id="shNote"></p>
-    <button class="btn" id="shSave">この日で出す</button>
+    <div id="shSlots"></div>
+    <button class="btn" id="shSave" style="margin-top:16px">この日で出す</button>
     <div class="row2">
       <button class="btn sub" id="shClose">とじる</button>
-      <button class="btn danger" id="shDel" hidden>この日をやめる</button>
     </div>
   </div>
-  <div id="shView" hidden>
-    <button class="btn sub" id="shClose2" style="margin-top:0">とじる</button>
+
+  <!-- 締切後：お願いを出す -->
+  <div id="shLocked" hidden>
+    <div id="shReqs"></div>
+    <button class="btn sub" id="shClose2" style="margin-top:16px">とじる</button>
   </div>
 </div>
 
@@ -348,12 +437,28 @@ function daysInMonth(y,m1){ return new Date(y,m1,0).getDate(); }
 function firstWday(y,m1){ return new Date(y,m1-1,1).getDay(); }
 function durMin(a,b){ return Math.max(0,b-a); }
 function fmtDur(m){ const h=Math.floor(m/60), mi=m%60; return h+'時間'+(mi?pad2(mi)+'分':''); }
-function totalMin(days){ return days.reduce((s,d)=>s+durMin(d.from,d.to),0); }
 function fmtDateJP(s){ const p=s.split('-'); return (+p[1])+'月'+(+p[2])+'日'; }
 function wdayOf(s){ const p=s.split('-'); return new Date(+p[0],+p[1]-1,+p[2]).getDay(); }
 
+/* 希望の配列 → 日付ごと・枠ごとの索引 */
+function indexByDate(rows){
+  const o={}; (rows||[]).forEach(r=>{ (o[r.d]=o[r.d]||{})[r.k]=r; }); return o;
+}
+/* お願いの索引（日付|枠） */
+function indexReq(rows){
+  const o={}; (rows||[]).filter(r=>r.status==='open').forEach(r=>{ o[r.d+'|'+r.k]=r; }); return o;
+}
+/* 出した日数（枠ではなく日で数える） */
+function countDays(rows){ const s=new Set(); (rows||[]).forEach(r=>s.add(r.d)); return s.size; }
+/* 合計時間 */
+function totalMin(rows){ return (rows||[]).reduce((s,r)=>s+durMin(r.from,r.to),0); }
+/* いつもの → {wday:{slot:true}} */
+function indexUsual(rows){
+  const o={}; (rows||[]).forEach(r=>{ (o[r.wday]=o[r.wday]||{})[r.k]=true; }); return o;
+}
+
 /* ===== 状態 ===== */
-let code=null, me=null, month=null, cur=null, byDate={};
+let code=null, me=null, month=null, cur=null, byDate={}, byReq={}, byAssign={}, usual={}, tab='kibo';
 
 /* ===== 通信 ===== */
 async function rpc(fn,params){ const {data,error}=await sb.rpc(fn,params); setSync(!error); if(error) throw error; return data; }
@@ -361,6 +466,8 @@ function setSync(ok){ const d=document.getElementById('syncDot'); d.className='s
 let toastT; function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
   clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),1900); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function slotOf(k){ return (me.slots||[]).find(s=>s.k===k); }
+function slotLabel(k){ const s=slotOf(k); return s?s.label:k; }
 
 /* ===== 表示切替（明るい／暗い） ===== */
 (function(){ const t=localStorage.getItem(LS_THEME); if(t) document.documentElement.dataset.theme=t; })();
@@ -371,9 +478,7 @@ document.getElementById('themeBtn').addEventListener('click',()=>{
   el.dataset.theme=next; localStorage.setItem(LS_THEME,next);
 });
 
-/* ===== キーボードが出たときに、入力欄が隠れないようにする =====
-   iOSは position:fixed の要素をキーボードの下に隠してしまうので、
-   実際に見えている高さ（visualViewport）を測って、シートを持ち上げる。 */
+/* ===== キーボードが出たときに、入力欄が隠れないようにする ===== */
 (function(){
   const vv=window.visualViewport; if(!vv) return;
   const fit=()=>{
@@ -427,93 +532,188 @@ async function loadMonth(){
   try{ const r=await rpc('kibo_staff_month',{p_code:code,p_month:month});
        if(s!==seq) return; cur=r; }
   catch(e){ toast('読み込みに失敗しました'); return; }
-  byDate={}; (cur.days||[]).forEach(d=>{ byDate[d.d]=d; });
+  byDate=indexByDate(cur.avail);
+  byReq=indexReq(cur.requests);
+  byAssign=indexByDate(cur.assign);
+  usual=indexUsual(cur.usual);
+  if(!cur.published && tab==='kakutei') tab='kibo';
   render();
 }
 
+/* ===== 描画 ===== */
 function render(){
   const {y,m1}=parseMonth(cur.month);
   document.getElementById('mLabel').textContent=y+'年'+m1+'月分';
 
+  /* 状態の札 */
   const st=document.getElementById('stateRow'); st.innerHTML='';
   const dl=fmtDateJP(cur.deadline);
-  if(cur.editable){
-    st.innerHTML='<span class="pill open">'+dl+'まで 受付中</span>';
-  }else{
-    st.innerHTML='<span class="pill closed">締切がすぎました（'+dl+'）</span>';
-  }
-  const n=(cur.days||[]).length;
+  st.innerHTML = cur.editable
+    ? '<span class="pill open">'+dl+'まで 受付中</span>'
+    : '<span class="pill closed">締切がすぎました（'+dl+'）</span>';
+  const n=countDays(cur.avail);
   st.innerHTML+='<span class="pill count">'+n+'日 出しました</span>';
-  if(n) st.innerHTML+='<span class="pill">'+fmtDur(totalMin(cur.days))+'</span>';
+  if(n) st.innerHTML+='<span class="pill">'+fmtDur(totalMin(cur.avail))+'</span>';
+  if(cur.submitted) st.innerHTML+='<span class="pill done">✓ 出し終わり</span>';
+  const openReq=(cur.requests||[]).filter(r=>r.status==='open').length;
+  if(openReq) st.innerHTML+='<span class="pill req">お願い '+openReq+'件</span>';
 
-  document.getElementById('hint').textContent = cur.editable
-    ? '働ける日をタップして、時間を入れてください。出していない日は「その日は働けない」として伝わります。'
-    : 'この月は締切をすぎたので、直せません。変更があるときはお店にご連絡ください。';
-
-  // カレンダー
+  /* カレンダー */
   const cal=document.getElementById('cal'); cal.className='cal'+(cur.editable?'':' locked'); cal.innerHTML='';
   const lead=firstWday(y,m1), last=daysInMonth(y,m1);
   const closed=new Set(me.closed_wdays||[]);
+  const showAssign=cur.published && tab==='kakutei';
   for(let i=0;i<lead;i++){ const e=document.createElement('div'); e.className='cell blank'; cal.appendChild(e); }
   for(let d=1;d<=last;d++){
-    const key=ymd(y,m1,d), w=new Date(y,m1-1,d).getDay(), got=byDate[key];
+    const key=ymd(y,m1,d), w=new Date(y,m1-1,d).getDay();
+    const got=showAssign?byAssign[key]:byDate[key];
+    const has=!!(got && Object.keys(got).length);
+    const hasReq=(me.slots||[]).some(s=>byReq[key+'|'+s.k]);
     const e=document.createElement('div');
-    e.className='cell s'+w+(got?' on':'')+(closed.has(w)&&!got?' rest':'')+(key===me.today?' today':'');
+    e.className='cell s'+w+(has?' on':'')+(closed.has(w)&&!has?' rest':'')
+              +(key===me.today?' today':'')+(hasReq?' req':'');
     let inner='<div class="dn">'+d+'</div>';
-    if(got) inner+='<div class="tm">'+m2hm(got.from)+'<br>'+m2hm(got.to)+'</div>';
-    else if(closed.has(w)) inner+='<div class="restmark">休</div>';
+    if(has){
+      inner+='<div class="mk">'+(me.slots||[]).filter(s=>got[s.k]).map(s=>{
+        const cls=showAssign?'a':(got[s.k].mark==='t'?'t':'o');
+        return '<span class="k '+cls+'">'+esc(s.label)+'</span>';
+      }).join('')+'</div>';
+    }else if(closed.has(w)){ inner+='<div class="restmark">休</div>'; }
     e.innerHTML=inner;
     e.addEventListener('click',()=>openSheet(key));
     cal.appendChild(e);
   }
 
-  // 出した日の一覧
+  /* いつもので埋める（まだ1日も出していない・いつもが決まっている・締切前のときだけ） */
+  const fb=document.getElementById('fillBar'); fb.innerHTML='';
+  if(cur.editable && n===0 && (cur.usual||[]).length){
+    fb.innerHTML='<div class="fillbar"><span>いつも入れる曜日から、下ごしらえができます。</span>'
+                +'<button id="fillBtn">いつもので埋める</button></div>';
+    document.getElementById('fillBtn').addEventListener('click',doFill);
+  }
+
+  /* 案内文 */
+  document.getElementById('hint').textContent = cur.editable
+    ? '働ける日をタップして、昼と夜それぞれを選んでください。選ばなかったところは「その時間は働けない」として伝わります。'
+    : '締切をすぎたので直せません。急な変更は、日をタップして「お願い」を出してください。';
+
+  /* 出し終わりの印 */
+  const db=document.getElementById('doneBtn');
+  db.hidden=!cur.editable;
+  db.textContent=cur.submitted?'✓ 出し終わりました（取り消す）':'今月はこれで出し終わりました';
+
+  renderList();
+  renderUsual();
+}
+
+/* 一覧（出した日 ／ 決まったシフト） */
+function renderList(){
+  const tabs=document.getElementById('tabs');
+  tabs.hidden=!cur.published;
+  [...tabs.children].forEach(b=>b.classList.toggle('on', b.dataset.t===tab));
+  const showAssign=cur.published && tab==='kakutei';
+  document.getElementById('listTitle').hidden=!tabs.hidden;
+
+  const src=showAssign?(cur.assign||[]):(cur.avail||[]);
   const box=document.getElementById('listBox');
-  const days=(cur.days||[]).slice().sort((a,b)=>a.d<b.d?-1:1);
-  if(!days.length){ box.innerHTML='<div class="empty">まだ1日も出していません</div>'; return; }
-  box.innerHTML=days.map(x=>{
-    const w=wdayOf(x.d);
-    return '<div class="listrow"><div class="d tnum">'+fmtDateJP(x.d)+'<span class="w">('+WD[w]+')</span></div>'+
-           '<div class="t tnum">'+m2hm(x.from)+' 〜 '+m2hm(x.to)+'</div>'+
-           '<div class="h">'+fmtDur(durMin(x.from,x.to))+'</div></div>';
+  if(!src.length){
+    box.innerHTML='<div class="empty">'+(showAssign?'まだ決まったシフトはありません':'まだ1日も出していません')+'</div>';
+    return;
+  }
+  const idx=indexByDate(src);
+  const days=Object.keys(idx).sort();
+  box.innerHTML=days.map(d=>{
+    const w=wdayOf(d);
+    const lines=(me.slots||[]).filter(s=>idx[d][s.k]).map(s=>{
+      const r=idx[d][s.k];
+      const cls=(!showAssign && r.mark==='t')?'sl t':'sl';
+      return '<div class="'+cls+'"><i>'+esc(s.label)+'</i>'+m2hm(r.from)+' 〜 '+m2hm(r.to)+'</div>';
+    }).join('');
+    return '<div class="listrow"><div class="d tnum">'+fmtDateJP(d)+'<span class="w">('+WD[w]+')</span></div>'+
+           '<div class="slots">'+lines+'</div></div>';
   }).join('');
 }
+document.getElementById('tabs').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return; tab=b.dataset.t; render();
+});
+
+/* いつもの曜日 */
+function renderUsual(){
+  const box=document.getElementById('usualRows'); box.innerHTML='';
+  for(let w=0;w<7;w++){
+    const row=document.createElement('div'); row.className='urow';
+    row.innerHTML='<div class="uw">'+WD[w]+'曜</div>';
+    (me.slots||[]).forEach(s=>{
+      const b=document.createElement('button');
+      b.textContent=s.label;
+      b.className=(usual[w]&&usual[w][s.k])?'on':'';
+      b.addEventListener('click',()=>{
+        usual[w]=usual[w]||{};
+        if(usual[w][s.k]) delete usual[w][s.k]; else usual[w][s.k]=true;
+        renderUsual(); saveUsual();
+      });
+      row.appendChild(b);
+    });
+    box.appendChild(row);
+  }
+}
+document.getElementById('usualFold').addEventListener('click',function(){
+  const body=document.getElementById('usualBody');
+  const open=body.hidden;
+  body.hidden=!open; this.classList.toggle('open',open); this.setAttribute('aria-expanded',String(open));
+});
+let usualT;
+function saveUsual(){
+  clearTimeout(usualT);
+  usualT=setTimeout(async()=>{
+    const arr=[];
+    Object.keys(usual).forEach(w=>Object.keys(usual[w]).forEach(k=>arr.push({wday:+w,k:k,mark:'o'})));
+    try{ await rpc('kibo_staff_usual',{p_code:code,p_usual:arr}); cur.usual=arr; }
+    catch(e){ toast('保存できませんでした'); }
+  },500);
+}
+async function doFill(){
+  try{
+    const r=await rpc('kibo_staff_fill',{p_code:code,p_month:month});
+    toast(r&&r.n?r.n+'つ入れました':'入れるところがありませんでした');
+    loadMonth();
+  }catch(e){ toast(String(e.message||'').indexOf('closed')>=0?'締切がすぎています':'埋められませんでした'); }
+}
+
+/* 出し終わりの印 */
+document.getElementById('doneBtn').addEventListener('click',async()=>{
+  const next=!cur.submitted;
+  try{
+    await rpc('kibo_staff_submit',{p_code:code,p_month:month,p_on:next});
+    cur.submitted=next; render(); toast(next?'お店に伝わりました':'取り消しました');
+  }catch(e){ toast('できませんでした'); }
+});
 
 /* ===== シート ===== */
 const sheet=document.getElementById('sheet'), backdrop=document.getElementById('backdrop');
-let shDate=null;
+let shDate=null, shState={};
 
 function openSheet(key){
   shDate=key;
-  const got=byDate[key], w=wdayOf(key);
+  const w=wdayOf(key);
   const closed=(me.closed_wdays||[]).indexOf(w)>=0;
   document.getElementById('shTitle').textContent=fmtDateJP(key)+'（'+WD[w]+'）';
   document.getElementById('shSub').textContent=closed?'この曜日は定休日です':'';
 
-  const editable=cur.editable;
-  document.getElementById('shEdit').hidden=!editable;
-  document.getElementById('shView').hidden=editable;
-  const warn=document.getElementById('shWarn');
-  if(!editable){
-    warn.hidden=false;
-    warn.textContent=got
-      ? '締切がすぎています（'+m2hm(got.from)+' 〜 '+m2hm(got.to)+' で出しています）。直すときはお店にご連絡ください。'
-      : '締切がすぎています。この日は出していません。';
-  }else{
-    warn.hidden=true;
-    // プリセット
-    const pv=document.getElementById('shPresets'); pv.innerHTML='';
-    (me.presets||[]).forEach(p=>{
-      const b=document.createElement('button'); b.textContent=p.label;
-      b.addEventListener('click',()=>{ setTimes(p.from,p.to); markPreset(); });
-      pv.appendChild(b);
+  document.getElementById('shEdit').hidden=!cur.editable;
+  document.getElementById('shLocked').hidden=cur.editable;
+
+  if(cur.editable){
+    /* いまの状態を作業用に写す */
+    shState={};
+    (me.slots||[]).forEach(s=>{
+      const got=(byDate[key]||{})[s.k];
+      shState[s.k]= got ? {on:true, mark:got.mark, from:got.from, to:got.to, edit:false}
+                        : {on:false, mark:'o', from:s.from, to:s.to, edit:false};
     });
-    if(got) setTimes(got.from,got.to);
-    else{ const p=(me.presets||[])[0]; setTimes(p?p.from:me.open_from, p?p.to:me.open_to); }
-    markPreset();
-    document.getElementById('shDel').hidden=!got;
-    document.getElementById('shSave').textContent=got?'この時間に直す':'この日で出す';
-    document.getElementById('shNote').textContent='お店があいている時間は '+m2hm(me.open_from)+' 〜 '+m2hm(me.open_to)+' です。時間はご自由に直せます。';
+    renderSlots();
+  }else{
+    renderLocked(key);
   }
   backdrop.classList.add('show'); sheet.classList.add('show');
 }
@@ -522,41 +722,117 @@ backdrop.addEventListener('click',closeSheet);
 document.getElementById('shClose').addEventListener('click',closeSheet);
 document.getElementById('shClose2').addEventListener('click',closeSheet);
 
-function setTimes(a,b){ document.getElementById('shFrom').value=m2hm(a); document.getElementById('shTo').value=m2hm(b); }
-function markPreset(){
-  const a=hm2m(document.getElementById('shFrom').value), b=hm2m(document.getElementById('shTo').value);
-  [...document.getElementById('shPresets').children].forEach((btn,i)=>{
-    const p=(me.presets||[])[i];
-    btn.classList.toggle('on', !!p && p.from===a && p.to===b);
+/* 締切前：枠ごとの行 */
+function renderSlots(){
+  const box=document.getElementById('shSlots'); box.innerHTML='';
+  (me.slots||[]).forEach(s=>{
+    const st=shState[s.k];
+    const row=document.createElement('div'); row.className='slotrow';
+
+    const top=document.createElement('div'); top.className='sl-top';
+    top.innerHTML='<b>'+esc(s.label)+'</b>';
+    const tb=document.createElement('button');
+    tb.className='sl-time'+(st.on?'':' off');
+    tb.textContent=st.on?(m2hm(st.from)+' 〜 '+m2hm(st.to)+' ›'):'—';
+    tb.addEventListener('click',()=>{ if(!st.on) return; st.edit=!st.edit; renderSlots(); });
+    top.appendChild(tb);
+    row.appendChild(top);
+
+    const seg=document.createElement('div'); seg.className='seg';
+    [['o','入れます'],['t','行けたら'],['x','休み']].forEach(([v,label])=>{
+      const b=document.createElement('button');
+      b.textContent=label;
+      const on=(v==='x')?!st.on:(st.on&&st.mark===v);
+      b.className=on?('on'+(v==='t'?' t':'')):'';
+      b.addEventListener('click',()=>{
+        if(v==='x'){ st.on=false; st.edit=false; }
+        else{ st.on=true; st.mark=v; }
+        renderSlots();
+      });
+      seg.appendChild(b);
+    });
+    row.appendChild(seg);
+
+    if(st.on && st.edit){
+      const t=document.createElement('div'); t.className='times'; t.style.marginTop='10px';
+      const f=document.createElement('input'); f.type='time'; f.step='900'; f.value=m2hm(st.from); f.setAttribute('aria-label',s.label+' はじまり');
+      const sp=document.createElement('span'); sp.textContent='〜';
+      const g=document.createElement('input'); g.type='time'; g.step='900'; g.value=m2hm(st.to); g.setAttribute('aria-label',s.label+' おわり');
+      f.addEventListener('change',()=>{ const v=hm2m(f.value); if(v!=null) st.from=v; });
+      g.addEventListener('change',()=>{ const v=hm2m(g.value); if(v!=null) st.to=v; });
+      t.appendChild(f); t.appendChild(sp); t.appendChild(g);
+      row.appendChild(t);
+    }
+    box.appendChild(row);
   });
 }
-document.getElementById('shFrom').addEventListener('change',markPreset);
-document.getElementById('shTo').addEventListener('change',markPreset);
 
 let saving=false;
 document.getElementById('shSave').addEventListener('click',async()=>{
   if(saving) return;
-  const a=hm2m(document.getElementById('shFrom').value), b=hm2m(document.getElementById('shTo').value);
-  if(a==null||b==null){ toast('時間を入れてください'); return; }
-  if(b<=a){ toast('おわりの時間が、はじまりより前になっています'); return; }
+  const arr=[];
+  let bad=null;
+  (me.slots||[]).forEach(s=>{
+    const st=shState[s.k]; if(!st.on) return;
+    if(st.to<=st.from){ bad=s.label; return; }
+    arr.push({k:s.k, f:st.from, t:st.to, mark:st.mark});
+  });
+  if(bad){ toast(bad+'のおわりの時間が、はじまりより前になっています'); return; }
   saving=true;
   try{
-    await rpc('kibo_staff_set',{p_code:code,p_date:shDate,p_from:a,p_to:b});
-    byDate[shDate]={d:shDate,from:a,to:b};
-    cur.days=Object.values(byDate);
-    closeSheet(); render(); toast('出しました');
+    await rpc('kibo_staff_set',{p_code:code,p_date:shDate,p_slots:arr});
+    closeSheet();
+    await loadMonth();
+    toast(arr.length?'出しました':'この日を取り消しました');
   }catch(e){ toast(String(e.message||'').indexOf('closed')>=0?'締切がすぎています':'保存できませんでした'); }
   finally{ saving=false; }
 });
-document.getElementById('shDel').addEventListener('click',async()=>{
-  if(saving) return; saving=true;
+
+/* 締切後：お願い */
+function renderLocked(key){
+  const box=document.getElementById('shReqs'); box.innerHTML='';
+  (me.slots||[]).forEach(s=>{
+    const got=(byDate[key]||{})[s.k];
+    const req=byReq[key+'|'+s.k];
+    const row=document.createElement('div'); row.className='reqrow';
+
+    const t=document.createElement('div'); t.className='rt';
+    t.innerHTML='<b>'+esc(s.label)+'</b><span class="rs">'
+      +(got?(m2hm(got.from)+' 〜 '+m2hm(got.to)+' で出しています'):'出していません')+'</span>';
+    row.appendChild(t);
+
+    if(req){
+      const p=document.createElement('div'); p.className='pend';
+      p.innerHTML='<span>お願い中：'+(req.kind==='drop'?'行けなくなりました':'ここ、入れます')+'</span>';
+      const c=document.createElement('button'); c.textContent='取り消す';
+      c.addEventListener('click',()=>cancelReq(req.id));
+      p.appendChild(c);
+      row.appendChild(p);
+    }else{
+      const b=document.createElement('button');
+      b.className='btn sub'; b.style.margin='0';
+      b.textContent=got?'行けなくなりました':'ここ、入れます';
+      b.addEventListener('click',()=>sendReq(key,s.k,got?'drop':'add'));
+      row.appendChild(b);
+    }
+    box.appendChild(row);
+  });
+  const note=document.createElement('p'); note.className='note';
+  note.textContent='お願いはお店に届きます。反映されるとこの画面にも入ります。';
+  box.appendChild(note);
+}
+async function sendReq(d,k,kind){
   try{
-    await rpc('kibo_staff_clear',{p_code:code,p_date:shDate});
-    delete byDate[shDate]; cur.days=Object.values(byDate);
-    closeSheet(); render(); toast('取り消しました');
+    await rpc('kibo_staff_request',{p_code:code,p_date:d,p_slot:k,p_kind:kind,p_note:''});
+    closeSheet(); await loadMonth(); toast('お店に届けました');
+  }catch(e){ toast('送れませんでした'); }
+}
+async function cancelReq(id){
+  try{
+    await rpc('kibo_staff_request_cancel',{p_code:code,p_id:id});
+    closeSheet(); await loadMonth(); toast('取り消しました');
   }catch(e){ toast('取り消せませんでした'); }
-  finally{ saving=false; }
-});
+}
 
 /* ===== 起動 ===== */
 (function(){

@@ -398,6 +398,43 @@
     padding:1px 9px; vertical-align:middle; margin-left:6px; white-space:nowrap;}
   .who-tag.w{background:var(--good-wash); color:#356b3b;}
   .who-tag.m{background:var(--acc-wash); color:var(--acc2);}
+
+  /* ===== v2：枠の印・シフトを決める・提出ぐあい・お願い ===== */
+  .cal7 .c .kk{display:flex; gap:2px; justify-content:center; margin-top:2px;}
+  .cal7 .c .kk i{font-style:normal; font-size:8px; font-weight:800; line-height:1; padding:2px 3px;
+    border-radius:4px; background:var(--acc); color:#fff;}
+  .cal7 .c .kk i.t{background:transparent; color:var(--acc2); box-shadow:0 0 0 1px var(--acc) inset;}
+  .cal7 .c .kk i.a{background:var(--good); color:#fff;}
+  .slotbox .pp .mk2{margin-left:6px; font-size:9px; font-weight:800; color:var(--acc2);
+    box-shadow:0 0 0 1px var(--acc) inset; border-radius:4px; padding:1px 4px;}
+  .slotbox .pp .ck{flex:none; width:14px; height:14px; border-radius:4px; border:1.5px solid var(--app-line2);
+    margin-right:8px; display:inline-flex; align-items:center; justify-content:center; font-size:9px; color:#fff;}
+  .slotbox .pp.on{background:var(--acc-wash);}
+  .slotbox .pp.on .ck{background:var(--acc); border-color:var(--acc);}
+  .slotbox .allb{display:block; text-align:center; font-size:10.5px; font-weight:700; color:var(--app-soft);
+    border:1px dashed var(--app-line2); border-radius:9px; padding:7px 2px; margin-top:6px;}
+  .stb{display:inline-block; font-size:9.5px; font-weight:800; padding:2px 8px; border-radius:999px; margin-left:6px;}
+  .stb.none{background:var(--warn-wash); color:var(--warn);}
+  .stb.part{background:var(--acc-wash); color:var(--acc2);}
+  .stb.done{background:var(--good-wash); color:var(--good);}
+  .reqb{border:1.5px solid var(--warn); border-radius:10px; padding:9px 10px;
+    background:var(--app-surface); margin-top:6px;}
+  .reqb .h{font-weight:800; font-size:11.5px;}
+  .reqb .d{font-size:10px; color:var(--app-soft); margin:2px 0 7px; line-height:1.5;}
+  .reqb .a{display:flex; gap:6px;}
+  .reqb .a i{font-style:normal; flex:1; text-align:center; font-size:10.5px; font-weight:800;
+    border-radius:8px; padding:6px 2px; background:var(--acc); color:#fff;}
+  .reqb .a i.sub{background:var(--app-surface2); color:var(--app-mid); border:1px solid var(--app-line);}
+  .pubb{display:flex; align-items:center; gap:8px; background:var(--app-surface2); border-radius:10px;
+    padding:8px 10px; font-size:10.5px; color:var(--app-mid); line-height:1.5;}
+  .pubb i{font-style:normal; margin-left:auto; background:var(--acc); color:#fff; font-weight:800;
+    border-radius:8px; padding:5px 10px; white-space:nowrap; flex:none;}
+  .uw{display:flex; align-items:center; gap:6px; margin-bottom:5px;}
+  .uw b{flex:0 0 34px; font-size:11px;}
+  .uw i{flex:1; font-style:normal; text-align:center; font-size:11px; font-weight:700;
+    border:1.5px solid var(--app-line2); border-radius:8px; background:var(--app-surface2);
+    padding:6px 2px; color:var(--app-soft);}
+  .uw i.on{background:var(--acc-wash); border-color:var(--acc); color:var(--acc2);}
 </style>
 </head>
 <body>
@@ -416,14 +453,14 @@
 <div class="layout">
 
 <details class="toc" id="toc" open>
-  <summary>もくじ（全27項目）</summary>
+  <summary>もくじ（全33項目）</summary>
   <nav>
     <p class="g">まず知る</p>
     <a href="#i1"><span class="n">1</span>どんな道具か</a>
     <a href="#i2"><span class="n">2</span>アプリは2つある</a>
     <a href="#i3"><span class="n">3</span>この説明書の見かた</a>
 
-    <p class="g">はじめの準備（店長・最初の1回だけ）</p>
+    <p class="g">はじめの準備（最初の1回だけ）</p>
     <a href="#i4"><span class="n">4</span>店長の画面をひらく</a>
     <a href="#i5"><span class="n">5</span>昼と夜、ほしい人数を決める</a>
     <a href="#i6"><span class="n">6</span>締切と定休日を決める</a>
@@ -433,29 +470,35 @@
     <p class="g">スタッフの使い方</p>
     <a href="#i9"><span class="n">9</span>届いたURLをひらく</a>
     <a href="#i10"><span class="n">10</span>働ける日をタップする</a>
-    <a href="#i11"><span class="n">11</span>昼・夜・通しのボタン</a>
+    <a href="#i11"><span class="n">11</span>入れます・行けたら・休み</a>
     <a href="#i12"><span class="n">12</span>時間を手で直す</a>
-    <a href="#i13"><span class="n">13</span>出した日を見返す</a>
-    <a href="#i14"><span class="n">14</span>まちがえた日を取り消す</a>
-    <a href="#i15"><span class="n">15</span>締切をすぎたら</a>
+    <a href="#i13"><span class="n">13</span>いつもの曜日で下ごしらえ</a>
+    <a href="#i14"><span class="n">14</span>「出し終わりました」を押す</a>
+    <a href="#i15"><span class="n">15</span>出した日を見返す</a>
+    <a href="#i16"><span class="n">16</span>まちがえた日を取り消す</a>
+    <a href="#i17"><span class="n">17</span>締切をすぎたら（お願いを出す）</a>
+    <a href="#i18"><span class="n">18</span>決まったシフトを見る</a>
 
     <p class="g">店長の使い方（毎月）</p>
-    <a href="#i16"><span class="n">16</span>足りない日がすぐ分かる</a>
-    <a href="#i17"><span class="n">17</span>カレンダーの読み方</a>
-    <a href="#i18"><span class="n">18</span>入れる人を見る</a>
-    <a href="#i19"><span class="n">19</span>代わりに入れる</a>
-    <a href="#i20"><span class="n">20</span>その日だけ人数を増やす</a>
-    <a href="#i21"><span class="n">21</span>まだ出していない人</a>
-    <a href="#i22"><span class="n">22</span>前の月・次の月</a>
+    <a href="#i19"><span class="n">19</span>足りない日がすぐ分かる</a>
+    <a href="#i20"><span class="n">20</span>カレンダーの読み方</a>
+    <a href="#i21"><span class="n">21</span>入れる人を見る（○と△）</a>
+    <a href="#i22"><span class="n">22</span>シフトを決める</a>
+    <a href="#i23"><span class="n">23</span>みんなに知らせる</a>
+    <a href="#i24"><span class="n">24</span>お願いを受け取る</a>
+    <a href="#i25"><span class="n">25</span>代わりに入れる</a>
+    <a href="#i26"><span class="n">26</span>その日だけ人数を増やす</a>
+    <a href="#i27"><span class="n">27</span>まだ出していない人</a>
+    <a href="#i28"><span class="n">28</span>前の月・次の月</a>
 
     <p class="g">そのほか</p>
-    <a href="#i23"><span class="n">23</span>URLを無くしたとき</a>
-    <a href="#i24"><span class="n">24</span>やめた人・お休みの人</a>
-    <a href="#i25"><span class="n">25</span>データはどこにあるか</a>
+    <a href="#i29"><span class="n">29</span>URLを無くしたとき</a>
+    <a href="#i30"><span class="n">30</span>やめた人・お休みの人</a>
+    <a href="#i31"><span class="n">31</span>データはどこにあるか</a>
 
     <p class="g">ホーム画面に置く</p>
-    <a href="#i26"><span class="n">26</span>iPhoneの場合</a>
-    <a href="#i27"><span class="n">27</span>Androidの場合</a>
+    <a href="#i32"><span class="n">32</span>iPhoneの場合</a>
+    <a href="#i33"><span class="n">33</span>Androidの場合</a>
 
     <p class="g">巻末</p>
     <a href="#qa"><span class="n">Q</span>こまったとき</a>
@@ -564,7 +607,7 @@
       </figure>
       <h3><span class="n">5</span>昼と夜、ほしい人数を決める<span class="who-tag m">店長</span></h3>
       <p><span class="path"><b>設定</b></span> で、昼と夜の時間帯と「<strong>その枠に何人ほしいか</strong>」を入れます。<strong>この人数を下回った日が、一覧で赤くなります。</strong></p>
-      <p class="fine">スタッフの画面に出る「昼／夜／通し」のボタンも、ここの時間帯から自動で作られます。設定するのはここ1か所だけです。</p>
+      <p class="fine">スタッフの画面に出る「昼」「夜」の選び方も、ここの時間帯から自動で作られます。設定するのはここ1か所だけです。</p>
     </article>
 
     <article class="item" id="i6">
@@ -641,90 +684,152 @@
         <div class="cal7 hd7"><i class="sun">日</i><i>月</i><i>火</i><i>水</i><i>木</i><i>金</i><i class="sat">土</i></div>
         <div class="cal7">
           <div class="c bl"></div><div class="c bl"></div><div class="c bl"></div><div class="c bl"></div>
-          <div class="c on"><span class="d">1</span><span class="s">17:30<br>21:00</span></div>
+          <div class="c on"><span class="d">1</span><span class="kk"><i>夜</i></span></div>
           <div class="c"><span class="d">2</span></div>
-          <div class="c sat on"><span class="d">3</span><span class="s">11:00<br>14:30</span></div>
+          <div class="c sat on"><span class="d">3</span><span class="kk"><i>昼</i><i>夜</i></span></div>
           <div class="c sun"><span class="d">4</span></div>
           <div class="c rest"><span class="d">5</span><span class="s">休</span></div>
           <div class="c"><span class="d">6</span></div>
-          <div class="c on"><span class="d">7</span><span class="s">17:30<br>21:00</span></div>
+          <div class="c on"><span class="d">7</span><span class="kk"><i class="t">夜</i></span></div>
           <div class="c"><span class="d">8</span></div>
-          <div class="c on"><span class="d">9</span><span class="s">11:00<br>14:30</span></div>
+          <div class="c on"><span class="d">9</span><span class="kk"><i>昼</i></span></div>
           <div class="c sat"><span class="d">10</span></div>
         </div>
       </figure>
       <h3><span class="n">10</span>働ける日をタップする<span class="who-tag w">スタッフ</span></h3>
-      <p>カレンダーで<strong>働ける日をタップ</strong>します。入れた日には色がつき、時間が小さく出ます。点線の「休」はお店の定休日です。</p>
-      <p class="fine">出していない日は「その日は働けない」として店長に伝わります。×をつける必要はありません。</p>
+      <p>カレンダーで<strong>働ける日をタップ</strong>します。入れた日には色がつき、<strong>入れる時間帯が「昼」「夜」の小さな札</strong>で出ます。両方に入れる日は札が2つ並びます。点線の「休」はお店の定休日です。</p>
+      <p class="fine">出していない日・選ばなかった時間帯は「そこは働けない」として店長に伝わります。×をつける必要はありません。<br>白ヌキの札（例：7日の「夜」）は「行けたら行きます」の印です。</p>
     </article>
 
     <article class="item" id="i11">
       <figure class="shot">
         <div class="screen">
           <p style="font-weight:800;font-size:13px">10月8日（木）</p>
-          <div class="prebtns" style="margin-top:8px"><i>昼</i><i class="on">夜</i><i>通し</i></div>
-          <div class="tmrow"><b class="hit">17:30</b><span>〜</span><b class="hit">21:00</b></div>
+          <div class="slotbox" style="margin-top:6px">
+            <div class="sh"><b>昼</b><span class="ct" style="color:var(--acc2)">11:00〜14:30 ›</span></div>
+            <div class="prebtns" style="margin-bottom:0"><i>入れます</i><i>行けたら</i><i class="on">休み</i></div>
+          </div>
+          <div class="slotbox">
+            <div class="sh"><b>夜</b><span class="ct" style="color:var(--acc2)">17:30〜21:00 ›</span></div>
+            <div class="prebtns" style="margin-bottom:0"><i class="on">入れます</i><i>行けたら</i><i>休み</i></div>
+          </div>
           <div class="bigbtn">この日で出す</div>
         </div>
       </figure>
-      <h3><span class="n">11</span>昼・夜・通しのボタン<span class="who-tag w">スタッフ</span></h3>
-      <p>日をタップすると、<kbd>昼</kbd> <kbd>夜</kbd> <kbd>通し</kbd> の3つが出ます。押すと時間が入るので、<kbd>この日で出す</kbd> を押せば終わりです。<strong>2タップで済みます。</strong></p>
-      <p class="fine">「通し」は、昼のはじまりから夜のおわりまで（＝その日はいつでも入れます）という意味です。</p>
+      <h3><span class="n">11</span>入れます・行けたら・休み<span class="who-tag w">スタッフ</span></h3>
+      <p>日をタップすると、<strong>昼と夜が別々に</strong>出ます。それぞれ <kbd>入れます</kbd> <kbd>行けたら</kbd> <kbd>休み</kbd> の3つから選び、<kbd>この日で出す</kbd> を押せば終わりです。</p>
+      <p class="fine"><strong>通しで入れる日は、昼と夜の両方を「入れます」にします。</strong>こうすると、あいだの中抜けの時間（14:30〜17:30）は働かない、と正しく伝わります。<br><kbd>行けたら</kbd> は「たぶん行けます」の意味です。店長の画面では人数に数えず、△として別に出ます。</p>
     </article>
 
     <article class="item" id="i12">
       <figure class="shot">
         <div class="screen">
-          <div class="prebtns"><i>昼</i><i>夜</i><i>通し</i></div>
-          <div class="tmrow"><b class="hit">18:00</b><span>〜</span><b class="hit">20:00</b></div>
-          <p style="font-size:10.5px;color:var(--app-soft);margin-top:7px">お店があいている時間は 11:00 〜 21:00 です。時間はご自由に直せます。</p>
+          <div class="slotbox" style="padding-top:2px">
+            <div class="sh"><b>夜</b><span class="ct" style="color:var(--acc2)">18:00〜20:00 ›</span></div>
+            <div class="prebtns"><i class="on">入れます</i><i>行けたら</i><i>休み</i></div>
+            <div class="tmrow"><b class="hit">18:00</b><span>〜</span><b class="hit">20:00</b></div>
+          </div>
         </div>
       </figure>
       <h3><span class="n">12</span>時間を手で直す<span class="who-tag w">スタッフ</span></h3>
-      <p>ボタンを押したあと、<strong>時間をタップすれば自由に直せます</strong>。「18時から20時まで」のような中途半端な時間もそのまま出せます。</p>
-      <p class="fine">短い時間でも大丈夫です。夜の時間帯に少しでもかかっていれば、店長の画面では「夜に入れる1人」として数えられます。</p>
+      <p>右側の<strong>時間の字をタップすると、時間の入力欄が出ます</strong>。「18時から20時まで」のような中途半端な時間もそのまま出せます。もう一度タップすると閉じます。</p>
+      <p class="fine">短い時間でも大丈夫です。その枠に入れる1人として数えられ、実際の時間は店長の画面にそのまま出ます。</p>
     </article>
 
     <article class="item" id="i13">
       <figure class="shot">
         <div class="screen">
-          <p style="font-weight:800;font-size:12.5px;margin-bottom:6px">出した日</p>
-          <div class="slotbox" style="border:none;padding:0">
-            <div class="pp"><b>10月1日(木)</b><span>17:30〜21:00</span></div>
-            <div class="pp"><b>10月3日(土)</b><span>11:00〜14:30</span></div>
-            <div class="pp"><b>10月7日(水)</b><span>17:30〜21:00</span></div>
-          </div>
+          <p style="font-weight:800;font-size:12.5px;margin-bottom:7px">いつも入れる曜日</p>
+          <div class="uw"><b>日曜</b><i>昼</i><i>夜</i></div>
+          <div class="uw"><b>火曜</b><i>昼</i><i class="on">夜</i></div>
+          <div class="uw"><b>土曜</b><i class="on">昼</i><i class="on">夜</i></div>
         </div>
       </figure>
-      <h3><span class="n">13</span>出した日を見返す<span class="who-tag w">スタッフ</span></h3>
-      <p>カレンダーの下に、<strong>出した日の一覧</strong>が出ます。上のほうには「何日出したか」「合計で何時間か」も出るので、出し忘れに気づけます。</p>
-      <p class="fine">あとから何度でも開けます。締切までなら、何回直しても大丈夫です。</p>
+      <h3><span class="n">13</span>いつもの曜日で下ごしらえ<span class="who-tag w">スタッフ</span></h3>
+      <p>いちばん下の <kbd>いつも入れる曜日</kbd> をひらいて、ふだん入れる曜日と時間帯を選んでおきます。すると次の月からは、カレンダーの上に <kbd>いつもので埋める</kbd> が出ます。</p>
+      <p class="fine">押すまで何も入りません。埋めたあとも、いつもどおり日ごとに直せます。すでに出している日は上書きされません。定休日にも入りません。</p>
     </article>
 
     <article class="item" id="i14">
       <figure class="shot">
         <div class="screen">
-          <p style="font-weight:800;font-size:13px">10月8日（木）</p>
-          <div class="tmrow" style="margin-top:8px"><b>17:30</b><span>〜</span><b>21:00</b></div>
-          <div class="bigbtn">この時間に直す</div>
-          <div class="subbtns"><i>とじる</i><i style="color:var(--warn);border-color:var(--warn);background:transparent">この日をやめる</i></div>
+          <div class="pills"><i class="ok">9月20日まで 受付中</i><i class="cnt">14日 出しました</i><i class="ok">✓ 出し終わり</i></div>
+          <div class="bigbtn" style="background:var(--app-surface2);color:var(--app-mid);border:1px solid var(--app-line)">✓ 出し終わりました（取り消す）</div>
         </div>
       </figure>
-      <h3><span class="n">14</span>まちがえた日を取り消す<span class="who-tag w">スタッフ</span></h3>
-      <p>出した日をもう一度タップすると <kbd>この日をやめる</kbd> が出ます。押せばその日の希望は消えます。時間だけ直したいときは <kbd>この時間に直す</kbd> です。</p>
-      <p class="fine">取り消してもお店に通知は飛びません。締切までに正しい形になっていれば大丈夫です。</p>
+      <h3><span class="n">14</span>「出し終わりました」を押す<span class="who-tag w">スタッフ</span></h3>
+      <p>ひととおり出したら、カレンダーの下の <kbd>今月はこれで出し終わりました</kbd> を押してください。店長の画面に「✓ 出し終わり」と出て、<strong>催促の連絡が来なくなります</strong>。</p>
+      <p class="caution fine">⚠ <strong>押し忘れても、出した希望はちゃんと届いています。</strong>これは「もう直しません」という合図なので、押したあとでも締切までは直せます。直したら押し直す必要もありません。</p>
     </article>
 
     <article class="item" id="i15">
       <figure class="shot">
         <div class="screen">
-          <div class="pills"><i class="ng">締切がすぎました（9月20日）</i><i class="cnt">14日 出しました</i></div>
-          <div style="background:var(--warn-wash);color:var(--warn);font-size:11px;font-weight:700;border-radius:9px;padding:9px 11px;line-height:1.55">締切がすぎています（17:30 〜 21:00 で出しています）。直すときはお店にご連絡ください。</div>
+          <div class="tabs"><span class="on">出した日</span><span>決まったシフト</span></div>
+          <div class="slotbox" style="border:none;padding:0">
+            <div class="pp"><b>10月1日(木)</b><span>夜 17:30〜21:00</span></div>
+            <div class="pp"><b>10月3日(土)</b><span>昼 11:00〜14:30</span></div>
+            <div class="pp"><b>10月7日(水)</b><span>夜 17:30〜21:00</span></div>
+          </div>
         </div>
       </figure>
-      <h3><span class="n">15</span>締切をすぎたら<span class="who-tag w">スタッフ</span></h3>
-      <p>締切をすぎた月は<strong>読むだけ</strong>になります。自分が何を出したかは、いつでも確認できます。</p>
-      <p class="caution fine">⚠ 締切後の変更は、店長に直接ご連絡ください。店長の画面からなら入れられます。</p>
+      <h3><span class="n">15</span>出した日を見返す<span class="who-tag w">スタッフ</span></h3>
+      <p>カレンダーの下に、<strong>出した日の一覧</strong>が出ます。上のほうには「何日出したか」「合計で何時間か」も出るので、出し忘れに気づけます。</p>
+      <p class="fine">あとから何度でも開けます。締切までなら、何回直しても大丈夫です。</p>
+    </article>
+
+    <article class="item" id="i16">
+      <figure class="shot">
+        <div class="screen">
+          <p style="font-weight:800;font-size:13px">10月8日（木）</p>
+          <div class="slotbox" style="margin-top:6px">
+            <div class="sh"><b>昼</b></div>
+            <div class="prebtns" style="margin-bottom:0"><i>入れます</i><i>行けたら</i><i class="on">休み</i></div>
+          </div>
+          <div class="slotbox">
+            <div class="sh"><b>夜</b></div>
+            <div class="prebtns" style="margin-bottom:0"><i>入れます</i><i>行けたら</i><i class="on">休み</i></div>
+          </div>
+          <div class="bigbtn">この日で出す</div>
+        </div>
+      </figure>
+      <h3><span class="n">16</span>まちがえた日を取り消す<span class="who-tag w">スタッフ</span></h3>
+      <p>出した日をもう一度タップして、<strong>昼と夜の両方を <kbd>休み</kbd> にしてから</strong> <kbd>この日で出す</kbd> を押します。その日の希望は消えます。</p>
+      <p class="fine">片方だけ取り消すこともできます（例：昼はやめて、夜だけ残す）。取り消してもお店に通知は飛びません。締切までに正しい形になっていれば大丈夫です。</p>
+    </article>
+
+    <article class="item" id="i17">
+      <figure class="shot">
+        <div class="screen">
+          <div class="pills"><i class="ng">締切がすぎました（9月20日）</i><i class="cnt">14日 出しました</i></div>
+          <div class="slotbox">
+            <div class="sh"><b>昼</b><span class="tm">11:00 〜 14:30 で出しています</span></div>
+            <div class="bigbtn" style="background:var(--app-surface2);color:var(--app-mid);border:1px solid var(--app-line);margin-top:6px">行けなくなりました</div>
+          </div>
+          <div class="slotbox">
+            <div class="sh"><b>夜</b><span class="tm">出していません</span></div>
+            <div class="bigbtn" style="background:var(--app-surface2);color:var(--app-mid);border:1px solid var(--app-line);margin-top:6px">ここ、入れます</div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">17</span>締切をすぎたら（お願いを出す）<span class="who-tag w">スタッフ</span></h3>
+      <p>締切をすぎた月は<strong>自分では直せません</strong>。でも日をタップすると <kbd>行けなくなりました</kbd> <kbd>ここ、入れます</kbd> が出ます。押すと<strong>お店にお願いが届きます</strong>。</p>
+      <p class="fine">お願いを出すと、上に「お願い ◯件」と出て、その日に赤い枠がつきます。取り消すこともできます。<br>店長が受け入れると、その内容が希望に反映されます。<strong>LINEで別に連絡する必要はありません。</strong></p>
+    </article>
+
+    <article class="item" id="i18">
+      <figure class="shot">
+        <div class="screen">
+          <div class="tabs"><span>出した日</span><span class="on">決まったシフト</span></div>
+          <div class="slotbox" style="border:none;padding:0">
+            <div class="pp"><b>10月1日(木)</b><span>夜 17:30〜21:00</span></div>
+            <div class="pp"><b>10月3日(土)</b><span>昼 11:00〜14:30</span></div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">18</span>決まったシフトを見る<span class="who-tag w">スタッフ</span></h3>
+      <p>店長がシフトを組んで知らせると、<kbd>決まったシフト</kbd> のタブが出ます。<strong>そこがあなたの確定した出勤日</strong>です。カレンダーの札も緑に変わります。</p>
+      <p class="fine">出す前の「希望」と、決まったあとの「シフト」は別ものです。タブで切り替えて見比べられます。知らせが出るまではタブ自体が出ません。</p>
     </article>
 
   </div>
@@ -735,22 +840,22 @@
   <h2>店長の使い方（毎月）</h2>
   <div class="items">
 
-    <article class="item" id="i16">
+    <article class="item" id="i19">
       <figure class="shot">
         <div class="screen">
-          <div class="pills"><i class="ok">9月20日まで 受付中</i><i class="cnt">8 / 8 人が提出</i></div>
+          <div class="pills"><i class="ok">9月20日まで 受付中</i><i class="cnt">8 / 8 人が提出</i><i class="ok">6人 出し終わり</i></div>
           <div class="lackbox">
             <div class="hd">人手が足りない日が 5日 あります</div>
             <div class="cs"><i>14日</i><i>16日</i><i>21日</i><i>24日</i><i>28日</i></div>
           </div>
         </div>
       </figure>
-      <h3><span class="n">16</span>足りない日がすぐ分かる<span class="who-tag m">店長</span></h3>
+      <h3><span class="n">19</span>足りない日がすぐ分かる<span class="who-tag m">店長</span></h3>
       <p>開くといちばん上に「<strong>人手が足りない日が◯日あります</strong>」と出ます。日のボタンを押すと、その日の画面がすぐ開きます。</p>
-      <p class="fine">足りない日が多いときは、先頭の6日だけ出して「ほか◯日」と表示します。全部はカレンダーで赤くなっています。</p>
+      <p class="fine">足りない日が多いときは、先頭の6日だけ出して「ほか◯日」と表示します。全部はカレンダーで赤くなっています。<br>「◯人 出し終わり」は、自分でもう直さないと宣言した人の数です。</p>
     </article>
 
-    <article class="item" id="i17">
+    <article class="item" id="i20">
       <figure class="shot">
         <div class="cal7 hd7"><i class="sun">日</i><i>月</i><i>火</i><i>水</i><i>木</i><i>金</i><i class="sat">土</i></div>
         <div class="cal7">
@@ -767,12 +872,12 @@
           <div class="c sat ng"><span class="d">10</span><span class="s">昼 −1<br>夜 −2</span></div>
         </div>
       </figure>
-      <h3><span class="n">17</span>カレンダーの読み方<span class="who-tag m">店長</span></h3>
+      <h3><span class="n">20</span>カレンダーの読み方<span class="who-tag m">店長</span></h3>
       <p>足りている日は<strong>その日に入れる人数だけ</strong>。足りない日は<strong>赤くなって「夜 −1」</strong>と出ます。これは「夜にあと1人ほしい」という意味です。</p>
-      <p class="fine">点線の「休」は定休日で、人数は数えません。四角い枠が出ている日は今日です。</p>
+      <p class="fine">点線の「休」は定休日で、人数は数えません。四角い枠が出ている日は今日です。<br><strong>「行けたら」（△）の人は、この数には入れていません。</strong>あてにできる人だけで足りているかを見るためです。</p>
     </article>
 
-    <article class="item" id="i18">
+    <article class="item" id="i21">
       <figure class="shot">
         <div class="screen">
           <p style="font-weight:800;font-size:13px">10月14日（水）</p>
@@ -782,68 +887,114 @@
             <div class="pp"><b>たなか けん</b><span>11:00〜14:30</span></div>
           </div>
           <div class="slotbox">
-            <div class="sh"><b>夜</b><span class="tm">17:30〜21:00</span><span class="ct">3 / 3人</span></div>
+            <div class="sh"><b>夜</b><span class="tm">17:30〜21:00</span><span class="ct ng">2 / 3人（＋△1）（あと1人）</span></div>
             <div class="pp"><b>すずき たろう</b><span>17:30〜21:00</span></div>
             <div class="pp"><b>わたなべ ゆう</b><span>18:00〜21:00</span></div>
+            <div class="pp"><b>さとう みお</b><span class="mk2">行けたら</span><span>17:30〜21:00</span></div>
           </div>
         </div>
       </figure>
-      <h3><span class="n">18</span>入れる人を見る<span class="who-tag m">店長</span></h3>
-      <p>日をタップすると、<strong>昼と夜に分けて名前と時間</strong>が出ます。「1 / 2人（あと1人）」は「2人ほしいのに1人しかいない」という意味です。</p>
-      <p class="fine">18:00〜21:00 のように一部だけの人も、夜の1人として数えます。実際の時間はそのまま出るので、組むときはそちらを見てください。</p>
-    </article>
-
-    <article class="item" id="i19">
-      <figure class="shot">
-        <div class="screen">
-          <p style="font-size:10.5px;color:var(--app-soft);margin-bottom:6px">誰の希望を入れますか</p>
-          <div class="pp" style="background:var(--app-surface);border:1px solid var(--app-line)"><b>やまだ はな</b><span>出ていません</span></div>
-          <div class="pp" style="background:var(--app-surface);border:1px solid var(--app-line)"><b>さとう みお</b><span>出ていません</span></div>
-          <div class="pp" style="background:var(--app-surface);border:1px solid var(--app-line)"><b>たなか けん</b><span>11:00〜14:30</span></div>
-        </div>
-      </figure>
-      <h3><span class="n">19</span>代わりに入れる<span class="who-tag m">店長</span></h3>
-      <p>電話で「入れます」と言われたら、日の下の <kbd>代わりに入れる</kbd> から店長が入れられます。<strong>まだ出していない人が上に並びます</strong>（頼む相手を探す画面なので）。</p>
-      <p class="fine">締切をすぎた月でも、店長からは入れられます。スタッフ側の画面にもすぐ反映されます。</p>
-    </article>
-
-    <article class="item" id="i20">
-      <figure class="shot">
-        <div class="screen">
-          <p style="font-weight:800;font-size:13px">10月18日（土）</p>
-          <p style="font-size:10.5px;color:var(--app-soft);margin-bottom:9px">この日だけの人数です。ふだんは設定の人数を使います。</p>
-          <div class="fld"><div class="row"><span class="u" style="width:26px;font-weight:700;color:var(--app-ink)">昼</span><span class="u">11:00〜14:30</span><div class="bx n">3</div></div></div>
-          <div class="fld"><div class="row"><span class="u" style="width:26px;font-weight:700;color:var(--app-ink)">夜</span><span class="u">17:30〜21:00</span><div class="bx n">5</div></div></div>
-          <div class="bigbtn">この日はこの人数にする</div>
-        </div>
-      </figure>
-      <h3><span class="n">20</span>その日だけ人数を増やす<span class="who-tag m">店長</span></h3>
-      <p>宴会が入った日などは、日の下の <kbd>この日の必要人数</kbd> でその日だけ増やせます。変えた日は「（この日だけの設定）」と出ます。</p>
-      <p class="fine">もとに戻したいときは <kbd>ふだんに戻す</kbd>。設定の人数に戻ります。</p>
-    </article>
-
-    <article class="item" id="i21">
-      <figure class="shot">
-        <div class="screen">
-          <div class="pills"><i class="ok">9月20日まで 受付中</i><i class="cnt">5 / 8 人が提出</i></div>
-          <div class="lackbox okbox"><div class="hd">まだ3人が出していません</div></div>
-        </div>
-      </figure>
-      <h3><span class="n">21</span>まだ出していない人<span class="who-tag m">店長</span></h3>
-      <p>上の「<strong>5 / 8 人が提出</strong>」で、何人が出し終えたか分かります。締切前に声をかける目安になります。</p>
-      <p class="fine">誰が出していないかは、日をタップして <kbd>代わりに入れる</kbd> を開くと分かります（上に並ぶのが未提出の人です）。</p>
+      <h3><span class="n">21</span>入れる人を見る（○と△）<span class="who-tag m">店長</span></h3>
+      <p>日をタップすると、<strong>昼と夜に分けて名前と時間</strong>が出ます。「2 / 3人（＋△1）（あと1人）」は「3人ほしい・確実なのは2人・あと1人は行けたらの人がいる」という意味です。</p>
+      <p class="fine">「行けたら」の人には札がつき、いちばん下にまとめて並びます。<strong>人数には数えていません</strong>ので、足りないときの当たり先として使ってください。</p>
     </article>
 
     <article class="item" id="i22">
       <figure class="shot">
         <div class="screen">
-          <div class="mbar"><i class="nv">‹</i><div class="mt">2026年10月分</div><i class="nv">›</i></div>
-          <div class="pills"><i class="ng">締切ずみ（8月20日）</i><i class="cnt">8 / 8 人が提出</i></div>
+          <div class="prebtns"><i>出ている希望</i><i class="on">シフトを決める</i></div>
+          <div class="slotbox">
+            <div class="sh"><b>夜</b><span class="tm">17:30〜21:00</span><span class="ct ng">決定 2 / 3人</span></div>
+            <div class="pp on"><span class="ck">✓</span><b>すずき たろう</b><span>17:30〜21:00</span></div>
+            <div class="pp on"><span class="ck">✓</span><b>わたなべ ゆう</b><span>18:00〜21:00</span></div>
+            <div class="pp"><span class="ck"></span><b>さとう みお</b><span class="mk2">行けたら</span><span>17:30〜21:00</span></div>
+            <span class="allb">希望どおり、○の2人を全員入れる</span>
+          </div>
         </div>
       </figure>
-      <h3><span class="n">22</span>前の月・次の月<span class="who-tag m">店長</span></h3>
-      <p>上の <kbd>‹</kbd> <kbd>›</kbd> で月を移動できます。過ぎた月も残っているので、あとから見返せます。</p>
-      <p class="fine">開いたときに出るのは「いま募集している月」です。締切をすぎると、自動で次の月に切り替わります。</p>
+      <h3><span class="n">22</span>シフトを決める<span class="who-tag m">店長</span></h3>
+      <p>日をひらいて <kbd>シフトを決める</kbd> に切り替えると、<strong>名前を押すだけでその日のシフトが決まります</strong>。もう一度押せば外れます。「決定 2 / 3人」で、ほしい人数まであと何人かが分かります。</p>
+      <p class="fine"><kbd>希望どおり、○の◯人を全員入れる</kbd> を押すと、その枠の「入れます」の人を一度に入れられます。そこから外したい人だけ押して外すのが早いです。<br><strong>自動では組みません。</strong>誰を入れるかは、必ず店長が決めます。</p>
+    </article>
+
+    <article class="item" id="i23">
+      <figure class="shot">
+        <div class="screen">
+          <div class="pubb"><span>いま 42つ決まっています。知らせるまでスタッフには見えません。</span><i>みんなに知らせる</i></div>
+        </div>
+      </figure>
+      <h3><span class="n">23</span>みんなに知らせる<span class="who-tag m">店長</span></h3>
+      <p>組んでいる途中は<strong>スタッフには見えません</strong>。ひととおり決まったら、カレンダーの下の <kbd>みんなに知らせる</kbd> を押します。全員の画面に「決まったシフト」が出ます。</p>
+      <p class="caution fine">⚠ 知らせたあとも中身は直せます。直すとスタッフの画面もすぐ変わるので、<strong>大きく組み替えるときは、いったん <kbd>知らせを取り消す</kbd> を押してからにすると混乱がありません。</strong></p>
+    </article>
+
+    <article class="item" id="i24">
+      <figure class="shot">
+        <div class="screen">
+          <div class="reqb">
+            <div class="h">いとう けんさん</div>
+            <div class="d">10月7日（水）の夜　行けなくなりました</div>
+            <div class="a"><i>受け入れる</i><i class="sub">見送る</i></div>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">24</span>お願いを受け取る<span class="who-tag m">店長</span></h3>
+      <p>締切のあとにスタッフが出したお願いは、<strong>一覧のいちばん上に赤く出ます</strong>。名前を押すと中身が開き、<kbd>受け入れる</kbd> か <kbd>見送る</kbd> を選べます。</p>
+      <p class="fine"><kbd>受け入れる</kbd> を押すと、その内容が希望に反映されます（「行けなくなりました」なら、決まっていたシフトからも外れます）。<br><kbd>見送る</kbd> は希望を変えずに、お願いだけ片づけます。どちらもスタッフの画面から消えます。</p>
+    </article>
+
+    <article class="item" id="i25">
+      <figure class="shot">
+        <div class="screen">
+          <p style="font-size:10.5px;color:var(--app-soft);margin-bottom:6px">誰の希望を入れますか</p>
+          <div class="pp" style="background:var(--app-surface);border:1px solid var(--app-line)"><b>やまだ はな</b><span>出ていません</span></div>
+          <div class="pp" style="background:var(--app-surface);border:1px solid var(--app-line)"><b>さとう みお</b><span>出ていません</span></div>
+          <div class="pp" style="background:var(--app-surface);border:1px solid var(--app-line)"><b>たなか けん</b><span>昼・夜</span></div>
+        </div>
+      </figure>
+      <h3><span class="n">25</span>代わりに入れる<span class="who-tag m">店長</span></h3>
+      <p>「電話で聞いた」「LINEで来た」希望は、<kbd>代わりに入れる</kbd> から店長が入れられます。名前を選ぶと、<strong>スタッフの画面と同じ形（昼／夜ごとに 入れます・行けたら・休み）</strong>が出ます。</p>
+      <p class="fine">まだ出していない人が上に並びます。<strong>締切をすぎていても店長は入れられます。</strong>入れたぶんは、その人の画面にもそのまま出ます。</p>
+    </article>
+
+    <article class="item" id="i26">
+      <figure class="shot">
+        <div class="screen">
+          <p style="font-weight:800;font-size:13px">10月24日（土）</p>
+          <p style="font-size:10.5px;color:var(--app-soft);margin-bottom:8px">この日だけの人数です。ふだんは設定の人数を使います。</p>
+          <div class="uw"><b>昼</b><i style="flex:0 0 auto;padding:6px 10px">11:00〜14:30</i><i class="on">3</i></div>
+          <div class="uw"><b>夜</b><i style="flex:0 0 auto;padding:6px 10px">17:30〜21:00</i><i class="on">5</i></div>
+        </div>
+      </figure>
+      <h3><span class="n">26</span>その日だけ人数を増やす<span class="who-tag m">店長</span></h3>
+      <p>宴会や貸切のように、<strong>その日だけ人手が要る日</strong>は、日をひらいて <kbd>この日の必要人数</kbd> から変えられます。ふだんの人数はそのままです。</p>
+      <p class="fine">変えた日は「（この日だけの設定）」と出ます。<kbd>ふだんに戻す</kbd> でいつでも元に戻せます。</p>
+    </article>
+
+    <article class="item" id="i27">
+      <figure class="shot">
+        <div class="screen">
+          <p style="font-size:11px;font-weight:700;margin-bottom:8px">6 / 8人が出し終わり　<span style="font-size:10px;color:var(--app-soft);border:1px solid var(--app-line);border-radius:8px;padding:4px 8px">まだの2人に送る文をコピー</span></p>
+          <p style="font-weight:800;font-size:12px">やまだ はな<span class="stb done">✓ 出し終わり</span></p>
+          <p style="font-weight:800;font-size:12px;margin-top:6px">たなか けん<span class="stb part">3日 出した（途中）</span></p>
+          <p style="font-weight:800;font-size:12px;margin-top:6px">さとう みお<span class="stb none">まだ出していません</span></p>
+        </div>
+      </figure>
+      <h3><span class="n">27</span>まだ出していない人<span class="who-tag m">店長</span></h3>
+      <p>「スタッフ」のタブで、ひとりずつ<strong>3つの状態</strong>が分かります。<br>「まだ出していません」「◯日 出した（途中）」「✓ 出し終わり」。</p>
+      <p class="fine">上の <kbd>まだの◯人に送る文をコピー</kbd> を押すと、名前入りの催促の文ができます。LINEのグループに貼るだけです。<br><strong>「途中」の人にも、まだ出し終わっていない可能性があります。</strong>締切前に一度声をかけると確実です。</p>
+    </article>
+
+    <article class="item" id="i28">
+      <figure class="shot">
+        <div class="screen">
+          <div class="mbar"><i class="nv">‹</i><div class="mt">2026年10月分</div><i class="nv">›</i></div>
+          <div class="pills"><i class="ng">締切ずみ（9月20日）</i><i class="cnt">8 / 8 人が提出</i></div>
+        </div>
+      </figure>
+      <h3><span class="n">28</span>前の月・次の月<span class="who-tag m">店長</span></h3>
+      <p>上の <kbd>‹</kbd> <kbd>›</kbd> で月を移れます。過ぎた月も見返せますし、<strong>先の月を先に組んでおくこともできます</strong>。</p>
+      <p class="fine">開いたときに出るのは「いま募集している月」です。締切前ならその月、締切をすぎていたら次の月になります。</p>
     </article>
 
   </div>
@@ -854,7 +1005,7 @@
   <h2>そのほか</h2>
   <div class="items">
 
-    <article class="item" id="i23">
+    <article class="item" id="i29">
       <figure class="shot">
         <div class="screen">
           <div class="stcard">
@@ -864,12 +1015,12 @@
           </div>
         </div>
       </figure>
-      <h3><span class="n">23</span>URLを無くしたとき<span class="who-tag m">店長</span></h3>
+      <h3><span class="n">29</span>URLを無くしたとき<span class="who-tag m">店長</span></h3>
       <p><span class="path"><b>スタッフ</b></span> でその人の <kbd>送る文をコピー</kbd> を押して、もう一度LINEで送るだけです。</p>
       <p class="caution fine">⚠ <kbd>合言葉を再発行</kbd> を押すと<b>古いURLはその瞬間に開けなくなります</b>。スマホを人に譲ったときなど、本当に無効にしたいときだけ使ってください。出した希望は消えません。</p>
     </article>
 
-    <article class="item" id="i24">
+    <article class="item" id="i30">
       <figure class="shot">
         <div class="screen">
           <div class="stcard" style="opacity:.55">
@@ -879,13 +1030,13 @@
           </div>
         </div>
       </figure>
-      <h3><span class="n">24</span>やめた人・お休みの人<span class="who-tag m">店長</span></h3>
+      <h3><span class="n">30</span>やめた人・お休みの人<span class="who-tag m">店長</span></h3>
       <p>しばらく入れない人は <kbd>休止する</kbd>。一覧から消えますが、出した希望は残ります。戻ってきたら <kbd>再開する</kbd> です。</p>
       <p class="caution fine">⚠ <kbd>削除</kbd> は、その人が出した希望も<b>いっしょに消えます</b>。迷ったら休止のほうを使ってください。</p>
     </article>
 
-    <article class="item nofig" id="i25">
-      <h3><span class="n">25</span>データはどこにあるか</h3>
+    <article class="item nofig" id="i31">
+      <h3><span class="n">31</span>データはどこにあるか</h3>
       <p>希望はインターネット上（＝クラウド）に保存されます。だから<strong>スタッフのスマホと店長の画面が、すぐにつながります</strong>。スマホを換えても、URLさえあれば同じ内容が出ます。</p>
       <p class="fine">スタッフの合言葉では、自分のぶんしか取り出せない作りになっています。ほかの人の名前も希望も、サーバー側から返ってきません。</p>
       <p class="caution fine">⚠ 電波がないところでは新しく出せません。電波の届くところで開いてください。</p>
@@ -899,14 +1050,14 @@
   <h2>ホーム画面に置く</h2>
   <div class="items">
 
-    <article class="item nofig" id="i26">
-      <h3><span class="n">26</span>iPhoneの場合</h3>
+    <article class="item nofig" id="i32">
+      <h3><span class="n">32</span>iPhoneの場合</h3>
       <p>Safariで開いて、下の <kbd>共有</kbd>（四角に↑）→ <kbd>ホーム画面に追加</kbd>。アプリのように1タップで開けます。</p>
       <p class="caution fine">⚠ Chromeなど<b>Safari以外では「ホーム画面に追加」が出ません</b>。うまくいかないときは、URLをSafariで開き直してください。</p>
     </article>
 
-    <article class="item nofig" id="i27">
-      <h3><span class="n">27</span>Androidの場合</h3>
+    <article class="item nofig" id="i33">
+      <h3><span class="n">33</span>Androidの場合</h3>
       <p>Chromeで開いて、右上の <kbd>⋮</kbd> → <kbd>ホーム画面に追加</kbd>。</p>
       <p class="fine">機種によっては「アプリをインストール」と出ます。どちらでも同じです。</p>
     </article>
@@ -923,7 +1074,7 @@
     </div>
     <div>
       <div class="q">日をタップしても入れられない</div>
-      <div class="a"><b>締切をすぎています。</b>その月は読むだけになります。店長に連絡すれば、店長側から入れられます。</div>
+      <div class="a"><b>締切をすぎています。</b>その月は自分では直せません。日をタップして <kbd>行けなくなりました</kbd> <kbd>ここ、入れます</kbd> からお願いを出してください。店長が受け入れると反映されます。</div>
     </div>
     <div>
       <div class="q">出したはずの日が消えている</div>
@@ -943,11 +1094,19 @@
     </div>
     <div>
       <div class="q">昼と夜の両方に数えられている人がいる</div>
-      <div class="a">「通し」で出した人です。昼にも夜にも入れるので、両方に1人として数えます。</div>
+      <div class="a">昼と夜の<b>両方を「入れます」にした人</b>です（＝通しで入れる人）。それぞれの枠に1人として数えます。あいだの中抜けの時間は働きません。</div>
     </div>
     <div>
       <div class="q">スタッフを間違えて削除した</div>
       <div class="a">もう一度追加してください。ただし<b>合言葉は新しくなり、出した希望は戻りません</b>。URLを渡し直してください。</div>
+    </div>
+    <div>
+      <div class="q">「行けたら」の人は、数に入らないの？</div>
+      <div class="a">はい、わざと入れていません。<b>あてにできる人だけで足りているか</b>を見るためです。足りない日は、△の人が声をかける当たり先になります。シフトを決めるときは、△の人も名前を押せば入れられます。</div>
+    </div>
+    <div>
+      <div class="q">スタッフに「決まったシフト」が見えない</div>
+      <div class="a"><kbd>みんなに知らせる</kbd> をまだ押していないと思われます。<b>組んでいる途中はスタッフに見えません。</b>一覧のカレンダーの下に出る帯から押してください。</div>
     </div>
   </div>
 </section>

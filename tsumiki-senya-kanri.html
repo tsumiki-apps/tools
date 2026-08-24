@@ -309,6 +309,64 @@
   }
 
   [hidden]{display:none !important;}
+
+  /* ===== v2：枠（昼/夜）・お願い・確定シフト ===== */
+  .cell .lack{white-space:nowrap;}
+  .cell .num.mix{font-size:.62rem;}
+
+  /* お願いの箱（足りない日の箱と同じ形で、色だけ変える） */
+  .short.req{background:var(--warn-wash); border-color:var(--warn);}
+  .short.req .hd{color:var(--warn);}
+
+  /* 公開の帯 */
+  .pubbar{display:flex; align-items:center; gap:10px; margin-top:12px; padding:11px 13px;
+    background:var(--surface-2); border-radius:13px; font-size:.83rem; color:var(--ink-mid); line-height:1.5;}
+  .pubbar.on{background:var(--good-wash); color:var(--good);}
+  .pubbar button{margin-left:auto; flex:none; min-height:var(--tap); padding:0 14px; border-radius:10px;
+    border:none; background:var(--accent); color:#fff; font-family:var(--sans); font-size:.82rem;
+    font-weight:700; cursor:pointer;}
+  .pubbar.on button{background:transparent; color:var(--good); border:1px solid var(--good);}
+
+  /* 日の詳細：希望／決める の切替 */
+  .modeseg{display:flex; gap:8px; margin:2px 0 15px;}
+  .modeseg button{flex:1 1 0; min-width:0; min-height:var(--tap); border:1.5px solid var(--line-2);
+    background:var(--surface-2); color:var(--ink-soft); border-radius:12px; font-family:var(--sans);
+    font-size:.9rem; font-weight:700; cursor:pointer;}
+  .modeseg button.on{background:var(--accent-wash); border-color:var(--accent); color:var(--accent-2);}
+
+  /* 人の行：△の印と、決めるときの選択 */
+  .who .p .mk{margin-left:0; flex:none; font-size:.68rem; font-weight:700; color:var(--accent-2);
+    background:transparent; box-shadow:0 0 0 1px var(--accent) inset; border-radius:5px; padding:2px 5px;}
+  .who .p.pick{width:100%; text-align:left; border:1.5px solid var(--line-2); cursor:pointer;
+    font-family:var(--sans); color:var(--ink);}
+  .who .p.pick.on{background:var(--accent-wash); border-color:var(--accent);}
+  .who .p .ck{flex:none; width:20px; height:20px; border-radius:6px; border:1.5px solid var(--line-2);
+    display:flex; align-items:center; justify-content:center; font-size:.72rem; color:#fff;}
+  .who .p.pick.on .ck{background:var(--accent); border-color:var(--accent);}
+  .slot .allbtn{width:100%; min-height:var(--tap); margin-top:8px; border:1px dashed var(--line-2);
+    background:transparent; color:var(--ink-soft); border-radius:11px; font-family:var(--sans);
+    font-size:.84rem; font-weight:700; cursor:pointer;}
+
+  /* お願いの一覧 */
+  .reqlist{display:flex; flex-direction:column; gap:9px;}
+  .reqitem{border:1.5px solid var(--warn); border-radius:13px; padding:12px 13px; background:var(--surface);}
+  .reqitem .rh{font-weight:700; font-size:.95rem; margin-bottom:3px;}
+  .reqitem .rd{font-size:.82rem; color:var(--ink-soft); margin-bottom:10px; line-height:1.55;}
+  .reqitem .ra{display:flex; gap:8px;}
+  .reqitem .ra .btn{margin:0; font-size:.86rem;}
+
+  /* スタッフの提出ぐあい */
+  .staff .st{display:inline-flex; align-items:center; font-size:.72rem; font-weight:700;
+    padding:3px 9px; border-radius:999px; margin-left:8px; vertical-align:middle;}
+  .staff .st.none{background:var(--warn-wash); color:var(--warn);}
+  .staff .st.part{background:var(--accent-wash); color:var(--accent-2);}
+  .staff .st.done{background:var(--good-wash); color:var(--good);}
+  .staffhd{display:flex; align-items:center; gap:10px; margin-bottom:13px; flex-wrap:wrap;}
+  .staffhd .btn{margin:0; width:auto; flex:none; padding:0 15px; min-height:var(--tap); font-size:.85rem;}
+  .staffhd .cnt{font-size:.84rem; font-weight:700; color:var(--ink-mid);}
+
+  /* 設定：枠ごと */
+  .slotcfg .lab{flex:0 0 auto; font-weight:700; font-size:.95rem; min-width:2.4em;}
 </style>
 </head>
 <body>
@@ -358,11 +416,13 @@
       <button class="navbtn" id="mNext" aria-label="次の月">›</button>
     </div>
     <div class="state" id="stateRow"></div>
+    <div id="reqBox"></div>
     <div id="shortBox"></div>
     <div class="wd">
       <div class="s0">日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div class="s6">土</div>
     </div>
     <div class="cal" id="cal"></div>
+    <div id="pubBox"></div>
     <p class="muted" style="margin:13px 0 0; line-height:1.65" id="hint1"></p>
   </section>
 
@@ -372,6 +432,7 @@
       <input id="newName" placeholder="スタッフのお名前" autocomplete="off">
       <button class="btn" id="addBtn">追加</button>
     </div>
+    <div class="staffhd" id="staffHd"></div>
     <div id="staffBox"></div>
     <p class="muted" style="margin-top:14px; line-height:1.65">
       追加すると、その人だけの合言葉と専用URLができます。「送る文をコピー」でLINEに貼って、ひとりずつお渡しください。
@@ -399,26 +460,12 @@
     </div>
     </div><!-- /#cfGrid -->
     <div class="field">
-      <label>昼の時間帯と、ほしい人数</label>
-      <div class="slotcfg">
-        <input type="time" id="cfDayFrom" step="900" aria-label="昼のはじまり">
-        <span class="sep">〜</span>
-        <input type="time" id="cfDayTo" step="900" aria-label="昼のおわり">
-        <span class="need"><input type="number" id="cfNeedDay" min="0" max="99" inputmode="numeric" aria-label="昼にほしい人数"><span class="muted">人ほしい</span></span>
-      </div>
-    </div>
-    <div class="field">
-      <label>夜の時間帯と、ほしい人数</label>
-      <div class="slotcfg">
-        <input type="time" id="cfNightFrom" step="900" aria-label="夜のはじまり">
-        <span class="sep">〜</span>
-        <input type="time" id="cfNightTo" step="900" aria-label="夜のおわり">
-        <span class="need"><input type="number" id="cfNeedNight" min="0" max="99" inputmode="numeric" aria-label="夜にほしい人数"><span class="muted">人ほしい</span></span>
-      </div>
+      <label>時間帯と、ほしい人数</label>
+      <div id="cfSlots"></div>
       <p class="muted" style="margin:8px 0 0; line-height:1.6">
         この人数を下回った日が、一覧で赤くなります。宴会などでその日だけ増やしたいときは、
         カレンダーで日をタップ →「この日の必要人数」で変えられます。
-        スタッフの画面に出る「昼／夜／通し」のボタンも、ここの時間帯から作られます。
+        スタッフの画面に出る昼／夜の選び方も、ここの時間帯から作られます。
       </p>
     </div>
     <button class="btn" id="saveCfg">この内容にする</button>
@@ -435,12 +482,16 @@
 <div class="sheet" id="sheet">
   <div class="grip"></div>
 
-  <!-- ① その日の面々 -->
+  <!-- ① その日 -->
   <div id="mDay">
     <h2 id="shTitle">—</h2>
     <div class="sub" id="shSub"></div>
+    <div class="modeseg" id="modeSeg">
+      <button data-m="kibo" class="on">出ている希望</button>
+      <button data-m="kime">シフトを決める</button>
+    </div>
     <div id="slots"></div>
-    <div class="dayacts">
+    <div class="dayacts" id="dayActs">
       <button class="btn sub" id="actFill">代わりに入れる</button>
       <button class="btn sub" id="actNeed">この日の必要人数</button>
     </div>
@@ -455,16 +506,10 @@
     <div class="sub" id="fillSub">誰の希望を入れますか</div>
     <div class="pickstaff" id="fillList"></div>
     <div id="fillTime" hidden>
-      <div class="presets" id="shPresets"></div>
-      <div class="times">
-        <input type="time" id="shFrom" step="900" aria-label="はじまり">
-        <span>〜</span>
-        <input type="time" id="shTo" step="900" aria-label="おわり">
-      </div>
-      <button class="btn" id="shSave" style="margin-top:13px">この時間で入れる</button>
+      <div id="fillSlots"></div>
+      <button class="btn" id="shSave" style="margin-top:15px">この内容で入れる</button>
       <div class="row2">
         <button class="btn sub" id="fillCancel">やめる</button>
-        <button class="btn danger" id="shDel" hidden>この日を消す</button>
       </div>
     </div>
   </div>
@@ -474,13 +519,21 @@
     <button class="backb" id="needBack">‹ もどる</button>
     <h2 id="needTitle">—</h2>
     <div class="sub">この日だけの人数です。ふだんは設定の人数を使います。</div>
-    <div class="needrow"><label>昼</label><span class="tm2" id="needDayTm"></span><input type="number" id="needDay" inputmode="numeric" min="0" max="99"></div>
-    <div class="needrow"><label>夜</label><span class="tm2" id="needNightTm"></span><input type="number" id="needNight" inputmode="numeric" min="0" max="99"></div>
+    <div id="needRows"></div>
     <button class="btn" id="needSave" style="margin-top:4px">この日はこの人数にする</button>
     <div class="row2">
       <button class="btn sub" id="needCancel">やめる</button>
       <button class="btn danger" id="needReset" hidden>ふだんに戻す</button>
     </div>
+  </div>
+
+  <!-- ④ 締切後のお願い -->
+  <div id="mReq" hidden>
+    <h2>スタッフからのお願い</h2>
+    <div class="sub">締切のあとに届いたものです。受け入れると希望に反映されます。</div>
+    <div class="reqlist" id="reqList"></div>
+    <div style="height:12px"></div>
+    <button class="btn sub" id="reqClose">とじる</button>
   </div>
 </div>
 
@@ -508,13 +561,34 @@ function daysInMonth(y,m1){ return new Date(y,m1,0).getDate(); }
 function fmtDateJP(s){ const p=s.split('-'); return (+p[1])+'月'+(+p[2])+'日'; }
 function firstWday(y,m1){ return new Date(y,m1-1,1).getDay(); }
 function wdayOf(s){ const p=s.split('-'); return new Date(+p[0],+p[1]-1,+p[2]).getDay(); }
-// 少しでも重なっていれば、その枠に数える（本人決定 2026-08-24）
-function overlaps(a1,a2,b1,b2){ return a1 < b2 && b1 < a2; }
-function indexAvail(list){ const m={}; (list||[]).forEach(a=>{ (m[a.d]=m[a.d]||{})[a.staff_id]={from:a.from,to:a.to}; }); return m; }
-function countPerDay(map){ const o={}; Object.keys(map).forEach(d=>{ o[d]=Object.keys(map[d]).length; }); return o; }
+
+/* 希望 → {日付:{スタッフ:{枠:{from,to,mark}}}}
+   ⚠️ v2から「時間帯と重なれば数える」推定はやめ、枠そのもので数える */
+function indexAvail(list){
+  const m={}; (list||[]).forEach(a=>{
+    const d=m[a.d]=m[a.d]||{}; const s=d[a.staff_id]=d[a.staff_id]||{};
+    s[a.k]={from:a.from,to:a.to,mark:a.mark||'o'};
+  }); return m;
+}
+/* 確定 → {日付:{枠:{スタッフ:{from,to}}}} */
+function indexAssign(list){
+  const m={}; (list||[]).forEach(a=>{
+    const d=m[a.d]=m[a.d]||{}; const k=d[a.k]=d[a.k]||{};
+    k[a.staff_id]={from:a.from,to:a.to};
+  }); return m;
+}
+/* その日だけの人数 → {日付:{枠:人数}} */
+function indexNeed(list){
+  const m={}; (list||[]).forEach(x=>{ (m[x.d]=m[x.d]||{})[x.k]=x.need; }); return m;
+}
+/* その日に誰か1人でも希望を出している人数（マスに出す数） */
+function peopleCount(dayMap){ return dayMap?Object.keys(dayMap).length:0; }
+/* 提出ぐあい */
+function submitState(s){ return s.done?'done':(s.days>0?'part':'none'); }
 
 /* ===== 状態 ===== */
-let admin=null, shopId=null, shop=null, month=null, cur=null, avail={}, staffList=[], dayNeed={};
+let admin=null, shopId=null, shop=null, month=null, cur=null;
+let avail={}, assign={}, dayNeed={}, staffList=[], dayMode='kibo';
 
 async function rpc(fn,params){ const {data,error}=await sb.rpc(fn,params); setSync(!error); if(error) throw error; return data; }
 // 店長側の呼び出しは、合言葉と「どの店か」を毎回そえる（マスターキーで店を選んで入るため）
@@ -523,6 +597,8 @@ function setSync(ok){ document.getElementById('syncDot').className='sync-dot '+(
 let toastT; function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
   clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),1900); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function slots(){ return shop.slots||[]; }
+function slotOf(k){ return slots().find(s=>s.k===k); }
 async function copyText(t){
   try{ await navigator.clipboard.writeText(t); return true; }
   catch(e){
@@ -541,9 +617,7 @@ document.getElementById('themeBtn').addEventListener('click',()=>{
   el.dataset.theme=next; localStorage.setItem(LS_THEME,next);
 });
 
-/* ===== キーボードが出たときに、入力欄が隠れないようにする =====
-   iOSは position:fixed の要素をキーボードの下に隠してしまうので、
-   実際に見えている高さ（visualViewport）を測って、シートを持ち上げる。 */
+/* ===== キーボードが出たときに、入力欄が隠れないようにする ===== */
 (function(){
   const vv=window.visualViewport; if(!vv) return;
   const fit=()=>{
@@ -572,13 +646,12 @@ async function doLogin(c, forShop){
     const info=await rpc('kibo_admin_login',{p_admin:v, p_shop:want||null});
     if(!info){ err.textContent='その合言葉は見つかりません'; return; }
     admin=v; localStorage.setItem(LS_CODE,v);
-    if(info.mode==='pick'){ showPicker(info.shops); return; }   // マスターキー：店が複数あるので選んでもらう
+    if(info.mode==='pick'){ showPicker(info.shops); return; }
     shop=info; shopId=info.shop_id; localStorage.setItem(LS_SHOP, shopId);
     enter();
   }catch(e){ err.textContent='つながりませんでした。もう一度お試しください'; }
 }
 
-/* マスターキーで入ったときの「どの店を見ますか」 */
 function showPicker(shops){
   document.getElementById('loginForm').hidden=true;
   const box=document.getElementById('pickBox'); box.hidden=false;
@@ -619,7 +692,7 @@ document.getElementById('logoutBtn').addEventListener('click',()=>{
       document.getElementById('tab'+n).classList.toggle('on', n===i+1);
       document.getElementById('view'+n).hidden = (n!==i+1);
     });
-    if(i===1) loadStaff();
+    if(i===1) renderStaff();
   });
 });
 
@@ -632,53 +705,70 @@ async function loadMonth(){
   const s=++seq;
   try{ const r=await arpc('kibo_admin_month',{p_month:month}); if(s!==seq) return; cur=r; }
   catch(e){ toast('読み込みに失敗しました'); return; }
-  avail=indexAvail(cur.avail); staffList=cur.staff||[];
-  dayNeed={}; (cur.dayneeds||[]).forEach(x=>{ dayNeed[x.d]={day:x.day, night:x.night}; });
+  avail=indexAvail(cur.avail); assign=indexAssign(cur.assign);
+  dayNeed=indexNeed(cur.dayneeds); staffList=cur.staff||[];
   renderMonth();
+  if(!document.getElementById('view2').hidden) renderStaff();
 }
 
-/* --- 数え方 --- */
-function needOf(key){ const o=dayNeed[key]; return o ? o : {day:shop.need_day, night:shop.need_night}; }
-function peopleOn(key){
-  const m=avail[key]||{};
-  return staffList.filter(s2=>m[s2.id]).map(s2=>({id:s2.id, name:s2.name, from:m[s2.id].from, to:m[s2.id].to}));
+/* --- 数え方（推定なし・枠そのもので数える） --- */
+function needOf(key,k){
+  const o=dayNeed[key]; if(o && o[k]!=null) return o[k];
+  const s=slotOf(k); return s?s.need:0;
 }
-function slotsOn(key){
-  const ppl=peopleOn(key);
-  return {
-    all:  ppl,
-    day:  ppl.filter(p=>overlaps(p.from,p.to,shop.day_from,shop.day_to)),
-    night:ppl.filter(p=>overlaps(p.from,p.to,shop.night_from,shop.night_to))
-  };
+function peopleOn(key,k){
+  const m=avail[key]||{}, out=[];
+  staffList.forEach(s2=>{ const g=m[s2.id]&&m[s2.id][k]; if(g) out.push({id:s2.id,name:s2.name,from:g.from,to:g.to,mark:g.mark}); });
+  // ○ を先に、△ を後に
+  return out.sort((a,b)=>(a.mark==='t'?1:0)-(b.mark==='t'?1:0));
 }
+function okCount(key,k){ return peopleOn(key,k).filter(p=>p.mark==='o').length; }
 function lackOn(key){
-  const n=needOf(key), s2=slotsOn(key);
-  return {day:Math.max(0,n.day-s2.day.length), night:Math.max(0,n.night-s2.night.length)};
+  const o={}; slots().forEach(s=>{ o[s.k]=Math.max(0, needOf(key,s.k)-okCount(key,s.k)); }); return o;
 }
+function anyLack(key){ const l=lackOn(key); return slots().some(s=>l[s.k]>0); }
 
 function renderMonth(){
   const {y,m1}=parseMonth(cur.month);
   document.getElementById('mLabel').textContent=y+'年'+m1+'月分';
 
   const past=(shop.today > cur.deadline);
-  const submitted=new Set(); (cur.avail||[]).forEach(a=>submitted.add(a.staff_id));
+  const doneN=staffList.filter(s=>s.done).length;
+  const anyN=staffList.filter(s=>s.days>0).length;
   document.getElementById('stateRow').innerHTML =
     (past ? '<span class="pill closed">締切ずみ（'+fmtDateJP(cur.deadline)+'）</span>'
           : '<span class="pill open">'+fmtDateJP(cur.deadline)+'まで 受付中</span>')
-    + '<span class="pill count">'+submitted.size+' / '+staffList.length+' 人が提出</span>';
+    + '<span class="pill count">'+anyN+' / '+staffList.length+' 人が提出</span>'
+    + (doneN?'<span class="pill">'+doneN+'人 出し終わり</span>':'')
+    + (cur.published?'<span class="pill open">シフト公開中</span>':'');
+
+  /* ⑤ お願い */
+  const rb=document.getElementById('reqBox'); rb.innerHTML='';
+  const reqs=cur.requests||[];
+  if(reqs.length){
+    rb.className='short req';
+    rb.innerHTML='<div class="hd">スタッフからのお願いが '+reqs.length+'件 あります</div>'
+      +'<div class="chips"></div>';
+    const chips=rb.querySelector('.chips');
+    reqs.slice(0,6).forEach(r=>{
+      const b=document.createElement('button');
+      b.textContent=r.name+' '+fmtDateJP(r.d);
+      b.addEventListener('click',()=>openReqs()); chips.appendChild(b);
+    });
+    if(reqs.length>6) rb.innerHTML+='<div class="muted" style="margin-top:8px">ほか '+(reqs.length-6)+'件</div>';
+  }else{ rb.className=''; }
 
   const closed=new Set(shop.closed_wdays||[]);
   const last=daysInMonth(y,m1), lead=firstWday(y,m1);
-  const anySubmitted = submitted.size>0 && staffList.length>0;
+  const anySubmitted = anyN>0 && staffList.length>0;
 
-  // 足りない日を先に集める（この画面の主役）
+  /* 足りない日（この画面の主役） */
   const shortDays=[];
   if(anySubmitted){
     for(let d=1;d<=last;d++){
       const key=ymd(y,m1,d), w=new Date(y,m1-1,d).getDay();
       if(closed.has(w)) continue;
-      const l=lackOn(key);
-      if(l.day>0||l.night>0) shortDays.push({d:d, key:key});
+      if(anyLack(key)) shortDays.push({d:d, key:key});
     }
   }
 
@@ -695,7 +785,6 @@ function renderMonth(){
     box.className='short ok';
     box.innerHTML='<div class="hd">足りない日はありません</div>';
   }else{
-    // 多いときは先頭だけ出す（ここが画面の半分を占めると、肝心のカレンダーが見えなくなる）
     const CAP=6, head=shortDays.slice(0,CAP), rest=shortDays.length-head.length;
     box.className='short';
     box.innerHTML='<div class="hd">人手が足りない日が '+shortDays.length+'日 あります</div><div class="chips"></div>'+
@@ -707,25 +796,40 @@ function renderMonth(){
     });
   }
 
+  /* カレンダー */
   const cal=document.getElementById('cal'); cal.innerHTML='';
   for(let i=0;i<lead;i++){ const e=document.createElement('div'); e.className='cell blank'; cal.appendChild(e); }
   for(let d=1;d<=last;d++){
     const key=ymd(y,m1,d), w=new Date(y,m1-1,d).getDay(), rest=closed.has(w);
-    const s2=slotsOn(key), l=lackOn(key);
-    const isShort = anySubmitted && !rest && (l.day>0||l.night>0);
+    const l=lackOn(key), isShort = anySubmitted && !rest && anyLack(key);
     const e=document.createElement('div');
     e.className='cell s'+w+(rest?' rest':'')+(isShort?' short':'')+(key===shop.today?' today':'');
     let inner='<div class="dn">'+d+'</div>';
     if(rest) inner+='<div class="num">休</div>';
     else if(isShort){
-      const parts=[]; if(l.day>0) parts.push('昼 −'+l.day); if(l.night>0) parts.push('夜 −'+l.night);
+      const parts=slots().filter(s=>l[s.k]>0).map(s=>esc(s.label)+' −'+l[s.k]);
       inner+='<div class="lack">'+parts.join('<br>')+'</div>';
     }else{
-      inner+='<div class="num">'+s2.all.length+'人</div>';
+      inner+='<div class="num">'+peopleCount(avail[key])+'人</div>';
     }
     e.innerHTML=inner;
     e.addEventListener('click',()=>openDay(key));
     cal.appendChild(e);
+  }
+
+  /* ⑥ 公開 */
+  const pb=document.getElementById('pubBox'); pb.innerHTML='';
+  const assignN=(cur.assign||[]).length;
+  if(assignN || cur.published){
+    const bar=document.createElement('div');
+    bar.className='pubbar'+(cur.published?' on':'');
+    bar.innerHTML='<span>'+(cur.published
+      ? '決まったシフトは、スタッフの画面に出ています。'
+      : 'いま '+assignN+'つ決まっています。知らせるまでスタッフには見えません。')+'</span>';
+    const b=document.createElement('button');
+    b.textContent=cur.published?'知らせを取り消す':'みんなに知らせる';
+    b.addEventListener('click',()=>doPublish(!cur.published));
+    bar.appendChild(b); pb.appendChild(bar);
   }
 
   document.getElementById('hint1').textContent = anySubmitted
@@ -733,45 +837,115 @@ function renderMonth(){
     : '日をタップすると、その日に入れる人が出ます。ほしい人数を下回ると赤くなります（人数は「設定」で決めます）。';
 }
 
-/* ===== 日の詳細／代理入力／この日の必要人数 ===== */
+async function doPublish(on){
+  if(on && !confirm('決まったシフトを、スタッフ全員の画面に出します。よろしいですか？')) return;
+  try{ await arpc('kibo_admin_publish',{p_month:month,p_on:on});
+       cur.published=on; renderMonth(); toast(on?'みんなに知らせました':'取り消しました'); }
+  catch(e){ toast('できませんでした'); }
+}
+
+/* ===== シート ===== */
 const sheet=document.getElementById('sheet'), backdrop=document.getElementById('backdrop');
-let shDate=null, fillSid=null, busy=false;
+let shDate=null, fillSid=null, fillState={}, busy=false;
 
 function showMode(m){
-  document.getElementById('mDay').hidden  = (m!=='day');
-  document.getElementById('mFill').hidden = (m!=='fill');
-  document.getElementById('mNeed').hidden = (m!=='need');
+  ['mDay','mFill','mNeed','mReq'].forEach(id=>{ document.getElementById(id).hidden = (id!==m); });
   sheet.scrollTop=0;
 }
 function closeSheet(){ backdrop.classList.remove('show'); sheet.classList.remove('show'); }
 backdrop.addEventListener('click',closeSheet);
 document.getElementById('shClose').addEventListener('click',closeSheet);
+document.getElementById('reqClose').addEventListener('click',closeSheet);
 
-function slotHtml(label, f, t, list, need){
-  const lack=Math.max(0, need-list.length);
-  let h='<div class="slot"><div class="sh"><b>'+label+'</b>'+
-        '<span class="tm">'+m2hm(f)+'〜'+m2hm(t)+'</span>'+
-        '<span class="cnt'+(lack?' lack':'')+'">'+list.length+' / '+need+'人'+(lack?'（あと'+lack+'人）':'')+'</span></div>';
+/* --- その日：出ている希望 --- */
+function slotKiboHtml(s){
+  const list=peopleOn(shDate,s.k), need=needOf(shDate,s.k), ok=list.filter(p=>p.mark==='o').length;
+  const lack=Math.max(0,need-ok), maybe=list.length-ok;
+  let h='<div class="slot"><div class="sh"><b>'+esc(s.label)+'</b>'+
+        '<span class="tm">'+m2hm(s.from)+'〜'+m2hm(s.to)+'</span>'+
+        '<span class="cnt'+(lack?' lack':'')+'">'+ok+' / '+need+'人'+
+        (maybe?'（＋△'+maybe+'）':'')+(lack?'（あと'+lack+'人）':'')+'</span></div>';
   if(!list.length) h+='<div class="who"><div class="none">まだ誰もいません</div></div>';
-  else h+='<div class="who">'+list.map(p=>'<div class="p"><b>'+esc(p.name)+'</b><span>'+
-      m2hm(p.from)+'〜'+m2hm(p.to)+'</span></div>').join('')+'</div>';
+  else h+='<div class="who">'+list.map(p=>'<div class="p"><b>'+esc(p.name)+'</b>'+
+      (p.mark==='t'?'<span class="mk">行けたら</span>':'')+
+      '<span>'+m2hm(p.from)+'〜'+m2hm(p.to)+'</span></div>').join('')+'</div>';
   return h+'</div>';
 }
+
+/* --- その日：シフトを決める --- */
+function renderKime(){
+  const box=document.getElementById('slots'); box.innerHTML='';
+  slots().forEach(s=>{
+    const list=peopleOn(shDate,s.k), need=needOf(shDate,s.k);
+    const got=(assign[shDate]||{})[s.k]||{};
+    const chosen=Object.keys(got).length;
+    const wrap=document.createElement('div'); wrap.className='slot';
+    wrap.innerHTML='<div class="sh"><b>'+esc(s.label)+'</b>'+
+      '<span class="tm">'+m2hm(s.from)+'〜'+m2hm(s.to)+'</span>'+
+      '<span class="cnt'+(chosen<need?' lack':'')+'">決定 '+chosen+' / '+need+'人</span></div>';
+    const who=document.createElement('div'); who.className='who';
+    if(!list.length){
+      who.innerHTML='<div class="none">希望が出ていません（「代わりに入れる」から入れられます）</div>';
+    }else{
+      list.forEach(p=>{
+        const on=!!got[p.id];
+        const b=document.createElement('button');
+        b.className='p pick'+(on?' on':'');
+        b.innerHTML='<span class="ck">'+(on?'✓':'')+'</span><b>'+esc(p.name)+'</b>'+
+          (p.mark==='t'?'<span class="mk">行けたら</span>':'')+
+          '<span>'+m2hm(on?got[p.id].from:p.from)+'〜'+m2hm(on?got[p.id].to:p.to)+'</span>';
+        b.addEventListener('click',()=>toggleAssign(s.k,p.id,!on));
+        who.appendChild(b);
+      });
+    }
+    wrap.appendChild(who);
+    const okList=list.filter(p=>p.mark==='o');
+    if(okList.length && okList.some(p=>!got[p.id])){
+      const all=document.createElement('button'); all.className='allbtn';
+      all.textContent='希望どおり、○の'+okList.length+'人を全員入れる';
+      all.addEventListener('click',()=>assignAuto(s.k));
+      wrap.appendChild(all);
+    }
+    box.appendChild(wrap);
+  });
+}
+async function toggleAssign(k,sid,on){
+  if(busy) return; busy=true;
+  try{
+    await arpc('kibo_admin_assign',{p_date:shDate,p_slot:k,p_staff:sid,p_on:on});
+    await loadMonth(); renderKime();
+  }catch(e){ toast('できませんでした'); }
+  finally{ busy=false; }
+}
+async function assignAuto(k){
+  if(busy) return; busy=true;
+  try{
+    const r=await arpc('kibo_admin_assign_auto',{p_date:shDate,p_slot:k});
+    await loadMonth(); renderKime(); toast('入れました');
+  }catch(e){ toast('できませんでした'); }
+  finally{ busy=false; }
+}
+
 function openDay(key){
   shDate=key;
   const w=wdayOf(key), rest=(shop.closed_wdays||[]).indexOf(w)>=0;
-  const n=needOf(key), ov=!!dayNeed[key], s2=slotsOn(key);
+  const ov=!!dayNeed[key];
   document.getElementById('shTitle').textContent=fmtDateJP(key)+'（'+WD[w]+'）';
   document.getElementById('shSub').textContent=
-    (rest?'定休日　':'')+'ほしい人数　昼 '+n.day+'人・夜 '+n.night+'人'+(ov?'（この日だけの設定）':'');
-  document.getElementById('slots').innerHTML =
-      slotHtml('昼', shop.day_from,   shop.day_to,   s2.day,   n.day)
-    + slotHtml('夜', shop.night_from, shop.night_to, s2.night, n.night);
-  showMode('day');
+    (rest?'定休日　':'')+'ほしい人数　'+slots().map(s=>s.label+' '+needOf(key,s.k)+'人').join('・')
+    +(ov?'（この日だけの設定）':'');
+  [...document.getElementById('modeSeg').children].forEach(b=>b.classList.toggle('on', b.dataset.m===dayMode));
+  document.getElementById('dayActs').hidden=(dayMode==='kime');
+  if(dayMode==='kime') renderKime();
+  else document.getElementById('slots').innerHTML=slots().map(slotKiboHtml).join('');
+  showMode('mDay');
   backdrop.classList.add('show'); sheet.classList.add('show');
 }
+document.getElementById('modeSeg').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return; dayMode=b.dataset.m; openDay(shDate);
+});
 
-/* --- 代わりに入れる --- */
+/* --- 代わりに入れる（枠ごと） --- */
 document.getElementById('actFill').addEventListener('click',()=>{
   const w=wdayOf(shDate);
   document.getElementById('fillTitle').textContent=fmtDateJP(shDate)+'（'+WD[w]+'）';
@@ -781,121 +955,200 @@ document.getElementById('actFill').addEventListener('click',()=>{
   // まだ出していない人を上に（頼む相手を探す画面なので）
   staffList.slice().sort((a,b)=>(m[a.id]?1:0)-(m[b.id]?1:0)).forEach(s2=>{
     const got=m[s2.id], b=document.createElement('button');
-    b.innerHTML=esc(s2.name)+'<span class="sub2">'+(got? m2hm(got.from)+'〜'+m2hm(got.to):'出ていません')+'</span>';
+    const txt=got?slots().filter(s=>got[s.k]).map(s=>s.label).join('・'):'出ていません';
+    b.innerHTML=esc(s2.name)+'<span class="sub2">'+txt+'</span>';
     b.addEventListener('click',()=>pickFill(s2.id));
     list.appendChild(b);
   });
   document.getElementById('fillTime').hidden=true;
-  showMode('fill');
+  showMode('mFill');
 });
 function pickFill(sid){
   fillSid=sid;
-  const s2=staffList.find(x=>x.id===sid), got=(avail[shDate]||{})[sid];
-  document.getElementById('fillSub').textContent=(s2?s2.name:'')+'さんの時間';
+  const s2=staffList.find(x=>x.id===sid), got=(avail[shDate]||{})[sid]||{};
+  document.getElementById('fillSub').textContent=(s2?s2.name:'')+'さんの希望';
   document.getElementById('fillList').hidden=true;
   document.getElementById('fillTime').hidden=false;
-  const pv=document.getElementById('shPresets'); pv.innerHTML='';
-  (shop.presets||[]).forEach(p=>{
-    const b=document.createElement('button'); b.textContent=p.label;
-    b.addEventListener('click',()=>{ setTimes(p.from,p.to); markPreset(); }); pv.appendChild(b);
+  fillState={};
+  slots().forEach(s=>{
+    const g=got[s.k];
+    fillState[s.k]= g ? {on:true, mark:g.mark, from:g.from, to:g.to, edit:false}
+                      : {on:false, mark:'o', from:s.from, to:s.to, edit:false};
   });
-  if(got) setTimes(got.from,got.to);
-  else{ const p=(shop.presets||[])[0]; setTimes(p?p.from:shop.open_from, p?p.to:shop.open_to); }
-  markPreset();
-  document.getElementById('shDel').hidden=!got;
+  renderFillSlots();
+}
+function renderFillSlots(){
+  const box=document.getElementById('fillSlots'); box.innerHTML='';
+  slots().forEach(s=>{
+    const st=fillState[s.k];
+    const row=document.createElement('div'); row.className='slot';
+    const top=document.createElement('div'); top.className='sh';
+    top.innerHTML='<b>'+esc(s.label)+'</b>';
+    const tb=document.createElement('button');
+    tb.className='cnt'; tb.style.cssText='margin-left:auto;background:none;border:none;font-family:inherit;min-height:44px;cursor:pointer;color:var(--accent-2)';
+    tb.textContent=st.on?(m2hm(st.from)+'〜'+m2hm(st.to)+' ›'):'—';
+    tb.addEventListener('click',()=>{ if(!st.on) return; st.edit=!st.edit; renderFillSlots(); });
+    top.appendChild(tb); row.appendChild(top);
+
+    const seg=document.createElement('div'); seg.className='modeseg'; seg.style.margin='0';
+    [['o','入れます'],['t','行けたら'],['x','入れない']].forEach(([v,label])=>{
+      const b=document.createElement('button'); b.textContent=label;
+      const on=(v==='x')?!st.on:(st.on&&st.mark===v);
+      b.className=on?'on':'';
+      b.addEventListener('click',()=>{
+        if(v==='x'){ st.on=false; st.edit=false; } else { st.on=true; st.mark=v; }
+        renderFillSlots();
+      });
+      seg.appendChild(b);
+    });
+    row.appendChild(seg);
+
+    if(st.on && st.edit){
+      const t=document.createElement('div'); t.className='times'; t.style.marginTop='10px';
+      const f=document.createElement('input'); f.type='time'; f.step='900'; f.value=m2hm(st.from); f.setAttribute('aria-label',s.label+' はじまり');
+      const sp=document.createElement('span'); sp.textContent='〜';
+      const g=document.createElement('input'); g.type='time'; g.step='900'; g.value=m2hm(st.to); g.setAttribute('aria-label',s.label+' おわり');
+      f.addEventListener('change',()=>{ const v=hm2m(f.value); if(v!=null) st.from=v; });
+      g.addEventListener('change',()=>{ const v=hm2m(g.value); if(v!=null) st.to=v; });
+      t.appendChild(f); t.appendChild(sp); t.appendChild(g);
+      row.appendChild(t);
+    }
+    box.appendChild(row);
+  });
 }
 document.getElementById('fillBack').addEventListener('click',()=>openDay(shDate));
 document.getElementById('fillCancel').addEventListener('click',()=>openDay(shDate));
-function setTimes(a,b){ document.getElementById('shFrom').value=m2hm(a); document.getElementById('shTo').value=m2hm(b); }
-function markPreset(){
-  const a=hm2m(document.getElementById('shFrom').value), b=hm2m(document.getElementById('shTo').value);
-  [...document.getElementById('shPresets').children].forEach((btn,i)=>{
-    const p=(shop.presets||[])[i]; btn.classList.toggle('on', !!p && p.from===a && p.to===b);
-  });
-}
-document.getElementById('shFrom').addEventListener('change',markPreset);
-document.getElementById('shTo').addEventListener('change',markPreset);
 
 document.getElementById('shSave').addEventListener('click',async()=>{
   if(busy) return;
-  const a=hm2m(document.getElementById('shFrom').value), b=hm2m(document.getElementById('shTo').value);
-  if(a==null||b==null){ toast('時間を入れてください'); return; }
-  if(b<=a){ toast('おわりが、はじまりより前になっています'); return; }
+  const arr=[]; let bad=null;
+  slots().forEach(s=>{
+    const st=fillState[s.k]; if(!st.on) return;
+    if(st.to<=st.from){ bad=s.label; return; }
+    arr.push({k:s.k,f:st.from,t:st.to,mark:st.mark});
+  });
+  if(bad){ toast(bad+'のおわりが、はじまりより前になっています'); return; }
   busy=true;
   try{
-    await arpc('kibo_admin_set',{p_staff:fillSid,p_date:shDate,p_from:a,p_to:b});
-    (avail[shDate]=avail[shDate]||{})[fillSid]={from:a,to:b};
-    cur.avail=cur.avail.filter(x=>!(x.staff_id===fillSid&&x.d===shDate)).concat([{staff_id:fillSid,d:shDate,from:a,to:b}]);
-    renderMonth(); openDay(shDate); toast('入れました');
+    await arpc('kibo_admin_set',{p_staff:fillSid,p_date:shDate,p_slots:arr});
+    await loadMonth(); openDay(shDate); toast(arr.length?'入れました':'消しました');
   }catch(e){ toast('保存できませんでした'); }
   finally{ busy=false; }
 });
-document.getElementById('shDel').addEventListener('click',async()=>{
-  if(busy) return; busy=true;
-  try{
-    await arpc('kibo_admin_clear',{p_staff:fillSid,p_date:shDate});
-    if(avail[shDate]) delete avail[shDate][fillSid];
-    cur.avail=cur.avail.filter(x=>!(x.staff_id===fillSid&&x.d===shDate));
-    renderMonth(); openDay(shDate); toast('消しました');
-  }catch(e){ toast('消せませんでした'); }
-  finally{ busy=false; }
-});
 
-/* --- この日の必要人数 --- */
+/* --- この日の必要人数（枠ごと） --- */
 document.getElementById('actNeed').addEventListener('click',()=>{
-  const w=wdayOf(shDate), n=needOf(shDate);
+  const w=wdayOf(shDate);
   document.getElementById('needTitle').textContent=fmtDateJP(shDate)+'（'+WD[w]+'）';
-  document.getElementById('needDay').value=n.day;
-  document.getElementById('needNight').value=n.night;
-  document.getElementById('needDayTm').textContent=m2hm(shop.day_from)+'〜'+m2hm(shop.day_to);
-  document.getElementById('needNightTm').textContent=m2hm(shop.night_from)+'〜'+m2hm(shop.night_to);
+  const box=document.getElementById('needRows'); box.innerHTML='';
+  slots().forEach(s=>{
+    const row=document.createElement('div'); row.className='needrow';
+    row.innerHTML='<label>'+esc(s.label)+'</label><span class="tm2">'+m2hm(s.from)+'〜'+m2hm(s.to)+'</span>';
+    const i=document.createElement('input');
+    i.type='number'; i.inputMode='numeric'; i.min='0'; i.max='99';
+    i.value=needOf(shDate,s.k); i.dataset.k=s.k; i.setAttribute('aria-label',s.label+'にほしい人数');
+    row.appendChild(i); box.appendChild(row);
+  });
   document.getElementById('needReset').hidden=!dayNeed[shDate];
-  showMode('need');
+  showMode('mNeed');
 });
 document.getElementById('needBack').addEventListener('click',()=>openDay(shDate));
 document.getElementById('needCancel').addEventListener('click',()=>openDay(shDate));
 document.getElementById('needSave').addEventListener('click',async()=>{
   if(busy) return;
-  const a=parseInt(document.getElementById('needDay').value,10),
-        b=parseInt(document.getElementById('needNight').value,10);
-  if(isNaN(a)||isNaN(b)||a<0||b<0||a>99||b>99){ toast('0〜99の数で入れてください'); return; }
+  const arr=[]; let bad=false;
+  [...document.querySelectorAll('#needRows input')].forEach(i=>{
+    const v=parseInt(i.value,10);
+    if(isNaN(v)||v<0||v>99){ bad=true; return; }
+    arr.push({k:i.dataset.k, need:v});
+  });
+  if(bad){ toast('0〜99の数で入れてください'); return; }
   busy=true;
-  try{ await arpc('kibo_admin_set_day_need',{p_date:shDate,p_day:a,p_night:b});
-       dayNeed[shDate]={day:a,night:b}; renderMonth(); openDay(shDate); toast('この日の人数を変えました'); }
+  try{ await arpc('kibo_admin_set_day_need',{p_date:shDate,p_needs:arr});
+       await loadMonth(); openDay(shDate); toast('この日の人数を変えました'); }
   catch(e){ toast('保存できませんでした'); }
   finally{ busy=false; }
 });
 document.getElementById('needReset').addEventListener('click',async()=>{
   if(busy) return; busy=true;
   try{ await arpc('kibo_admin_clear_day_need',{p_date:shDate});
-       delete dayNeed[shDate]; renderMonth(); openDay(shDate); toast('ふだんの人数に戻しました'); }
+       await loadMonth(); openDay(shDate); toast('ふだんの人数に戻しました'); }
   catch(e){ toast('戻せませんでした'); }
   finally{ busy=false; }
 });
 
-/* ===== スタッフ ===== */
-async function loadStaff(){
-  try{ staffList=await arpc('kibo_admin_staff'); }
-  catch(e){ toast('読み込みに失敗しました'); return; }
-  renderStaff();
+/* --- ⑤ お願い --- */
+function openReqs(){
+  const box=document.getElementById('reqList'); box.innerHTML='';
+  (cur.requests||[]).forEach(r=>{
+    const el=document.createElement('div'); el.className='reqitem';
+    el.innerHTML='<div class="rh">'+esc(r.name)+'さん</div>'+
+      '<div class="rd">'+fmtDateJP(r.d)+'（'+WD[wdayOf(r.d)]+'）の'+esc(slotOf(r.k)?slotOf(r.k).label:r.k)+'　'+
+      (r.kind==='drop'?'行けなくなりました':'ここ、入れます')+
+      (r.note?'<br>'+esc(r.note):'')+'</div>';
+    const a=document.createElement('div'); a.className='ra';
+    const ok=document.createElement('button'); ok.className='btn'; ok.textContent='受け入れる';
+    ok.addEventListener('click',()=>resolveReq(r.id,'apply'));
+    const ng=document.createElement('button'); ng.className='btn sub'; ng.textContent='見送る';
+    ng.addEventListener('click',()=>resolveReq(r.id,'dismiss'));
+    a.appendChild(ok); a.appendChild(ng); el.appendChild(a);
+    box.appendChild(el);
+  });
+  if(!(cur.requests||[]).length) box.innerHTML='<div class="empty">お願いはありません</div>';
+  showMode('mReq');
+  backdrop.classList.add('show'); sheet.classList.add('show');
 }
+async function resolveReq(id,action){
+  if(busy) return; busy=true;
+  try{
+    await arpc('kibo_admin_request',{p_id:id,p_action:action});
+    await loadMonth();
+    if((cur.requests||[]).length) openReqs(); else { closeSheet(); }
+    toast(action==='apply'?'希望に入れました':'見送りました');
+  }catch(e){ toast('できませんでした'); }
+  finally{ busy=false; }
+}
+
+/* ===== スタッフ ===== */
 function staffUrl(code){ return STAFF_URL+'?c='+code; }
 function inviteText(s2){
   const {y,m1}=parseMonth(shop.open_month);
   return s2.name+'さん\n'+shop.name+'のシフト希望は、こちらから出してください。\n\n'+
     staffUrl(s2.code)+'\n\n'+
     '・'+y+'年'+m1+'月分をお願いします\n'+
-    '・働ける日をタップして、時間を入れるだけです\n'+
+    '・働ける日をタップして、昼と夜それぞれを選ぶだけです\n'+
     '・あとから何度でも直せます\n'+
     '・合言葉は '+s2.code+' です（リンクが開かないときに使ってください）';
 }
+function remindText(list){
+  const {y,m1}=parseMonth(cur.month);
+  return 'おつかれさまです。\n'+y+'年'+m1+'月分のシフト希望を、'+fmtDateJP(cur.deadline)+'までにお願いします。\n\n'+
+    'まだの方：'+list.map(s=>s.name+'さん').join('、')+'\n\n'+
+    'それぞれの専用URLからお願いします。';
+}
 function renderStaff(){
+  const hd=document.getElementById('staffHd'); hd.innerHTML='';
   const box=document.getElementById('staffBox');
   if(!staffList.length){ box.innerHTML='<div class="empty">まだ誰も登録されていません</div>'; return; }
+
+  const yet=staffList.filter(s2=>s2.active && submitState(s2)!=='done');
+  const cnt=document.createElement('div'); cnt.className='cnt';
+  cnt.textContent=cur? (staffList.filter(s=>s.done).length+' / '+staffList.filter(s=>s.active).length+'人が出し終わり') : '';
+  hd.appendChild(cnt);
+  if(yet.length){
+    const b=document.createElement('button'); b.className='btn sub';
+    b.textContent='まだの'+yet.length+'人に送る文をコピー';
+    b.addEventListener('click',async()=>{ toast(await copyText(remindText(yet))?'コピーしました':'コピーできませんでした'); });
+    hd.appendChild(b);
+  }
+
   box.innerHTML='';
   staffList.forEach(s2=>{
     const el=document.createElement('div'); el.className='staff'+(s2.active?'':' off');
-    el.innerHTML='<div class="nm">'+esc(s2.name)+(s2.active?'':' <span class="muted">（休止中）</span>')+'</div>'+
+    const st=submitState(s2);
+    const stTxt={none:'まだ出していません', part:s2.days+'日 出した（途中）', done:'✓ 出し終わり'}[st];
+    el.innerHTML='<div class="nm">'+esc(s2.name)+(s2.active?'':' <span class="muted">（休止中）</span>')+
+      (s2.active?'<span class="st '+st+'">'+stTxt+'</span>':'')+'</div>'+
       '<div class="cd">合言葉 '+esc(s2.code)+'</div><div class="acts"></div>';
     const acts=el.querySelector('.acts');
     const mk=(label,cls,fn)=>{ const b=document.createElement('button'); b.className='btn sm '+cls; b.textContent=label;
@@ -904,21 +1157,21 @@ function renderStaff(){
     mk('URLだけコピー','sub',async()=>{ toast(await copyText(staffUrl(s2.code))?'コピーしました':'コピーできませんでした'); });
     mk('名前を直す','sub',async()=>{
       const v=prompt('お名前',s2.name); if(v===null) return;
-      try{ await arpc('kibo_admin_update_staff',{p_staff:s2.id,p_name:v,p_active:null}); loadStaff(); toast('直しました'); }
+      try{ await arpc('kibo_admin_update_staff',{p_staff:s2.id,p_name:v,p_active:null}); loadMonth(); toast('直しました'); }
       catch(e){ toast('直せませんでした'); }
     });
     mk(s2.active?'休止する':'再開する','sub',async()=>{
-      try{ await arpc('kibo_admin_update_staff',{p_staff:s2.id,p_name:null,p_active:!s2.active}); loadStaff(); }
+      try{ await arpc('kibo_admin_update_staff',{p_staff:s2.id,p_name:null,p_active:!s2.active}); loadMonth(); }
       catch(e){ toast('変えられませんでした'); }
     });
     mk('合言葉を再発行','sub',async()=>{
       if(!confirm(s2.name+'さんの合言葉を作り直します。\nいまのURLはこの瞬間から開けなくなります。よろしいですか？')) return;
-      try{ await arpc('kibo_admin_reissue',{p_staff:s2.id}); loadStaff(); toast('作り直しました'); }
+      try{ await arpc('kibo_admin_reissue',{p_staff:s2.id}); loadMonth(); toast('作り直しました'); }
       catch(e){ toast('できませんでした'); }
     });
     mk('削除','danger',async()=>{
       if(!confirm(s2.name+'さんを削除します。\nこれまでに出した希望も一緒に消えます。よろしいですか？')) return;
-      try{ await arpc('kibo_admin_delete_staff',{p_staff:s2.id}); loadStaff(); loadMonth(); toast('削除しました'); }
+      try{ await arpc('kibo_admin_delete_staff',{p_staff:s2.id}); loadMonth(); toast('削除しました'); }
       catch(e){ toast('削除できませんでした'); }
     });
     box.appendChild(el);
@@ -929,7 +1182,7 @@ document.getElementById('newName').addEventListener('keydown',e=>{ if(e.key==='E
 async function addStaff(){
   const el=document.getElementById('newName'), v=el.value.trim();
   if(!v){ toast('お名前を入れてください'); return; }
-  try{ await arpc('kibo_admin_add_staff',{p_name:v}); el.value=''; loadStaff(); loadMonth(); toast('追加しました'); }
+  try{ await arpc('kibo_admin_add_staff',{p_name:v}); el.value=''; loadMonth(); toast('追加しました'); }
   catch(e){ toast('追加できませんでした'); }
 }
 
@@ -937,12 +1190,17 @@ async function addStaff(){
 function fillConfig(){
   document.getElementById('cfName').value=shop.name;
   document.getElementById('cfDeadline').value=shop.deadline_day;
-  document.getElementById('cfDayFrom').value=m2hm(shop.day_from);
-  document.getElementById('cfDayTo').value=m2hm(shop.day_to);
-  document.getElementById('cfNightFrom').value=m2hm(shop.night_from);
-  document.getElementById('cfNightTo').value=m2hm(shop.night_to);
-  document.getElementById('cfNeedDay').value=shop.need_day;
-  document.getElementById('cfNeedNight').value=shop.need_night;
+  const box=document.getElementById('cfSlots'); box.innerHTML='';
+  slots().forEach(s=>{
+    const row=document.createElement('div'); row.className='slotcfg'; row.style.marginBottom='10px';
+    row.dataset.k=s.k;
+    row.innerHTML='<span class="lab">'+esc(s.label)+'</span>'+
+      '<input type="time" step="900" class="cf-from" value="'+m2hm(s.from)+'" aria-label="'+esc(s.label)+'のはじまり">'+
+      '<span class="sep">〜</span>'+
+      '<input type="time" step="900" class="cf-to" value="'+m2hm(s.to)+'" aria-label="'+esc(s.label)+'のおわり">'+
+      '<span class="need"><input type="number" class="cf-need" min="0" max="99" inputmode="numeric" value="'+s.need+'" aria-label="'+esc(s.label)+'にほしい人数"><span class="muted">人ほしい</span></span>';
+    box.appendChild(row);
+  });
   const wd=document.getElementById('cfWdays'); wd.innerHTML='';
   const closed=new Set(shop.closed_wdays||[]);
   WD.forEach((w,i)=>{
@@ -961,19 +1219,21 @@ function updateDlHint(){
 document.getElementById('saveCfg').addEventListener('click',async()=>{
   const name=document.getElementById('cfName').value.trim();
   const dd=parseInt(document.getElementById('cfDeadline').value,10);
-  const df=hm2m(document.getElementById('cfDayFrom').value),   dt=hm2m(document.getElementById('cfDayTo').value);
-  const nf=hm2m(document.getElementById('cfNightFrom').value), nt=hm2m(document.getElementById('cfNightTo').value);
-  const nd=parseInt(document.getElementById('cfNeedDay').value,10);
-  const nn=parseInt(document.getElementById('cfNeedNight').value,10);
   if(!name){ toast('お店の名前を入れてください'); return; }
   if(isNaN(dd)||dd<1||dd>31){ toast('締切は1〜31の数で入れてください'); return; }
-  if(df==null||dt==null||dt<=df){ toast('昼の時間帯を見直してください'); return; }
-  if(nf==null||nt==null||nt<=nf){ toast('夜の時間帯を見直してください'); return; }
-  if(isNaN(nd)||isNaN(nn)||nd<0||nn<0||nd>99||nn>99){ toast('ほしい人数は0〜99で入れてください'); return; }
+  const arr=[]; let bad=null;
+  [...document.querySelectorAll('#cfSlots .slotcfg')].forEach((row,i)=>{
+    const k=row.dataset.k, s=slotOf(k);
+    const f=hm2m(row.querySelector('.cf-from').value), t=hm2m(row.querySelector('.cf-to').value);
+    const need=parseInt(row.querySelector('.cf-need').value,10);
+    if(f==null||t==null||t<=f){ bad=s.label+'の時間帯'; return; }
+    if(isNaN(need)||need<0||need>99){ bad=s.label+'のほしい人数'; return; }
+    arr.push({k:k, label:s.label, sort:i+1, f:f, t:t, need:need});
+  });
+  if(bad){ toast(bad+'を見直してください'); return; }
   const closed=[...document.getElementById('cfWdays').children].filter(b=>b.classList.contains('on')).map(b=>+b.dataset.w);
   try{
-    await arpc('kibo_admin_update_shop',{p_name:name, p_deadline_day:dd, p_closed:closed,
-      p_day_from:df, p_day_to:dt, p_night_from:nf, p_night_to:nt, p_need_day:nd, p_need_night:nn});
+    await arpc('kibo_admin_update_shop',{p_name:name, p_deadline_day:dd, p_closed:closed, p_slots:arr});
     shop=await arpc('kibo_admin_login');
     document.getElementById('who').textContent=shop.name+(shop.is_master?'　（マスターキー）':'');
     fillConfig(); loadMonth(); toast('変えました');
