@@ -488,13 +488,15 @@ function osKind(ua, standalone){
 }
 /* 確定シフト → カレンダーに取り込める形（.ics）
    時刻は「浮動時間」で書く＝端末の時間帯でそのまま読まれる（日本の端末ならこれが正しい） */
-function icsText(shopName, rows, slotLabel, stamp){
+function icsText(shopName, rows, slotLabel, stamp, uid){
   const esc2=t=>String(t).replace(/([,;\\])/g,'\\$1');
   const dt=(d,min)=>d.replace(/-/g,'')+'T'+pad2(Math.floor(min/60))+pad2(min%60)+'00';
   const out=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//tsumiki//tsumiki-senya//JA','CALSCALE:GREGORIAN'];
-  rows.forEach((r,i)=>{
+  rows.forEach(function(r){
     out.push('BEGIN:VEVENT',
-      'UID:'+r.d.replace(/-/g,'')+'-'+r.k+'-'+i+'@tsumiki-senya',
+      // ⚠️ 並び順の番号を混ぜると、押し直したとき別の予定として増える。
+      // 日付・枠・本人だけで決まる形にして、カレンダー側に「同じ予定」と分からせる
+      'UID:'+r.d.replace(/-/g,'')+'-'+r.k+'-'+uid+'@tsumiki-senya',
       'DTSTAMP:'+stamp,
       'DTSTART:'+dt(r.d,r.from),
       'DTEND:'+dt(r.d,r.to),
@@ -503,6 +505,12 @@ function icsText(shopName, rows, slotLabel, stamp){
   });
   out.push('END:VCALENDAR');
   return out.join('\r\n');
+}
+
+/* "2026-09-28 14:30" → "9月28日 14:30"（頭の0を落とす） */
+function fmtStamp(s){
+  const m=/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}:\d{2})/.exec(String(s||''));
+  return m ? (+m[2])+'月'+(+m[3])+'日 '+m[4] : String(s||'');
 }
 
 /* 希望の配列 → 日付ごと・枠ごとの索引 */
@@ -578,7 +586,17 @@ async function doLogin(c){
   if(v.length<4){ err.textContent='合言葉を入れてください'; return; }
   try{
     const info=await rpc('kibo_staff_login',{p_code:v});
-    if(!info){ err.textContent='その合言葉は見つかりません。お店にご確認ください'; return; }
+    if(!info){
+      // ⚠️ 合言葉を作り直されると、端末に残った古いものでは二度と入れない。
+      //    消しておかないと、開くたびに同じエラーが出続けて理由が分からない。
+      if(v===localStorage.getItem(LS_CODE)){
+        localStorage.removeItem(LS_CODE);
+        err.textContent='この合言葉は使えなくなりました。お店から新しいURLを受け取ってください。';
+      }else{
+        err.textContent='その合言葉は見つかりません。お店にご確認ください';
+      }
+      return;
+    }
     code=v; me=info; localStorage.setItem(LS_CODE,v);
     history.replaceState(null,'',location.pathname);
     enter();
@@ -629,6 +647,7 @@ async function loadMonth(){
   try{ const r=await rpc('kibo_staff_month',{p_code:code,p_month:month});
        if(s!==seq) return; cur=r; }
   catch(e){ toast('読み込みに失敗しました'); return; }
+  if(cur.today) me.today=cur.today;   // 開きっぱなしでも「今日」がずれないように
   byDate=indexByDate(cur.avail);
   byReq=indexReq(cur.requests);
   byAssign=indexByDate(cur.assign);
@@ -724,7 +743,10 @@ function renderList(){
   if(showAssign && (cur.assign||[]).length){
     or2.innerHTML='<div class="outrow">'
       +'<button class="main" id="icsBtn">カレンダーに追加</button>'
-      +'<button id="cpBtn">コピー</button></div>';
+      +'<button id="cpBtn">コピー</button></div>'
+      // 知らせたあとにお店が直すと黙って変わる。いつのものかが分かれば気づける
+      +(cur.assign_updated?'<p class="note muted" style="margin:-6px 0 12px">最終更新　'
+        +esc(fmtStamp(cur.assign_updated))+'</p>':'');
     document.getElementById('icsBtn').addEventListener('click',saveIcs);
     document.getElementById('cpBtn').addEventListener('click',copyAssign);
   }
@@ -760,7 +782,7 @@ function saveIcs(){
   const rows=assignRowsSorted();
   if(!rows.length){ toast('決まったシフトがありません'); return; }
   const stamp=new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
-  const text=icsText(me.shop_name, rows, slotLabel, stamp);
+  const text=icsText(me.shop_name, rows, slotLabel, stamp, me.staff_id);
   try{
     const blob=new Blob([text],{type:'text/calendar;charset=utf-8'});
     const url=URL.createObjectURL(blob);
@@ -919,6 +941,13 @@ function renderSlots(){
     });
     row.appendChild(seg);
 
+    if(st.on && !(st.from < s.to && s.from < st.to)){
+      const wn=document.createElement('p'); wn.className='note';
+      wn.style.cssText='margin:8px 0 0;color:var(--warn);font-weight:700';
+      wn.textContent='⚠ '+s.label+'の時間帯（'+m2hm(s.from)+'〜'+m2hm(s.to)+'）と重なっていません。'
+        +'このままでも出せますが、お店には「'+s.label+'に入れる人」として伝わります。';
+      row.appendChild(wn);
+    }
     if(st.on && st.edit){
       const t=document.createElement('div'); t.className='times'; t.style.marginTop='10px';
       const f=document.createElement('input'); f.type='time'; f.step='900'; f.value=m2hm(st.from); f.setAttribute('aria-label',s.label+' はじまり');
@@ -999,6 +1028,23 @@ async function cancelReq(id){
     closeSheet(true); await loadMonth(); toast('取り消しました');
   }catch(e){ toast('取り消せませんでした'); }
 }
+
+/* ===== 画面に戻ってきたら読み直す =====
+   開いたまま日をまたぐと「あと◯日」が嘘になる。
+   店長が代理で入れたぶんも見えないまま、古い画面から上書きしてしまう。 */
+let lastFresh=0, refreshing=false;
+async function refresh(force){
+  if(!code || !me || refreshing) return;
+  const now=Date.now();
+  if(!force && now-lastFresh < 8000) return;
+  if(sheet.classList.contains('show')) return;   // 操作中は触らない
+  refreshing=true;
+  try{ await loadMonth(); lastFresh=Date.now(); }
+  catch(e){ /* 電波が無いときは黙って諦める */ }
+  finally{ refreshing=false; }
+}
+document.addEventListener('visibilitychange',function(){ if(!document.hidden) refresh(); });
+window.addEventListener('focus',function(){ refresh(); });
 
 /* ===== 起動 ===== */
 (function(){

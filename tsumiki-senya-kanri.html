@@ -694,6 +694,12 @@ let toastT; function toast(msg){ const el=document.getElementById('toast'); el.t
   clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),1900); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function slots(){ return shop.slots||[]; }
+/* staffList は「休止した人も含む全員」。数える所・選ばせる所では active だけを使う。
+   ⚠️ 確定シフトに残っている休止者は、表にも決める画面にも出さないと外せなくなる。 */
+function activeStaff(){ return staffList.filter(s=>s.active); }
+function staffById(id){ return staffList.find(s=>s.id===id); }
+/* 入れた時間が、その枠の時間帯と少しでも重なっているか */
+function overlapsSlot(st, sl){ return st.from < sl.to && sl.from < st.to; }
 function slotOf(k){ return slots().find(s=>s.k===k); }
 async function copyText(t){
   try{ await navigator.clipboard.writeText(t); return true; }
@@ -814,7 +820,7 @@ function needOf(key,k){
 }
 function peopleOn(key,k){
   const m=avail[key]||{}, out=[];
-  staffList.forEach(s2=>{ const g=m[s2.id]&&m[s2.id][k]; if(g) out.push({id:s2.id,name:s2.name,from:g.from,to:g.to,mark:g.mark}); });
+  activeStaff().forEach(s2=>{ const g=m[s2.id]&&m[s2.id][k]; if(g) out.push({id:s2.id,name:s2.name,from:g.from,to:g.to,mark:g.mark}); });
   // ○ を先に、△ を後に
   return out.sort((a,b)=>(a.mark==='t'?1:0)-(b.mark==='t'?1:0));
 }
@@ -829,12 +835,13 @@ function renderMonth(){
   document.getElementById('mLabel').textContent=y+'年'+m1+'月分';
 
   const past=(shop.today > cur.deadline);
-  const doneN=staffList.filter(s=>s.done).length;
-  const anyN=staffList.filter(s=>s.days>0).length;
+  const act=activeStaff();
+  const doneN=act.filter(s=>s.done).length;
+  const anyN=act.filter(s=>s.days>0).length;
   document.getElementById('stateRow').innerHTML =
     (past ? '<span class="pill closed">締切ずみ（'+fmtDateJP(cur.deadline)+'）</span>'
           : '<span class="pill open">'+fmtDateJP(cur.deadline)+'まで 受付中</span>')
-    + '<span class="pill count">'+anyN+' / '+staffList.length+' 人が提出</span>'
+    + '<span class="pill count">'+anyN+' / '+act.length+' 人が提出</span>'
     + (doneN?'<span class="pill">'+doneN+'人 出し終わり</span>':'')
     + (cur.published?'<span class="pill open">シフト公開中</span>':'');
 
@@ -856,7 +863,7 @@ function renderMonth(){
 
   const closed=new Set(shop.closed_wdays||[]);
   const last=daysInMonth(y,m1), lead=firstWday(y,m1);
-  const anySubmitted = anyN>0 && staffList.length>0;
+  const anySubmitted = anyN>0 && act.length>0;
 
   /* 足りない日（この画面の主役） */
   const shortDays=[];
@@ -869,7 +876,7 @@ function renderMonth(){
   }
 
   const box=document.getElementById('shortBox');
-  if(!staffList.length){
+  if(!act.length){
     box.className='short';
     box.innerHTML='<div class="hd">スタッフがまだ登録されていません</div>'+
       '<div class="muted" style="margin-top:6px">「スタッフ」から追加してください</div>';
@@ -926,7 +933,7 @@ function fixedMinOf(sid){ const s2=staffList.find(x=>x.id===sid); return s2?(s2.
 
 function renderShiftBox(anySubmitted){
   const box=document.getElementById('shiftBox'); box.innerHTML='';
-  if(!staffList.length) return;
+  if(!activeStaff().length && !(cur.assign||[]).length) return;
   const slotsN=(cur.assign||[]).length;
   const peopleN=new Set((cur.assign||[]).map(a=>a.staff_id)).size;
 
@@ -989,7 +996,8 @@ function assignRows(){
     const byK={};
     slots().forEach(s=>{
       const got=(assign[key]||{})[s.k]||{};
-      byK[s.k]=staffList.filter(x=>got[x.id]).map(x=>({name:x.name,from:got[x.id].from,to:got[x.id].to}));
+      // 休止した人も、確定シフトに残っているなら名前を出す（紙に穴があくのを防ぐ）
+      byK[s.k]=staffList.filter(x=>got[x.id]).map(x=>({name:x.name+(x.active?'':'（休止中）'),from:got[x.id].from,to:got[x.id].to}));
     });
     out.push({d:d, key:key, w:w, rest:closed.has(w), byK:byK});
   }
@@ -1017,9 +1025,10 @@ function openTable(){
   /* C：ひとりずつの合計（偏りを目で見る） */
   const maxMin=Math.max(1, ...staffList.map(s2=>s2.fixed_min||0));
   let t='<thead><tr><th>お名前</th><th style="text-align:right">出る日</th><th style="text-align:right">時間</th><th>　</th></tr></thead><tbody>';
-  staffList.slice().sort((a,b)=>(b.fixed_min||0)-(a.fixed_min||0)).forEach(s2=>{
+  staffList.slice().filter(s2=>s2.active||(s2.fixed_slots||0)>0)
+           .sort((a,b)=>(b.fixed_min||0)-(a.fixed_min||0)).forEach(s2=>{
     const mi=s2.fixed_min||0;
-    t+='<tr><td>'+esc(s2.name)+'</td><td class="n2">'+(s2.fixed_days||0)+'日</td>'+
+    t+='<tr><td>'+esc(s2.name)+(s2.active?'':'<span style="color:var(--ink-soft)">（休止中）</span>')+'</td><td class="n2">'+(s2.fixed_days||0)+'日</td>'+
        '<td class="n2">'+(mi?fmtDur(mi):'—')+'</td>'+
        '<td class="bx"><div class="bar" style="width:'+Math.round(mi/maxMin*100)+'%"></div></td></tr>';
   });
@@ -1113,6 +1122,14 @@ function renderKime(){
   slots().forEach(s=>{
     const list=peopleOn(shDate,s.k), need=needOf(shDate,s.k);
     const got=(assign[shDate]||{})[s.k]||{};
+    // 確定に入っているのに希望の一覧に出てこない人（休止した人など）を足す。
+    // 足さないと、その人を外すことができなくなる。
+    Object.keys(got).forEach(sid=>{
+      if(list.some(p=>p.id===sid)) return;
+      const s3=staffById(sid); if(!s3) return;
+      list.push({id:sid, name:s3.name+(s3.active?'':'（休止中）'),
+                 from:got[sid].from, to:got[sid].to, mark:'o'});
+    });
     const chosen=Object.keys(got).length;
     const wrap=document.createElement('div'); wrap.className='slot';
     wrap.innerHTML='<div class="sh"><b>'+esc(s.label)+'</b>'+
@@ -1206,7 +1223,7 @@ document.getElementById('actFill').addEventListener('click',()=>{
   const m=avail[shDate]||{}, list=document.getElementById('fillList');
   list.innerHTML=''; list.hidden=false;
   // まだ出していない人を上に（頼む相手を探す画面なので）
-  staffList.slice().sort((a,b)=>(m[a.id]?1:0)-(m[b.id]?1:0)).forEach(s2=>{
+  activeStaff().slice().sort((a,b)=>(m[a.id]?1:0)-(m[b.id]?1:0)).forEach(s2=>{
     const got=m[s2.id], b=document.createElement('button');
     const txt=got?slots().filter(s=>got[s.k]).map(s=>s.label).join('・'):'出ていません';
     b.innerHTML=esc(s2.name)+'<span class="sub2">'+txt+'</span>';
@@ -1256,6 +1273,13 @@ function renderFillSlots(){
     });
     row.appendChild(seg);
 
+    if(st.on && !overlapsSlot(st, s)){
+      const wn=document.createElement('p'); wn.className='note';
+      wn.style.cssText='margin:8px 0 0;color:var(--warn);font-weight:700';
+      wn.textContent='⚠ '+s.label+'の時間帯（'+m2hm(s.from)+'〜'+m2hm(s.to)+'）と重なっていません。'
+        +'このままだと「'+s.label+'に1人」と数えられます。';
+      row.appendChild(wn);
+    }
     if(st.on && st.edit){
       const t=document.createElement('div'); t.className='times'; t.style.marginTop='10px';
       const f=document.createElement('input'); f.type='time'; f.step='900'; f.value=m2hm(st.from); f.setAttribute('aria-label',s.label+' はじまり');
@@ -1495,6 +1519,27 @@ document.getElementById('saveCfg').addEventListener('click',async()=>{
     fillConfig(); loadMonth(); toast('変えました');
   }catch(e){ toast('保存できませんでした'); }
 });
+
+/* ===== 画面に戻ってきたら読み直す =====
+   開きっぱなしのままだと「今日」も希望も古いまま。
+   スタッフが直したぶんが見えないと、古い画面から上書きしてしまう。 */
+let lastFresh=0, refreshing=false;
+async function refresh(force){
+  if(!admin || !shopId || refreshing) return;
+  const now=Date.now();
+  if(!force && now-lastFresh < 8000) return;   // 連打・タブ往復で叩きすぎない
+  if(sheet.classList.contains('show')) return; // 操作中は触らない
+  refreshing=true;
+  try{
+    const info=await arpc('kibo_admin_login');
+    if(info && info.mode==='shop'){ shop=info; }
+    await loadMonth();
+    lastFresh=Date.now();
+  }catch(e){ /* 電波が無いときは黙って諦める（次に戻ったときに再挑戦） */ }
+  finally{ refreshing=false; }
+}
+document.addEventListener('visibilitychange',function(){ if(!document.hidden) refresh(); });
+window.addEventListener('focus',function(){ refresh(); });
 
 /* ===== 起動 ===== */
 (function(){ const saved=localStorage.getItem(LS_CODE); if(saved) doLogin(saved); })();
