@@ -711,6 +711,22 @@ async function copyText(t){
   }
 }
 
+/* 開いたままのあいだに、店の合言葉が変わった／店が消えた場合。
+   そのままだと「読み込みに失敗しました」しか出ず、理由が分からない。 */
+function authLost(e){
+  if(String((e&&e.message)||'').indexOf('unauthorized')<0) return false;
+  localStorage.removeItem(LS_CODE); localStorage.removeItem(LS_SHOP);
+  admin=null; shopId=null; shop=null; cur=null;
+  try{ backdrop.classList.remove('show'); sheet.classList.remove('show'); }catch(_){ }
+  document.getElementById('tableView').hidden=true; document.body.style.overflow='';
+  document.getElementById('appView').hidden=true;
+  document.getElementById('loginView').hidden=false;
+  document.getElementById('loginForm').hidden=false;
+  document.getElementById('pickBox').hidden=true;
+  document.getElementById('loginErr').textContent='この合言葉は使えなくなりました。お店にご確認ください。';
+  return true;
+}
+
 (function(){ const t=localStorage.getItem(LS_THEME); if(t) document.documentElement.dataset.theme=t; })();
 document.getElementById('themeBtn').addEventListener('click',()=>{
   const el=document.documentElement;
@@ -806,7 +822,7 @@ let seq=0;
 async function loadMonth(){
   const s=++seq;
   try{ const r=await arpc('kibo_admin_month',{p_month:month}); if(s!==seq) return; cur=r; }
-  catch(e){ toast('読み込みに失敗しました'); return; }
+  catch(e){ if(authLost(e)) return; toast('読み込みに失敗しました'); return; }
   avail=indexAvail(cur.avail); assign=indexAssign(cur.assign);
   dayNeed=indexNeed(cur.dayneeds); staffList=cur.staff||[];
   renderMonth();
@@ -973,16 +989,25 @@ async function assignMonth(){
   busy=true;
   try{ const r=await arpc('kibo_admin_assign_month',{p_month:month});
        await loadMonth(); toast((r&&r.n?r.n:0)+'コマ入れました'); }
-  catch(e){ toast('できませんでした'); }
+  catch(e){ if(!authLost(e)) toast('できませんでした'); }
   finally{ busy=false; }
 }
 async function clearMonth(){
   if(busy) return;
-  if(!confirm('この月に決めたシフトを、全部消します。\n希望は消えません。よろしいですか？')) return;
+  // ⚠️ 知らせている最中に消すと、スタッフの画面に空の「決まったシフト」が残ってしまう。
+  //    サーバー側で知らせも一緒に取り消すので、そのことを先に伝える。
+  const msg = cur.published
+    ? 'この月に決めたシフトを、全部消します。\n\n'
+      +'いまスタッフに知らせている最中なので、知らせも一緒に取り消します。\n'
+      +'みなさんの画面から「決まったシフト」が消え、組み直して知らせるまで出ません。\n\n'
+      +'希望は消えません。よろしいですか？'
+    : 'この月に決めたシフトを、全部消します。\n希望は消えません。よろしいですか？';
+  if(!confirm(msg)) return;
   busy=true;
-  try{ await arpc('kibo_admin_assign_clear_month',{p_month:month});
-       await loadMonth(); toast('やり直せます'); }
-  catch(e){ toast('できませんでした'); }
+  try{ const r=await arpc('kibo_admin_assign_clear_month',{p_month:month});
+       await loadMonth();
+       toast(r&&r.unpublished?'消して、知らせも取り消しました':'やり直せます'); }
+  catch(e){ if(!authLost(e)) toast('できませんでした'); }
   finally{ busy=false; }
 }
 
@@ -1064,7 +1089,7 @@ async function doPublish(on){
   if(on && !confirm('決まったシフトを、スタッフ全員の画面に出します。よろしいですか？')) return;
   try{ await arpc('kibo_admin_publish',{p_month:month,p_on:on});
        cur.published=on; renderMonth(); toast(on?'みんなに知らせました':'取り消しました'); }
-  catch(e){ toast('できませんでした'); }
+  catch(e){ if(!authLost(e)) toast('できませんでした'); }
 }
 
 /* ===== シート ===== */
@@ -1184,7 +1209,7 @@ async function toggleAssign(k,sid,on){
   try{
     await arpc('kibo_admin_assign',{p_date:shDate,p_slot:k,p_staff:sid,p_on:on});
     await loadMonth(); renderKime();
-  }catch(e){ toast('できませんでした'); }
+  }catch(e){ if(!authLost(e)) toast('できませんでした'); }
   finally{ busy=false; }
 }
 async function assignAuto(k){
@@ -1192,7 +1217,7 @@ async function assignAuto(k){
   try{
     const r=await arpc('kibo_admin_assign_auto',{p_date:shDate,p_slot:k});
     await loadMonth(); renderKime(); toast('入れました');
-  }catch(e){ toast('できませんでした'); }
+  }catch(e){ if(!authLost(e)) toast('できませんでした'); }
   finally{ busy=false; }
 }
 
@@ -1309,7 +1334,7 @@ document.getElementById('shSave').addEventListener('click',async()=>{
   try{
     await arpc('kibo_admin_set',{p_staff:fillSid,p_date:shDate,p_slots:arr});
     await loadMonth(); openDay(shDate); toast(arr.length?'入れました':'消しました');
-  }catch(e){ toast('保存できませんでした'); }
+  }catch(e){ if(!authLost(e)) toast('保存できませんでした'); }
   finally{ busy=false; }
 });
 
@@ -1343,14 +1368,14 @@ document.getElementById('needSave').addEventListener('click',async()=>{
   busy=true;
   try{ await arpc('kibo_admin_set_day_need',{p_date:shDate,p_needs:arr});
        await loadMonth(); openDay(shDate); toast('この日の人数を変えました'); }
-  catch(e){ toast('保存できませんでした'); }
+  catch(e){ if(!authLost(e)) toast('保存できませんでした'); }
   finally{ busy=false; }
 });
 document.getElementById('needReset').addEventListener('click',async()=>{
   if(busy) return; busy=true;
   try{ await arpc('kibo_admin_clear_day_need',{p_date:shDate});
        await loadMonth(); openDay(shDate); toast('ふだんの人数に戻しました'); }
-  catch(e){ toast('戻せませんでした'); }
+  catch(e){ if(!authLost(e)) toast('戻せませんでした'); }
   finally{ busy=false; }
 });
 
@@ -1382,7 +1407,7 @@ async function resolveReq(id,action){
     await loadMonth();
     if((cur.requests||[]).length) openReqs(); else { closeSheet(); }
     toast(action==='apply'?'希望に入れました':'見送りました');
-  }catch(e){ toast('できませんでした'); }
+  }catch(e){ if(!authLost(e)) toast('できませんでした'); }
   finally{ busy=false; }
 }
 
@@ -1447,7 +1472,7 @@ function renderStaff(){
     mk('合言葉を再発行','sub',async()=>{
       if(!confirm(s2.name+'さんの合言葉を作り直します。\nいまのURLはこの瞬間から開けなくなります。よろしいですか？')) return;
       try{ await arpc('kibo_admin_reissue',{p_staff:s2.id}); loadMonth(); toast('作り直しました'); }
-      catch(e){ toast('できませんでした'); }
+      catch(e){ if(!authLost(e)) toast('できませんでした'); }
     });
     mk('削除','danger',async()=>{
       if(!confirm(s2.name+'さんを削除します。\nこれまでに出した希望も一緒に消えます。よろしいですか？')) return;
@@ -1517,7 +1542,7 @@ document.getElementById('saveCfg').addEventListener('click',async()=>{
     shop=await arpc('kibo_admin_login');
     document.getElementById('who').textContent=shop.name+(shop.is_master?'　（マスターキー）':'');
     fillConfig(); loadMonth(); toast('変えました');
-  }catch(e){ toast('保存できませんでした'); }
+  }catch(e){ if(!authLost(e)) toast('保存できませんでした'); }
 });
 
 /* ===== 画面に戻ってきたら読み直す =====

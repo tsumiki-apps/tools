@@ -551,6 +551,20 @@ async function copyText(t){
 }
 function slotLabel(k){ const s=slotOf(k); return s?s.label:k; }
 
+/* 開いたままのあいだに、お店が合言葉を作り直した／休止した／削除した場合。
+   そのままだと「読み込みに失敗しました」しか出ず、理由が分からないまま止まる。 */
+function authLost(e){
+  if(String((e&&e.message)||'').indexOf('unauthorized')<0) return false;
+  localStorage.removeItem(LS_CODE);
+  code=null; me=null; cur=null;
+  try{ shOrig=''; backdrop.classList.remove('show'); sheet.classList.remove('show'); }catch(_){ }
+  document.getElementById('appView').hidden=true;
+  document.getElementById('loginView').hidden=false;
+  document.getElementById('loginErr').textContent=
+    'この合言葉は使えなくなりました。お店から新しいURLを受け取ってください。';
+  return true;
+}
+
 /* ===== 表示切替（明るい／暗い） ===== */
 (function(){ const t=localStorage.getItem(LS_THEME); if(t) document.documentElement.dataset.theme=t; })();
 document.getElementById('themeBtn').addEventListener('click',()=>{
@@ -646,7 +660,7 @@ async function loadMonth(){
   const s=++seq;
   try{ const r=await rpc('kibo_staff_month',{p_code:code,p_month:month});
        if(s!==seq) return; cur=r; }
-  catch(e){ toast('読み込みに失敗しました'); return; }
+  catch(e){ if(authLost(e)) return; toast('読み込みに失敗しました'); return; }
   if(cur.today) me.today=cur.today;   // 開きっぱなしでも「今日」がずれないように
   byDate=indexByDate(cur.avail);
   byReq=indexReq(cur.requests);
@@ -843,7 +857,7 @@ function saveUsual(){
     const arr=[];
     Object.keys(usual).forEach(w=>Object.keys(usual[w]).forEach(k=>arr.push({wday:+w,k:k,mark:'o'})));
     try{ await rpc('kibo_staff_usual',{p_code:code,p_usual:arr}); cur.usual=arr; }
-    catch(e){ toast('保存できませんでした'); }
+    catch(e){ if(!authLost(e)) toast('保存できませんでした'); }
   },500);
 }
 async function doFill(){
@@ -851,7 +865,7 @@ async function doFill(){
     const r=await rpc('kibo_staff_fill',{p_code:code,p_month:month});
     toast(r&&r.n?r.n+'つ入れました':'入れるところがありませんでした');
     loadMonth();
-  }catch(e){ toast(String(e.message||'').indexOf('closed')>=0?'締切がすぎています':'埋められませんでした'); }
+  }catch(e){ if(!authLost(e)) toast(String(e.message||'').indexOf('closed')>=0?'締切がすぎています':'埋められませんでした'); }
 }
 
 /* 出し終わりの印 */
@@ -860,7 +874,7 @@ document.getElementById('doneBtn').addEventListener('click',async()=>{
   try{
     await rpc('kibo_staff_submit',{p_code:code,p_month:month,p_on:next});
     cur.submitted=next; render(); toast(next?'お店に伝わりました':'取り消しました');
-  }catch(e){ toast('できませんでした'); }
+  }catch(e){ if(!authLost(e)) toast('できませんでした'); }
 });
 
 /* ===== シート ===== */
@@ -979,7 +993,7 @@ document.getElementById('shSave').addEventListener('click',async()=>{
     closeSheet(true);
     await loadMonth();
     toast(arr.length?'出しました':'この日を取り消しました');
-  }catch(e){ toast(String(e.message||'').indexOf('closed')>=0?'締切がすぎています':'保存できませんでした'); }
+  }catch(e){ if(!authLost(e)) toast(String(e.message||'').indexOf('closed')>=0?'締切がすぎています':'保存できませんでした'); }
   finally{ saving=false; }
 });
 
@@ -1020,13 +1034,13 @@ async function sendReq(d,k,kind){
   try{
     await rpc('kibo_staff_request',{p_code:code,p_date:d,p_slot:k,p_kind:kind,p_note:''});
     closeSheet(true); await loadMonth(); toast('お店に届けました');
-  }catch(e){ toast('送れませんでした'); }
+  }catch(e){ if(!authLost(e)) toast('送れませんでした'); }
 }
 async function cancelReq(id){
   try{
     await rpc('kibo_staff_request_cancel',{p_code:code,p_id:id});
     closeSheet(true); await loadMonth(); toast('取り消しました');
-  }catch(e){ toast('取り消せませんでした'); }
+  }catch(e){ if(!authLost(e)) toast('取り消せませんでした'); }
 }
 
 /* ===== 画面に戻ってきたら読み直す =====
