@@ -192,6 +192,63 @@
     font-size:12px; color:var(--ghost); text-align:center; line-height:2;
   }
 
+  footer .ask{
+    max-width:32em; margin:0 auto 20px; padding:14px 17px; text-align:left;
+    background:var(--control); border:1px solid var(--hair); border-radius:14px;
+    color:var(--ink); font-size:13px; line-height:1.9;
+  }
+  footer .ask .h{font-size:11.5px; font-weight:700; letter-spacing:.12em; color:var(--muted);}
+  footer .ask a{font-weight:700; word-break:break-all;}
+
+
+
+  /* ================= まず、これだけ（最短の成功手順） =================
+     原則1：冒頭で「これは何か」と「最初の1操作」だけを示す。
+     読まずに使う人が、ここだけ見て1回目を成功できる分量にとどめる。 */
+  .quick{
+    margin-top:22px; background:var(--ink); color:var(--paper);
+    border-radius:18px; padding:18px 18px 16px;
+  }
+  .quick h2{font-size:12.5px; font-weight:700; letter-spacing:.14em; opacity:.72;}
+  .quick a{color:var(--paper); text-underline-offset:2px;}
+  .quick .steps{display:grid; gap:11px; margin-top:13px;}
+  .quick .st{display:flex; gap:10px; align-items:flex-start;}
+  .quick .st .no{
+    flex:none; width:22px; height:22px; border-radius:50%;
+    background:var(--paper); color:var(--ink); font-size:12px; font-weight:800;
+    display:flex; align-items:center; justify-content:center; margin-top:3px;
+  }
+  .quick .st p{font-size:14px; line-height:1.7;}
+  .quick .st .sub{display:block; font-size:12px; opacity:.62; margin-top:1px;}
+  .quick .after{
+    margin-top:14px; padding-top:12px; border-top:1px solid rgba(244,242,238,.22);
+    font-size:12.5px; line-height:1.9; opacity:.78;
+  }
+  @media (min-width:640px){ .quick .steps{grid-template-columns:repeat(3,1fr);} }
+
+  /* ================= 大切なこと（先頭に置く注意） =================
+     原則2・8：知らないと困ることだけを3つまで、必ず「理由」を添えて先頭に。 */
+  .headsup{
+    margin-top:14px; background:var(--control); border:1.5px solid var(--hair);
+    border-radius:16px; padding:15px 17px;
+  }
+  .headsup h2{font-size:12.5px; font-weight:700; letter-spacing:.14em; color:var(--muted);}
+  .headsup ul{list-style:none; margin-top:11px; display:grid; gap:10px;}
+  .headsup li{font-size:13.5px; line-height:1.7; padding-left:22px; position:relative;}
+  .headsup li::before{content:"\26A0"; position:absolute; left:0; top:0; color:#94301b; font-weight:700;}
+  .headsup li .why{display:block; font-size:12.5px; color:var(--muted); margin-top:1px;}
+  @media (min-width:900px){ .headsup ul{grid-template-columns:1fr 1fr 1fr; gap:10px 24px;} }
+
+  /* ================= 注意の強さは2段階だけ =================
+     原則9：全部同じ強さだと、何が本当に大事か伝わらない。
+     .must＝守らないと記録が狂う／.tip＝知っていると楽。この2つ以外を増やさない。 */
+  .flag{
+    display:inline-block; font-size:10.5px; font-weight:700; border-radius:999px;
+    padding:1px 8px; margin-right:6px; vertical-align:1px; white-space:nowrap;
+  }
+  .flag.must{background:#F6E2DD; color:#94301B;}
+  .flag.tip{background:#E4E0D8; color:var(--muted);}
+
   /* ================= 横幅を使う ================= */
   @media (min-width:640px){
     .items{grid-template-columns:1fr 1fr;}
@@ -345,6 +402,39 @@
   <p class="lead">出勤・退勤を<strong>タップするだけ</strong>。派遣の勤怠管理表（＝会社に出す提出書類）まで自動でつくれます。アプリは<strong>労働者用</strong>と<strong>管理者用</strong>の2つです。</p>
 </header>
 
+<!-- 原則1：最初の1画面で「最初の1操作」だけ。ここだけ読めば1回目が成功する。 -->
+<section class="quick">
+  <h2>まず、これだけ<span class="who-tag w">労働者</span></h2>
+  <div class="steps">
+    <div class="st"><span class="no">1</span>
+      <p>届いたURLを開いて、<b>打刻コード</b>を入れます
+        <span class="sub">アルファベット6文字。ひとり1つの、自分専用のコードです</span></p></div>
+    <div class="st"><span class="no">2</span>
+      <p>出勤したら、大きい<b>出勤</b>ボタンを1回押します
+        <span class="sub">押した時刻が、その場で記録されます</span></p></div>
+    <div class="st"><span class="no">3</span>
+      <p>帰るときに<b>退勤</b>ボタンを押します
+        <span class="sub">これで、その日の1日ぶんが残ります</span></p></div>
+  </div>
+  <p class="after">
+    まちがえても、あとから直せます。押し忘れた日も入れ直せます（→ <a href="#i11">11 打ち忘れを直す</a>）。<br>
+    管理者の方は「<a href="#g2">はじめの準備</a>」から読んでください。
+  </p>
+</section>
+
+<!-- 原則2・8：知らないと困ることだけ3つ。必ず理由をつける。 -->
+<section class="headsup">
+  <h2>大切なこと（3つだけ）</h2>
+  <ul>
+    <li><b>打刻コードは、人に貸さない・見せない</b>
+      <span class="why">押した人ではなく、コードの持ち主の記録として残ります。他の人の勤務時間が混ざります。</span></li>
+    <li><b>管理者コードは、必ず控える</b>
+      <span class="why">会社の登録は最初の1回だけ。分からなくなると、勤務表を開けなくなります。</span></li>
+    <li><b>月度は21日締め</b>（1日〜末日ではありません）
+      <span class="why">6月度＝5/21〜6/20。1日始まりのつもりで合計を見ると、金額がずれて見えます。</span></li>
+  </ul>
+</section>
+
 <div class="layout">
 
 <details class="toc" id="toc" open>
@@ -462,7 +552,7 @@
       </figure>
       <h3><span class="n">4</span>会社を登録する<span class="who-tag m">管理者</span></h3>
       <p>管理者アプリの「はじめての方」から会社名を登録すると、<strong>管理者コード</strong>が発行されます。</p>
-      <p class="fine">次からはこのコードでログインします。<b>必ず控えてください。</b></p>
+      <p class="caution fine"><span class="flag must">必ず守る</span>次からはこのコードでログインします。<b>必ず控えてください。</b></p>
     </article>
 
     <article class="item" id="i5">
@@ -489,7 +579,7 @@
       </figure>
       <h3><span class="n">6</span>打刻コードを渡す<span class="who-tag m">管理者</span></h3>
       <p>保存すると打刻コードが自動発行されます。LINEや口頭で本人に伝えます。</p>
-      <p class="fine">忘れられても、従業員一覧にいつでも表示されています。</p>
+      <p class="fine"><span class="flag tip">知っておくと楽</span>忘れられても、従業員一覧にいつでも表示されています。</p>
     </article>
 
     <article class="item" id="i7">
@@ -563,7 +653,7 @@
       </figure>
       <h3><span class="n">11</span>打ち忘れを直す<span class="who-tag w">労働者</span></h3>
       <p><kbd>記録</kbd> タブでその日をタップし、時刻を直して保存します。</p>
-      <p class="fine">退勤を押し忘れても、あとから入れられます。管理者側からも直せます。</p>
+      <p class="fine"><span class="flag tip">知っておくと楽</span>退勤を押し忘れても、あとから入れられます。管理者側からも直せます。</p>
     </article>
 
     <article class="item" id="i12">
@@ -794,7 +884,7 @@
       </figure>
       <h3><span class="n">24</span>時間の計算ルール</h3>
       <p>集計はこのルールで自動計算されます。</p>
-      <p class="caution fine"><b>⚠ 年末年始やGWなど会社独自の休みは、自動では休日になりません。</b>自動判定は土日祝だけです。必要なら記録を手で直してください。</p>
+      <p class="caution fine"><span class="flag must">必ず守る</span><b>年末年始やGWなど会社独自の休みは、自動では休日になりません。</b>自動判定は土日祝だけです。必要なら記録を手で直してください。</p>
     </article>
 
     <article class="item nofig" id="i25">
@@ -842,9 +932,15 @@
 </section>
 
 <footer>
+  <div class="ask">
+    <p class="h">それでも解決しないとき</p>
+    <p><b>まず、会社の管理者にご確認ください。</b>打刻コードの再確認、記録の修正、勤務表のことは管理者が対応できます。<br>
+    アプリの不具合や、管理者でも分からないことは
+    <a href="mailto:support.tsumiki@gmail.com">support.tsumiki@gmail.com</a> までご連絡ください。</p>
+  </div>
   打刻アプリ 使い方<br>
   つくったもの：つみき<br>
-  2026年8月3日
+  最終更新：2026年8月25日
 </footer>
 
 </main>
