@@ -364,6 +364,7 @@
   <input id="codeInput" inputmode="latin" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="6" placeholder="ABC123" aria-label="合言葉">
   <button class="btn" id="loginBtn">はいる</button>
   <div class="err" id="loginErr"></div>
+  <button class="btn sub" id="retryBtn" hidden style="margin-top:4px">もう一度ためす</button>
 </section>
 
 <!-- ===== 本体 ===== -->
@@ -438,13 +439,21 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL='https://okbjqtdirrathscctyvx.supabase.co';
 const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rYmpxdGRpcnJhdGhzY2N0eXZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMjI4NTIsImV4cCI6MjA5NTg5ODg1Mn0.T-1AOK6vCD6uGdqrVGXjPui3L6WPSNrnygS-IHyfZ6Y';
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+/* ⚠️ 以前は supabase-js を CDN から読んでいたが、していたのは
+   POST /rest/v1/rpc/<関数名> だけだった。読めないと画面が黙って死ぬ一方で、
+   得ているものが無かったので、外部の部品ごとやめて素の fetch にした。
+   → 外から読むものはフォント以外ゼロ（フォントは無くても既定の書体で読める）。 */
+const RPC_URL=SUPABASE_URL+'/rest/v1/rpc/';
 const LS_CODE='tsumiki_senya_code', LS_THEME='tsumiki_senya_theme', LS_A2HS='tsumiki_senya_a2hs';
 const WD=['日','月','火','水','木','金','土'];
+/* プライベートブラウズなどで localStorage が使えない端末がある。
+   投げられると「つながりませんでした」と誤って出るので、包んでおく。 */
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
 
 /* ===== 純粋関数（テストしやすいように副作用なし） ===== */
 function pad2(n){ return String(n).padStart(2,'0'); }
@@ -534,7 +543,25 @@ function indexUsual(rows){
 let code=null, me=null, month=null, cur=null, byDate={}, byReq={}, byAssign={}, usual={}, tab='kibo';
 
 /* ===== 通信 ===== */
-async function rpc(fn,params){ const {data,error}=await sb.rpc(fn,params); setSync(!error); if(error) throw error; return data; }
+async function rpc(fn,params){
+  let r;
+  try{
+    r=await fetch(RPC_URL+fn,{
+      method:'POST',
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,
+               'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify(params||{})
+    });
+  }catch(e){ setSync(false); throw new Error('network'); }   // 電波が無い・届かない
+  setSync(r.ok);
+  const txt=await r.text();
+  if(!r.ok){
+    let msg=txt;
+    try{ const j=JSON.parse(txt); msg=j.message||txt; }catch(e){}
+    throw new Error(msg||('http '+r.status));               // 'unauthorized' 'closed' がそのまま入る
+  }
+  return txt?JSON.parse(txt):null;
+}
 function setSync(ok){ const d=document.getElementById('syncDot'); d.className='sync-dot '+(ok?'ok':'off'); }
 let toastT; function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
   clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),1900); }
@@ -555,7 +582,7 @@ function slotLabel(k){ const s=slotOf(k); return s?s.label:k; }
    そのままだと「読み込みに失敗しました」しか出ず、理由が分からないまま止まる。 */
 function authLost(e){
   if(String((e&&e.message)||'').indexOf('unauthorized')<0) return false;
-  localStorage.removeItem(LS_CODE);
+  lsDel(LS_CODE);
   code=null; me=null; cur=null;
   try{ shOrig=''; backdrop.classList.remove('show'); sheet.classList.remove('show'); }catch(_){ }
   document.getElementById('appView').hidden=true;
@@ -565,13 +592,28 @@ function authLost(e){
   return true;
 }
 
+/* つながらないときの出しかたを1か所にまとめる。
+   ⚠️ 部品（supabase）が読めない場合は、これまで何も出ずにボタンだけ死んでいた。 */
+function showRetry(msg){
+  document.getElementById('loginView').hidden=false;
+  document.getElementById('appView').hidden=true;
+  document.getElementById('loginErr').textContent=msg;
+  document.getElementById('retryBtn').hidden=false;
+}
+function isOffline(e){
+  const m=String((e&&e.message)||'');
+  return m.indexOf('network')>=0 || m.indexOf('Failed to fetch')>=0
+      || m.indexOf('NetworkError')>=0 || m.indexOf('Load failed')>=0;
+}
+document.getElementById('retryBtn').addEventListener('click',function(){ location.reload(); });
+
 /* ===== 表示切替（明るい／暗い） ===== */
-(function(){ const t=localStorage.getItem(LS_THEME); if(t) document.documentElement.dataset.theme=t; })();
+(function(){ const t=lsGet(LS_THEME); if(t) document.documentElement.dataset.theme=t; })();
 document.getElementById('themeBtn').addEventListener('click',()=>{
   const el=document.documentElement;
   const now=el.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
   const next=now==='dark'?'light':'dark';
-  el.dataset.theme=next; localStorage.setItem(LS_THEME,next);
+  el.dataset.theme=next; lsSet(LS_THEME,next);
 });
 
 /* ===== キーボードが出たときに、入力欄が隠れないようにする ===== */
@@ -603,18 +645,21 @@ async function doLogin(c){
     if(!info){
       // ⚠️ 合言葉を作り直されると、端末に残った古いものでは二度と入れない。
       //    消しておかないと、開くたびに同じエラーが出続けて理由が分からない。
-      if(v===localStorage.getItem(LS_CODE)){
-        localStorage.removeItem(LS_CODE);
+      if(v===lsGet(LS_CODE)){
+        lsDel(LS_CODE);
         err.textContent='この合言葉は使えなくなりました。お店から新しいURLを受け取ってください。';
       }else{
         err.textContent='その合言葉は見つかりません。お店にご確認ください';
       }
       return;
     }
-    code=v; me=info; localStorage.setItem(LS_CODE,v);
+    code=v; me=info; lsSet(LS_CODE,v);
     history.replaceState(null,'',location.pathname);
     enter();
-  }catch(e){ err.textContent='つながりませんでした。電波のよい所で、もう一度お試しください'; }
+  }catch(e){
+    err.textContent='つながりませんでした。電波のよい所で、もう一度お試しください';
+    document.getElementById('retryBtn').hidden=false;
+  }
 }
 function enter(){
   document.getElementById('loginView').hidden=true;
@@ -629,7 +674,7 @@ function enter(){
    思い出す手がかりはホーム画面のアイコンだけなので、一度だけご案内する。 */
 function renderA2hs(){
   const box=document.getElementById('a2hsBox'); box.innerHTML='';
-  if(localStorage.getItem(LS_A2HS)) return;
+  if(lsGet(LS_A2HS)) return;
   let standalone=false;
   try{ standalone = window.navigator.standalone===true || matchMedia('(display-mode: standalone)').matches; }catch(e){}
   const kind=osKind(navigator.userAgent, standalone);
@@ -643,12 +688,12 @@ function renderA2hs(){
     +'アイコンが目に入ることが、思い出す手がかりになります。<br>'+how+'</div>'
     +'<button id="a2hsOk">わかりました</button></div>';
   document.getElementById('a2hsOk').addEventListener('click',function(){
-    localStorage.setItem(LS_A2HS,'1'); renderA2hs();
+    lsSet(LS_A2HS,'1'); renderA2hs();
   });
 }
 document.getElementById('logoutBtn').addEventListener('click',()=>{
   if(!confirm('この端末からログアウトします。もう一度入るには合言葉が要ります。')) return;
-  localStorage.removeItem(LS_CODE); location.replace(location.pathname);
+  lsDel(LS_CODE); location.replace(location.pathname);
 });
 
 /* ===== 月の読み込み ===== */
@@ -660,7 +705,13 @@ async function loadMonth(){
   const s=++seq;
   try{ const r=await rpc('kibo_staff_month',{p_code:code,p_month:month});
        if(s!==seq) return; cur=r; }
-  catch(e){ if(authLost(e)) return; toast('読み込みに失敗しました'); return; }
+  catch(e){
+    if(authLost(e)) return;
+    // ⚠️ 失敗したまま month だけ進むと、次の ‹ › が1つずれる
+    if(cur && cur.month) month=cur.month;
+    toast(isOffline(e)?'つながりませんでした。電波のよいところでお試しください':'読み込みに失敗しました');
+    return;
+  }
   if(cur.today) me.today=cur.today;   // 開きっぱなしでも「今日」がずれないように
   byDate=indexByDate(cur.avail);
   byReq=indexReq(cur.requests);
@@ -933,10 +984,18 @@ function renderSlots(){
 
     const top=document.createElement('div'); top.className='sl-top';
     top.innerHTML='<b>'+esc(s.label)+'</b>';
-    const tb=document.createElement('button');
-    tb.className='sl-time'+(st.on?'':' off');
-    tb.textContent=st.on?(m2hm(st.from)+' 〜 '+m2hm(st.to)+' ›'):'—';
-    tb.addEventListener('click',()=>{ if(!st.on) return; st.edit=!st.edit; renderSlots(); });
+    // 「休み」のときは押せないので、ボタンにしない（押せない小さなボタンを置かない）
+    let tb;
+    if(st.on){
+      tb=document.createElement('button');
+      tb.className='sl-time';
+      tb.textContent=m2hm(st.from)+' 〜 '+m2hm(st.to)+' ›';
+      tb.addEventListener('click',()=>{ st.edit=!st.edit; renderSlots(); });
+    }else{
+      tb=document.createElement('span');
+      tb.className='sl-time off';
+      tb.textContent='—';
+    }
     top.appendChild(tb);
     row.appendChild(top);
 
@@ -1063,7 +1122,7 @@ window.addEventListener('focus',function(){ refresh(); });
 /* ===== 起動 ===== */
 (function(){
   const q=new URLSearchParams(location.search).get('c');
-  const saved=localStorage.getItem(LS_CODE);
+  const saved=lsGet(LS_CODE);
   if(q) doLogin(q);
   else if(saved) doLogin(saved);
 })();

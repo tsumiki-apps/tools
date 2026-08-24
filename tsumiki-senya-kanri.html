@@ -472,6 +472,7 @@
     <input id="codeInput" inputmode="latin" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="10" placeholder="ABCD1234" aria-label="店長の合言葉">
     <button class="btn" id="loginBtn" style="margin-top:12px">はいる</button>
     <div class="err" id="loginErr"></div>
+    <button class="btn sub" id="retryBtn" hidden style="margin-top:4px">もう一度ためす</button>
   </div>
   <div id="pickBox" hidden>
     <div style="font-size:1.22rem;font-weight:700">どのお店を見ますか</div>
@@ -634,13 +635,20 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL='https://okbjqtdirrathscctyvx.supabase.co';
 const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rYmpxdGRpcnJhdGhzY2N0eXZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMjI4NTIsImV4cCI6MjA5NTg5ODg1Mn0.T-1AOK6vCD6uGdqrVGXjPui3L6WPSNrnygS-IHyfZ6Y';
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+/* ⚠️ 以前は supabase-js を CDN から読んでいたが、していたのは
+   POST /rest/v1/rpc/<関数名> だけだった。読めないと画面が黙って死ぬ一方で、
+   得ているものが無かったので、外部の部品ごとやめて素の fetch にした。
+   → 外から読むものはフォント以外ゼロ（フォントは無くても既定の書体で読める）。 */
+const RPC_URL=SUPABASE_URL+'/rest/v1/rpc/';
 const LS_CODE='tsumiki_senya_admin', LS_SHOP='tsumiki_senya_shop', LS_THEME='tsumiki_senya_theme';
 const WD=['日','月','火','水','木','金','土'];
+/* 端末によっては localStorage が使えない（プライベートブラウズなど） */
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
 const STAFF_URL=location.href.split('?')[0].split('#')[0].replace(/tsumiki-senya-kanri\.html$/,'tsumiki-senya.html');
 
 /* ===== 純粋関数 ===== */
@@ -686,7 +694,25 @@ function submitState(s){ return s.done?'done':(s.days>0?'part':'none'); }
 let admin=null, shopId=null, shop=null, month=null, cur=null;
 let avail={}, assign={}, dayNeed={}, staffList=[], dayMode='kibo';
 
-async function rpc(fn,params){ const {data,error}=await sb.rpc(fn,params); setSync(!error); if(error) throw error; return data; }
+async function rpc(fn,params){
+  let r;
+  try{
+    r=await fetch(RPC_URL+fn,{
+      method:'POST',
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,
+               'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify(params||{})
+    });
+  }catch(e){ setSync(false); throw new Error('network'); }   // 電波が無い・届かない
+  setSync(r.ok);
+  const txt=await r.text();
+  if(!r.ok){
+    let msg=txt;
+    try{ const j=JSON.parse(txt); msg=j.message||txt; }catch(e){}
+    throw new Error(msg||('http '+r.status));               // 'unauthorized' 'closed' がそのまま入る
+  }
+  return txt?JSON.parse(txt):null;
+}
 // 店長側の呼び出しは、合言葉と「どの店か」を毎回そえる（マスターキーで店を選んで入るため）
 async function arpc(fn,params){ return rpc(fn, Object.assign({p_admin:admin, p_shop:shopId}, params||{})); }
 function setSync(ok){ document.getElementById('syncDot').className='sync-dot '+(ok?'ok':'off'); }
@@ -713,9 +739,22 @@ async function copyText(t){
 
 /* 開いたままのあいだに、店の合言葉が変わった／店が消えた場合。
    そのままだと「読み込みに失敗しました」しか出ず、理由が分からない。 */
+function showRetry(msg){
+  document.getElementById('loginView').hidden=false;
+  document.getElementById('appView').hidden=true;
+  document.getElementById('loginForm').hidden=false;
+  document.getElementById('pickBox').hidden=true;
+  document.getElementById('loginErr').textContent=msg;
+  document.getElementById('retryBtn').hidden=false;
+}
+function isOffline(e){
+  const m=String((e&&e.message)||'');
+  return m.indexOf('network')>=0 || m.indexOf('Failed to fetch')>=0
+      || m.indexOf('NetworkError')>=0 || m.indexOf('Load failed')>=0;
+}
 function authLost(e){
   if(String((e&&e.message)||'').indexOf('unauthorized')<0) return false;
-  localStorage.removeItem(LS_CODE); localStorage.removeItem(LS_SHOP);
+  lsDel(LS_CODE); lsDel(LS_SHOP);
   admin=null; shopId=null; shop=null; cur=null;
   try{ backdrop.classList.remove('show'); sheet.classList.remove('show'); }catch(_){ }
   document.getElementById('tableView').hidden=true; document.body.style.overflow='';
@@ -727,12 +766,13 @@ function authLost(e){
   return true;
 }
 
-(function(){ const t=localStorage.getItem(LS_THEME); if(t) document.documentElement.dataset.theme=t; })();
+document.getElementById('retryBtn').addEventListener('click',function(){ location.reload(); });
+(function(){ const t=lsGet(LS_THEME); if(t) document.documentElement.dataset.theme=t; })();
 document.getElementById('themeBtn').addEventListener('click',()=>{
   const el=document.documentElement;
   const now=el.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
   const next=now==='dark'?'light':'dark';
-  el.dataset.theme=next; localStorage.setItem(LS_THEME,next);
+  el.dataset.theme=next; lsSet(LS_THEME,next);
 });
 
 /* ===== キーボードが出たときに、入力欄が隠れないようにする ===== */
@@ -759,15 +799,23 @@ async function doLogin(c, forShop){
   const err=document.getElementById('loginErr'); err.textContent='';
   const v=(typeof c==='string'?c:codeInput.value).trim().toUpperCase();
   if(v.length<4){ err.textContent='合言葉を入れてください'; return; }
-  const want = (forShop!==undefined) ? forShop : localStorage.getItem(LS_SHOP);
+  // 端末に残っている「どの店か」が壊れていると、サーバーが uuid の型エラーを返し、
+  // 画面には「つながりませんでした」と出て原因にたどり着けない。形だけ見て捨てる。
+  const savedShop=lsGet(LS_SHOP);
+  const want = (forShop!==undefined) ? forShop
+             : (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(savedShop||'')
+                ? savedShop : null);
   try{
     const info=await rpc('kibo_admin_login',{p_admin:v, p_shop:want||null});
     if(!info){ err.textContent='その合言葉は見つかりません'; return; }
-    admin=v; localStorage.setItem(LS_CODE,v);
+    admin=v; lsSet(LS_CODE,v);
     if(info.mode==='pick'){ showPicker(info.shops); return; }
-    shop=info; shopId=info.shop_id; localStorage.setItem(LS_SHOP, shopId);
+    shop=info; shopId=info.shop_id; lsSet(LS_SHOP, shopId);
     enter();
-  }catch(e){ err.textContent='つながりませんでした。もう一度お試しください'; }
+  }catch(e){
+    err.textContent='つながりませんでした。もう一度お試しください';
+    document.getElementById('retryBtn').hidden=false;
+  }
 }
 
 function showPicker(shops){
@@ -791,7 +839,7 @@ function enter(){
   loadMonth();
 }
 document.getElementById('switchShop').addEventListener('click',async()=>{
-  localStorage.removeItem(LS_SHOP); shopId=null;
+  lsDel(LS_SHOP); shopId=null;
   document.getElementById('appView').hidden=true;
   document.getElementById('loginView').hidden=false;
   document.getElementById('loginForm').hidden=true;
@@ -800,7 +848,7 @@ document.getElementById('switchShop').addEventListener('click',async()=>{
 });
 document.getElementById('logoutBtn').addEventListener('click',()=>{
   if(!confirm('この端末からログアウトします。')) return;
-  localStorage.removeItem(LS_CODE); localStorage.removeItem(LS_SHOP); location.reload();
+  lsDel(LS_CODE); lsDel(LS_SHOP); location.reload();
 });
 
 /* ===== タブ ===== */
@@ -822,7 +870,12 @@ let seq=0;
 async function loadMonth(){
   const s=++seq;
   try{ const r=await arpc('kibo_admin_month',{p_month:month}); if(s!==seq) return; cur=r; }
-  catch(e){ if(authLost(e)) return; toast('読み込みに失敗しました'); return; }
+  catch(e){
+    if(authLost(e)) return;
+    if(cur && cur.month) month=cur.month;   // 失敗したまま月だけ進むと矢印がずれる
+    toast(isOffline(e)?'つながりませんでした。電波のよいところでお試しください':'読み込みに失敗しました');
+    return;
+  }
   avail=indexAvail(cur.avail); assign=indexAssign(cur.assign);
   dayNeed=indexNeed(cur.dayneeds); staffList=cur.staff||[];
   renderMonth();
@@ -1279,10 +1332,19 @@ function renderFillSlots(){
     const row=document.createElement('div'); row.className='slot';
     const top=document.createElement('div'); top.className='sh';
     top.innerHTML='<b>'+esc(s.label)+'</b>';
-    const tb=document.createElement('button');
-    tb.className='cnt'; tb.style.cssText='margin-left:auto;background:none;border:none;font-family:inherit;min-height:44px;cursor:pointer;color:var(--accent-2)';
-    tb.textContent=st.on?(m2hm(st.from)+'〜'+m2hm(st.to)+' ›'):'—';
-    tb.addEventListener('click',()=>{ if(!st.on) return; st.edit=!st.edit; renderFillSlots(); });
+    // 「入れない」のときは押せないので、ボタンにしない
+    let tb;
+    if(st.on){
+      tb=document.createElement('button');
+      tb.className='cnt';
+      tb.style.cssText='margin-left:auto;background:none;border:none;font-family:inherit;min-height:44px;padding:0 0 0 10px;cursor:pointer;color:var(--accent-2)';
+      tb.textContent=m2hm(st.from)+'〜'+m2hm(st.to)+' ›';
+      tb.addEventListener('click',()=>{ st.edit=!st.edit; renderFillSlots(); });
+    }else{
+      tb=document.createElement('span');
+      tb.className='cnt'; tb.style.cssText='margin-left:auto;color:var(--ink-soft)';
+      tb.textContent='—';
+    }
     top.appendChild(tb); row.appendChild(top);
 
     const seg=document.createElement('div'); seg.className='modeseg'; seg.style.margin='0';
@@ -1567,7 +1629,9 @@ document.addEventListener('visibilitychange',function(){ if(!document.hidden) re
 window.addEventListener('focus',function(){ refresh(); });
 
 /* ===== 起動 ===== */
-(function(){ const saved=localStorage.getItem(LS_CODE); if(saved) doLogin(saved); })();
+(function(){
+  const saved=lsGet(LS_CODE); if(saved) doLogin(saved);
+})();
 </script>
 </body>
 </html>
