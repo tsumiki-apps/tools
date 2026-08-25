@@ -146,11 +146,6 @@
   .sumbox.ok{background:var(--good-wash);}
   .sumbox .hd{font-weight:700; font-size:.95rem; color:var(--warn);}
   .sumbox.ok .hd{color:var(--good);}
-  .sumbox .chips{display:flex; flex-wrap:wrap; gap:7px; margin-top:10px;}
-  .sumbox .chips button{min-height:var(--tap); padding:6px 13px; border-radius:12px; border:1.5px solid var(--warn);
-    background:var(--surface); color:var(--warn); font-family:var(--sans); font-weight:700; font-size:.92rem;
-    cursor:pointer; font-variant-numeric:tabular-nums;}
-  .sumbox .chips button:active{transform:scale(.96);}
 
   /* ---------- 月のカレンダー ---------- */
   :root{--cellgap:clamp(3px, 1.1vw, 6px);}
@@ -342,8 +337,6 @@
   .cell .num.mix{font-size:.62rem;}
 
   /* お願いの箱（足りない日の箱と同じ形で、色だけ変える） */
-  .sumbox.req{background:var(--warn-wash); border-color:var(--warn);}
-  .sumbox.req .hd{color:var(--warn);}
 
   /* 公開の帯 */
   .pubbar{display:flex; align-items:center; gap:10px; margin-top:12px; padding:11px 13px;
@@ -460,6 +453,43 @@
   table.tot td.bx{width:38%;}
   .tvnote{margin-top:14px; font-size:.78rem; color:var(--ink-soft); line-height:1.65;}
 
+  /* ===== 引き算で足したもの ===== */
+  /* 開いた瞬間の主役。ほかの札より強くして、真っ先に目に入るようにする */
+  .pill.lackpill{background:var(--warn); color:var(--on-accent); border-color:transparent;}
+
+  /* お願い：名前のチップを並べる代わりに、1本の帯（押すと一覧が開く） */
+  .reqbar{display:flex; align-items:center; gap:10px; width:100%; margin-top:13px;
+    min-height:var(--tap); padding:11px 14px; border-radius:14px; border:none;
+    background:var(--warn-wash); color:var(--warn); font-family:var(--sans);
+    font-size:.9rem; font-weight:700; text-align:left; cursor:pointer; line-height:1.5;}
+  .reqbar .ch{margin-left:auto; flex:none;}
+  .reqbar:active{transform:scale(.99);}
+
+  /* シートを閉じる ✕（「とじる」「やめる」の全幅ボタンの代わり） */
+  /* ⚠️ シートは中身が長いと自分でスクロールする。absolute だと ✕ が上へ流れて消えてしまう。
+     sticky + float にして、下までスクロールしても右上に residing させる。 */
+  .closex{position:sticky; top:0; float:right; z-index:3;
+    margin:-8px calc(-1 * clamp(2px,1vw,6px)) 0 0;
+    width:var(--tap); height:var(--tap); border:none; background:none; color:var(--ink-soft);
+    font-family:inherit; font-size:1rem; line-height:1; cursor:pointer; border-radius:11px;}
+  .closex:active{transform:scale(.94);}
+  .sheet h2{padding-right:var(--tap);}
+
+  /* スタッフの「…」と、その中身 */
+  .btn.sm.more{flex:none; padding:8px 16px; letter-spacing:.12em;
+    background:none; border:none; color:var(--ink-soft);}
+  .morelist{display:grid; gap:9px; margin-top:14px;}
+  .morebtn{display:block; width:100%; min-height:var(--tap); text-align:left;
+    padding:12px 14px; border:1px solid var(--line); border-radius:13px;
+    background:var(--surface-2); color:var(--ink); font-family:var(--sans); cursor:pointer;}
+  .morebtn b{display:block; font-size:.94rem; font-weight:700;}
+  /* ⚠️ --surface-2 の上では --ink-soft は 3.9 しか差が無い（目安4.5）。1段濃い色にする。 */
+  .morebtn span{display:block; margin-top:3px; font-size:.78rem; color:var(--ink-mid); line-height:1.55;}
+  .morebtn:active{transform:scale(.99);}
+  /* ⚠️ 取り返しのつかない操作は、ほかから離して置く（となりに並べない） */
+  .morebtn.danger{margin-top:12px; background:transparent; border-color:var(--warn); color:var(--warn);}
+  .morebtn.danger span{color:var(--warn);}
+
   @media print{
     @page{size:A4; margin:12mm;}
     body > *{display:none !important;}
@@ -573,9 +603,8 @@
       <label>時間帯と、ほしい人数</label>
       <div id="cfSlots"></div>
       <p class="muted" style="margin:8px 0 0; line-height:1.6">
-        この人数を下回った日が、一覧で赤くなります。宴会などでその日だけ増やしたいときは、
-        カレンダーで日をタップ →「この日の必要人数」で変えられます。
-        スタッフの画面に出る昼／夜の選び方も、ここの時間帯から作られます。
+        この人数を下回った日が、一覧で赤くなります。<br>
+        時間帯は、スタッフの画面の「昼／夜」にもそのまま出ます。
       </p>
     </div>
     <button class="btn" id="saveCfg">この内容にする</button>
@@ -591,6 +620,9 @@
 <div class="backdrop" id="backdrop"></div>
 <div class="sheet" id="sheet">
   <div class="grip"></div>
+  <!-- ⚠️ 「とじる」の全幅ボタンと「やめる」は、どちらも背景タップ・「‹ もどる」と同じことをしていた。
+       閉じるは右上の ✕ ひとつに寄せる。 -->
+  <button class="closex" id="shX" aria-label="とじる">✕</button>
 
   <!-- ① その日 -->
   <div id="mDay">
@@ -605,8 +637,6 @@
       <button class="btn sub" id="actFill">代わりに入れる</button>
       <button class="btn sub" id="actNeed">この日の必要人数</button>
     </div>
-    <div style="height:9px"></div>
-    <button class="btn sub" id="shClose">とじる</button>
   </div>
 
   <!-- ② 代わりに入れる -->
@@ -618,9 +648,6 @@
     <div id="fillTime" hidden>
       <div id="fillSlots"></div>
       <button class="btn" id="shSave" style="margin-top:15px">この内容で入れる</button>
-      <div class="row2">
-        <button class="btn sub" id="fillCancel">やめる</button>
-      </div>
     </div>
   </div>
 
@@ -632,9 +659,15 @@
     <div id="needRows"></div>
     <button class="btn" id="needSave" style="margin-top:4px">この日はこの人数にする</button>
     <div class="row2">
-      <button class="btn sub" id="needCancel">やめる</button>
       <button class="btn danger" id="needReset" hidden>ふだんに戻す</button>
     </div>
+  </div>
+
+  <!-- ⑤ ひとりのスタッフの、たまにしか使わない操作 -->
+  <div id="mMore" hidden>
+    <h2 id="moreTitle">—</h2>
+    <div class="sub" id="moreSub"></div>
+    <div class="morelist" id="moreList"></div>
   </div>
 
   <!-- ④ 締切後のお願い -->
@@ -642,8 +675,6 @@
     <h2>スタッフからのお願い</h2>
     <div class="sub">締切のあとに届いたものです。受け入れると希望に反映されます。</div>
     <div class="reqlist" id="reqList"></div>
-    <div style="height:12px"></div>
-    <button class="btn sub" id="reqClose">とじる</button>
   </div>
 </div>
 
@@ -935,36 +966,12 @@ function renderMonth(){
 
   const past=(shop.today > cur.deadline);
   const act=activeStaff();
-  const doneN=act.filter(s=>s.done).length;
   const anyN=act.filter(s=>s.days>0).length;
-  document.getElementById('stateRow').innerHTML =
-    (past ? '<span class="pill closed">締切ずみ（'+fmtDateJP(cur.deadline)+'）</span>'
-          : '<span class="pill open">'+fmtDateJP(cur.deadline)+'まで 受付中</span>')
-    + '<span class="pill count">'+anyN+' / '+act.length+' 人が提出</span>'
-    + (doneN?'<span class="pill">'+doneN+'人 出し終わり</span>':'')
-    + (cur.published?'<span class="pill open">シフト公開中</span>':'');
-
-  /* ⑤ お願い */
-  const rb=document.getElementById('reqBox'); rb.innerHTML='';
-  const reqs=cur.requests||[];
-  if(reqs.length){
-    rb.className='sumbox req';
-    rb.innerHTML='<div class="hd">スタッフからのお願いが '+reqs.length+'件 あります</div>'
-      +'<div class="chips"></div>';
-    const chips=rb.querySelector('.chips');
-    reqs.slice(0,6).forEach(r=>{
-      const b=document.createElement('button');
-      b.textContent=r.name+' '+fmtDateJP(r.d);
-      b.addEventListener('click',()=>openReqs()); chips.appendChild(b);
-    });
-    if(reqs.length>6) rb.innerHTML+='<div class="muted" style="margin-top:8px">ほか '+(reqs.length-6)+'件</div>';
-  }else{ rb.className=''; }
-
   const closed=new Set(shop.closed_wdays||[]);
   const last=daysInMonth(y,m1), lead=firstWday(y,m1);
   const anySubmitted = anyN>0 && act.length>0;
 
-  /* 足りない日（この画面の主役） */
+  /* 足りない日（この画面の主役）。札より先に数える。 */
   const shortDays=[];
   if(anySubmitted){
     for(let d=1;d<=last;d++){
@@ -974,6 +981,35 @@ function renderMonth(){
     }
   }
 
+  /* 状態の札。
+     ⚠️ 開いた瞬間にいちばん知りたいのは「足りない日」なので、それを先頭に置く。
+     「◯人 出し終わり」は「スタッフ」タブの見出しと同じことを言っていたので、こちらから外した。 */
+  document.getElementById('stateRow').innerHTML =
+    (anySubmitted ? (shortDays.length
+        ? '<span class="pill lackpill">足りない日 '+shortDays.length+'日</span>'
+        : '<span class="pill open">足りない日なし</span>') : '')
+    + (past ? '<span class="pill closed">締切ずみ（'+fmtDateJP(cur.deadline)+'）</span>'
+            : '<span class="pill">'+fmtDateJP(cur.deadline)+'まで 受付中</span>')
+    + (act.length?'<span class="pill count">'+anyN+' / '+act.length+' 人が提出</span>':'')
+    + (cur.published?'<span class="pill open">シフト公開中</span>':'');
+
+  /* ⑤ お願い。
+     ⚠️ 前は名前のチップを並べていたが、どれを押しても同じ一覧が開くだけだった（＝ボタンの水増し）。
+     1本の帯にまとめる。名前と日付は開いた先に全部出ている。 */
+  const rb=document.getElementById('reqBox'); rb.innerHTML='';
+  const reqs=cur.requests||[];
+  if(reqs.length){
+    rb.className='';
+    const b=document.createElement('button'); b.className='reqbar';
+    b.innerHTML='<span>スタッフからのお願いが '+reqs.length+'件 あります</span><span class="ch">›</span>';
+    b.addEventListener('click',()=>openReqs());
+    rb.appendChild(b);
+  }else{ rb.className=''; }
+
+  /* 足りない日の箱。
+     ⚠️ 「◯日あります」＋日のチップ＋「ほか◯日。下のカレンダーで赤くなっています」で、
+     カレンダーの赤と同じことを3回言っていた。数は札に移し、行き先はカレンダーの赤に一本化。
+     この箱は「カレンダーを見ても次に何をすればいいか分からない」ときだけ残す。 */
   const box=document.getElementById('shortBox');
   if(!act.length){
     box.className='sumbox';
@@ -982,20 +1018,9 @@ function renderMonth(){
   }else if(!anySubmitted){
     box.className='sumbox ok';
     box.innerHTML='<div class="hd">まだ誰も出していません</div>'+
-      '<div class="muted" style="margin-top:6px">出そろうと、足りない日がここに出ます</div>';
-  }else if(!shortDays.length){
-    box.className='sumbox ok';
-    box.innerHTML='<div class="hd">足りない日はありません</div>';
+      '<div class="muted" style="margin-top:6px">出そろうと、足りない日が赤くなります</div>';
   }else{
-    const CAP=6, head=shortDays.slice(0,CAP), rest=shortDays.length-head.length;
-    box.className='sumbox';
-    box.innerHTML='<div class="hd">人手が足りない日が '+shortDays.length+'日 あります</div><div class="chips"></div>'+
-      (rest>0 ? '<div class="muted" style="margin-top:8px">ほか '+rest+'日。下のカレンダーで赤くなっています</div>' : '');
-    const chips=box.querySelector('.chips');
-    head.forEach(x=>{
-      const b=document.createElement('button'); b.textContent=x.d+'日';
-      b.addEventListener('click',()=>openDay(x.key)); chips.appendChild(b);
-    });
+    box.className=''; box.innerHTML='';
   }
 
   /* カレンダー */
@@ -1021,9 +1046,11 @@ function renderMonth(){
 
   renderShiftBox(anySubmitted);
 
-  document.getElementById('hint1').textContent = anySubmitted
-    ? '赤い日は人手が足りない日です。「昼 −1」は、昼にあと1人ほしいという意味。日をタップすると、その日に入れる人が出ます。'
-    : '日をタップすると、その日に入れる人が出ます。ほしい人数を下回ると赤くなります（人数は「設定」で決めます）。';
+  /* ⚠️ 赤い日が1つも無いときに「赤い日は…」と説明するのは、無いものの説明になる。 */
+  document.getElementById('hint1').textContent =
+      shortDays.length ? '赤い日は人手が足りない日（「昼 −1」＝昼にあと1人）。日をタップすると、その日に入れる人が出ます。'
+    : anySubmitted     ? '日をタップすると、その日に入れる人と、決めたシフトが出ます。'
+    :                    '日をタップすると、その日に入れる人が出ます。ほしい人数を下回ると赤くなります（人数は「設定」で決めます）。';
 }
 
 /* ===== ⑥＋B：シフトを組む・配る ===== */
@@ -1179,13 +1206,12 @@ const sheet=document.getElementById('sheet'), backdrop=document.getElementById('
 let shDate=null, fillSid=null, fillState={}, busy=false;
 
 function showMode(m){
-  ['mDay','mFill','mNeed','mReq'].forEach(id=>{ document.getElementById(id).hidden = (id!==m); });
+  ['mDay','mFill','mNeed','mReq','mMore'].forEach(id=>{ document.getElementById(id).hidden = (id!==m); });
   sheet.scrollTop=0;
 }
 function closeSheet(){ backdrop.classList.remove('show'); sheet.classList.remove('show'); }
 backdrop.addEventListener('click',closeSheet);
-document.getElementById('shClose').addEventListener('click',closeSheet);
-document.getElementById('reqClose').addEventListener('click',closeSheet);
+document.getElementById('shX').addEventListener('click',closeSheet);
 
 /* --- その日：出ている希望 --- */
 function slotKiboHtml(s){
@@ -1410,7 +1436,6 @@ function renderFillSlots(){
   });
 }
 document.getElementById('fillBack').addEventListener('click',()=>openDay(shDate));
-document.getElementById('fillCancel').addEventListener('click',()=>openDay(shDate));
 
 document.getElementById('shSave').addEventListener('click',async()=>{
   if(busy) return;
@@ -1446,7 +1471,6 @@ document.getElementById('actNeed').addEventListener('click',()=>{
   showMode('mNeed');
 });
 document.getElementById('needBack').addEventListener('click',()=>openDay(shDate));
-document.getElementById('needCancel').addEventListener('click',()=>openDay(shDate));
 document.getElementById('needSave').addEventListener('click',async()=>{
   if(busy) return;
   const arr=[]; let bad=false;
@@ -1546,33 +1570,54 @@ function renderStaff(){
     el.innerHTML='<div class="nm">'+esc(s2.name)+(s2.active?'':' <span class="muted">（休止中）</span>')+
       (s2.active?'<span class="st '+st+'">'+stTxt+'</span>':'')+'</div>'+
       '<div class="cd">合言葉 '+esc(s2.code)+esc(fx)+'</div><div class="acts"></div>';
+    /* ⚠️ 前はここに6つボタンが並んでいた（9人＝54個）。毎月押すのは「送る文をコピー」だけで、
+       残り5つは 名前を直す・休止・再発行・削除 といった たまにしか使わないもの。
+       ⚠️ とくに「削除」が「休止する」のとなりに同じ大きさで並んでいて、押し間違えの元だった。
+       → 表は「送る文をコピー」＋「…」の2つ。残りは「…」の中で、削除だけ離して置く。 */
     const acts=el.querySelector('.acts');
     const mk=(label,cls,fn)=>{ const b=document.createElement('button'); b.className='btn sm '+cls; b.textContent=label;
-      b.addEventListener('click',fn); acts.appendChild(b); };
-    mk('送る文をコピー','',async()=>{ toast(await copyText(inviteText(s2))?'コピーしました':'コピーできませんでした'); });
-    mk('URLだけコピー','sub',async()=>{ toast(await copyText(staffUrl(s2.code))?'コピーしました':'コピーできませんでした'); });
-    mk('名前を直す','sub',async()=>{
-      const v=prompt('お名前',s2.name); if(v===null) return;
-      try{ await arpc('kibo_admin_update_staff',{p_staff:s2.id,p_name:v,p_active:null}); loadMonth(); toast('直しました'); }
-      catch(e){ toast('直せませんでした'); }
-    });
-    mk(s2.active?'休止する':'再開する','sub',async()=>{
-      try{ await arpc('kibo_admin_update_staff',{p_staff:s2.id,p_name:null,p_active:!s2.active}); loadMonth(); }
-      catch(e){ toast('変えられませんでした'); }
-    });
-    mk('合言葉を再発行','sub',async()=>{
-      if(!confirm(s2.name+'さんの合言葉を作り直します。\nいまのURLはこの瞬間から開けなくなります。よろしいですか？')) return;
-      try{ await arpc('kibo_admin_reissue',{p_staff:s2.id}); loadMonth(); toast('作り直しました'); }
-      catch(e){ if(!authLost(e)) toast('できませんでした'); }
-    });
-    mk('削除','danger',async()=>{
-      if(!confirm(s2.name+'さんを削除します。\nこれまでに出した希望も一緒に消えます。よろしいですか？')) return;
-      try{ await arpc('kibo_admin_delete_staff',{p_staff:s2.id}); loadMonth(); toast('削除しました'); }
-      catch(e){ toast('削除できませんでした'); }
-    });
+      b.addEventListener('click',fn); acts.appendChild(b); return b; };
+    mk('送る文をコピー','sub',async()=>{ toast(await copyText(inviteText(s2))?'コピーしました':'コピーできませんでした'); });
+    mk('…','more',()=>openMore(s2.id)).setAttribute('aria-label',s2.name+'さんの、そのほかの操作');
     box.appendChild(el);
   });
 }
+/* たまにしか使わない操作を、シートの中にしまう。 */
+function openMore(sid){
+  const s2=staffById(sid); if(!s2) return;
+  document.getElementById('moreTitle').textContent=s2.name+'さん';
+  document.getElementById('moreSub').textContent='合言葉 '+s2.code+(s2.active?'':'（休止中）');
+  const box=document.getElementById('moreList'); box.innerHTML='';
+  const mk=(label,note,cls,fn)=>{
+    const b=document.createElement('button'); b.className='morebtn '+(cls||'');
+    b.innerHTML='<b>'+esc(label)+'</b>'+(note?'<span>'+esc(note)+'</span>':'');
+    b.addEventListener('click',fn); box.appendChild(b);
+  };
+  mk('URLだけコピー','リンクだけをお渡しするとき','',async()=>{
+    toast(await copyText(staffUrl(s2.code))?'コピーしました':'コピーできませんでした'); });
+  mk('名前を直す','','',async()=>{
+    const v=prompt('お名前',s2.name); if(v===null) return;
+    try{ await arpc('kibo_admin_update_staff',{p_staff:s2.id,p_name:v,p_active:null}); closeSheet(); loadMonth(); toast('直しました'); }
+    catch(e){ toast('直せませんでした'); }
+  });
+  mk(s2.active?'休止する':'再開する', s2.active?'しばらくお休みの方。希望も シフト表も残ります':'また希望を出していただけます','',async()=>{
+    try{ await arpc('kibo_admin_update_staff',{p_staff:s2.id,p_name:null,p_active:!s2.active}); closeSheet(); loadMonth(); toast(s2.active?'休止しました':'再開しました'); }
+    catch(e){ toast('変えられませんでした'); }
+  });
+  mk('合言葉を再発行','URLを無くされたとき。いまのURLは開けなくなります','',async()=>{
+    if(!confirm(s2.name+'さんの合言葉を作り直します。\nいまのURLはこの瞬間から開けなくなります。よろしいですか？')) return;
+    try{ await arpc('kibo_admin_reissue',{p_staff:s2.id}); closeSheet(); loadMonth(); toast('作り直しました'); }
+    catch(e){ if(!authLost(e)) toast('作り直せませんでした'); }
+  });
+  mk('この方を削除する','これまでに出した希望も一緒に消えます','danger',async()=>{
+    if(!confirm(s2.name+'さんを削除します。\nこれまでに出した希望も一緒に消えます。よろしいですか？')) return;
+    try{ await arpc('kibo_admin_delete_staff',{p_staff:s2.id}); closeSheet(); loadMonth(); toast('削除しました'); }
+    catch(e){ toast('削除できませんでした'); }
+  });
+  showMode('mMore');
+  backdrop.classList.add('show'); sheet.classList.add('show');
+}
+
 document.getElementById('addBtn').addEventListener('click',addStaff);
 document.getElementById('newName').addEventListener('keydown',e=>{ if(e.key==='Enter') addStaff(); });
 async function addStaff(){

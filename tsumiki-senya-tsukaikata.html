@@ -289,6 +289,12 @@
   .pills i.ok{background:var(--good-wash); color:var(--good); border-color:transparent;}
   .pills i.cnt{background:var(--acc-wash); color:var(--acc2); border-color:transparent;}
   .pills i.ng{background:var(--warn-wash); color:var(--warn); border-color:transparent;}
+  /* 開いた瞬間の主役。ほかの札より強い */
+  .pills i.lack{background:var(--warn); color:#fff; border-color:transparent;}
+  /* お願いの帯（名前のチップをやめて1本にした） */
+  .reqbar2{display:flex; align-items:center; gap:8px; background:var(--warn-wash); color:var(--warn);
+    font-size:11.5px; font-weight:800; border-radius:12px; padding:10px 12px; margin-bottom:10px;}
+  .reqbar2 span{margin-left:auto;}
 
   /* 足りない日のまとめ */
   .lackbox{background:var(--warn-wash); border-radius:12px; padding:10px 12px; margin-bottom:10px;}
@@ -367,6 +373,13 @@
     background:var(--app-surface2); border:1px solid var(--app-line); color:var(--app-mid);}
   .stcard .acts i.pri{background:var(--acc); color:#fff; border-color:var(--acc);}
   .stcard .acts i.dg{background:transparent; color:var(--warn); border-color:var(--warn);}
+  .stcard .acts i.more{background:none; border-color:transparent; color:var(--app-soft); letter-spacing:.12em;}
+  /* 「…」をひらいたところ */
+  .morelist2{display:grid; gap:6px; margin-top:8px;}
+  .morelist2 i{font-style:normal; display:block; border:1px solid var(--app-line); border-radius:10px;
+    padding:8px 10px; background:var(--app-surface2); font-size:11px; font-weight:700;}
+  .morelist2 i b{display:block; font-weight:400; font-size:10px; color:var(--app-mid); margin-top:2px;}
+  .morelist2 i.dg{margin-top:6px; background:transparent; border-color:var(--warn); color:var(--warn);}
   .addrow{display:flex; gap:6px; margin-bottom:9px;}
   .addrow .bx{flex:1; min-width:0; border:1.5px solid var(--app-line2); border-radius:9px;
     background:var(--app-surface); padding:8px 10px; font-size:12px; color:var(--app-soft);}
@@ -572,8 +585,7 @@
             <div class="screen">
               <div class="bar"><div class="mk"></div><div class="ttl">つみき&amp;せんや 店長<small>せんや</small></div><div class="dot"></div></div>
               <div class="tabs"><span class="on">一覧</span><span>スタッフ</span><span>設定</span></div>
-              <div class="lackbox"><div class="hd">人手が足りない日が 3日 あります</div>
-                <div class="cs"><i>14日</i><i>21日</i><i>28日</i></div></div>
+              <div class="pills"><i class="lack">足りない日 3日</i><i class="ok">9月20日まで 受付中</i></div>
             </div>
           </div>
         </div>
@@ -660,7 +672,7 @@
           <div class="stcard">
             <div class="nm">やまだ はな</div>
             <div class="cd">合言葉 TEST01</div>
-            <div class="acts"><i class="pri">送る文をコピー</i><i>URLだけコピー</i><i>名前を直す</i></div>
+            <div class="acts"><i>送る文をコピー</i><i class="more">…</i></div>
           </div>
         </div>
       </figure>
@@ -673,12 +685,13 @@
       <figure class="shot">
         <div class="screen">
           <div class="urlchip">やまだ はなさん<br>せんや高崎インター店のシフト希望は、こちらから出してください。<br><br>https://tools.tsumiki-apps.com/tsumiki-senya.html?c=TEST01<br><br>・2026年10月分をお願いします<br>・働ける日をタップして、時間を入れるだけです</div>
-          <div class="subbtns"><i>送る文をコピー</i><i>URLだけコピー</i></div>
+          <div class="subbtns"><i>送る文をコピー</i></div>
         </div>
       </figure>
       <h3><span class="n">8</span>ひとりずつURLを渡す<span class="who-tag m">店長</span></h3>
       <p><kbd>送る文をコピー</kbd> を押して、<strong>LINEに貼るだけ</strong>です。あいさつ・URL・締切・合言葉が入った文ができています。</p>
       <p class="caution fine">⚠ URLは<b>ひとりにつき1本</b>です。他の人に転送すると、その人の希望として入ってしまいます。ひとりずつ送ってください。</p>
+      <p class="fine">リンクだけをお渡ししたいときは、お名前の右の <kbd>…</kbd> から <kbd>URLだけコピー</kbd> が使えます。</p>
     </article>
 
   </div>
@@ -776,13 +789,14 @@
     <article class="item" id="i14">
       <figure class="shot">
         <div class="screen">
-          <div class="pills"><i class="ok">9月20日まで 受付中</i><i class="cnt">14日 出しました</i><i class="ok">✓ 出し終わり</i></div>
+          <div class="pills"><i class="ok">9月20日まで（あと26日）</i><i class="cnt">14日・61時間 出しました</i></div>
           <div class="bigbtn" style="background:var(--app-surface2);color:var(--app-mid);border:1px solid var(--app-line)">✓ 出し終わりました（取り消す）</div>
         </div>
       </figure>
       <h3><span class="n">14</span>「出し終わりました」を押す<span class="who-tag w">スタッフ</span></h3>
       <p>ひととおり出したら、カレンダーの下の <kbd>今月はこれで出し終わりました</kbd> を押してください。店長の画面に「✓ 出し終わり」と出て、<strong>催促の連絡が来なくなります</strong>。</p>
       <p class="caution fine">⚠ <strong>押し忘れても、出した希望はちゃんと届いています。</strong>これは「もう直しません」という合図なので、押したあとでも締切までは直せます。直したら押し直す必要もありません。</p>
+      <p class="fine">押したあとは、このボタンが「<b>✓ 出し終わりました（取り消す）</b>」に変わります。それが出し終わりの印なので、上の札には出しません。</p>
     </article>
 
     <article class="item" id="i15">
@@ -882,16 +896,13 @@
 <article class="item" id="i20">
       <figure class="shot">
         <div class="screen">
-          <div class="pills"><i class="ok">9月20日まで 受付中</i><i class="cnt">8 / 8 人が提出</i><i class="ok">6人 出し終わり</i></div>
-          <div class="lackbox">
-            <div class="hd">人手が足りない日が 5日 あります</div>
-            <div class="cs"><i>14日</i><i>16日</i><i>21日</i><i>24日</i><i>28日</i></div>
-          </div>
+          <div class="pills"><i class="lack">足りない日 5日</i><i class="ok">9月20日まで 受付中</i><i class="cnt">8 / 8 人が提出</i></div>
+          <div class="reqbar2">スタッフからのお願いが 2件 あります<span>›</span></div>
         </div>
       </figure>
       <h3><span class="n">20</span>足りない日がすぐ分かる<span class="who-tag m">店長</span></h3>
-      <p>開くといちばん上に「<strong>人手が足りない日が◯日あります</strong>」と出ます。日のボタンを押すと、その日の画面がすぐ開きます。</p>
-      <p class="fine">足りない日が多いときは、先頭の6日だけ出して「ほか◯日」と表示します。全部はカレンダーで赤くなっています。<br>「◯人 出し終わり」は、自分でもう直さないと宣言した人の数です。</p>
+      <p>開くといちばん上に <strong>「足りない日 ◯日」</strong> の赤い札が出ます。<strong>どの日かは、すぐ下のカレンダーが赤で教えてくれます。</strong>赤いマスを押すと、その日の画面が開きます。</p>
+      <p class="fine">足りない日が1日も無いときは「足りない日なし」と緑で出ます。<br>スタッフから締切後のお願いが届いていると、その下に帯が出ます。押すと一覧がひらきます。<br>「◯人が出し終わり」の数は <span class="path"><b>スタッフ</b></span> のタブにあります。</p>
     </article>
 
 <article class="item" id="i21">
@@ -1117,13 +1128,21 @@
           <div class="stcard">
             <div class="nm">やまだ はな</div>
             <div class="cd">合言葉 TEST01</div>
-            <div class="acts"><i>合言葉を再発行</i><i class="dg">削除</i></div>
+            <div class="acts"><i>送る文をコピー</i><i class="more">…</i></div>
+          </div>
+          <div class="morelist2">
+            <i>URLだけコピー<b>リンクだけをお渡しするとき</b></i>
+            <i>名前を直す</i>
+            <i>休止する<b>しばらくお休みの方。希望も シフト表も残ります</b></i>
+            <i>合言葉を再発行<b>URLを無くされたとき。いまのURLは開けなくなります</b></i>
+            <i class="dg">この方を削除する<b>これまでに出した希望も一緒に消えます</b></i>
           </div>
         </div>
       </figure>
       <h3><span class="n">34</span>URLを無くしたとき<span class="who-tag m">店長</span></h3>
       <p><span class="path"><b>スタッフ</b></span> でその人の <kbd>送る文をコピー</kbd> を押して、もう一度LINEで送るだけです。</p>
-      <p class="caution fine">⚠ <kbd>合言葉を再発行</kbd> を押すと<b>古いURLはその瞬間に開けなくなります</b>。スマホを人に譲ったときなど、本当に無効にしたいときだけ使ってください。出した希望は消えません。<br>古いURLをお使いだった端末には <b>「この合言葉は使えなくなりました。お店から新しいURLを受け取ってください」</b> と出ます。<b>そのとき画面を開いたままだった方にも、その場で同じご案内が出ます</b>（休止・削除のときも同じです）。新しい <kbd>送る文をコピー</kbd> をお渡しください。</p>
+      <p>お名前の右にある <kbd>…</kbd> を押すと、<strong>たまにしか使わない操作</strong>がまとまって出てきます。<br><kbd>URLだけコピー</kbd> <kbd>名前を直す</kbd> <kbd>休止する</kbd> <kbd>合言葉を再発行</kbd> <kbd>この方を削除する</kbd> の5つです。</p>
+      <p class="caution fine">⚠ <kbd>…</kbd> の中の <kbd>合言葉を再発行</kbd> を押すと<b>古いURLはその瞬間に開けなくなります</b>。スマホを人に譲ったときなど、本当に無効にしたいときだけ使ってください。出した希望は消えません。<br>古いURLをお使いだった端末には <b>「この合言葉は使えなくなりました。お店から新しいURLを受け取ってください」</b> と出ます。<b>そのとき画面を開いたままだった方にも、その場で同じご案内が出ます</b>（休止・削除のときも同じです）。新しい <kbd>送る文をコピー</kbd> をお渡しください。</p>
     </article>
 
     <article class="item" id="i35">
@@ -1132,13 +1151,13 @@
           <div class="stcard" style="opacity:.55">
             <div class="nm">すずき たろう <span style="font-size:10px;color:var(--app-soft);font-weight:400">（休止中）</span></div>
             <div class="cd">合言葉 TEST02</div>
-            <div class="acts"><i>再開する</i><i class="dg">削除</i></div>
+            <div class="acts"><i>送る文をコピー</i><i class="more">…</i></div>
           </div>
         </div>
       </figure>
       <h3><span class="n">35</span>やめた人・お休みの人<span class="who-tag m">店長</span></h3>
-      <p>しばらく入れない人は <kbd>休止する</kbd>。<b>一覧には「（休止中）」として残ります</b>ので、戻ってきたら <kbd>再開する</kbd> を押すだけです。出した希望も残ります。</p>
-      <p class="caution fine">⚠ <kbd>削除</kbd> は、その人が出した希望も<b>いっしょに消えます</b>。迷ったら休止のほうを使ってください。<br>休止した人は<b>人数の集計から外れます</b>（提出のかぞえ・足りない日の判定・頼めそうな人）。ただし<b>すでに決まっているシフトには「（休止中）」つきで残ります</b>ので、シフト表からも消えませんし、外すこともできます。</p>
+      <p>しばらく入れない人は、お名前の右の <kbd>…</kbd> から <kbd>休止する</kbd>。<b>一覧には「（休止中）」として残ります</b>ので、戻ってきたら同じ <kbd>…</kbd> の <kbd>再開する</kbd> を押すだけです。出した希望も残ります。</p>
+      <p class="caution fine">⚠ <kbd>…</kbd> の中の <kbd>この方を削除する</kbd> は、その人が出した希望も<b>いっしょに消えます</b>。迷ったら休止のほうを使ってください。<br>休止した人は<b>人数の集計から外れます</b>（提出のかぞえ・足りない日の判定・頼めそうな人）。ただし<b>すでに決まっているシフトには「（休止中）」つきで残ります</b>ので、シフト表からも消えませんし、外すこともできます。</p>
     </article>
 
     <article class="item nofig" id="i36">

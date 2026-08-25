@@ -367,6 +367,19 @@
   .a2hs button{width:100%; min-height:var(--tap); margin-top:12px; border:1px solid var(--accent);
     background:transparent; color:var(--accent-2); border-radius:11px; font-family:inherit;
     font-size:.86rem; font-weight:700; cursor:pointer;}
+
+  /* ===== 引き算：シートの ✕ と、ひかえめなリンク ===== */
+  /* ⚠️ シートは中身が長いと自分でスクロールする。absolute だと ✕ が上へ流れて消えてしまう。
+     sticky + float にして、下までスクロールしても右上に residing させる。 */
+  .closex{position:sticky; top:0; float:right; z-index:3;
+    margin:-8px calc(-1 * clamp(2px,1vw,6px)) 0 0;
+    width:var(--tap); height:var(--tap); border:none; background:none; color:var(--ink-soft);
+    font-family:inherit; font-size:1rem; line-height:1; cursor:pointer; border-radius:11px;}
+  .closex:active{transform:scale(.94);}
+  .sheet h2{padding-right:var(--tap);}   /* 長い見出しが ✕ に重ならないように */
+  .quietlink{display:block; width:100%; min-height:var(--tap); background:none; border:none;
+    font-family:inherit; font-size:.82rem; color:var(--ink-soft); cursor:pointer; padding:0;}
+  .quietlink:active{opacity:.6;}
 </style>
 </head>
 <body>
@@ -439,14 +452,19 @@
     </div>
   </section>
 
-  <section class="card" id="outCard">
-    <button class="btn sub" id="logoutBtn" style="margin:0">この端末からログアウト</button>
-  </section>
+  <!-- ⚠️ ログアウトは「毎月使うもの」ではない（端末を手放すときだけ）。
+       カード＋全幅ボタンだと「出し終わりました」と同じ重さに見えるので、
+       消さずに、いちばん下のひかえめな文字にする。押せる大きさは 44px を保つ。 -->
+  <div id="outCard"><button class="quietlink" id="logoutBtn">この端末からログアウト</button></div>
 </main>
 
 <div class="backdrop" id="backdrop"></div>
 <div class="sheet" id="sheet">
   <div class="grip"></div>
+  <!-- ⚠️ 前は「この日で出す」の真下に、同じ幅の「とじる」が並んでいた。
+       同じ大きさのボタンが2つ縦に並ぶと、どちらを押すのか迷う。
+       閉じるは右上の ✕ ひとつに寄せて、下は「出す」だけにする（背景タップでも閉じる）。 -->
+  <button class="closex" id="shX" aria-label="とじる">✕</button>
   <h2 id="shTitle">—</h2>
   <div class="sub" id="shSub"></div>
 
@@ -454,15 +472,11 @@
   <div id="shEdit">
     <div id="shSlots"></div>
     <button class="btn" id="shSave" style="margin-top:16px">この日で出す</button>
-    <div class="row2">
-      <button class="btn sub" id="shClose">とじる</button>
-    </div>
   </div>
 
   <!-- 締切後：お願いを出す -->
   <div id="shLocked" hidden>
     <div id="shReqs"></div>
-    <button class="btn sub" id="shClose2" style="margin-top:16px">とじる</button>
   </div>
 </div>
 
@@ -767,10 +781,11 @@ function render(){
   }else{
     st.innerHTML='<span class="pill closed">締切ずみ（'+dl+'）</span>';
   }
+  /* 「◯日」「◯時間」「✓出し終わり」の3枚は、同じ「どれだけ出したか」を3回言っていた。
+     出し終わりは下のボタンが「✓ 出し終わりました（取り消す）」と出しているので、札は要らない。 */
   const n=countDays(cur.avail);
-  st.innerHTML+='<span class="pill count">'+n+'日 出しました</span>';
-  if(n) st.innerHTML+='<span class="pill">'+fmtDur(totalMin(cur.avail))+'</span>';
-  if(cur.submitted) st.innerHTML+='<span class="pill done">✓ 出し終わり</span>';
+  st.innerHTML+= n ? '<span class="pill count">'+n+'日・'+fmtDur(totalMin(cur.avail))+' 出しました</span>'
+                   : '<span class="pill">まだ出していません</span>';
   const openReq=(cur.requests||[]).filter(r=>r.status==='open').length;
   if(openReq) st.innerHTML+='<span class="pill req">お願い '+openReq+'件</span>';
 
@@ -810,10 +825,15 @@ function render(){
     document.getElementById('fillBtn').addEventListener('click',doFill);
   }
 
-  /* 案内文 */
-  document.getElementById('hint').textContent = cur.editable
-    ? '働ける日をタップして、昼と夜それぞれを選んでください。選ばなかったところは「その時間は働けない」として伝わります。'
+  /* 案内文。
+     ⚠️ 締切前の説明は「使い方」なので、まだ1日も出していない人にだけ出す。
+     慣れた人には毎月ずっと出続けるだけで、読まれない。空の月に戻れば また出る。
+     締切後の案内（お願いの出しかた）は、めったに出ない状況の説明なので残す。 */
+  const hintEl=document.getElementById('hint');
+  const hintTxt = cur.editable
+    ? (n===0 ? '働ける日をタップして、昼と夜それぞれを選んでください。選ばなかったところは「その時間は働けない」として伝わります。' : '')
     : '締切をすぎたので直せません。急な変更は、日をタップして「お願い」を出してください。';
+  hintEl.textContent=hintTxt; hintEl.hidden=!hintTxt;
 
   /* 出し終わりの印 */
   const db=document.getElementById('doneBtn');
@@ -1001,8 +1021,7 @@ function closeSheet(force){
   shOrig=''; backdrop.classList.remove('show'); sheet.classList.remove('show');
 }
 backdrop.addEventListener('click',function(){ closeSheet(); });
-document.getElementById('shClose').addEventListener('click',function(){ closeSheet(); });
-document.getElementById('shClose2').addEventListener('click',function(){ closeSheet(true); });
+document.getElementById('shX').addEventListener('click',function(){ closeSheet(); });
 
 /* 締切前：枠ごとの行 */
 function renderSlots(){
