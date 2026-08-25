@@ -108,7 +108,7 @@
   .login input:focus{outline:none; border-color:var(--accent);}
   .btn{
     width:100%; min-height:var(--tap); font-family:var(--sans); font-size:1rem; font-weight:700; padding:14px;
-    border:none; border-radius:14px; background:var(--accent); color:#fff; cursor:pointer; margin-top:12px;
+    border:none; border-radius:14px; background:var(--accent); color:var(--on-accent); cursor:pointer; margin-top:12px;
   }
   .btn:active{transform:scale(.985);}
   .btn.sub{background:var(--surface-2); color:var(--ink-mid); border:1px solid var(--line);}
@@ -344,7 +344,7 @@
   .fillbar{display:flex; align-items:center; gap:10px; margin-top:12px; padding:11px 13px;
     background:var(--accent-wash); border-radius:13px; font-size:.83rem; color:var(--accent-2); line-height:1.5;}
   .fillbar button{margin-left:auto; flex:none; min-height:var(--tap); padding:0 14px; border-radius:10px;
-    border:none; background:var(--accent); color:#fff; font-family:inherit; font-size:.82rem;
+    border:none; background:var(--accent); color:var(--on-accent); font-family:inherit; font-size:.82rem;
     font-weight:700; cursor:pointer;}
 
   /* ===== v3：持ち出し・締切の残り・ホーム画面のご案内 ===== */
@@ -355,7 +355,7 @@
   .outrow button{flex:1 1 0; min-width:0; min-height:var(--tap); border:1px solid var(--line);
     background:var(--surface-2); color:var(--ink-mid); border-radius:11px; font-family:inherit;
     font-size:.84rem; font-weight:700; cursor:pointer;}
-  .outrow button.main{background:var(--accent); color:#fff; border-color:transparent;}
+  .outrow button.main{background:var(--accent); color:var(--on-accent); border-color:transparent;}
   .outrow button:active{transform:scale(.97);}
 
   /* ほかのカードと同じ角丸・同じ文字の左端にそろえる（枠は透明で位置合わせだけ） */
@@ -377,8 +377,9 @@
     font-family:inherit; font-size:1rem; line-height:1; cursor:pointer; border-radius:11px;}
   .closex:active{transform:scale(.94);}
   .sheet h2{padding-right:var(--tap);}   /* 長い見出しが ✕ に重ならないように */
+  /* ⚠️ 地は --surface ではなく --paper。--ink-soft だと 4.2 しか差が無い（目安4.5）。 */
   .quietlink{display:block; width:100%; min-height:var(--tap); background:none; border:none;
-    font-family:inherit; font-size:.82rem; color:var(--ink-soft); cursor:pointer; padding:0;}
+    font-family:inherit; font-size:.82rem; color:var(--ink-mid); cursor:pointer; padding:0;}
   .quietlink:active{opacity:.6;}
 </style>
 </head>
