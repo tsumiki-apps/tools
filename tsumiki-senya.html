@@ -389,6 +389,8 @@
   .quietlink{display:block; width:100%; min-height:var(--tap); background:none; border:none;
     font-family:inherit; font-size:.82rem; color:var(--ink-mid); cursor:pointer; padding:0;}
   .quietlink:active{opacity:.6;}
+  /* 説明書へのリンク。ボタンと同じ見た目・同じ押せる大きさにそろえる */
+  a.quietlink{display:flex; align-items:center; justify-content:center; text-decoration:none;}
 
   /* ===== チュートリアル（穴あきの暗幕） =====
      暗幕は「大きな四角4枚」で作り、真ん中だけを空ける。
@@ -503,6 +505,7 @@
        消さずに、いちばん下のひかえめな文字にする。押せる大きさは 44px を保つ。 -->
   <div id="outCard">
     <button class="quietlink" id="tutAgain">使い方をもう一度みる</button>
+    <a class="quietlink" href="tsumiki-senya-tsukaikata.html">くわしい使い方（説明書）</a>
     <button class="quietlink" id="logoutBtn">この端末からログアウト</button>
   </div>
 </main>

@@ -516,6 +516,24 @@
     .tvnote{font-size:8pt;}
   }
 
+  /* ホーム画面へ置くご案内。ほかのカードと同じ角丸・同じ文字の左端にそろえる */
+  .a2hs{background:var(--accent-wash); border:1px solid transparent; border-radius:18px;
+    padding:var(--card-pad); }
+  .a2hs .t{font-weight:700; font-size:.95rem; color:var(--accent-2); margin-bottom:6px;}
+  .a2hs .b{font-size:.84rem; color:var(--accent-2); line-height:1.75;}
+  .a2hs .b b{font-weight:700;}
+  .a2hs button{width:100%; min-height:var(--tap); margin-top:12px; border:1px solid var(--accent);
+    background:transparent; color:var(--accent-2); border-radius:11px; font-family:inherit;
+    font-size:.86rem; font-weight:700; cursor:pointer;}
+  /* ⚠️ main は grid。空の入れ物でも1行ぶんのすきまが空いてしまう */
+  #a2hsBox:empty{display:none;}
+  /* 渡したかどうかの印 */
+  .staff .st.unsent{background:var(--warn-wash); color:var(--warn);}
+  .staff .st.sent{background:var(--surface-2); color:var(--ink-mid);}
+  .sumbox .go{width:100%; min-height:var(--tap); margin-top:11px; border:none; border-radius:12px;
+    background:var(--accent-fill); color:var(--on-accent); font-family:inherit; font-size:.9rem;
+    font-weight:700; cursor:pointer;}
+
   /* ===== チュートリアル（穴あきの暗幕） =====
      暗幕は「大きな四角4枚」で作り、真ん中だけを空ける。
      ⚠️ 1枚の幕に穴をあける書き方（clip-path / mask）だと、穴の中のタップまで幕が受けてしまう。
@@ -595,6 +613,8 @@
     <button id="tab2">スタッフ</button>
     <button id="tab3">設定</button>
   </div>
+
+  <div id="a2hsBox"></div>
 
   <!-- ===== 一覧 ===== -->
   <section class="card" id="view1">
@@ -770,6 +790,7 @@ const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
    → 外から読むものはフォント以外ゼロ（フォントは無くても既定の書体で読める）。 */
 const RPC_URL=SUPABASE_URL+'/rest/v1/rpc/';
 const LS_CODE='tsumiki_senya_admin', LS_SHOP='tsumiki_senya_shop', LS_THEME='tsumiki_senya_theme';
+const LS_A2HS='tsumiki_senya_ka2hs';
 const WD=['日','月','火','水','木','金','土'];
 /* 端末によっては localStorage が使えない（プライベートブラウズなど） */
 function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
@@ -937,6 +958,8 @@ async function doLogin(c, forShop){
     admin=v; lsSet(LS_CODE,v);
     if(info.mode==='pick'){ showPicker(info.shops); return; }
     shop=info; shopId=info.shop_id; lsSet(LS_SHOP, shopId);
+    // URLに合言葉が入ったままだと、画面を見せたときに他の人に見えてしまう
+    history.replaceState(null,'',location.pathname);
     enter();
   }catch(e){
     err.textContent='つながりませんでした。もう一度お試しください';
@@ -955,12 +978,54 @@ function showPicker(shops){
     list.appendChild(b);
   });
 }
+/* iOS / Android の見分け（ホーム画面のご案内の出し分けだけに使う） */
+function osKind(ua, standalone){
+  if(standalone) return 'installed';
+  if(/iPhone|iPad|iPod/i.test(ua)) return 'ios';
+  if(/Android/i.test(ua)) return 'android';
+  return 'other';
+}
+/* ⚠️ 店長は毎月ここを開く人。こちらからお知らせは出せないので、
+   ホーム画面のアイコンが唯一の手がかりになる。一度だけご案内する。 */
+function renderA2hs(){
+  const box=document.getElementById('a2hsBox'); box.innerHTML='';
+  if(lsGet(LS_A2HS)) return;
+  let standalone=false;
+  try{ standalone = window.navigator.standalone===true || matchMedia('(display-mode: standalone)').matches; }catch(e){}
+  const kind=osKind(navigator.userAgent, standalone);
+  if(kind==='installed') return;
+  const how = kind==='ios'   ? '画面の下の <b>共有ボタン</b>（四角に上むきの矢印）を押します。'
+                             + '見あたらないときは、右下の <b>「…」</b> を押すと中にあります。<br>'
+                             + 'そこから <b>「ホーム画面に追加」</b>'
+            : kind==='android'? '右上の <b>メニュー</b>（点が3つ縦に並んだ印）→ <b>「ホーム画面に追加」</b>'
+            :                   'ブラウザのメニューから <b>「ホーム画面に追加」</b>';
+  box.innerHTML='<div class="a2hs"><div class="t">ホーム画面に置いておくと、毎月すぐ開けます</div>'
+    +'<div class="b">このページは<b>お知らせを出すことができません</b>。'
+    +'締切のころに思い出す手がかりは、ホーム画面のアイコンだけです。<br>'+how+'</div>'
+    +'<button id="a2hsOk">わかりました</button></div>';
+  document.getElementById('a2hsOk').addEventListener('click',function(){
+    lsSet(LS_A2HS,'1'); renderA2hs();
+  });
+}
+
+/* 「その人にURLを渡したか」。
+   ⚠️ 端末に覚えさせると、店長と奥様の2台で食い違って配り漏れが出る。店で1つ（サーバー）に持つ。
+   合言葉を作り直すと古いURLは死ぬので、印もサーバー側で自動的に外れる。 */
+async function sentSet(id,on){
+  const s2=staffById(id); if(!s2) return;
+  const before=s2.sent;
+  s2.sent=on; renderStaff();                    // 先に見た目を変える（押した手ごたえ）
+  try{ await arpc('kibo_admin_mark_sent',{p_staff:id,p_on:!!on}); }
+  catch(e){ s2.sent=before; renderStaff(); if(!authLost(e)) toast('印をつけられませんでした'); }
+}
+
 function enter(){
   document.getElementById('loginView').hidden=true;
   document.getElementById('appView').hidden=false;
   document.getElementById('who').textContent=shop.name+(shop.is_master?'　（マスターキー）':'');
   document.getElementById('switchShop').hidden=!shop.is_master;
   month=shop.open_month;
+  renderA2hs();
   fillConfig();
   loadMonth();
 }
@@ -1079,7 +1144,9 @@ function renderMonth(){
   if(!act.length){
     box.className='sumbox';
     box.innerHTML='<div class="hd">スタッフがまだ登録されていません</div>'+
-      '<div class="muted" style="margin-top:6px">「スタッフ」から追加してください</div>';
+      '<div class="muted" style="margin-top:6px">働く方を登録すると、その人だけの専用URLができます</div>'+
+      '<button class="go" id="goStaff">スタッフを追加する →</button>';
+    document.getElementById('goStaff').addEventListener('click',function(){ document.getElementById('tab2').click(); });
   }else if(!anySubmitted){
     box.className='sumbox ok';
     box.innerHTML='<div class="hd">まだ誰も出していません</div>'+
@@ -1614,9 +1681,17 @@ function renderStaff(){
   const box=document.getElementById('staffBox');
   if(!staffList.length){ box.innerHTML='<div class="empty">まだ誰も登録されていません</div>'; return; }
 
-  const yet=staffList.filter(s2=>s2.active && submitState(s2)!=='done');
+  /* ⚠️ 催促は「URLを渡した人」にしか意味がない。
+     まだ渡していない人に「締切までにお願いします」と送っても、その人は出しようがない。 */
+  const yet=staffList.filter(s2=>s2.active && s2.sent && submitState(s2)!=='done');
   const cnt=document.createElement('div'); cnt.className='cnt';
-  cnt.textContent=cur? (staffList.filter(s=>s.done).length+' / '+staffList.filter(s=>s.active).length+'人が出し終わり') : '';
+  /* ⚠️ 配っている最中は「出し終わり◯人」より「渡し終わったか」を知りたい。
+     全員に渡し終わったら、いつもの「出し終わり」に戻す。 */
+  const actAll=staffList.filter(s2=>s2.active);
+  const sentN=actAll.filter(s2=>s2.sent).length;
+  cnt.textContent = (actAll.length && sentN<actAll.length)
+      ? (actAll.length+'人中 '+sentN+'人にURLを渡しました')
+      : (cur? (staffList.filter(s=>s.done).length+' / '+actAll.length+'人が出し終わり') : '');
   hd.appendChild(cnt);
   if(yet.length){
     const b=document.createElement('button'); b.className='btn sub';
@@ -1633,8 +1708,10 @@ function renderStaff(){
     const fx=(s2.fixed_days||0)
       ? '　／　シフト '+s2.fixed_days+'日'+(s2.fixed_min?'（'+fmtDur(s2.fixed_min)+'）':'')
       : '';
+    const sent=!!s2.sent;
     el.innerHTML='<div class="nm">'+esc(s2.name)+(s2.active?'':' <span class="muted">（休止中）</span>')+
-      (s2.active?'<span class="st '+st+'">'+stTxt+'</span>':'')+'</div>'+
+      (s2.active&&!sent?'<span class="st unsent">まだ渡していません</span>':'')+
+      (s2.active&&sent?'<span class="st '+st+'">'+stTxt+'</span>':'')+'</div>'+
       '<div class="cd">合言葉 '+esc(s2.code)+esc(fx)+'</div><div class="acts"></div>';
     /* ⚠️ 前はここに6つボタンが並んでいた（9人＝54個）。毎月押すのは「送る文をコピー」だけで、
        残り5つは 名前を直す・休止・再発行・削除 といった たまにしか使わないもの。
@@ -1643,7 +1720,11 @@ function renderStaff(){
     const acts=el.querySelector('.acts');
     const mk=(label,cls,fn)=>{ const b=document.createElement('button'); b.className='btn sm '+cls; b.textContent=label;
       b.addEventListener('click',fn); acts.appendChild(b); return b; };
-    mk('送る文をコピー','sub',async()=>{ toast(await copyText(inviteText(s2))?'コピーしました':'コピーできませんでした'); });
+    mk(sent?'もう一度コピー':'送る文をコピー','sub',async()=>{
+      const ok=await copyText(inviteText(s2));
+      if(ok) sentSet(s2.id,true); else renderStaff();
+      toast(ok?'コピーしました。LINEに貼ってお送りください':'コピーできませんでした');
+    });
     mk('…','more',()=>openMore(s2.id)).setAttribute('aria-label',s2.name+'さんの、そのほかの操作');
     box.appendChild(el);
   });
@@ -1660,7 +1741,15 @@ function openMore(sid){
     b.addEventListener('click',fn); box.appendChild(b);
   };
   mk('URLだけコピー','リンクだけをお渡しするとき','',async()=>{
-    toast(await copyText(staffUrl(s2.code))?'コピーしました':'コピーできませんでした'); });
+    const ok=await copyText(staffUrl(s2.code));
+    closeSheet();
+    if(ok) sentSet(s2.id,true); else renderStaff();
+    toast(ok?'コピーしました':'コピーできませんでした');
+  });
+  mk(s2.sent?'まだ渡していないことにする':'渡したことにする',
+     '「まだ渡していません」の印を切り替えます','',function(){
+    closeSheet(); sentSet(s2.id, !s2.sent);
+  });
   mk('名前を直す','','',async()=>{
     const v=prompt('お名前',s2.name); if(v===null) return;
     try{ await arpc('kibo_admin_update_staff',{p_staff:s2.id,p_name:v,p_active:null}); closeSheet(); loadMonth(); toast('直しました'); }
@@ -1770,7 +1859,12 @@ window.addEventListener('focus',function(){ refresh(); });
 
 /* ===== 起動 ===== */
 (function(){
-  const saved=lsGet(LS_CODE); if(saved) doLogin(saved);
+  /* LINEで送ったリンク（?c=合言葉）から、そのまま開けるようにする。
+     ⚠️ 店長だけ手打ちだった。8文字を打ち間違えると「見つかりません」で止まる。 */
+  const q=new URLSearchParams(location.search).get('c');
+  const saved=lsGet(LS_CODE);
+  if(q) doLogin(q);
+  else if(saved) doLogin(saved);
 })();
 /* ===== チュートリアル（穴あきの暗幕） =====
    ⚠️ 中身はスタッフ側（tsumiki-senya.html）と同じ仕掛け。直すときは両方そろえる。
@@ -1802,12 +1896,14 @@ function tutSteps1(){
     {sel:'#tab2', text:'つぎに<b>スタッフ</b>を登録します。',
      done:function(){ return viewShown(2); }},
     {sel:'.addrow', need:function(){ return viewShown(2); },
-     text:'お名前を入れて<b>「追加」</b>。その人だけの<b>合言葉と専用URL</b>ができます。',
+     text:'お名前を入れて<b>「追加」</b>。その人だけの<b>合言葉と専用URL</b>ができます。<br>まずは<b>ご自身のお名前</b>を入れてみてください。届く側の画面を、そのまま確かめられます。',
      done:function(){ return tutVisible(tq('#staffBox .staff')); }},
     {sel:'#staffBox .staff .acts .btn', need:function(){ return viewShown(2); },
-     text:'<b>「送る文をコピー」</b>を押すと、その人に渡す文ができます。<br>LINEに貼って、<b>ひとりずつ</b>お送りください。'},
+     text:'<b>「送る文をコピー」</b>で、その人に渡す文ができます。<br><b>LINEを開いて貼りつけて</b>お送りください。ひとりにつき1本です。'},
+    {sel:'#staffBox .staff', need:function(){ return viewShown(2); },
+     text:'配り漏れは、ここで分かります。まだの人には赤く <b>「まだ渡していません」</b>、上には <b>「◯人中◯人にURLを渡しました」</b> と出ます。<br>ご自身を登録した方は、<b>その文のURLをこの端末で開いてみてください</b>。スタッフに見えている画面が、そのまま出ます。'},
     {sel:'.tabs', enter:function(){ const b=tq('#tab1'); if(b && !viewShown(1)) b.click(); },
-     text:'準備はこれで終わりです。あとは希望が集まるのを待ちます。<br>集まると、この<b>一覧</b>が「足りない日」を教えてくれます。'}
+     text:'準備はこれで終わりです。全員にURLを渡したら、あとは<b>希望が集まるのを待ちます</b>。<br>集まると、この<b>一覧</b>が「足りない日」を教えてくれます。'}
   ];
 }
 /* 第2章＝毎月の使い方（希望が集まってから） */
