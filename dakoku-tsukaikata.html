@@ -13,7 +13,10 @@
      ・図はアプリ画面をHTML/CSSで再現（スクショ画像を使わない）
      ================================================================ */
   :root{
-    --paper:#F4F2EE; --surface:#ECE9E3; --ink:#242321; --muted:#77736B;
+    /* ⚠️ --muted は #77736B だと紙の上で 4.2 しか差が無かった（目安4.5）。
+       本文の下の注記・リード文・Q&Aの答えが全部これ。地が --surface の表の見出しでも
+       4.5 を超えるところまで濃くする（#6C6860 ＝ 紙4.96／面4.58）。 */
+    --paper:#F4F2EE; --surface:#ECE9E3; --ink:#242321; --muted:#6C6860;
     --hair:#D8D4CC; --ghost:#BEB9B0; --control:#FBFAF8;
     --mark:#B4562E;                       /* 図の注釈（番号ピン・矢印） */
   }
@@ -40,7 +43,8 @@
   header .lead{margin-top:10px; font-size:14.5px; color:var(--muted); max-width:36em;}
   .openapp{margin-top:16px; display:flex; gap:9px; flex-wrap:wrap;}
   .openapp a{
-    display:inline-block; background:var(--ink); color:var(--paper);
+    display:inline-flex; align-items:center; min-height:44px;   /* 指で押す入口なので44px */
+    background:var(--ink); color:var(--paper);
     text-decoration:none; border-radius:999px; padding:9px 20px;
     font-size:14px; font-weight:700;
   }
@@ -62,15 +66,17 @@
   details.toc[open] summary::after{content:'▴';}
   .toc nav{margin-top:10px;}
   .toc .g{
-    font-size:10.5px; font-weight:700; letter-spacing:.14em; color:var(--ghost);
+    /* ⚠️ --ghost（1.75）は線と記号のための色。読む文字には使わない。 */
+    font-size:10.5px; font-weight:700; letter-spacing:.14em; color:var(--muted);
     margin:14px 0 3px;
   }
   .toc .g:first-child{margin-top:0;}
+  /* ⚠️ もくじは指で押す入口。1本28pxでは狭いので 44px を確保する。 */
   .toc a{
-    display:block; text-decoration:none; font-size:13.5px; padding:2px 0;
-    color:var(--ink);
+    display:flex; align-items:center; min-height:44px; text-decoration:none;
+    font-size:13.5px; padding:2px 0; color:var(--ink);
   }
-  .toc a .n{display:inline-block; width:1.9em; color:var(--ghost); font-weight:700; font-size:12px;}
+  .toc a .n{display:inline-block; width:1.9em; color:var(--muted); font-weight:700; font-size:12px;}
   .toc a.on{color:var(--mark); font-weight:700;}
   .toc a.on .n{color:var(--mark);}
 
@@ -115,7 +121,7 @@
   /* ================= 図（アプリ画面の再現） ================= */
   /* 番号ピンが枠の外に11px＋影ぶんはみ出す。その余白を figure 側に持たせる。 */
   figure.shot{margin:0; padding:2px 14px 0;}
-  figcaption{font-size:11.5px; color:var(--ghost); margin-top:7px; text-align:center;}
+  figcaption{font-size:11.5px; color:var(--muted); margin-top:7px; text-align:center;}
   /* 注釈：番号ピンと矢印（使うのは「ここを押す」が言葉で伝わらない図だけ） */
   .pin{
     position:absolute; z-index:3; width:21px; height:21px; border-radius:50%;
@@ -189,7 +195,7 @@
 
   footer{
     margin-top:44px; padding-top:18px; border-top:1px solid var(--hair);
-    font-size:12px; color:var(--ghost); text-align:center; line-height:2;
+    font-size:12px; color:var(--muted); text-align:center; line-height:2;
   }
 
   footer .ask{
@@ -198,7 +204,9 @@
     color:var(--ink); font-size:13px; line-height:1.9;
   }
   footer .ask .h{font-size:11.5px; font-weight:700; letter-spacing:.12em; color:var(--muted);}
-  footer .ask a{font-weight:700; word-break:break-all;}
+  /* 問い合わせ先は単独で押す入口なので 44px を確保する（本文の途中のリンクは対象外） */
+  footer .ask a{display:inline-flex; align-items:center; min-height:44px;
+    font-weight:700; word-break:break-all;}
 
 
 

@@ -5,7 +5,10 @@
               deai-tsukaikata.html / mitsumori-tsukaikata.html
    ================================================================ */
 :root{
-  --paper:#F4F2EE; --surface:#ECE9E3; --ink:#242321; --muted:#77736B;
+  /* ⚠️ --muted は #77736B だと紙の上で 4.2 しか差が無かった（目安4.5）。
+     リード文・Q&Aの答え・表の見出しが全部これ。地が --surface のときも 4.5 を
+     超えるところまで濃くする（#6C6860 ＝ 紙4.96／面4.58）。 */
+  --paper:#F4F2EE; --surface:#ECE9E3; --ink:#242321; --muted:#6C6860;
   --hair:#D8D4CC; --ghost:#BEB9B0; --control:#F8F7F4;
   --mark:#B4562E;                       /* 図の注釈（番号・矢印） */
   /* アプリ画面の再現に使う色（中立トーン） */
@@ -72,6 +75,8 @@ aside.toc{
 aside.toc .t{font-size:11.5px; font-weight:700; letter-spacing:.12em; color:var(--muted); margin-bottom:8px;}
 aside.toc ol{margin:0; padding-left:1.35em;}
 aside.toc li{margin:2px 0; font-size:14px;}
+/* もくじは指で押す入口。44px を確保する（本文の途中のリンクは対象外） */
+aside.toc a{display:inline-flex; align-items:center; min-height:44px;}
 aside.toc a{text-decoration:none; border-bottom:1px solid var(--hair);}
 
 /* ================= 部品 ================= */
@@ -239,9 +244,10 @@ table.grid td.n{color:var(--app-line);}
 
 footer{
   margin-top:56px; padding-top:20px; border-top:1px solid var(--hair);
-  font-size:12.5px; color:var(--ghost); text-align:center; line-height:2;
+  /* --ghost（1.75）は線と記号のための色。読む文字には使わない。 */
+  font-size:12.5px; color:var(--muted); text-align:center; line-height:2;
 }
-footer a{color:var(--muted);}
+footer a{color:var(--muted); display:inline-flex; align-items:center; min-height:44px;}
 
 /* ================= 横幅を使う（タブレット以上） ================= */
 @media (min-width:720px){
