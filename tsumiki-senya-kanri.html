@@ -515,6 +515,45 @@
     .tvwrap{overflow:visible;}
     .tvnote{font-size:8pt;}
   }
+
+  /* ===== チュートリアル（穴あきの暗幕） =====
+     暗幕は「大きな四角4枚」で作り、真ん中だけを空ける。
+     ⚠️ 1枚の幕に穴をあける書き方（clip-path / mask）だと、穴の中のタップまで幕が受けてしまう。
+        4枚に分ければ穴の中には何も無い＝本物のボタンがそのまま押せる。 */
+  .tut{position:fixed; inset:0; z-index:55; pointer-events:none;}
+  /* トースト（z-index:60）はわざと上に出す＝「保存しました」が暗幕に隠れないように */
+  .tut-m{position:fixed; background:rgba(18,14,6,.62); pointer-events:auto;}
+  .tut-ring{position:fixed; pointer-events:none;
+    box-shadow:0 0 0 2.5px var(--accent), 0 0 0 7px color-mix(in srgb, var(--accent) 26%, transparent);
+    transition:box-shadow .16s;}
+  .tut-ring.pulse{box-shadow:0 0 0 3.5px var(--accent), 0 0 0 13px color-mix(in srgb, var(--accent) 20%, transparent);}
+  .tut-card{
+    position:fixed; left:50%; transform:translateX(-50%); top:0;
+    width:min(430px, calc(100% - 18px)); pointer-events:auto;
+    background:var(--surface); color:var(--ink); border:1px solid var(--line);
+    border-radius:16px; box-shadow:0 16px 42px -14px rgba(0,0,0,.55); padding:13px 15px 15px;
+  }
+  .tut-hd{display:flex; align-items:center; gap:10px; margin-bottom:6px;}
+  .tut-n{font-size:.74rem; font-weight:700; color:var(--accent-2); background:var(--accent-wash);
+    border-radius:999px; padding:4px 11px; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .tut-later{margin-left:auto; min-height:var(--tap); padding:0 6px; border:none; background:none;
+    font-family:inherit; font-size:.82rem; color:var(--ink-mid); cursor:pointer;}
+  .tut-t{margin:0; font-size:.92rem; line-height:1.8;}
+  .tut-t b{color:var(--accent-2); font-weight:700;}
+  .tut-next{width:100%; min-height:var(--tap); margin-top:12px; border:none; border-radius:12px;
+    background:var(--accent-fill); color:var(--on-accent); font-family:inherit; font-size:.94rem;
+    font-weight:700; cursor:pointer;}
+  .tut-next:active{transform:scale(.985);}
+  /* 横向きなど高さの低い画面。解説の札が大きいと、光らせた所に重なってしまう */
+  @media (max-height:520px){
+    .tut-card{padding:10px 13px 12px;}
+    .tut-t{font-size:.86rem; line-height:1.65;}
+    .tut-next{margin-top:9px;}
+    .tut-hd{margin-bottom:4px;}
+  }
+  @media (prefers-reduced-motion: reduce){ .tut-ring{transition:none;} }
+  /* 印刷にチュートリアルを出さない（シフト表を刷るときに暗幕が乗ると台無し） */
+  @media print{ .tut{display:none !important;} }
 </style>
 </head>
 <body>
@@ -618,6 +657,10 @@
     </div>
     <button class="btn" id="saveCfg">この内容にする</button>
     <div style="height:10px"></div>
+    <button class="btn sub" id="tutAgain1">はじめの準備を、画面でなぞる</button>
+    <div style="height:10px"></div>
+    <button class="btn sub" id="tutAgain2">毎月の使い方を、画面でなぞる</button>
+    <div style="height:10px"></div>
     <a class="btn sub" href="tsumiki-senya-tsukaikata.html" style="display:flex; align-items:center; justify-content:center; text-decoration:none">使い方をひらく</a>
     <div style="height:10px"></div>
     <button class="btn sub" id="switchShop" hidden>ほかのお店を見る</button>
@@ -701,6 +744,19 @@
   <div class="tvsub">ひとりずつの合計</div>
   <table class="tot" id="tvTotal"></table>
   <p class="tvnote" id="tvNote"></p>
+</div>
+
+<!-- ===== チュートリアル（穴あきの暗幕） ===== -->
+<div class="tut" id="tut" hidden>
+  <div class="tut-m" id="tutMT"></div><div class="tut-m" id="tutMB"></div>
+  <div class="tut-m" id="tutML"></div><div class="tut-m" id="tutMR"></div>
+  <div class="tut-ring" id="tutRing" hidden></div>
+  <div class="tut-card" id="tutCard" role="dialog" aria-live="polite">
+    <div class="tut-hd"><span class="tut-n" id="tutN"></span>
+      <button class="tut-later" id="tutLater">あとで</button></div>
+    <p class="tut-t" id="tutTxt"></p>
+    <button class="tut-next" id="tutNext">つぎへ</button>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1060,6 +1116,7 @@ function renderMonth(){
       shortDays.length ? '赤い日は人手が足りない日（「昼 −1」＝昼にあと1人）。日をタップすると、その日に入れる人が出ます。'
     : anySubmitted     ? '日をタップすると、その日に入れる人と、決めたシフトが出ます。'
     :                    '日をタップすると、その日に入れる人が出ます。ほしい人数を下回ると赤くなります（人数は「設定」で決めます）。';
+  tutMaybeStart();
 }
 
 /* ===== ⑥＋B：シフトを組む・配る ===== */
@@ -1715,6 +1772,255 @@ window.addEventListener('focus',function(){ refresh(); });
 (function(){
   const saved=lsGet(LS_CODE); if(saved) doLogin(saved);
 })();
+/* ===== チュートリアル（穴あきの暗幕） =====
+   ⚠️ 中身はスタッフ側（tsumiki-senya.html）と同じ仕掛け。直すときは両方そろえる。
+   店長は2章に分ける＝はじめの準備（スタッフ0人）と、毎月の使い方（希望が集まってから）。
+   1本にすると、初回はカレンダーが空っぽで「赤い日の見かた」を教えようがない。 */
+const LS_TUT='tsumiki_senya_ktut', LS_TUT2='tsumiki_senya_ktut2', LS_TIP='tsumiki_senya_ktip';
+function tutKey(base){ return base+'_'+(shopId||'x'); }
+function tq(sel){ try{ return document.querySelector(sel); }catch(e){ return null; } }
+function sheetOpen(){ return sheet.classList.contains('show'); }
+function tutVisible(el){ if(!el) return false; const r=el.getBoundingClientRect(); return r.width>2 && r.height>2; }
+function tutAnySub(){ return (staffList||[]).some(function(s2){ return s2.active && s2.days>0; }); }
+function viewShown(n){ const v=tq('#view'+n); return !!v && !v.hidden; }
+
+/* 第1章＝はじめの準備（スタッフを配るところまで） */
+function tutSteps1(){
+  return [
+    {sel:'.tabs',
+     text:'上の3つで画面が変わります。<b>一覧</b>＝希望とシフト、<b>スタッフ</b>＝人の登録、<b>設定</b>＝お店の決めごと。'},
+    {sel:'#tab3', text:'はじめに<b>設定</b>をすませます。ここを押してください。',
+     done:function(){ return viewShown(3); }},
+    {sel:'#cfDeadline',
+     text:'いつまでに希望を出してもらうか。<b>前の月の◯日まで</b>です。<br>締切をすぎると、スタッフは自分では直せなくなります。'},
+    {sel:'#cfWdays', need:function(){ return viewShown(3); },
+     text:'お店の<b>定休日</b>。押した曜日は、はじめから「休」になります。'},
+    {sel:'#cfSlots', need:function(){ return viewShown(3); },
+     text:'時間帯と、その時間に<b>ほしい人数</b>。<br>ここで決めた人数を下回った日が、一覧で<b>赤く</b>なります。時間帯の名前は、スタッフの画面にもそのまま出ます。'},
+    {sel:'#saveCfg', need:function(){ return viewShown(3); }, tap:true,
+     text:'決めたら<b>「この内容にする」</b>。あとからいつでも変えられます。'},
+    {sel:'#tab2', text:'つぎに<b>スタッフ</b>を登録します。',
+     done:function(){ return viewShown(2); }},
+    {sel:'.addrow', need:function(){ return viewShown(2); },
+     text:'お名前を入れて<b>「追加」</b>。その人だけの<b>合言葉と専用URL</b>ができます。',
+     done:function(){ return tutVisible(tq('#staffBox .staff')); }},
+    {sel:'#staffBox .staff .acts .btn', need:function(){ return viewShown(2); },
+     text:'<b>「送る文をコピー」</b>を押すと、その人に渡す文ができます。<br>LINEに貼って、<b>ひとりずつ</b>お送りください。'},
+    {sel:'.tabs', enter:function(){ const b=tq('#tab1'); if(b && !viewShown(1)) b.click(); },
+     text:'準備はこれで終わりです。あとは希望が集まるのを待ちます。<br>集まると、この<b>一覧</b>が「足りない日」を教えてくれます。'}
+  ];
+}
+/* 第2章＝毎月の使い方（希望が集まってから） */
+function tutSteps2(){
+  return [
+    {sel:'#stateRow', enter:function(){ const b=tq('#tab1'); if(b && !viewShown(1)) b.click(); },
+     text:'ここが今月のようすです。<b>足りない日</b>が何日あるか、<b>何人が出し終わったか</b>が出ます。'},
+    {sel:'#cal', pad:4,
+     text:'<b>赤い日</b>は人手が足りない日。<b>「昼 −1」＝昼にあと1人</b>という意味です。<br>日をタップしてみてください。',
+     done:sheetOpen},
+    {sel:'#slots', need:sheetOpen,
+     text:'その日に<b>入れる人と時間</b>が出ます。<b>○</b>は入れます、<b>△</b>は行けたら。'},
+    {sel:'#modeSeg', need:sheetOpen,
+     text:'<b>「シフトを決める」</b>に切り替えると、この日に<b>誰を入れるか</b>を選べます。',
+     done:function(){ const b=tq('#modeSeg button[data-m="kime"]'); return !!b && b.classList.contains('on'); }},
+    {sel:'#slots', need:function(){ const b=tq('#modeSeg button[data-m="kime"]'); return sheetOpen() && !!b && b.classList.contains('on'); },
+     text:'名前を押すと<b>入る／外れる</b>。枠ごとに「全員入れる」もできます。'},
+    {sel:'#shiftBox', enter:function(){ if(sheetOpen()) closeSheet(); },
+     text:'決まったら、ここから<b>シフト表</b>を開けます。<b>印刷</b>して貼り出したり、<b>LINEに貼る文</b>にもできます。<br><b>「みんなに知らせる」</b>を押すと、スタッフの画面にも出ます。'}
+  ];
+}
+
+let tutOn=false, tutIdx=0, tutList=[], tutRaf=0, tutTimer=0, tutLastKey='', tutMode='tour', tutFlag='';
+
+function tutStart(list, mode, flag){
+  if(!list || !list.length) return;
+  tutList=list; tutIdx=-1; tutMode=mode||'tour'; tutFlag=flag||''; tutOn=true;
+  document.getElementById('tut').hidden=false;
+  tutGo(0);
+  /* ⚠️ 見張りは「タイマー」を本命にする。requestAnimationFrame は、
+     裏に回ったタブや一部の埋め込み画面では止まってしまい、
+     そうなると「押したのに次へ進まない」で完全に詰む。
+     rAF はなめらかさのための追加。止まってもタイマーが拾う。 */
+  if(tutOn && !tutTimer) tutTimer=setInterval(tutTick,90);
+  if(tutOn && !tutRaf) tutRaf=requestAnimationFrame(tutRafLoop);
+}
+function tutGo(i){
+  while(i<tutList.length){
+    const st=tutList[i];
+    if(st.enter) try{ st.enter(); }catch(e){}
+    if(st.need && !st.need()){ i++; continue; }
+    if(st.sel && !tutVisible(tq(st.sel))){ i++; continue; }   /* 出ていない部品は飛ばす */
+    break;
+  }
+  if(i>=tutList.length){ tutEnd(true); return; }
+  tutIdx=i;
+  const s=tutList[i], el=s.sel?tq(s.sel):null;
+  document.getElementById('tutTxt').innerHTML=s.text;
+  document.getElementById('tutN').textContent = tutMode==='tour' ? (i+1)+' / '+tutList.length : 'ワンポイント';
+  document.getElementById('tutNext').textContent = (tutMode!=='tour')?'わかりました':((i===tutList.length-1)?'おしまい':'つぎへ');
+  document.getElementById('tutLater').textContent = (tutMode==='tour')?'あとで':'とじる';
+  tutLastKey='';
+  if(el) tutScrollIn(el);
+  tutPlace();
+  /* ⚠️ 歩が変わった直後は、まだ画面が動いている最中のことがある（保存の描き直し・シートの出入り）。
+     その一瞬の位置で穴を開けると、穴が出ないまま次のタイマーまで暗いだけになる。少し置いて開け直す。 */
+  setTimeout(function(){ tutLastKey=''; tutMoved(); },120);
+  setTimeout(function(){ tutLastKey=''; tutMoved(); },430);
+}
+function tutVh(){ return (window.visualViewport&&window.visualViewport.height)||window.innerHeight; }
+function tutScrollIn(el){
+  /* ⚠️ シートの中は独立してスクロールする。押してほしいものが画面の外にいることがある。
+     なめらかスクロールが効かない場面（動きを減らす設定・埋め込み画面）もあるので、
+     効かなかったら一瞬で連れて行く。ここで詰まると、押すものが見えないまま止まる。 */
+  const out=function(){ const r=el.getBoundingClientRect(), vh=tutVh(); return r.top<70 || r.bottom>vh-210; };
+  if(!out()) return;
+  try{ el.scrollIntoView({block:'center', behavior:'smooth'}); }
+  catch(e){ try{ el.scrollIntoView(); }catch(e2){} }
+  setTimeout(function(){ if(out()){ try{ el.scrollIntoView({block:'center'}); }catch(e){} tutMoved(); } },500);
+}
+function tutPlace(){
+  const s=tutList[tutIdx]; if(!s) return;
+  const el=s.sel?tq(s.sel):null;
+  const mt=document.getElementById('tutMT'), mb=document.getElementById('tutMB'),
+        ml=document.getElementById('tutML'), mr=document.getElementById('tutMR'),
+        ring=document.getElementById('tutRing'), card=document.getElementById('tutCard');
+  const vw=document.documentElement.clientWidth, vh=tutVh();
+  let x=0,y=0,w=0,h=0,br=12, hole=false;
+  if(el){
+    const r=el.getBoundingClientRect(), pad=(s.pad==null?6:s.pad);
+    if(r.width>2 && r.height>2 && r.bottom>0 && r.top<vh && r.right>0 && r.left<vw){
+      x=Math.max(0, r.left-pad); y=Math.max(0, r.top-pad);
+      w=Math.min(vw, r.right+pad)-x; h=Math.min(vh, r.bottom+pad)-y;
+      br=Math.min(20,(parseFloat(getComputedStyle(el).borderTopLeftRadius)||6)+pad);
+      hole = w>2 && h>2;
+    }
+  }
+  if(hole){
+    mt.style.cssText='left:0;top:0;right:0;height:'+y+'px';
+    mb.style.cssText='left:0;top:'+(y+h)+'px;right:0;bottom:0';
+    ml.style.cssText='left:0;top:'+y+'px;width:'+x+'px;height:'+h+'px';
+    mr.style.cssText='left:'+(x+w)+'px;top:'+y+'px;right:0;height:'+h+'px';
+    ring.hidden=false;
+    ring.style.cssText='left:'+x+'px;top:'+y+'px;width:'+w+'px;height:'+h+'px;border-radius:'+br+'px';
+  }else{
+    mt.style.cssText='inset:0';
+    mb.style.cssText='display:none'; ml.style.cssText='display:none'; mr.style.cssText='display:none';
+    ring.hidden=true;
+  }
+  /* 解説文は、穴の下 → 入らなければ上 → それも無理なら画面の下 */
+  const ch=card.getBoundingClientRect().height, gap=12, edge=16;
+  let top;
+  if(!hole) top=Math.max(edge,(vh-ch)/2);
+  else if(y+h+gap+ch <= vh-edge) top=y+h+gap;
+  else if(y-gap-ch >= edge) top=y-gap-ch;
+  else top=Math.max(edge, vh-ch-edge);
+  card.style.top=Math.round(top)+'px';
+}
+/* 穴の位置がずれていたら開け直す（スクロール・画面回転・シートの出入り） */
+function tutMoved(){
+  if(!tutOn) return;
+  const s=tutList[tutIdx]; if(!s) return;
+  const el=s.sel?tq(s.sel):null;
+  let k='-';
+  if(el){ const r=el.getBoundingClientRect(); k=[r.top,r.left,r.width,r.height,tutVh()].join(','); }
+  if(k!==tutLastKey){ tutLastKey=k; tutPlace(); }
+}
+/* 進む条件を見張る本命 */
+function tutTick(){
+  if(!tutOn) return;
+  const s=tutList[tutIdx]; if(!s) return;
+  if(s.need && !s.need()){ tutGo(tutIdx+1); return; }
+  if(s.done && s.done()){ tutGo(tutIdx+1); return; }
+  tutMoved();
+}
+function tutRafLoop(){
+  tutRaf=0; if(!tutOn) return;
+  tutMoved();
+  tutRaf=requestAnimationFrame(tutRafLoop);
+}
+/* 押した直後は、タイマーを待たずに見に行く（反応を速くする）。
+   tap:true の歩は、光らせたものを押したら進む（保存など、押した結果が画面に出ないもの用）。 */
+document.addEventListener('click',function(e){
+  if(!tutOn) return;
+  const s=tutList[tutIdx];
+  if(s && s.tap && s.sel){ const el=tq(s.sel); if(el && e.target && el.contains(e.target)){ setTimeout(function(){ tutGo(tutIdx+1); },260); return; } }
+  setTimeout(tutTick,0);
+},true);
+window.addEventListener('scroll',function(){ tutMoved(); },true);
+window.addEventListener('resize',function(){ tutMoved(); });
+if(window.visualViewport){ window.visualViewport.addEventListener('resize',function(){ tutMoved(); }); }
+function tutEnd(done){
+  if(!tutOn) return;
+  tutOn=false;
+  if(tutTimer){ clearInterval(tutTimer); tutTimer=0; }
+  if(tutRaf){ cancelAnimationFrame(tutRaf); tutRaf=0; }
+  document.getElementById('tut').hidden=true;
+  if(tutMode==='tour' && tutFlag) lsSet(tutKey(tutFlag), done?'done':'later');
+}
+document.getElementById('tutNext').addEventListener('click',function(){ tutGo(tutIdx+1); });
+document.getElementById('tutLater').addEventListener('click',function(){ tutEnd(false); });
+document.addEventListener('keydown',function(e){ if(tutOn && e.key==='Escape') tutEnd(false); });
+/* 暗いところを押した人には、明るいところを光らせて知らせる（無反応にしない） */
+['tutMT','tutMB','tutML','tutMR'].forEach(function(id){
+  document.getElementById(id).addEventListener('click',function(){
+    const r=document.getElementById('tutRing'); if(r.hidden) return;
+    r.classList.add('pulse'); setTimeout(function(){ r.classList.remove('pulse'); },280);
+  });
+});
+document.getElementById('tutAgain1').addEventListener('click',function(){
+  if(!cur||!shop) return;
+  if(sheetOpen()) closeSheet();
+  window.scrollTo(0,0); tutStart(tutSteps1(),'tour',LS_TUT);
+});
+document.getElementById('tutAgain2').addEventListener('click',function(){
+  if(!cur||!shop) return;
+  /* 希望が1件も無いと、赤い日もシフトも出ない＝なぞるものが無い */
+  if(!tutAnySub()){ toast('希望が集まってからご案内できます'); return; }
+  if(sheetOpen()) closeSheet();
+  const b=document.getElementById('tab1'); if(b && !viewShown(1)) b.click();
+  window.scrollTo(0,0); tutStart(tutSteps2(),'tour',LS_TUT2);
+});
+
+/* ===== 後出しのワンポイント（必要になった時に1つだけ・一度きり） ===== */
+let tipShown=false;
+function tipDone(id){ return ((lsGet(tutKey(LS_TIP))||'').split(',').indexOf(id)>=0); }
+function tipShow(id, sel, text){
+  if(tipShown || tutOn || tipDone(id)) return false;
+  if(!tutVisible(tq(sel))) return false;
+  const v=lsGet(tutKey(LS_TIP))||'';
+  lsSet(tutKey(LS_TIP), v?v+','+id:id);
+  tipShown=true;
+  tutStart([{sel:sel, text:text}],'tip');
+  return true;
+}
+function tutTips(){
+  if(tipShown || tutOn || !cur) return;
+  if(sheetOpen()) return;
+  if(tipShow('req','.reqbar',
+      '締切のあとに<b>スタッフから届いたお願い</b>です。押すと中身が見られます。<br><b>受け入れると希望に入り</b>、この日の人数に数えられます。')) return;
+  if((cur.assign||[]).length && !cur.published &&
+     tipShow('publish','#shiftBox',
+      'シフトは<b>「みんなに知らせる」</b>を押すまでスタッフには見えません。<br>直しおわってから押してください。')) return;
+}
+
+let tutTried=false;
+function tutMaybeStart(){
+  if(tutOn || !cur || !shop) return;
+  if(!tutTried){
+    tutTried=true;
+    /* まだスタッフが1人もいない＝はじめての店長。準備からご案内する */
+    if(!lsGet(tutKey(LS_TUT)) && !(staffList||[]).length){
+      setTimeout(function(){ if(!tutOn) tutStart(tutSteps1(),'tour',LS_TUT); },260);
+      return;
+    }
+    /* 希望が集まった月をはじめて開いたとき＝毎月の使い方 */
+    if(!lsGet(tutKey(LS_TUT2)) && tutAnySub()){
+      setTimeout(function(){ if(!tutOn) tutStart(tutSteps2(),'tour',LS_TUT2); },260);
+      return;
+    }
+  }
+  tutTips();
+}
 </script>
 </body>
 </html>
