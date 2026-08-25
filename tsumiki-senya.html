@@ -168,6 +168,9 @@
 
   @media (max-width:430px){
     #calCard{padding-inline:clamp(5px,1.8vw,10px);}
+    /* ⚠️ カレンダーだけ広げたいので、中の文字は元の位置に戻す。
+       これが無いと、このカードの中だけ文字の左端が6pxずれる。 */
+    #calCard > *:not(.cal):not(.wd){padding-inline:6px;}
   }
   /* 320px級の小さい画面では、7列×44px（308px）が余白ぶん入りきらない。
      カレンダーだけ画面の端まで広げて、マスを44px以上に保つ。 */
@@ -178,7 +181,10 @@
       width:auto; padding-inline:3px;
       border-radius:0; border-left:0; border-right:0; box-shadow:none;
     }
-    #calCard > *:not(.cal):not(.wd){padding-inline:8px;}
+    /* 全幅にしたぶん、中の文字だけはほかのカードと同じ左端に戻す
+       （＝ページの余白 + カードの余白 − このカードの余白3px） */
+    #calCard > *:not(.cal):not(.wd){
+      padding-inline:calc(max(var(--pad-x), env(safe-area-inset-left)) + var(--card-pad) - 3px);}
     .cell{border-radius:7px;}
   }
 
@@ -352,7 +358,9 @@
   .outrow button.main{background:var(--accent); color:#fff; border-color:transparent;}
   .outrow button:active{transform:scale(.97);}
 
-  .a2hs{background:var(--accent-wash); border-radius:16px; padding:15px 16px; margin-bottom:var(--gap);}
+  /* ほかのカードと同じ角丸・同じ文字の左端にそろえる（枠は透明で位置合わせだけ） */
+  .a2hs{background:var(--accent-wash); border:1px solid transparent; border-radius:18px;
+    padding:var(--card-pad); margin-bottom:var(--gap);}
   .a2hs .t{font-weight:700; font-size:.95rem; color:var(--accent-2); margin-bottom:6px;}
   .a2hs .b{font-size:.84rem; color:var(--accent-2); line-height:1.75;}
   .a2hs .b b{font-weight:700;}

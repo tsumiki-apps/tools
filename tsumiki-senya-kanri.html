@@ -194,7 +194,10 @@
       width:auto; padding-inline:3px;
       border-radius:0; border-left:0; border-right:0; box-shadow:none;
     }
-    #view1 > *:not(.cal):not(.wd){padding-inline:8px;}
+    /* 全幅にしたぶん、中の文字だけはほかのカードと同じ左端に戻す
+       （＝ページの余白 + カードの余白 − このカードの余白3px） */
+    #view1 > *:not(.cal):not(.wd){
+      padding-inline:calc(max(var(--pad-x), env(safe-area-inset-left)) + var(--card-pad) - 3px);}
     .cell{border-radius:7px;}
   }
 
@@ -253,8 +256,10 @@
   /* 設定 */
   .field{margin-bottom:15px;}
   .field label{display:block; font-size:.82rem; font-weight:700; color:var(--ink-mid); margin-bottom:6px;}
+  /* ⚠️ 時刻の入力だけ端末の作りで2px高くなっていた。高さを明示してそろえる。 */
   .field input[type=text], .field input[type=number], .field input[type=time]{
-    width:100%; min-height:var(--tap); font-family:var(--sans); font-size:1rem; padding:12px;
+    width:100%; height:50px; min-height:var(--tap); line-height:1.2;
+    font-family:var(--sans); font-size:1rem; padding:0 12px;
     border:1.5px solid var(--line-2); border-radius:12px; background:var(--surface); color:var(--ink);}
   .field input:focus{outline:none; border-color:var(--accent);}
   .inline{display:flex; gap:9px; align-items:center;}
@@ -391,7 +396,10 @@
   .slotcfg .lab{flex:0 0 auto; font-weight:700; font-size:.95rem; min-width:2.4em;}
 
   /* ===== v3：シフト表・偏り・まとめて決める・頼めそうな人 ===== */
-  .shiftcard{border:1px solid var(--line); border-radius:14px; padding:13px; margin-top:13px;
+  /* ⚠️ 以前は #shiftBox の中にもう1枚 div を入れていたため、
+     ほかの箱（足りない日・お願い）と左右がずれていた（左25/中身39 対 左19/中身25）。
+     #reqBox と同じく、箱そのものに class を付けて形をそろえる。 */
+  .shiftcard{border:1px solid var(--line); border-radius:14px; margin-top:13px;
     background:var(--surface);}
   .shiftcard.on{border-color:var(--good); background:var(--good-wash);}
   .shiftcard .hd2{font-weight:700; font-size:.92rem; margin-bottom:3px;}
@@ -1023,12 +1031,12 @@ function fixedOf(sid){ const s2=staffList.find(x=>x.id===sid); return s2?(s2.fix
 function fixedMinOf(sid){ const s2=staffList.find(x=>x.id===sid); return s2?(s2.fixed_min||0):0; }
 
 function renderShiftBox(anySubmitted){
-  const box=document.getElementById('shiftBox'); box.innerHTML='';
+  const box=document.getElementById('shiftBox'); box.innerHTML=''; box.className='';
   if(!activeStaff().length && !(cur.assign||[]).length) return;
   const slotsN=(cur.assign||[]).length;
   const peopleN=new Set((cur.assign||[]).map(a=>a.staff_id)).size;
 
-  const card=document.createElement('div');
+  const card=box;   // 入れ子にせず、箱そのものを使う（ほかの箱と左右がそろう）
   card.className='shiftcard'+(cur.published?' on':'');
   card.innerHTML='<div class="hd2">'+(cur.published?'✓ シフトを知らせました':'シフトを組む')+'</div>';
 
@@ -1055,7 +1063,6 @@ function renderShiftBox(anySubmitted){
     const r=document.createElement('button'); r.className='redo'; r.textContent='この月のシフトを全部やり直す';
     r.addEventListener('click',clearMonth); card.appendChild(r);
   }
-  box.appendChild(card);
 }
 
 async function assignMonth(){

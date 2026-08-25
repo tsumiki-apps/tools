@@ -7,7 +7,6 @@
 <meta name="description" content="つみき&amp;せんやの使い方。スタッフは働ける日をタップするだけ、店長は人手が足りない日がひと目で分かります。">
 <link rel="apple-touch-icon" href="icon-tsumiki-senya.png">
 <style>
-<style>
   /* ================================================================
      つみき 取扱説明書 共通スタイル v2（1項目＝1図＋数行）
      ・外部読み込みゼロ（フォント/CDN/画像すべて無し）
@@ -254,10 +253,10 @@
   /* つみき&せんや 本体と同じ色（画面再現に使う） */
   :root{
     --app-paper:#f5f4f0; --app-surface:#fffefb; --app-surface2:#efece5;
-    --app-ink:#1d1a15; --app-mid:#5b554a; --app-soft:#8f8877;
+    --app-ink:#1d1a15; --app-mid:#5b554a; --app-soft:#7c7464;   /* アプリと同じ値にそろえた（読みやすさ 3.5→4.6） */
     --app-line:#e2ded4; --app-line2:#d8d3c7;
     --acc:#b06f26; --acc2:#8a5a24; --acc-wash:#f0e4d1;
-    --good:#4c7a51; --good-wash:#dde9dd; --warn:#b0522a; --warn-wash:#f2e0d4;
+    --good:#3f6a44; --good-wash:#dde9dd; --warn:#9b4520; --warn-wash:#f2e0d4;   /* アプリと同じ値 */
     --sat:#3f6b8a; --sun:#a2513f;
   }
 
@@ -306,11 +305,13 @@
   .cal7.hd7{margin-bottom:3px;}
   .cal7.hd7 i{font-style:normal; text-align:center; font-size:9.5px; font-weight:700; color:var(--app-soft);}
   .cal7.hd7 i.sat{color:var(--sat);} .cal7.hd7 i.sun{color:var(--sun);}
+  /* アプリと同じ考え方＝高さは中身ではなく幅から決める（比率1.12）。
+     min-height だと図ごとに縦横比がばらつく（実測 1.06〜1.18）。 */
   .cal7 .c{border:1px solid var(--app-line); border-radius:7px; background:var(--app-surface);
-    min-height:40px; display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:1px; padding:2px 1px;}
+    aspect-ratio:1 / 1.2; min-height:38px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:1px; padding:2px 1px; overflow:hidden;}
   .cal7 .c .d{font-size:10.5px; font-weight:800; line-height:1.05;}
-  .cal7 .c .s{font-size:8.5px; color:var(--app-soft); line-height:1.2; text-align:center;}
+  .cal7 .c .s{font-size:8px; color:var(--app-soft); line-height:1.15; text-align:center;}
   .cal7 .c.bl{border:none; background:transparent;}
   .cal7 .c.rest{background:var(--app-surface2); border-style:dashed;}
   .cal7 .c.rest .d{color:var(--app-soft);}
@@ -400,9 +401,9 @@
   .who-tag.m{background:var(--acc-wash); color:var(--acc2);}
 
   /* ===== v2：枠の印・シフトを決める・提出ぐあい・お願い ===== */
-  .cal7 .c .kk{display:flex; gap:2px; justify-content:center; margin-top:2px;}
+  .cal7 .c .kk{display:flex; gap:2px; justify-content:center; margin-top:2px; flex-wrap:nowrap;}
   .cal7 .c .kk i{font-style:normal; font-size:8px; font-weight:800; line-height:1; padding:2px 3px;
-    border-radius:4px; background:var(--acc); color:#fff;}
+    border-radius:4px; background:var(--acc); color:#fff; white-space:nowrap;}
   .cal7 .c .kk i.t{background:transparent; color:var(--acc2); box-shadow:0 0 0 1px var(--acc) inset;}
   .cal7 .c .kk i.a{background:var(--good); color:#fff;}
   .slotbox .pp .mk2{margin-left:6px; font-size:9px; font-weight:800; color:var(--acc2);
@@ -445,6 +446,8 @@
   table.sft2 th, table.sft2 td{border:1px solid var(--app-line); padding:4px 6px;
     text-align:left; vertical-align:top; line-height:1.45;}
   table.sft2 th{background:var(--app-surface2); font-weight:800; white-space:nowrap;}
+  /* 狭い画面では見出しが長くて図からはみ出すので、折り返させる */
+  @media (max-width:420px){ table.sft2 th{white-space:normal;} }
   table.sft2 td.dt2{white-space:nowrap; font-weight:800; width:4.6em;}
   table.sft2 td.emp2{color:var(--warn); font-weight:800;}
   table.sft2 tr.rest2 td{background:var(--app-surface2); color:var(--app-soft);}
@@ -821,7 +824,7 @@
     <article class="item" id="i17">
       <figure class="shot">
         <div class="screen">
-          <div class="pills"><i class="ng">締切がすぎました（9月20日）</i><i class="cnt">14日 出しました</i></div>
+          <div class="pills"><i class="ng">締切ずみ（9月20日）</i><i class="cnt">14日 出しました</i></div>
           <div class="slotbox">
             <div class="sh"><b>昼</b><span class="tm">11:00 〜 14:30 で出しています</span></div>
             <div class="bigbtn" style="background:var(--app-surface2);color:var(--app-mid);border:1px solid var(--app-line);margin-top:6px">行けなくなりました</div>
