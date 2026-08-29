@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="近江高島から銀閣寺・下鴨神社・上賀茂神社・金閣寺を車で回り、京都18:16発の新幹線に間に合わせる一日の時刻表。">
+<meta name="theme-color" content="#EFF2ED">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="洛北の時刻表">
+<title>洛北ドライブ時刻表</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600&family=Zen+Maru+Gothic:wght@400;500;700&display=swap">
+<style>
+  :root{
+    --ground:#EFF2ED;
+    --surface:#FFFFFF;
+    --surface-2:#E7ECE5;
+    --ink:#16211B;
+    --muted:#5E6B62;
+    --rule:#D3DBD1;
+    --rule-soft:#E3E9E1;
+    --cedar:#1F5C43;
+    --cedar-soft:#E3EDE6;
+    --gold:#8F6410;
+    --gold-soft:#F5EBD6;
+    --band:#16211B;
+    --band-ink:#EFF2ED;
+    --band-gold:#D9AE55;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0F1613;
+      --surface:#16201B;
+      --surface-2:#1D2822;
+      --ink:#E6EBE4;
+      --muted:#94A199;
+      --rule:#27332C;
+      --rule-soft:#1F2A24;
+      --cedar:#6FB08F;
+      --cedar-soft:#1A2B22;
+      --gold:#D3A648;
+      --gold-soft:#2A2317;
+      --band:#08100C;
+      --band-ink:#E6EBE4;
+      --band-gold:#D9AE55;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0F1613;
+    --surface:#16201B;
+    --surface-2:#1D2822;
+    --ink:#E6EBE4;
+    --muted:#94A199;
+    --rule:#27332C;
+    --rule-soft:#1F2A24;
+    --cedar:#6FB08F;
+    --cedar-soft:#1A2B22;
+    --gold:#D3A648;
+    --gold-soft:#2A2317;
+    --band:#08100C;
+    --band-ink:#E6EBE4;
+    --band-gold:#D9AE55;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--ground);
+    color:var(--ink);
+    font-family:"Zen Maru Gothic","Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+    font-size:16px;
+    line-height:1.75;
+    margin:0;
+    padding:0 max(16px,env(safe-area-inset-left)) calc(56px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-right));
+  }
+  .page{max-width:760px;margin:0 auto}
+
+  .num{font-family:"Barlow Condensed","Zen Maru Gothic",sans-serif;font-variant-numeric:tabular-nums;font-weight:500;letter-spacing:.01em}
+
+  /* ---- masthead ---- */
+  .masthead{padding:40px 0 24px;display:flex;flex-direction:column;gap:10px}
+  .kicker{
+    display:flex;flex-wrap:wrap;gap:10px 14px;align-items:baseline;
+    font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:0;
+  }
+  .kicker .live{color:var(--cedar)}
+  h1{
+    font-size:clamp(1.7rem,6.5vw,2.6rem);line-height:1.28;margin:0;font-weight:700;
+    text-wrap:balance;letter-spacing:-.01em;
+  }
+  h1 .thin{display:block;font-size:.5em;font-weight:400;color:var(--muted);letter-spacing:.04em;margin-top:8px;line-height:1.6}
+
+  /* ---- departure band ---- */
+  .band{
+    background:var(--band);color:var(--band-ink);border-radius:4px;
+    padding:20px 22px;display:grid;gap:18px;
+    grid-template-columns:1fr;align-items:center;
+  }
+  .band .label{font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:var(--band-gold);margin:0 0 6px}
+  .band .row{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .band .big{font-size:clamp(2.4rem,11vw,3.4rem);line-height:1;color:var(--band-gold)}
+  .band .arrow{font-size:1.1rem;opacity:.5}
+  .band .to{font-size:clamp(1.2rem,5vw,1.5rem);line-height:1;opacity:.75}
+  .band .where{font-size:.85rem;opacity:.65;margin:8px 0 0}
+  .band .count{
+    border-top:1px solid rgba(217,174,85,.28);padding-top:14px;
+    font-size:.85rem;opacity:.85;margin:0;
+  }
+  .band .count strong{color:var(--band-gold);font-weight:500}
+  @media (min-width:620px){
+    .band{grid-template-columns:1.4fr 1fr;gap:28px}
+    .band .count{border-top:0;border-left:1px solid rgba(217,174,85,.28);padding:2px 0 2px 24px}
+  }
+
+  /* ---- section heads ---- */
+  h2{
+    font-size:.74rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);
+    font-weight:500;margin:52px 0 0;padding-bottom:10px;border-bottom:1px solid var(--rule);
+    display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+  }
+  h2 .jp{letter-spacing:.06em;text-transform:none;font-size:.95rem;color:var(--ink);font-weight:700}
+
+  /* ---- timetable ---- */
+  .board{list-style:none;margin:0;padding:0}
+  .board>li{border-bottom:1px solid var(--rule-soft)}
+  .stop{display:grid;grid-template-columns:3.6rem 1fr;gap:0 16px;padding:20px 0}
+  .stop .time{font-size:1.6rem;line-height:1.1;color:var(--cedar);padding-top:2px}
+  .stop h3{margin:0;font-size:1.06rem;font-weight:700;line-height:1.45;text-wrap:balance}
+  .stop p{margin:6px 0 0;font-size:.9rem;color:var(--muted)}
+  .stop .dur{
+    display:inline-block;font-size:.7rem;letter-spacing:.06em;
+    background:var(--cedar-soft);color:var(--cedar);border-radius:999px;padding:2px 10px;margin-left:8px;
+    vertical-align:.15em;font-weight:500;
+  }
+  .meta{
+    margin-top:12px;font-size:.82rem;color:var(--muted);
+    display:flex;flex-direction:column;gap:4px;
+  }
+  .meta .k{color:var(--ink);font-weight:500}
+
+  .leg{
+    display:grid;grid-template-columns:3.6rem 1fr;gap:0 16px;
+    padding:0 0 20px;font-size:.82rem;color:var(--muted);
+  }
+  .leg .rail{
+    border-left:1px dashed var(--rule);margin-left:1.7rem;height:100%;min-height:14px;
+  }
+  .leg .txt{padding-top:0}
+  .leg .txt b{color:var(--ink);font-weight:500}
+
+  .stop.pin .time{color:var(--gold)}
+  .stop.pin h3{color:var(--gold)}
+
+  /* ---- fork ---- */
+  .fork{padding:22px 0 24px}
+  .fork .gate{
+    display:flex;align-items:baseline;gap:14px;margin-bottom:16px;
+  }
+  .fork .gate .time{font-size:1.6rem;line-height:1.1;color:var(--gold);width:3.6rem;flex:none}
+  .fork .gate h3{margin:0;font-size:1.06rem;font-weight:700}
+  .lanes{display:grid;gap:12px;grid-template-columns:1fr}
+  @media (min-width:620px){.lanes{grid-template-columns:1fr 1fr;margin-left:calc(3.6rem + 16px)}}
+  .lane{background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:14px 16px}
+  .lane .cond{
+    font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--cedar);margin:0 0 6px;font-weight:500;
+  }
+  .lane.b .cond{color:var(--gold)}
+  .lane h4{margin:0 0 4px;font-size:.98rem;font-weight:700}
+  .lane p{margin:0;font-size:.85rem;color:var(--muted)}
+
+  /* ---- callout ---- */
+  .callout{
+    background:var(--gold-soft);border-left:3px solid var(--gold);border-radius:0 4px 4px 0;
+    padding:16px 18px;margin-top:14px;
+  }
+  .callout p{margin:0;font-size:.88rem}
+  .callout p+p{margin-top:8px}
+  .callout .hd{font-weight:700;color:var(--gold)}
+
+  /* ---- table ---- */
+  .scroller{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:18px}
+  table{width:100%;border-collapse:collapse;font-size:.88rem;min-width:420px}
+  caption{text-align:left;font-size:.8rem;color:var(--muted);padding-bottom:10px}
+  th,td{padding:10px 8px;border-bottom:1px solid var(--rule-soft);text-align:left}
+  th{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  td.n{text-align:right;white-space:nowrap;font-family:"Barlow Condensed",sans-serif;font-variant-numeric:tabular-nums;font-size:1.02rem}
+  tr.total td{border-bottom:0;border-top:1px solid var(--rule);font-weight:700;padding-top:12px}
+  tr.total td.n{color:var(--gold)}
+
+  /* ---- notes ---- */
+  .notes{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:14px}
+  .notes li{
+    display:grid;grid-template-columns:1.6rem 1fr;gap:0 10px;
+    font-size:.89rem;color:var(--muted);
+  }
+  .notes .n{font-family:"Barlow Condensed",sans-serif;color:var(--cedar);font-size:1.05rem;line-height:1.5}
+  .notes b{color:var(--ink);font-weight:700}
+
+  footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--rule);font-size:.76rem;color:var(--muted)}
+  footer p{margin:0 0 6px}
+
+  a{color:var(--cedar)}
+  :focus-visible{outline:2px solid var(--cedar);outline-offset:3px;border-radius:2px}
+</style>
+
+</head>
+<body>
+<div class="page">
+
+  <header class="masthead">
+    <p class="kicker">
+      <span>2026.08.29 SAT</span>
+      <span>近江高島 → 京都</span>
+      <span class="live">車で移動</span>
+    </p>
+    <h1>洛北をめぐって、<br>18時16分に間に合う
+      <span class="thin">銀閣寺・下鴨神社・上賀茂神社・金閣寺。<br>駐車場のある社寺だけでつないだ、一日の時刻表。</span>
+    </h1>
+  </header>
+
+  <section class="band" aria-label="この日のゴール">
+    <div>
+      <p class="label">Goal — 東海道新幹線</p>
+      <p class="row" style="margin:0">
+        <span class="num big">18:16</span>
+        <span class="arrow">→</span>
+        <span class="num to">20:27</span>
+      </p>
+      <p class="where">京都 発 → 東京 着／京都駅 八条口で降車</p>
+    </div>
+    <p class="count" id="countdown">出発まで <strong>—</strong></p>
+  </section>
+
+  <h2><span class="jp">時刻表</span><span>Timetable</span></h2>
+  <ol class="board">
+
+    <li>
+      <div class="stop">
+        <div class="num time">10:50</div>
+        <div>
+          <h3>近江高島 出発</h3>
+          <p>国道161号を南下 → 志賀バイパス → 湖西道路（無料の自動車専用道）→ 西大津バイパス → 山中越（県道30号）で比叡の南を越える。</p>
+        </div>
+      </div>
+      <div class="leg"><div class="rail"></div><p class="txt" style="margin:0">約48km／<b>1時間10分</b></p></div>
+    </li>
+
+    <li>
+      <div class="stop">
+        <div class="num time">12:00</div>
+        <div>
+          <h3>銀閣寺（慈照寺）<span class="dur">1時間40分</span></h3>
+          <p>山中越を降りるとそのまま白川通。先に参道で昼食（〜12:45）、そのあと拝観。砂の銀沙灘と苔庭、山手の展望路まで20分あれば回れる。</p>
+          <div class="meta">
+            <span><span class="k">駐車場</span>　市営 銀閣寺観光駐車場・約40台／1日1,040円の定額／徒歩5分</span>
+          </div>
+        </div>
+      </div>
+      <div class="leg"><div class="rail"></div><p class="txt" style="margin:0">4.5km／<b>15分</b>　今出川通を西へ、下鴨本通へ</p></div>
+    </li>
+
+    <li>
+      <div class="stop">
+        <div class="num time">14:00</div>
+        <div>
+          <h3>下鴨神社・糺の森<span class="dur">45分</span></h3>
+          <p>原生林の参道が本体。縁結びの相生社、みたらし団子発祥の御手洗池まで。世界遺産。</p>
+          <div class="meta">
+            <span><span class="k">駐車場</span>　西駐車場ほか大型あり／1時間300円前後</span>
+          </div>
+        </div>
+      </div>
+      <div class="leg"><div class="rail"></div><p class="txt" style="margin:0">4km／<b>12分</b>　賀茂川沿いを北上</p></div>
+    </li>
+
+    <li>
+      <div class="stop">
+        <div class="num time">15:05</div>
+        <div>
+          <h3>上賀茂神社<span class="dur">45分</span></h3>
+          <p>京都最古の神社のひとつ。円錐形の立砂と、境内を流れるならの小川。世界遺産。</p>
+          <div class="meta">
+            <span><span class="k">駐車場</span>　境内 約170台／30分100円／6:00〜22:00</span>
+          </div>
+        </div>
+      </div>
+    </li>
+
+    <li>
+      <div class="fork">
+        <div class="gate">
+          <div class="num time">15:50</div>
+          <h3>ここで一度、時計を見る</h3>
+        </div>
+        <div class="lanes">
+          <div class="lane a">
+            <p class="cond">16:00 までに出られたら</p>
+            <h4>金閣寺へ寄る</h4>
+            <p>拝観受付は16:45まで。16:15に着ければ、夕方の斜光で金箔がいちばん映える時間に間に合う。</p>
+          </div>
+          <div class="lane b">
+            <p class="cond">16:00 を過ぎたら</p>
+            <h4>まっすぐ京都駅へ</h4>
+            <p>金閣寺は捨てる。堀川通を南下して約40分、16:45には八条口。余った時間は駅ビルでお土産に回すほうが気持ちがいい。</p>
+          </div>
+        </div>
+      </div>
+    </li>
+
+    <li>
+      <div class="stop">
+        <div class="num time">16:15</div>
+        <div>
+          <h3>金閣寺（鹿苑寺）<span class="dur">45分</span></h3>
+          <p>順路が一方通行なので45分で回りきれる。拝観受付は16:45まで、閉門17:00。</p>
+          <div class="meta">
+            <span><span class="k">駐車場</span>　公式 第1〜第3・約250台／60分400円（以降30分200円）／正門まで徒歩2〜3分</span>
+          </div>
+        </div>
+      </div>
+      <div class="leg"><div class="rail"></div><p class="txt" style="margin:0">8.5km／<b>40分</b>　西大路通を南下 → 八条通を東へ。土曜夕方なので長めに見積もり</p></div>
+    </li>
+
+    <li>
+      <div class="stop pin">
+        <div class="num time">17:00</div>
+        <div>
+          <h3>金閣寺 出発 ── ここが最終ライン</h3>
+          <p>閉門と同時に出る形。ここを過ぎると渋滞ぶんの余裕が消えるので、この時刻だけは守る。</p>
+        </div>
+      </div>
+    </li>
+
+    <li>
+      <div class="stop">
+        <div class="num time">17:40</div>
+        <div>
+          <h3>京都駅 八条口・一般車乗降場で降車</h3>
+          <p>新幹線改札のすぐ前。ナビの目的地は「京都駅八条口 一般車乗降場」で入る。進入は八条通から左折・右折どちらでも可。南北の室町通からは直進で入れないので、八条通に出てから回り込む。</p>
+          <div class="callout">
+            <p><span class="hd">5分ルール</span>　ここは乗り降り専用。運転する人が車を離れるのも、人待ちで停めるのも禁止。荷物は手前でまとめておき、降りたらその場で解散する前提で。</p>
+            <p>ゆっくり見送りたい／荷物が多いなら、隣のアバンティ地下2・3階の駐車場が送迎目的で30分無料。こちらのほうが落ち着く。</p>
+          </div>
+        </div>
+      </div>
+    </li>
+
+    <li>
+      <div class="stop">
+        <div class="num time">17:45</div>
+        <div>
+          <h3>八条口の新幹線改札へ</h3>
+          <p>降車場所から改札まで数分。駅弁を買うなら、この時点で25分の余裕がある。</p>
+        </div>
+      </div>
+    </li>
+
+    <li>
+      <div class="stop pin">
+        <div class="num time">18:16</div>
+        <div>
+          <h3>京都 発 → 東京 20:27 着</h3>
+          <p>ここまで来られたら、今日は成功。</p>
+        </div>
+      </div>
+    </li>
+
+  </ol>
+
+  <h2><span class="jp">駐車場と費用</span><span>Parking</span></h2>
+  <div class="scroller">
+    <table>
+      <caption>すべて境内または徒歩5分以内。料金は2026年8月時点の目安。</caption>
+      <thead>
+        <tr><th scope="col">場所</th><th scope="col">台数</th><th scope="col">料金</th><th scope="col" class="n">目安</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>銀閣寺（市営）</td><td>約40台</td><td>1日定額</td><td class="n">1,040</td></tr>
+        <tr><td>下鴨神社</td><td>大型</td><td>1時間300円前後</td><td class="n">300</td></tr>
+        <tr><td>上賀茂神社</td><td>約170台</td><td>30分100円</td><td class="n">100</td></tr>
+        <tr><td>金閣寺（公式）</td><td>約250台</td><td>60分400円</td><td class="n">400</td></tr>
+        <tr><td>京都駅 八条口</td><td>—</td><td>乗降のみ・5分</td><td class="n">0</td></tr>
+        <tr class="total"><td colspan="3">合計の目安</td><td class="n">1,840円</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2><span class="jp">走る前に</span><span>Notes</span></h2>
+  <ul class="notes">
+    <li><span class="num n">01</span><span><b>山中越はカーブの多い山道。</b>すれ違いはできるが夜は暗い。明るいうちに通る今日の行程なら問題なし。</span></li>
+    <li><span class="num n">02</span><span><b>銀閣寺の駐車場は約40台と小さい。</b>12時台なら入れるはずだが、満車なら白川通沿いのコインパーキングへ。</span></li>
+    <li><span class="num n">03</span><span><b>土曜夕方の西大路通・堀川通は混む。</b>金閣寺から八条口は40分で見積もってある。渋滞が見えたらカーナビの到着予想を優先。</span></li>
+    <li><span class="num n">04</span><span><b>金閣寺の拝観受付は16:45まで。</b>16:20を過ぎそうなら金閣寺はやめて、京都駅で余裕をとるほうがいい。</span></li>
+    <li><span class="num n">05</span><span><b>八条口は5分しか停められない。</b>運転する人が降りて見送る余裕はないので、お礼は車の中で。</span></li>
+    <li><span class="num n">06</span><span><b>降ろしたあとの帰り道。</b>八条通を東へ抜けると京都南インター（名神）が近い。市街地を戻るより早い。</span></li>
+  </ul>
+
+  <footer>
+    <p>2026年8月29日 作成。料金・所要時間は調査時点の目安です。</p>
+    <p>走行中の判断は、必ずカーナビの到着予想を優先してください。</p>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  var el = document.getElementById('countdown');
+  var dep = new Date('2026-08-29T18:16:00+09:00');
+  function render(){
+    var diff = dep - new Date();
+    if (diff <= 0) { el.innerHTML = '<strong>出発済み</strong>　いってらっしゃい'; return; }
+    var m = Math.floor(diff / 60000);
+    var h = Math.floor(m / 60);
+    var mm = m % 60;
+    var txt = h > 0 ? h + '時間' + mm + '分' : mm + '分';
+    el.innerHTML = '出発まで <strong>' + txt + '</strong>';
+  }
+  render();
+  setInterval(render, 15000);
+})();
+</script>
+</body>
+</html>
