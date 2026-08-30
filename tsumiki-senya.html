@@ -196,8 +196,11 @@
   /* ---------- 出した一覧 ---------- */
   .listrow{display:flex; align-items:center; gap:10px; padding:9px 0; border-top:1px solid var(--line);}
   .listrow:first-of-type{border-top:none;}
-  .listrow .d{font-weight:700; font-size:.9rem; flex:0 0 clamp(66px,19vw,86px); font-variant-numeric:tabular-nums;}
-  .listrow .d .w{font-size:.74rem; color:var(--ink-soft); margin-left:3px;}
+  /* ⚠️ 「10月11日(日)」のように2桁+2桁になると、決め打ちの幅からあふれて曜日だけ次の行に落ちていた。
+     日付と曜日は一息で読むもの＝ぜったいに折り返さない。幅は下限だけ決めて、あふれたら伸ばす。 */
+  .listrow .d{font-weight:700; font-size:.9rem; flex:0 0 auto;
+    min-width:clamp(66px,19vw,86px); white-space:nowrap; font-variant-numeric:tabular-nums;}
+  .listrow .d .w{font-size:.74rem; color:var(--ink-soft); margin-left:3px; white-space:nowrap;}
   .listrow .t{font-weight:700; color:var(--accent-2); font-variant-numeric:tabular-nums;}
   .listrow .h{margin-left:auto; font-size:.78rem; color:var(--ink-soft);}
   .empty{text-align:center; color:var(--ink-soft); font-size:.85rem; padding:22px 0;}
@@ -675,15 +678,6 @@ let toastT; function toast(msg){ const el=document.getElementById('toast'); el.t
   clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),1900); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function slotOf(k){ return (me.slots||[]).find(s=>s.k===k); }
-async function copyText(t){
-  try{ await navigator.clipboard.writeText(t); return true; }
-  catch(e){
-    const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
-    document.body.appendChild(ta); ta.select();
-    let ok=false; try{ ok=document.execCommand('copy'); }catch(e2){}
-    document.body.removeChild(ta); return ok;
-  }
-}
 function slotLabel(k){ const s=slotOf(k); return s?s.label:k; }
 
 /* 開いたままのあいだに、お店が合言葉を作り直した／休止した／削除した場合。
@@ -926,13 +920,11 @@ function renderList(){
   const or2=document.getElementById('outRow'); or2.innerHTML='';
   if(showAssign && (cur.assign||[]).length){
     or2.innerHTML='<div class="outrow">'
-      +'<button class="main" id="icsBtn">カレンダーに追加</button>'
-      +'<button id="cpBtn">コピー</button></div>'
+      +'<button class="main" id="icsBtn">カレンダーに追加</button></div>'
       // 知らせたあとにお店が直すと黙って変わる。いつのものかが分かれば気づける
       +(cur.assign_updated?'<p class="note muted" style="margin:-6px 0 12px">最終更新　'
         +esc(fmtStamp(cur.assign_updated))+'</p>':'');
     document.getElementById('icsBtn').addEventListener('click',saveIcs);
-    document.getElementById('cpBtn').addEventListener('click',copyAssign);
   }
 
   const src=showAssign?(cur.assign||[]):(cur.avail||[]);
@@ -976,23 +968,6 @@ function saveIcs(){
     setTimeout(()=>URL.revokeObjectURL(url),2000);
     toast('カレンダーのアプリで開いてください');
   }catch(e){ toast('うまくいきませんでした'); }
-}
-function assignText(){
-  const {y,m1}=parseMonth(cur.month);
-  const idx=indexByDate(cur.assign);
-  const days=Object.keys(idx).sort();
-  const lines=[me.name+'さんの '+y+'年'+m1+'月のシフト', ''];
-  days.forEach(d=>{
-    const w=wdayOf(d);
-    const parts=(me.slots||[]).filter(s=>idx[d][s.k])
-      .map(s=>s.label+' '+m2hm(idx[d][s.k].from)+'〜'+m2hm(idx[d][s.k].to));
-    lines.push(fmtDateJP(d)+'('+WD[w]+') '+parts.join(' ／ '));
-  });
-  lines.push('', '合計 '+days.length+'日・'+fmtDur(totalMin(cur.assign)));
-  return lines.join('\n');
-}
-async function copyAssign(){
-  toast(await copyText(assignText())?'コピーしました':'コピーできませんでした');
 }
 
 /* いつもの曜日 */
@@ -1287,7 +1262,15 @@ function tutSteps(){
       {sel:'#listCard',
        enter:function(){ if(sheetOpen() && !shDirty()) closeSheet(true); },
        need:function(){ return !sheetOpen(); },
-       text:'出した日は、ここに並びます。<br>あとは同じように、<b>働ける日をぜんぶ</b>入れてください。おつかれさまでした。'}
+       text:'出した日は、ここに並びます。<br>あとは同じように、<b>働ける日をぜんぶ</b>入れてください。'},
+      /* ⚠️ ここから先は「1日出せた人」がつぎに迷うところ。
+         ためし押しは要らないので、見せて読むだけで終わる歩にする。 */
+      {sel:'#usualCard', need:function(){ return !sheetOpen(); },
+       text:'毎週おなじ曜日に入る方は、<b>「いつもの曜日」</b>が早いです。<br>曜日を選ぶと、その月の<b>その曜日ぜんぶ</b>にまとめて入ります。あとから1日ずつ直せます。'},
+      {sel:'#doneBtn', need:function(){ return !sheetOpen() && tutVisible(tq('#doneBtn')); },
+       text:'ぜんぶ入れ終わったら<b>「今月はこれで出し終わりました」</b>を押してください。<br>お店の画面に<b>✓ 出し終わり</b>と出て、催促が来なくなります。<br>押したあとでも、締切までは直せます。'},
+      {sel:'#mNext', need:function(){ return !sheetOpen(); },
+       text:'来月ぶんは、ここで<b>月をめくって</b>出します。<br>シフトが決まると、この画面に<b>「決まったシフト」</b>が出て、<b>スマホの予定表にもまとめて入れられます</b>。<br>おつかれさまでした。'}
     ];
   }
   /* 締切がすぎた月に、はじめて開いた人（出す操作ができないので読むだけ） */

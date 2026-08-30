@@ -121,11 +121,10 @@
   .btn.pick b{font-size:1rem; color:var(--ink);}
   .btn.pick span{font-size:.78rem; color:var(--ink-soft); font-weight:400;}
 
-  /* タブ */
-  .tabs{display:flex; gap:6px; background:var(--surface-2); padding:4px; border-radius:13px; margin-bottom:2px;}
-  .tabs button{flex:1; min-width:0; min-height:var(--tap); font-family:var(--sans); font-size:.9rem; font-weight:700; padding:10px 4px;
-    border:none; border-radius:10px; background:transparent; color:var(--ink-mid); cursor:pointer;}
-  .tabs button.on{background:var(--surface); color:var(--ink); box-shadow:0 1px 3px rgba(40,32,18,.1);}
+  /* ⚠️ 前は「一覧／スタッフ／設定」の3つのタブが常に上にあった。
+     毎日ひらくのは一覧だけで、あとの2つは月に1度も押さない＝いちばん広い一等地を、
+     ほとんど押さないものが2/3も占めていた。
+     → 一覧をそのままトップに出し、スタッフと設定は右上の歯車の中へしまう。 */
 
   .monthbar{display:flex; align-items:center; gap:8px;}
   .monthbar .mv{flex:1; text-align:center;}
@@ -228,6 +227,7 @@
   .needrow input{flex:1; min-width:0; min-height:var(--tap); font-family:var(--sans); font-size:1.05rem;
     text-align:center; padding:10px; border:1.5px solid var(--line-2); border-radius:12px;
     background:var(--surface); color:var(--ink);}
+  .vhd{margin:2px 0 14px; font-size:1.12rem; font-weight:700;}
   .backb{background:none; border:none; color:var(--ink-soft); font-family:var(--sans); font-size:.88rem;
     padding:8px 2px; cursor:pointer; margin-bottom:2px; min-height:var(--tap);}
 
@@ -499,21 +499,51 @@
   .morebtn.danger{margin-top:12px; background:transparent; border-color:var(--warn); color:var(--warn);}
   .morebtn.danger span{color:var(--warn);}
 
+  /* ===== 印刷用のシフト表（横向き・かならず1枚） =====
+     ⚠️ 前は画面の表をそのまま刷っていた。A4たてに31行＋合計表＝2〜3枚に割れて、
+        「1枚のシフト表」として貼り出せなかった（月をまたいで行が続くと、どこを見ればいいか分からない）。
+     → 印刷のときだけ、別に組んだ「横向き1枚ぶん」の中身に差し替える。
+        ・前半／後半の2段組にして、たてに長い表を横に寝かせる（時間帯が4つ以上のときは1段のまま）
+        ・組んだあとに高さを測り、はみ出すぶんだけ縮める（--pscale）＝ぜったいに2枚目を作らない
+     ⚠️ 寸法は px のまま書く。印刷でも 96px = 1inch でそろうので、
+        画面で測った高さがそのまま紙の高さになる（pt で書くと測れない）。 */
+  .pr{display:none;}
+  .pr-in{width:1060px; transform-origin:top left; color:#000; background:#fff;
+    font-family:var(--sans); -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  .pr-t{font-size:19px; font-weight:700; margin-bottom:2px;}
+  .pr-m{font-size:11px; color:#555; margin-bottom:8px;}
+  .pr-cols{display:flex; gap:12px; align-items:flex-start;}
+  .pr-cols > .pr-c{flex:1 1 0; min-width:0;}
+  /* ⚠️ 表は中身の最小幅より細くならない＝flex に入れても縮まず、紙からはみ出す。
+     table-layout:fixed ＋ colgroup で「先に幅を決めてから中身を折り返す」に変える。 */
+  table.prt{width:100%; table-layout:fixed; border-collapse:collapse; font-size:12px; background:#fff;
+    word-break:break-word; overflow-wrap:anywhere;}
+  table.prt th, table.prt td{border:.75px solid #999; padding:2px 4px; vertical-align:top;
+    line-height:1.35; text-align:left;}
+  table.prt th{background:#ececec; font-weight:700; white-space:nowrap; font-size:11px;}
+  table.prt td.dt{white-space:nowrap; font-weight:700; font-variant-numeric:tabular-nums;}
+  table.prt td.dt .w{font-weight:400; margin-left:2px;}
+  table.prt tr.rest td{background:#f2f2f2; color:#666;}
+  table.prt td.emp{color:#000;}
+  table.prt td.nm .t{font-size:10.5px; color:#444; margin-left:3px; white-space:nowrap;
+    font-variant-numeric:tabular-nums;}
+  .pr-tot{margin-top:9px; font-size:11.5px;}
+  .pr-tot .h{font-weight:700; margin-bottom:4px; font-size:12px;}
+  .pr-tot .ls{display:flex; flex-wrap:wrap; gap:4px 8px;}
+  .pr-tot .p{border:.75px solid #bbb; border-radius:4px; padding:1px 7px; white-space:nowrap;}
+  .pr-tot .p b{font-weight:700;}
+  .pr-tot .p span{color:#555; margin-left:5px; font-variant-numeric:tabular-nums;}
+  .pr-f{margin-top:8px; font-size:10.5px; color:#555;}
+
   @media print{
-    @page{size:A4; margin:12mm;}
+    @page{size:A4 landscape; margin:8mm;}
     body > *{display:none !important;}
     body > .tableview{display:block !important; position:static; inset:auto; padding:0;
       background:#fff; color:#000; overflow:visible;}
-    .tvacts{display:none !important;}
-    .tableview .tvh h2{font-size:15pt;}
-    table.sft, table.tot{background:#fff; font-size:9pt;}
-    table.sft th, table.tot th{background:#f1f1f1;}
-    table.sft tr.rest td{background:#f6f6f6;}
-    table.sft, table.tot{page-break-inside:auto;}
-    table.sft thead, table.tot thead{display:table-header-group;}
-    table.sft tr, table.tot tr{page-break-inside:avoid;}
-    .tvwrap{overflow:visible;}
-    .tvnote{font-size:8pt;}
+    /* 画面ぶんは全部たたんで、印刷用の中身だけを出す */
+    .tableview > *{display:none !important;}
+    .tableview > .pr{display:block !important;}
+    .pr-in{transform:scale(var(--pscale,1));}
   }
 
   /* ホーム画面へ置くご案内。ほかのカードと同じ角丸・同じ文字の左端にそろえる */
@@ -586,6 +616,9 @@
   </div>
   <span class="spacer"></span>
   <span class="sync-dot" id="syncDot" title="同期"></span>
+  <button class="iconbtn" id="gearBtn" aria-label="メニュー（スタッフ・設定）">
+    <svg viewBox="0 0 24 24" style="width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="3.1"/><path d="M19.4 14.5a1.5 1.5 0 0 0 .3 1.7l.1.1a1.8 1.8 0 1 1-2.5 2.5l-.1-.1a1.5 1.5 0 0 0-1.7-.3 1.5 1.5 0 0 0-.9 1.4v.2a1.8 1.8 0 1 1-3.6 0V20a1.5 1.5 0 0 0-1-1.4 1.5 1.5 0 0 0-1.7.3l-.1.1a1.8 1.8 0 1 1-2.5-2.5l.1-.1a1.5 1.5 0 0 0 .3-1.7 1.5 1.5 0 0 0-1.4-.9H4a1.8 1.8 0 1 1 0-3.6h.2a1.5 1.5 0 0 0 1.4-1 1.5 1.5 0 0 0-.3-1.7l-.1-.1A1.8 1.8 0 1 1 7.7 4.6l.1.1a1.5 1.5 0 0 0 1.7.3H9.6a1.5 1.5 0 0 0 .9-1.4V3.4a1.8 1.8 0 1 1 3.6 0v.2a1.5 1.5 0 0 0 .9 1.4 1.5 1.5 0 0 0 1.7-.3l.1-.1a1.8 1.8 0 1 1 2.5 2.5l-.1.1a1.5 1.5 0 0 0-.3 1.7v.1a1.5 1.5 0 0 0 1.4.9h.2a1.8 1.8 0 1 1 0 3.6H20a1.5 1.5 0 0 0-1.4.9z"/></svg>
+  </button>
   <button class="iconbtn" id="themeBtn" aria-label="表示切替">
     <svg viewBox="0 0 24 24" style="width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M19 13.5A7 7 0 1 1 10.5 5a5.5 5.5 0 0 0 8.5 8.5z"/></svg>
   </button>
@@ -608,12 +641,6 @@
 </section>
 
 <main id="appView" hidden>
-  <div class="tabs">
-    <button id="tab1" class="on">一覧</button>
-    <button id="tab2">スタッフ</button>
-    <button id="tab3">設定</button>
-  </div>
-
   <div id="a2hsBox"></div>
 
   <!-- ===== 一覧 ===== -->
@@ -636,6 +663,8 @@
 
   <!-- ===== スタッフ ===== -->
   <section class="card" id="view2" hidden>
+    <button class="backb" id="v2Back">‹ 一覧にもどる</button>
+    <h2 class="vhd">スタッフ</h2>
     <div class="addrow">
       <input id="newName" placeholder="スタッフのお名前" autocomplete="off">
       <button class="btn" id="addBtn">追加</button>
@@ -649,6 +678,8 @@
 
   <!-- ===== 設定 ===== -->
   <section class="card" id="view3" hidden>
+    <button class="backb" id="v3Back">‹ 一覧にもどる</button>
+    <h2 class="vhd">設定</h2>
     <div id="cfGrid">
     <div class="field">
       <label>お店の名前</label>
@@ -742,6 +773,16 @@
     <div class="morelist" id="moreList"></div>
   </div>
 
+  <!-- ⑥ メニュー（歯車から。ふだんは押さないものだけ） -->
+  <div id="mMenu" hidden>
+    <h2>メニュー</h2>
+    <div class="sub">ふだんの仕事は「一覧」だけで足ります。ここは、はじめの準備と、ときどき直すところです。</div>
+    <div class="morelist">
+      <button class="morebtn" id="goStaffM"><b>スタッフ</b><span>働く方の登録と、専用URLのお渡し</span></button>
+      <button class="morebtn" id="goCfgM"><b>設定</b><span>お店の名前・締切・定休日・時間帯とほしい人数</span></button>
+    </div>
+  </div>
+
   <!-- ④ 締切後のお願い -->
   <div id="mReq" hidden>
     <h2>スタッフからのお願い</h2>
@@ -750,13 +791,12 @@
   </div>
 </div>
 
-<!-- ===== シフト表（貼り出す・印刷する・LINEに貼る） ===== -->
+<!-- ===== シフト表（貼り出す・印刷する） ===== -->
 <div class="tableview" id="tableView" hidden>
   <div class="tvh">
     <h2 id="tvTitle">—</h2>
     <div class="tvacts">
       <button class="main" id="tvPrint">印刷する</button>
-      <button id="tvCopy">LINEに貼る文をコピー</button>
       <button id="tvClose">とじる</button>
     </div>
   </div>
@@ -764,6 +804,8 @@
   <div class="tvsub">ひとりずつの合計</div>
   <table class="tot" id="tvTotal"></table>
   <p class="tvnote" id="tvNote"></p>
+  <!-- 印刷のときだけ出る、横向き1枚ぶんの中身 -->
+  <div class="pr" id="tvPrintArea" aria-hidden="true"><div class="pr-in" id="tvPrintIn"></div></div>
 </div>
 
 <!-- ===== チュートリアル（穴あきの暗幕） ===== -->
@@ -1042,16 +1084,23 @@ document.getElementById('logoutBtn').addEventListener('click',()=>{
   lsDel(LS_CODE); lsDel(LS_SHOP); location.reload();
 });
 
-/* ===== タブ ===== */
-[['tab1','view1'],['tab2','view2'],['tab3','view3']].forEach(([t,v],i)=>{
-  document.getElementById(t).addEventListener('click',()=>{
-    [1,2,3].forEach(n=>{
-      document.getElementById('tab'+n).classList.toggle('on', n===i+1);
-      document.getElementById('view'+n).hidden = (n!==i+1);
-    });
-    if(i===1) renderStaff();
-  });
-});
+/* ===== 画面の切り替え（一覧がトップ・あとの2つは歯車の中） =====
+   ⚠️ タブを外したので、行き先は「歯車 → メニュー」と「もどる」の2本だけ。
+      ほかの場所から飛ばしたいときも、必ず showView() を通す（表示の食い違いを作らない）。 */
+function showView(n){
+  [1,2,3].forEach(function(m){ document.getElementById('view'+m).hidden = (m!==n); });
+  if(n===2) renderStaff();
+  window.scrollTo(0,0);
+}
+function openMenu(){
+  showMode('mMenu');
+  backdrop.classList.add('show'); sheet.classList.add('show');
+}
+document.getElementById('gearBtn').addEventListener('click',openMenu);
+document.getElementById('goStaffM').addEventListener('click',function(){ closeSheet(); showView(2); });
+document.getElementById('goCfgM').addEventListener('click',function(){ closeSheet(); showView(3); });
+document.getElementById('v2Back').addEventListener('click',function(){ showView(1); });
+document.getElementById('v3Back').addEventListener('click',function(){ showView(1); });
 
 /* ===== 一覧（月のカレンダー） ===== */
 document.getElementById('mPrev').addEventListener('click',()=>{ month=shiftMonth(month,-1); loadMonth(); });
@@ -1146,7 +1195,7 @@ function renderMonth(){
     box.innerHTML='<div class="hd">スタッフがまだ登録されていません</div>'+
       '<div class="muted" style="margin-top:6px">働く方を登録すると、その人だけの専用URLができます</div>'+
       '<button class="go" id="goStaff">スタッフを追加する →</button>';
-    document.getElementById('goStaff').addEventListener('click',function(){ document.getElementById('tab2').click(); });
+    document.getElementById('goStaff').addEventListener('click',function(){ showView(2); });
   }else if(!anySubmitted){
     box.className='sumbox ok';
     box.innerHTML='<div class="hd">まだ誰も出していません</div>'+
@@ -1253,7 +1302,7 @@ async function clearMonth(){
   finally{ busy=false; }
 }
 
-/* ===== A：シフト表（貼り出す・印刷する・LINEに貼る） ===== */
+/* ===== A：シフト表（貼り出す・印刷する） ===== */
 function assignRows(){
   const {y,m1}=parseMonth(cur.month);
   const last=daysInMonth(y,m1), closed=new Set(shop.closed_wdays||[]);
@@ -1306,26 +1355,80 @@ function openTable(){
     (undecided?'⚠ まだ人が決まっていない枠が '+undecided+'日ぶん あります。　':'')+
     (cur.published?'この内容は、スタッフの画面にも出ています。':'⚠ まだスタッフには知らせていません。');
 
+  buildPrint(rows, undecided);
+
   document.getElementById('tableView').hidden=false;
   document.body.style.overflow='hidden';
 }
+
+/* ===== 印刷用の中身を組む（横向き・1枚） =====
+   画面の表とは別に組み直す。紙は「上から順に読む」のではなく「一目で見る」もので、
+   ほしい形がちがう＝31行を前半／後半の2段に寝かせて、合計は小さな札にする。 */
+function prCell(list, rest){
+  if(rest && !list.length) return '<td class="rest">定休日</td>';
+  if(!list.length) return '<td class="emp">未定</td>';
+  return '<td class="nm">'+list.map(function(p){
+    return esc(p.name)+'<span class="t">'+m2hm(p.from)+'〜'+m2hm(p.to)+'</span>';
+  }).join('<br>')+'</td>';
+}
+function prTable(rows, dateW){
+  const sl=slots();
+  const each=Math.max(1,(100-dateW)/Math.max(1,sl.length));
+  let h='<div class="pr-c"><table class="prt"><colgroup><col style="width:'+dateW+'%">'+
+    sl.map(function(){ return '<col style="width:'+each.toFixed(2)+'%">'; }).join('')+'</colgroup>'+
+    '<thead><tr><th>日</th>'+
+    sl.map(function(s2){ return '<th>'+esc(s2.label)+' '+m2hm(s2.from)+'〜'+m2hm(s2.to)+'</th>'; }).join('')+
+    '</tr></thead><tbody>';
+  rows.forEach(function(r){
+    h+='<tr'+(r.rest?' class="rest"':'')+'><td class="dt">'+r.d+'<span class="w">('+WD[r.w]+')</span></td>';
+    sl.forEach(function(s2){ h+=prCell(r.byK[s2.k], r.rest); });
+    h+='</tr>';
+  });
+  return h+'</tbody></table></div>';
+}
+function buildPrint(rows, undecided){
+  const {y,m1}=parseMonth(cur.month);
+  /* 時間帯が4つ以上あると、2段組では1マスが細くなりすぎる＝そのときだけ1段のまま */
+  const split = slots().length<=3 && rows.length>18;
+  const half = Math.ceil(rows.length/2);
+
+  let h='<div class="pr-t">'+esc(shop.name)+'　'+y+'年'+m1+'月 シフト表</div>';
+  h+='<div class="pr-m">'+(undecided?'⚠ まだ人が決まっていない枠が '+undecided+'日ぶん あります':'')+'</div>';
+  h+='<div class="pr-cols">'+
+       (split ? prTable(rows.slice(0,half),15)+prTable(rows.slice(half),15) : prTable(rows,8))+
+     '</div>';
+
+  const tot=staffList.slice().filter(function(s2){ return s2.active||(s2.fixed_slots||0)>0; })
+    .sort(function(a,b){ return (b.fixed_min||0)-(a.fixed_min||0); });
+  if(tot.length){
+    h+='<div class="pr-tot"><div class="h">ひとりずつの合計</div><div class="ls">'+
+      tot.map(function(s2){
+        return '<span class="p"><b>'+esc(s2.name)+(s2.active?'':'（休止中）')+'</b>'+
+               '<span>'+(s2.fixed_days||0)+'日'+(s2.fixed_min?'・'+fmtDur(s2.fixed_min):'')+'</span></span>';
+      }).join('')+'</div></div>';
+  }
+  h+='<div class="pr-f">'+esc(shop.name)+'　'+y+'年'+m1+'月　／　変更があったら貼り替えます</div>';
+  document.getElementById('tvPrintIn').innerHTML=h;
+}
+/* 組んだ中身の高さを測って、A4よこ1枚（内側 約730px）に入るところまで縮める。
+   ⚠️ 96px = 1inch は画面も紙も同じ。だから「画面で測った高さ」がそのまま紙に効く。 */
+function fitPrint(){
+  const area=document.getElementById('tvPrintArea'), inn=document.getElementById('tvPrintIn');
+  if(!area||!inn||!inn.innerHTML) return;
+  const keep=area.getAttribute('style')||'';
+  area.setAttribute('style','display:block;position:absolute;left:-10000px;top:0;width:1060px;');
+  const h=inn.scrollHeight||inn.getBoundingClientRect().height;
+  const cols=inn.querySelector('.pr-cols');
+  const w=Math.max(inn.scrollWidth, cols?cols.scrollWidth:0);
+  area.setAttribute('style',keep);
+  const sc=Math.min(1, 730/Math.max(1,h), 1060/Math.max(1,w));
+  document.documentElement.style.setProperty('--pscale', String(Math.floor(sc*1000)/1000));
+}
 function closeTable(){ document.getElementById('tableView').hidden=true; document.body.style.overflow=''; }
 document.getElementById('tvClose').addEventListener('click',closeTable);
-document.getElementById('tvPrint').addEventListener('click',()=>window.print());
-document.getElementById('tvCopy').addEventListener('click',async()=>{
-  toast(await copyText(lineText())?'コピーしました':'コピーできませんでした');
-});
-function lineText(){
-  const {y,m1}=parseMonth(cur.month);
-  const lines=[y+'年'+m1+'月のシフトです。', ''];
-  assignRows().forEach(r=>{
-    const parts=slots().filter(s=>r.byK[s.k].length)
-      .map(s=>s.label+' '+r.byK[s.k].map(p=>p.name).join('、'));
-    if(parts.length) lines.push(r.d+'日('+WD[r.w]+') '+parts.join(' ／ '));
-  });
-  lines.push('', '※ ご自分のぶんは、いつものURLからも見られます。');
-  return lines.join('\n');
-}
+document.getElementById('tvPrint').addEventListener('click',function(){ fitPrint(); window.print(); });
+/* ブラウザのメニューから刷られたときも、縮尺を合わせてから出す */
+window.addEventListener('beforeprint', fitPrint);
 
 async function doPublish(on){
   if(on && !confirm('決まったシフトを、スタッフ全員の画面に出します。よろしいですか？')) return;
@@ -1339,7 +1442,7 @@ const sheet=document.getElementById('sheet'), backdrop=document.getElementById('
 let shDate=null, fillSid=null, fillState={}, busy=false;
 
 function showMode(m){
-  ['mDay','mFill','mNeed','mReq','mMore'].forEach(id=>{ document.getElementById(id).hidden = (id!==m); });
+  ['mDay','mFill','mNeed','mReq','mMore','mMenu'].forEach(id=>{ document.getElementById(id).hidden = (id!==m); });
   sheet.scrollTop=0;
 }
 function closeSheet(){ backdrop.classList.remove('show'); sheet.classList.remove('show'); }
@@ -1878,38 +1981,68 @@ function tutVisible(el){ if(!el) return false; const r=el.getBoundingClientRect(
 function tutAnySub(){ return (staffList||[]).some(function(s2){ return s2.active && s2.days>0; }); }
 function viewShown(n){ const v=tq('#view'+n); return !!v && !v.hidden; }
 
-/* 第1章＝はじめの準備（スタッフを配るところまで） */
+/* 第1章＝はじめの準備
+   ⚠️ ここは「アプリを渡したその日」に、中身が何も無いところから読む章。
+      だから「赤い日の見かた」など“データがある前提”の話は、いっさい入れない。
+      入れる順番は、実際にしないと先へ進めない順番＝設定 → スタッフ → 配る → 待つ。
+   ⚠️ 歩を足すときは、必ず need: を書く（その画面に居ないと出ない部品を指したまま
+      止まると、押すものが無いのに暗いだけになる）。 */
 function tutSteps1(){
+  const inCfg=function(){ return viewShown(3); };
+  const inStaff=function(){ return viewShown(2); };
+  const menuOpen=function(){ return sheetOpen() && !tq('#mMenu').hidden; };
   return [
-    {sel:'.tabs',
-     text:'上の3つで画面が変わります。<b>一覧</b>＝希望とシフト、<b>スタッフ</b>＝人の登録、<b>設定</b>＝お店の決めごと。'},
-    {sel:'#tab3', text:'はじめに<b>設定</b>をすませます。ここを押してください。',
-     done:function(){ return viewShown(3); }},
-    {sel:'#cfDeadline',
-     text:'いつまでに希望を出してもらうか。<b>前の月の◯日まで</b>です。<br>締切をすぎると、スタッフは自分では直せなくなります。'},
-    {sel:'#cfWdays', need:function(){ return viewShown(3); },
-     text:'お店の<b>定休日</b>。押した曜日は、はじめから「休」になります。'},
-    {sel:'#cfSlots', need:function(){ return viewShown(3); },
-     text:'時間帯と、その時間に<b>ほしい人数</b>。<br>ここで決めた人数を下回った日が、一覧で<b>赤く</b>なります。時間帯の名前は、スタッフの画面にもそのまま出ます。'},
-    {sel:'#saveCfg', need:function(){ return viewShown(3); }, tap:true,
-     text:'決めたら<b>「この内容にする」</b>。あとからいつでも変えられます。'},
-    {sel:'#tab2', text:'つぎに<b>スタッフ</b>を登録します。',
-     done:function(){ return viewShown(2); }},
-    {sel:'.addrow', need:function(){ return viewShown(2); },
-     text:'お名前を入れて<b>「追加」</b>。その人だけの<b>合言葉と専用URL</b>ができます。<br>まずは<b>ご自身のお名前</b>を入れてみてください。届く側の画面を、そのまま確かめられます。',
+    {text:'<b>つみき&amp;せんや</b>へようこそ。<br>することは、月に3つだけです。<br>① スタッフに<b>URLを渡す</b>　② 集まった希望から<b>シフトを組む</b>　③ <b>みんなに知らせる</b>。<br>このご案内では、①のいちばん手前＝<b>お店の登録</b>から順にやっていきます。'},
+    {sel:'#cal', pad:4,
+     text:'いま出ているこの画面が<b>「一覧」</b>です。ふだんはここしか使いません。<br>これが今月のカレンダー。希望が集まると、ここに<b>人数</b>が出て、足りない日が<b>赤く</b>なります。<br>いまは空っぽで正解です。'},
+    {sel:'#gearBtn', text:'はじめの準備は、右上の<b>歯車</b>の中にあります。押してください。',
+     done:menuOpen},
+    {sel:'#goCfgM', need:menuOpen, text:'中は<b>スタッフ</b>と<b>設定</b>の2つ。<br>まずは<b>「設定」</b>から。押してください。',
+     done:inCfg},
+    {sel:'#cfName', need:inCfg,
+     text:'<b>お店の名前</b>です。<br>スタッフの画面と、これからお渡しする「送る文」に、そのまま出ます。'},
+    {sel:'#cfDeadline', need:inCfg,
+     text:'<b>締切</b>＝いつまでに希望を出してもらうか。<b>前の月の◯日まで</b>で入れます。<br>たとえば「25」なら、10月ぶんの締切は<b>9月25日</b>。<br>締切をすぎると、スタッフは自分では直せなくなります（かわりに「お願い」が届きます）。'},
+    {sel:'#cfWdays', need:inCfg,
+     text:'お店の<b>定休日</b>。押した曜日は、はじめから「休」になり、スタッフの画面でも選べなくなります。<br>お休みが無ければ、どこも押さないままで大丈夫です。'},
+    {sel:'#cfSlots', need:inCfg,
+     text:'いちばん大事なところです。<b>時間帯</b>と、その時間に<b>ほしい人数</b>。<br>「昼 9:00〜15:00 ／ 2人」のように入れます。<br>・ここの名前が、スタッフの画面にそのまま出ます<br>・ここの人数を下回った日が、一覧で<b>赤く</b>なります'},
+    {sel:'#saveCfg', need:inCfg, tap:true,
+     text:'決めたら<b>「この内容にする」</b>を押します。<br>あとからいつでも変えられます（変えても、もう出ている希望は消えません）。'},
+    {sel:'#v3Back', need:inCfg,
+     text:'設定はこれでおしまい。<b>「‹ 一覧にもどる」</b>で戻れます。<br>つぎは<b>スタッフ</b>の登録です。'},
+    {sel:'#gearBtn', text:'もう一度、右上の<b>歯車</b>を押してください。',
+     done:menuOpen},
+    {sel:'#goStaffM', need:menuOpen, text:'こんどは<b>「スタッフ」</b>。押してください。',
+     done:inStaff},
+    {sel:'.addrow', need:inStaff,
+     text:'お名前を入れて<b>「追加」</b>。<br>まずは<b>ご自身のお名前</b>で1人つくってみてください。<br>スタッフに届く画面を、そのままご自分で確かめられます。',
      done:function(){ return tutVisible(tq('#staffBox .staff')); }},
-    {sel:'#staffBox .staff .acts .btn', need:function(){ return viewShown(2); },
-     text:'<b>「送る文をコピー」</b>で、その人に渡す文ができます。<br><b>LINEを開いて貼りつけて</b>お送りください。ひとりにつき1本です。'},
-    {sel:'#staffBox .staff', need:function(){ return viewShown(2); },
-     text:'配り漏れは、ここで分かります。まだの人には赤く <b>「まだ渡していません」</b>、上には <b>「◯人中◯人にURLを渡しました」</b> と出ます。<br>ご自身を登録した方は、<b>その文のURLをこの端末で開いてみてください</b>。スタッフに見えている画面が、そのまま出ます。'},
-    {sel:'.tabs', enter:function(){ const b=tq('#tab1'); if(b && !viewShown(1)) b.click(); },
-     text:'準備はこれで終わりです。全員にURLを渡したら、あとは<b>希望が集まるのを待ちます</b>。<br>集まると、この<b>一覧</b>が「足りない日」を教えてくれます。'}
+    {sel:'#staffBox .staff .cd', need:inStaff,
+     text:'登録すると、その人だけの<b>合言葉</b>と<b>専用URL</b>ができます。<br>URLは人ごとにちがいます。<b>ほかの人のぶんは見えません</b>ので、そのままお渡しして大丈夫です。'},
+    {sel:'#staffBox .staff .acts .btn', need:inStaff,
+     text:'<b>「送る文をコピー」</b>を押すと、その人に渡す文（あいさつ＋URL＋合言葉）ができます。<br>そのまま<b>LINEを開いて貼りつけて</b>お送りください。ひとりにつき1本です。'},
+    {sel:'#staffBox .staff .nm', need:inStaff,
+     text:'渡し忘れは、ここで分かります。<br>まだの人は赤く<b>「まだ渡していません」</b>。渡すと、その人が<b>出し終わったか</b>に変わります。'},
+    {sel:'#staffHd', need:inStaff,
+     text:'上には<b>「◯人中◯人にURLを渡しました」</b>。<br>全員に渡し終わると、ここは「◯／◯人が出し終わり」に変わります。'},
+    {sel:'#staffBox .staff .acts .more', need:inStaff,
+     text:'名前を直す・しばらく<b>休止</b>する・合言葉を作り直す・削除は、この<b>「…」</b>の中です。<br>ふだんは押しません。'},
+    {sel:'#v2Back', need:inStaff,
+     text:'スタッフの登録はこれでおしまい。<b>「‹ 一覧にもどる」</b>で戻ります。'},
+    {sel:'.monthbar', enter:function(){ if(sheetOpen()) closeSheet(); if(!viewShown(1)) showView(1); },
+     text:'一覧に戻りました。<b>‹ ›</b> で見る月を変えられます。<br>希望は<b>月ごと</b>に集めます。まずは<b>来月</b>を出してお待ちください。'},
+    {sel:'#stateRow',
+     text:'ここが今月のようすです。<br>いまは空っぽですが、スタッフが希望を出しはじめると<b>「◯人が出し終わり」</b>「<b>足りない日</b>が◯日」と出てきます。'},
+    {sel:'#gearBtn',
+     text:'準備はこれで終わりです。<br>あとは<b>希望が集まるのを待つだけ</b>。集まったら、この一覧が「足りない日」を赤で教えてくれます。<br>使い方をもう一度見たいときは、<b>歯車 → 設定</b>のいちばん下にあります。'}
   ];
 }
 /* 第2章＝毎月の使い方（希望が集まってから） */
 function tutSteps2(){
+  const kimeOn=function(){ const b=tq('#modeSeg button[data-m="kime"]'); return !!b && b.classList.contains('on'); };
   return [
-    {sel:'#stateRow', enter:function(){ const b=tq('#tab1'); if(b && !viewShown(1)) b.click(); },
+    {sel:'#stateRow', enter:function(){ if(!viewShown(1)) showView(1); },
      text:'ここが今月のようすです。<b>足りない日</b>が何日あるか、<b>何人が出し終わったか</b>が出ます。'},
     {sel:'#cal', pad:4,
      text:'<b>赤い日</b>は人手が足りない日。<b>「昼 −1」＝昼にあと1人</b>という意味です。<br>日をタップしてみてください。',
@@ -1918,14 +2051,19 @@ function tutSteps2(){
      text:'その日に<b>入れる人と時間</b>が出ます。<b>○</b>は入れます、<b>△</b>は行けたら。'},
     {sel:'#modeSeg', need:sheetOpen,
      text:'<b>「シフトを決める」</b>に切り替えると、この日に<b>誰を入れるか</b>を選べます。',
-     done:function(){ const b=tq('#modeSeg button[data-m="kime"]'); return !!b && b.classList.contains('on'); }},
-    {sel:'#slots', need:function(){ const b=tq('#modeSeg button[data-m="kime"]'); return sheetOpen() && !!b && b.classList.contains('on'); },
+     done:kimeOn},
+    {sel:'#slots', need:function(){ return sheetOpen() && kimeOn(); },
      text:'名前を押すと<b>入る／外れる</b>。枠ごとに「全員入れる」もできます。'},
+    {sel:'#dayActs', need:sheetOpen,
+     text:'希望を出しそびれた方は、<b>「代わりに入れる」</b>で店長が入れられます。<br>その日だけ人手が要るときは<b>「この日の必要人数」</b>。'},
     {sel:'#shiftBox', enter:function(){ if(sheetOpen()) closeSheet(); },
-     text:'決まったら、ここから<b>シフト表</b>を開けます。<b>印刷</b>して貼り出したり、<b>LINEに貼る文</b>にもできます。<br><b>「みんなに知らせる」</b>を押すと、スタッフの画面にも出ます。'}
+     text:'決まったら、ここから<b>シフト表</b>を開けます。<br>1日ずつ決めるのが大変なときは、先に<b>「希望どおり、月まるごと入れる」</b>で全部入れて、多いところを外していくのが早いです。'},
+    {sel:'#shiftBox',
+     text:'<b>「シフト表を見る」</b>→ <b>「印刷する」</b>で、<b>横向きの紙1枚</b>にまとまって出てきます。そのまま貼り出せます。'},
+    {sel:'#shiftBox',
+     text:'最後に<b>「みんなに知らせる」</b>。ここを押すまで、スタッフの画面には出ません。<br>知らせたあとに直すと、その場で相手の画面も変わります。'}
   ];
 }
-
 let tutOn=false, tutIdx=0, tutList=[], tutRaf=0, tutTimer=0, tutLastKey='', tutMode='tour', tutFlag='';
 
 function tutStart(list, mode, flag){
@@ -2073,7 +2211,7 @@ document.getElementById('tutAgain2').addEventListener('click',function(){
   /* 希望が1件も無いと、赤い日もシフトも出ない＝なぞるものが無い */
   if(!tutAnySub()){ toast('希望が集まってからご案内できます'); return; }
   if(sheetOpen()) closeSheet();
-  const b=document.getElementById('tab1'); if(b && !viewShown(1)) b.click();
+  if(!viewShown(1)) showView(1);
   window.scrollTo(0,0); tutStart(tutSteps2(),'tour',LS_TUT2);
 });
 
