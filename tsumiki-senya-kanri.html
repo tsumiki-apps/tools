@@ -1773,20 +1773,11 @@ function inviteText(s2){
     '・あとから何度でも直せます\n'+
     '・合言葉は '+s2.code+' です（リンクが開かないときに使ってください）';
 }
-function remindText(list){
-  const {y,m1}=parseMonth(cur.month);
-  return 'おつかれさまです。\n'+y+'年'+m1+'月分のシフト希望を、'+fmtDateJP(cur.deadline)+'までにお願いします。\n\n'+
-    'まだの方：'+list.map(s=>s.name+'さん').join('、')+'\n\n'+
-    'それぞれの専用URLからお願いします。';
-}
 function renderStaff(){
   const hd=document.getElementById('staffHd'); hd.innerHTML='';
   const box=document.getElementById('staffBox');
   if(!staffList.length){ box.innerHTML='<div class="empty">まだ誰も登録されていません</div>'; return; }
 
-  /* ⚠️ 催促は「URLを渡した人」にしか意味がない。
-     まだ渡していない人に「締切までにお願いします」と送っても、その人は出しようがない。 */
-  const yet=staffList.filter(s2=>s2.active && s2.sent && submitState(s2)!=='done');
   const cnt=document.createElement('div'); cnt.className='cnt';
   /* ⚠️ 配っている最中は「出し終わり◯人」より「渡し終わったか」を知りたい。
      全員に渡し終わったら、いつもの「出し終わり」に戻す。 */
@@ -1795,13 +1786,10 @@ function renderStaff(){
   cnt.textContent = (actAll.length && sentN<actAll.length)
       ? (actAll.length+'人中 '+sentN+'人にURLを渡しました')
       : (cur? (staffList.filter(s=>s.done).length+' / '+actAll.length+'人が出し終わり') : '');
+  /* ⚠️ ここには「まだの◯人に送る文をコピー」の催促ボタンがあった。
+     催促は毎月1回あるかどうかで、しかも文面はお店ごとに言い回しが違う。
+     出し終わっていない人は下の一覧に赤く並ぶので、そこを見て声をかければ足りる。 */
   hd.appendChild(cnt);
-  if(yet.length){
-    const b=document.createElement('button'); b.className='btn sub';
-    b.textContent='まだの'+yet.length+'人に送る文をコピー';
-    b.addEventListener('click',async()=>{ toast(await copyText(remindText(yet))?'コピーしました':'コピーできませんでした'); });
-    hd.appendChild(b);
-  }
 
   box.innerHTML='';
   staffList.forEach(s2=>{
