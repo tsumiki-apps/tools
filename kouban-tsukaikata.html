@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>香盤メーカー — 使い方</title>
-<meta name="description" content="香盤メーカーの使い方。稽古のNGから「今日できる場面」を出し、香盤を自動で組むための道具です。">
-<link rel="apple-touch-icon" href="icon-kouban.png">
+<meta name="description" content="香盤メーカーの使い方。出演者のNGを入れると、その日に撮れる場面が出ます。">
+<link rel="apple-touch-icon" href="icon-teppari.png">
 <style>
   /* ================================================================
      つみき 取扱説明書 共通スタイル v2（1項目＝1図＋数行）
@@ -256,7 +256,7 @@
     footer{color:#555;}
   }
 
-  /* kouban 本体と同じ色（画面再現に使う） */
+  /* teppari 本体と同じ色（画面再現に使う） */
   :root{
     /* アプリ画面の再現に使う色（香盤メーカー本体と同じ値） */
     --app-ink:#1f2933; --app-subtle:#52606d; --app-line:#e4e7eb; --app-surface:#f5f7fa;
@@ -311,6 +311,35 @@
 
   /* Q&A */
 
+  /* ================= てっぱり表の再現（図） ================= */
+  table.board{border-collapse:collapse; width:100%; font-size:11px; background:#fff;}
+  table.board th, table.board td{border:1px solid var(--app-line); padding:4px 3px; text-align:center; white-space:nowrap;}
+  table.board thead th{background:var(--app-surface); color:var(--app-subtle); font-weight:700; font-size:10.5px;}
+  table.board thead th.sel{background:var(--app-ink); color:#fff;}
+  table.board tbody th{text-align:left; font-weight:600; font-size:10.5px; background:#fff;}
+  table.board td.ng{background:var(--ng); color:#fff; font-weight:700;}
+  table.board td.part{background:#fef3c7; color:#92400e; font-weight:700;}
+  table.board tr.plan td{background:#fffbeb; color:#92400e; font-weight:700; font-size:10px;}
+  table.board tr.plan td.off{background:#e2e8f0; color:#64748b;}
+  table.board tfoot th{background:var(--app-surface); color:var(--app-subtle); font-weight:400; font-size:10px; text-align:left;}
+  table.board tfoot td{background:var(--app-surface); color:var(--app-subtle); font-weight:700;}
+  table.board tfoot tr.can td{background:#d1fae5; color:#065f46;}
+  table.board tfoot tr.did td{background:#fff; color:var(--app-subtle);}
+  table.board tfoot tr.did td.on{background:#e0f2fe; color:#075985;}
+
+  /* 香盤表の再現 */
+  table.kouban td.dot{color:var(--app-ink);}
+  table.kouban thead th.ok{background:var(--ok); color:#fff;}
+  table.kouban thead th.near{background:#fde68a; color:#92400e;}
+
+  /* 進み具合の帯 */
+  .bar3{display:flex; height:12px; border-radius:999px; overflow:hidden; background:var(--app-line); margin:10px 0 8px;}
+  .bar3 i{display:block;}
+  .bar3 .did{background:#0284c7;}
+  .bar3 .can{background:#34d399;}
+  .bar3 .no{background:#f87171;}
+  .keys{display:flex; flex-wrap:wrap; gap:12px; font-size:11.5px; color:var(--app-subtle);}
+  .keys span{display:inline-flex; align-items:center; gap:5px;}
 
 </style>
 </head>
@@ -320,8 +349,11 @@
 <header>
   <p class="kicker">TSUMIKI TOOLS</p>
   <h1>香盤メーカー 使い方</h1>
-  <p class="lead">来られない人を入れると、<strong>その日にできる場面</strong>が出ます。そのまま香盤（＝その日の進行表）も自動で組めます。</p>
-  <p class="openapp"><a href="kouban-pro.html">香盤メーカーを開く →</a></p>
+  <p class="lead">てっぱり表と香盤表を突き合わせて、<strong>その日どの場（シーン）の稽古ができるか</strong>を出す道具です。公演の内容（キャスト・場面・稽古日）は、はじめから入っています。</p>
+  <p class="openapp">
+    <a href="kouban-pro.html">香盤メーカーを開く →</a>
+    <a class="ghost" href="teppari-tsukaikata-v2.html">増えたところの使い方</a>
+  </p>
 </header>
 
 <div class="layout">
@@ -331,38 +363,40 @@
   <nav>
     <p class="g">まず知る</p>
     <a href="#i1"><span class="n">1</span>どんな道具か</a>
-    <a href="#i2"><span class="n">2</span>まず、さわってみる</a>
+    <a href="#i2"><span class="n">2</span>てっぱり表</a>
+    <a href="#i3"><span class="n">3</span>香盤表</a>
+    <a href="#i4"><span class="n">4</span>最初の1回だけ</a>
 
-    <p class="g">はじめの準備（最初の1回だけ）</p>
-    <a href="#i3"><span class="n">3</span>設定を開く</a>
-    <a href="#i4"><span class="n">4</span>役を登録する</a>
-    <a href="#i5"><span class="n">5</span>場面を登録する</a>
-    <a href="#i6"><span class="n">6</span>出る役をチェックする</a>
-    <a href="#i7"><span class="n">7</span>チェックは付けすぎない</a>
-    <a href="#i8"><span class="n">8</span>稽古日を登録する</a>
-    <a href="#i9"><span class="n">9</span>午前と午後に分ける</a>
+    <p class="g">画面の見かた</p>
+    <a href="#i5"><span class="n">5</span>2つの表を切り替える</a>
+    <a href="#i6"><span class="n">6</span>日付を選ぶ</a>
+    <a href="#i7"><span class="n">7</span>選んだ日の中身</a>
+    <a href="#i8"><span class="n">8</span>香盤表の色</a>
+    <a href="#i9"><span class="n">9</span>赤い行の意味</a>
 
     <p class="g">毎回の使い方</p>
-    <a href="#i10"><span class="n">10</span>日付を選ぶ</a>
-    <a href="#i11"><span class="n">11</span>出られない所を赤くする</a>
-    <a href="#i12"><span class="n">12</span>1日ぜんぶは「終日」</a>
-    <a href="#i13"><span class="n">13</span>できる場面を見る</a>
-    <a href="#i14"><span class="n">14</span>できない理由も出る</a>
+    <a href="#i10"><span class="n">10</span>日付を押す</a>
+    <a href="#i11"><span class="n">11</span>時間の区切りは自動</a>
+    <a href="#i12"><span class="n">12</span>できる場面を見る</a>
+    <a href="#i13"><span class="n">13</span>あと1人でできる場面</a>
+    <a href="#i14"><span class="n">14</span>できた場面を記録する</a>
 
-    <p class="g">香盤を組む</p>
-    <a href="#i15"><span class="n">15</span>香盤タブに切り替える</a>
-    <a href="#i16"><span class="n">16</span>締切を入れる（任意）</a>
-    <a href="#i17"><span class="n">17</span>自動で3案を出す</a>
-    <a href="#i18"><span class="n">18</span>3案のちがい</a>
-    <a href="#i19"><span class="n">19</span>採用して並べ替える</a>
-    <a href="#i20"><span class="n">20</span>役が足りなくても置ける</a>
-    <a href="#i21"><span class="n">21</span>印刷して貼り出す</a>
+    <p class="g">予定・NGを入れる</p>
+    <a href="#i15"><span class="n">15</span>マスを押してNGを入れる</a>
+    <a href="#i16"><span class="n">16</span>「その日の予定」を押す</a>
+    <a href="#i17"><span class="n">17</span>この日の扱い</a>
+    <a href="#i18"><span class="n">18</span>特別稽古・時間・メモ</a>
+    <a href="#i19"><span class="n">19</span>通しを2回入れるとき</a>
+    <a href="#i20"><span class="n">20</span>稽古時間をまとめて変える</a>
 
-    <p class="g">配る・保存する</p>
-    <a href="#i22"><span class="n">22</span>この内容を配る</a>
-    <a href="#i23"><span class="n">23</span>受け取ると置き換わる</a>
-    <a href="#i24"><span class="n">24</span>控えの取り方</a>
-    <a href="#i25"><span class="n">25</span>データは端末の中だけ</a>
+    <p class="g">進み具合</p>
+    <a href="#i21"><span class="n">21</span>進み具合の帯</a>
+    <a href="#i22"><span class="n">22</span>赤が出たときの見かた</a>
+
+    <p class="g">印刷・データ</p>
+    <a href="#i23"><span class="n">23</span>貼り出し用に印刷する</a>
+    <a href="#i24"><span class="n">24</span>バックアップを取る</a>
+    <a href="#i25"><span class="n">25</span>消えてしまう場合</a>
     <a href="#i26"><span class="n">26</span>ホーム画面に置く</a>
 
     <p class="g">巻末</p>
@@ -380,174 +414,163 @@
     <article class="item" id="i1">
       <figure class="shot">
         <div class="flow">
-          <span class="box">来られない人を入れる</span><span class="arw">→</span>
+          <span class="box">てっぱりを入れる</span><span class="arw">→</span>
           <span class="box">できる場面が出る</span><span class="arw">→</span>
-          <span class="box">香盤ができる</span>
+          <span class="box">できた場面を記録</span>
         </div>
       </figure>
       <h3><span class="n">1</span>どんな道具か</h3>
-      <p>出欠から「今日できる場面」を出して、その日の香盤を組み、印刷するところまでの道具です。</p>
-      <p class="fine">出欠の集計・連絡・台本の管理はしません。使うのはまとめ役ひとり。ログインもインストールも不要です。<br>
-        ※ 香盤（こうばん）＝ どの場面を何時からやるかを並べた、その日の進行表。</p>
+      <p>てっぱりから「その日できる場面」を出し、期間ぜんぶの見通しと、稽古の進み具合（予定と結果）まで出します。</p>
+      <p class="fine">出欠の集計や連絡、時間割づくりはいたしません（1場面あたりの稽古時間は決めない方針のため）。インストール不要、URLを開くだけです。</p>
     </article>
 
     <article class="item" id="i2">
       <figure class="shot">
-        <div class="screen">
-          <div class="lbl" style="font-size:13px; color:var(--app-ink); margin-bottom:9px">はじめかた</div>
-          <div class="dash" style="font-size:12px">
-            <div style="margin:3px 0">① 役を登録する</div>
-            <div style="margin:3px 0">② 場面を登録して出る役をチェック</div>
-            <div style="margin:3px 0">③ 稽古日と時間帯を登録する</div>
+        <div class="screen" style="padding:12px">
+          <div class="tblwrap">
+            <table class="board">
+              <thead>
+                <tr><th>キャスト</th><th>4<br>火</th><th class="sel">5<br>水</th><th>6<br>木</th></tr>
+              </thead>
+              <tbody>
+                <tr><th>東 一馬</th><td class="part">16入</td><td class="part">16入</td><td></td></tr>
+                <tr><th>白石 玲</th><td class="part">17出</td><td></td><td class="part">17出</td></tr>
+                <tr><th>森本 大地</th><td></td><td class="ng">NG</td><td></td></tr>
+              </tbody>
+            </table>
           </div>
-          <div style="margin-top:11px; display:flex; gap:7px; flex-wrap:wrap">
-            <span class="btn pri">設定を開いて登録する</span>
-            <span class="btn">サンプルで試す</span>
-          </div>
-          <span class="pin" style="right:8px; bottom:-10px">1</span>
         </div>
-        <figcaption>はじめて開いたときの画面</figcaption>
+        <figcaption>実際は26日ぶん・24名が並びます（お名前と数字は例です）</figcaption>
       </figure>
-      <h3><span class="n">2</span>まず、さわってみる</h3>
-      <p><kbd>サンプルで試す</kbd> を押すと『ロミオとジュリエット』（役26・全26場面）が全部入った状態になります。</p>
-      <p class="fine">自分の劇団のデータを1文字も入れずに全機能を試せます。消すときは <span class="path"><b>設定 → データ → 全データを消去</b></span>。</p>
+      <h3><span class="n">2</span>てっぱり表</h3>
+      <p><strong>キャスト × 日付</strong>の表です。NG・◯時入り／◯時出しを、ここに入れます。</p>
+    </article>
+
+    <article class="item" id="i3">
+      <figure class="shot">
+        <div class="screen" style="padding:12px">
+          <div class="tblwrap">
+            <table class="board kouban">
+              <thead>
+                <tr><th>キャスト</th><th class="ok">1場<br>◎</th><th class="ok">2場<br>◎</th><th>3場<br>×</th><th class="near">5場<br>△</th></tr>
+              </thead>
+              <tbody>
+                <tr><th>東 一馬</th><td class="dot">●</td><td class="dot">●</td><td class="dot">●</td><td></td></tr>
+                <tr><th>佐倉 みゆき</th><td></td><td></td><td class="dot">●</td><td></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </figure>
+      <h3><span class="n">3</span>香盤表</h3>
+      <p><strong>キャスト × 場面</strong>の表です。● がその場面に出る人を表します。</p>
+      <p class="fine">いつもお使いの2つの表と同じ並びにしてあります。</p>
+    </article>
+
+    <article class="item" id="i4">
+      <figure class="shot">
+        <div class="screen" style="text-align:center; padding:18px 14px">
+          <div class="lbl" style="letter-spacing:.16em">TSUMIKI TOOLS</div>
+          <div style="font-size:15px; font-weight:700; margin:7px 0 4px">プロダクトキー</div>
+          <div class="dash" style="color:var(--app-subtle); letter-spacing:.08em">TSUMIKI-XXXX-XXXX-XXXX</div>
+          <div style="margin-top:11px"><span class="btn pri">はじめる</span></div>
+        </div>
+        <figcaption>1回入れたら、この端末では二度と出ません</figcaption>
+      </figure>
+      <h3><span class="n">4</span>最初の1回だけ</h3>
+      <p>お送りしたURLを開き、プロダクトキーを入れて <kbd>はじめる</kbd> を押してください。</p>
+      <p class="fine">大文字・小文字どちらでも、ハイフンの有無も問いません。</p>
+      <p class="caution fine"><b>⚠ キーはメールを消さずに残しておいてください。</b>別の端末で開くときや、履歴・サイトデータを消したあとは、もう一度入力が必要です。</p>
     </article>
 
   </div>
 </section>
 
-<!-- ==================== はじめの準備 ==================== -->
+<!-- ==================== 画面の見かた ==================== -->
 <section class="grp" id="g2">
-  <h2>はじめの準備（最初の1回だけ）</h2>
+  <h2>画面の見かた</h2>
   <div class="items">
-
-    <article class="item" id="i3">
-      <figure class="shot">
-        <div class="screen">
-          <div class="bar"><span class="ttl">香盤メーカー</span><span class="gear">⚙ 設定</span></div>
-          <div class="tabs"><span class="on">きょうの稽古</span><span>香盤</span></div>
-          <span class="pin" style="top:6px; right:-10px">1</span>
-        </div>
-      </figure>
-      <h3><span class="n">3</span>設定を開く</h3>
-      <p>右上の歯車（<kbd>⚙ 設定</kbd>）が登録の入口です。ここで <b>役 → 場面 → 稽古日</b> の順に3つ登録します。</p>
-      <p class="fine">3つそろうと、画面上の案内は自動で消えます。</p>
-    </article>
-
-    <article class="item" id="i4">
-      <figure class="shot">
-        <div class="screen">
-          <div class="lbl" style="margin-bottom:8px">役（登場人物）</div>
-          <div style="display:flex; gap:6px; align-items:center; margin-bottom:9px">
-            <span class="chip line" style="flex:1; text-align:left">ロミオ</span>
-            <span class="btn pri">追加</span>
-          </div>
-          <div style="display:flex; gap:5px; flex-wrap:wrap">
-            <span class="chip line">ジュリエット</span><span class="chip line">乳母</span><span class="chip line">ティボルト</span>
-          </div>
-        </div>
-      </figure>
-      <h3><span class="n">4</span>役を登録する</h3>
-      <p><span class="path"><b>設定 → 役（登場人物）</b></span>で、役名を入れて <kbd>追加</kbd>。</p>
-      <p class="fine">人の名前でも構いません。配役が未定なら役名のままでOKです。</p>
-    </article>
 
     <article class="item" id="i5">
       <figure class="shot">
         <div class="screen">
-          <div class="lbl" style="margin-bottom:8px">場面</div>
-          <div style="border:1px solid var(--app-line); border-radius:10px; padding:10px">
-            <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap">
-              <span class="chip line">5</span><span style="font-size:11.5px; color:var(--app-subtle)">場</span>
-              <span class="chip line" style="flex:1">バルコニー</span>
-              <span class="chip line">60</span><span style="font-size:11.5px; color:var(--app-subtle)">分</span>
-            </div>
-          </div>
+          <div class="bar"><span class="ttl">香盤メーカー</span><span class="gear">管理</span></div>
+          <div class="tabs"><span class="on">てっぱり表</span><span>香盤表</span></div>
         </div>
       </figure>
-      <h3><span class="n">5</span>場面を登録する</h3>
-      <p><span class="path"><b>設定 → 場面</b></span>で、場番号とタイトルを入れて <kbd>追加</kbd>。</p>
-      <p class="fine"><b>分</b>＝稽古にかける時間（初期60分）。時代・幕は任意です。</p>
+      <h3><span class="n">5</span>2つの表を切り替える</h3>
+      <p>画面は1枚です。右上で<strong>てっぱり表</strong>と<strong>香盤表</strong>を切り替えます。</p>
     </article>
 
     <article class="item" id="i6">
       <figure class="shot">
-        <div class="screen">
-          <div class="lbl" style="margin-bottom:8px">5場・バルコニー / 出る役</div>
-          <div style="display:flex; gap:5px; flex-wrap:wrap">
-            <span class="chip" style="background:var(--app-ink); color:#fff">ロミオ</span>
-            <span class="chip" style="background:var(--app-ink); color:#fff">ジュリエット</span>
-            <span class="chip line">乳母</span>
-            <span class="chip line">ティボルト</span>
+        <div class="screen" style="padding:12px">
+          <div class="tblwrap">
+            <table class="board">
+              <thead>
+                <tr><th>キャスト</th><th>4<br>火</th><th class="sel">5<br>水</th><th>6<br>木</th></tr>
+                <tr class="plan"><td style="text-align:left">その日の予定 ✎</td><td>通し</td><td>…</td><td>通し</td></tr>
+              </thead>
+            </table>
           </div>
-          <span class="pin" style="top:44%; left:-10px">1</span>
-          <span class="pin" style="top:44%; right:-10px">2</span>
+          <span class="pin" style="top:22%; right:-10px">1</span>
         </div>
-        <figcaption>❶ 黒＝出る　❷ 白＝出ない（押すと切り替わります）</figcaption>
       </figure>
-      <h3><span class="n">6</span>出る役をチェックする</h3>
-      <p><b>ここが判定のもと</b>です。黒くした役が<strong>全員そろって初めて</strong>「できる場面」になります。</p>
+      <h3><span class="n">6</span>日付を選ぶ</h3>
+      <p>日付を押すと、その日が選ばれます（黒くなります）。</p>
+      <p class="fine">今日に戻るときは右上の <kbd>今日へ</kbd> です。</p>
     </article>
 
     <article class="item" id="i7">
       <figure class="shot">
         <div class="screen">
-          <div style="font-size:11.5px; color:var(--app-subtle); margin-bottom:5px">◎ 少なめ（2人）</div>
-          <div style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:11px">
-            <span class="chip" style="background:var(--app-ink); color:#fff">ロミオ</span>
-            <span class="chip" style="background:var(--app-ink); color:#fff">ジュリエット</span>
+          <div style="display:flex; align-items:baseline; justify-content:space-between; border-bottom:1px solid var(--app-line); padding-bottom:6px; margin-bottom:8px">
+            <b style="font-size:13.5px">13:00–16:00</b>
+            <span style="font-size:11px; color:var(--app-subtle)">できる 12 ／ あと1人 11</span>
           </div>
-          <div style="font-size:11.5px; color:#b91c1c; margin-bottom:5px">△ 付けすぎ（6人）</div>
-          <div style="display:flex; gap:5px; flex-wrap:wrap">
-            <span class="chip" style="background:var(--app-ink); color:#fff">ロミオ</span>
-            <span class="chip" style="background:var(--app-ink); color:#fff">ジュリエット</span>
-            <span class="chip" style="background:var(--app-ink); color:#fff">乳母</span>
-            <span class="chip" style="background:var(--app-ink); color:#fff">ティボルト</span>
-            <span class="chip" style="background:var(--app-ink); color:#fff">神父</span>
-            <span class="chip" style="background:var(--app-ink); color:#fff">従者</span>
+          <div style="font-size:11.5px">
+            <b style="color:#b91c1c">欠席</b> <span class="chip absent">東 一馬</span>
           </div>
         </div>
       </figure>
-      <h3><span class="n">7</span>チェックは付けすぎない</h3>
-      <p>その日やらない役まで付けると、<strong>いつまでも「できない」判定</strong>になります。</p>
-      <p class="fine">迷ったら少なめに。あとからいつでも足せます。</p>
+      <h3><span class="n">7</span>選んだ日の中身</h3>
+      <p>選んだ日の詳しい内容は、画面の<strong>右</strong>（スマホでは下）に出ます。</p>
+      <p class="fine">時間の区切りごとの欠席者とできる場面、その日の特別稽古、できた場面の記録が並びます。</p>
     </article>
 
     <article class="item" id="i8">
       <figure class="shot">
-        <div class="screen">
-          <div class="lbl" style="margin-bottom:8px">稽古日・時間帯</div>
-          <div style="border:1px solid var(--app-line); border-radius:10px; padding:10px">
-            <div style="font-weight:600; font-size:12.5px; margin-bottom:6px">8/1（土）</div>
-            <div style="display:flex; gap:6px; align-items:center; font-size:12px; color:var(--app-subtle)">
-              <span class="chip line">午後</span><span>13:00 – 17:00</span>
-            </div>
-          </div>
-          <div style="margin-top:9px"><span class="btn">＋ 時間帯を追加</span></div>
+        <div class="tblwrap">
+          <table class="cmp stack">
+            <tbody>
+              <tr><th>◎ 緑</th><td data-l="意味">できる（出る人が全員そろう時間がある）</td></tr>
+              <tr><th>△ 黄</th><td data-l="意味">あと1人でできる（1人だけ足りない）</td></tr>
+              <tr><th>× 灰</th><td data-l="意味">できない（2人以上足りない）</td></tr>
+            </tbody>
+          </table>
         </div>
       </figure>
-      <h3><span class="n">8</span>稽古日を登録する</h3>
-      <p><span class="path"><b>設定 → 稽古日・時間帯</b></span>で日付を足すと、「午後 13:00–17:00」が1つ付いてきます。</p>
-      <p class="fine">名前も時刻も、あとから自由に変えられます。</p>
+      <h3><span class="n">8</span>香盤表の色</h3>
+      <p>選んでいる日に、その場面ができるかどうかを<strong>列の色</strong>で表します。</p>
+      <p class="fine">「あと1人」を分けているのは、誰が来られれば成立するかが分かると段取りを決めやすいためです。</p>
     </article>
 
     <article class="item" id="i9">
       <figure class="shot">
-        <div class="screen">
-          <div style="border:1px solid var(--app-line); border-radius:10px; padding:10px">
-            <div style="font-weight:600; font-size:12.5px; margin-bottom:7px">8/1（土）</div>
-            <div style="display:flex; gap:6px; align-items:center; font-size:12px; color:var(--app-subtle); margin-bottom:5px">
-              <span class="chip line">午前</span><span>10:00 – 13:00</span>
-            </div>
-            <div style="display:flex; gap:6px; align-items:center; font-size:12px; color:var(--app-subtle)">
-              <span class="chip line">午後</span><span>14:00 – 18:00</span>
-            </div>
+        <div class="screen" style="padding:12px">
+          <div class="tblwrap">
+            <table class="board kouban">
+              <thead><tr><th>キャスト</th><th>3場<br>×</th><th class="near">5場<br>△</th></tr></thead>
+              <tbody>
+                <tr><th>東 一馬</th><td class="dot">●</td><td></td></tr>
+                <tr style="background:#fef2f2"><th style="background:#fef2f2; color:#b91c1c">川辺 悟</th><td style="background:#fee2e2; color:#b91c1c; font-weight:700">●</td><td style="background:#fee2e2; color:#b91c1c; font-weight:700">●</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </figure>
-      <h3><span class="n">9</span>午前と午後に分ける</h3>
-      <p><kbd>＋ 時間帯を追加</kbd> で1日を2コマに分けられます。</p>
-      <p class="fine">午前だけ来られない人がいるなら、分けておくと判定が細かく出ます。</p>
+      <h3><span class="n">9</span>赤い行の意味</h3>
+      <p>赤い行は、その日が<strong>終日休み</strong>の方です。その方の ● が、できない理由になります。</p>
     </article>
 
   </div>
@@ -555,283 +578,272 @@
 
 <!-- ==================== 毎回の使い方 ==================== -->
 <section class="grp" id="g3">
-  <h2>毎回の使い方（きょうの稽古タブ）</h2>
+  <h2>毎回の使い方</h2>
   <div class="items">
 
     <article class="item" id="i10">
       <figure class="shot">
-        <div class="screen">
-          <div class="tabs"><span class="on">きょうの稽古</span><span>香盤</span></div>
-          <div style="display:flex; gap:6px">
-            <span class="chip line" style="background:var(--app-ink); color:#fff; border-color:var(--app-ink)">8/1(土)</span>
-            <span class="chip line">8/2(日)</span>
-            <span class="chip line">8/5(水)</span>
-          </div>
+        <div class="screen" style="text-align:center">
+          <span class="btn">今日へ</span>
         </div>
       </figure>
-      <h3><span class="n">10</span>日付を選ぶ</h3>
-      <p>上に並んだ日付から、今日の稽古日を押します。</p>
+      <h3><span class="n">10</span>日付を押す</h3>
+      <p>まず、見たい日を押します。今日に戻るときは右上の <kbd>今日へ</kbd>。</p>
     </article>
 
     <article class="item" id="i11">
       <figure class="shot">
-        <div class="screen">
-          <div class="tblwrap">
-            <table class="ng">
-              <thead><tr><th style="text-align:left">役</th><th>午前<br>10–13</th><th>午後<br>14–18</th><th>終日</th></tr></thead>
-              <tbody>
-                <tr><th>ロミオ</th><td class="on"></td><td></td><td class="allday">終日</td></tr>
-                <tr><th>乳母</th><td></td><td></td><td class="allday">終日</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="legend">
-            <span><i class="sw white"></i>出られる</span>
-            <span><i class="sw red"></i>出られない</span>
-          </div>
+        <div class="calc" style="font-size:13px">
+          16:00入りの方 ＋ 17:00出しの方<br>
+          <span class="res">13:00–16:00 ／ 16:00–17:00 ／ 17:00–19:00</span>
+          <span class="note2">まん中は全員そろうので「通しが打てます」と出ます</span>
         </div>
-        <figcaption>ロミオは午前だけ来られない</figcaption>
       </figure>
-      <h3><span class="n">11</span>出られない所を赤くする</h3>
-      <p>マスをタップすると赤（＝NG）。もう一度押すと戻ります。</p>
+      <h3><span class="n">11</span>時間の区切りは自動</h3>
+      <p>1日は「◯時入り／◯時出し」で自動的に区切られ、区切りごとに判定します。</p>
+      <p class="fine">判定は「その区切りのあいだ、ずっと居る方」だけを数えます。17:00出しの方が出る場面は、17:00をまたぐ形では出てきません。</p>
     </article>
 
     <article class="item" id="i12">
       <figure class="shot">
         <div class="screen">
-          <div class="tblwrap">
-            <table class="ng">
-              <thead><tr><th style="text-align:left">役</th><th>午前<br>10–13</th><th>午後<br>14–18</th><th>終日</th></tr></thead>
-              <tbody>
-                <tr><th>ジュリエット</th><td class="on"></td><td class="on"></td><td class="allday on">終日</td></tr>
-              </tbody>
-            </table>
+          <div class="lbl" style="margin-bottom:6px">◎ できる場面（12）</div>
+          <div style="display:flex; flex-wrap:wrap; gap:5px">
+            <span class="chip ok">4場</span><span class="chip ok">5場</span><span class="chip ok">6場</span>
+            <span class="chip ok">8場</span><span class="chip line">…</span>
           </div>
-          <span class="pin" style="top:58%; right:-10px">1</span>
         </div>
       </figure>
-      <h3><span class="n">12</span>1日ぜんぶは「終日」</h3>
-      <p>右端の <kbd>終日</kbd> を1回押すだけで、その人のその日ぜんぶが切り替わります。</p>
+      <h3><span class="n">12</span>できる場面を見る</h3>
+      <p>区切りごとに、そのままいける場面が緑で並びます。</p>
     </article>
 
     <article class="item" id="i13">
       <figure class="shot">
         <div class="screen">
-          <div class="lbl" style="margin-bottom:6px">できる場面（2）</div>
-          <span class="chip ok">3場・広場のけんか</span>
-          <span class="chip ok">7場・決闘</span>
+          <div class="lbl" style="color:#92400e; margin-bottom:4px">△ あと1人でできる場面（11）</div>
+          <div style="font-size:11.5px; color:#92400e">1場（東 一馬が不在）／2場（東 一馬が不在）…</div>
         </div>
       </figure>
-      <h3><span class="n">13</span>できる場面を見る</h3>
-      <p>塗ったその場で、下の「できる場面」が入れ替わります。緑がそのままいける場面です。</p>
-      <p class="fine">時間帯ごとに出ます。「欠席なし」なら全場できます。</p>
+      <h3><span class="n">13</span>あと1人でできる場面</h3>
+      <p>1人だけ足りない場面は、<strong>その「1人」の名前つき</strong>で出ます。</p>
+      <p class="fine">連絡すべき相手がすぐ決まります。</p>
     </article>
 
     <article class="item" id="i14">
       <figure class="shot">
         <div class="screen">
-          <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--app-line); padding-bottom:6px; margin-bottom:9px">
-            <strong style="font-size:12.5px">午後</strong>
-            <span style="font-size:11px; color:var(--app-subtle)">14:00–18:00</span>
+          <div class="lbl" style="margin-bottom:6px">稽古できた場面の記録</div>
+          <div style="display:flex; flex-wrap:wrap; gap:5px">
+            <span class="chip line" style="border-color:var(--ok)">4場</span>
+            <span class="chip line" style="border-color:var(--ok)">5場</span>
+            <span class="chip ok">6場</span>
+            <span class="chip line">7場</span>
           </div>
-          <div style="margin-bottom:9px">
-            <span style="color:#b91c1c; font-weight:700; font-size:12px; margin-right:6px">欠席</span>
-            <span class="chip absent">ジュリエット</span>
-          </div>
-          <div class="lbl" style="margin-bottom:4px">できない場面（1）</div>
-          <div style="font-size:12px">5場・バルコニー <span style="color:#b91c1c">（ジュリエットが不在）</span></div>
         </div>
+        <figcaption>緑の枠が付いているものが、その日にできる場面です</figcaption>
       </figure>
-      <h3><span class="n">14</span>できない理由も出る</h3>
-      <p><strong>誰がいないからできないのか</strong>まで出ます。連絡すべき相手がすぐ決まります。</p>
+      <h3><span class="n">14</span>できた場面を記録する</h3>
+      <p>稽古のあと、<strong>実際にやった場面を押すだけ</strong>です（もう一度押すと取り消せます）。</p>
+      <p class="fine">押すと、てっぱり表の「できた場面」と、香盤表の「稽古できた」の行（✓）にも反映されます。</p>
     </article>
 
   </div>
 </section>
 
-<!-- ==================== 香盤を組む ==================== -->
+<!-- ==================== 予定・NG ==================== -->
 <section class="grp" id="g4">
-  <h2>香盤を組む・印刷する</h2>
+  <h2>予定・NGを入れる</h2>
   <div class="items">
 
     <article class="item" id="i15">
       <figure class="shot">
-        <div class="screen">
-          <div class="tabs"><span>きょうの稽古</span><span class="on">香盤</span></div>
-          <div style="display:flex; gap:6px">
-            <span class="chip line" style="background:var(--app-ink); color:#fff; border-color:var(--app-ink)">8/1(土)</span>
-            <span class="chip line">8/2(日)</span>
-          </div>
+        <div class="tblwrap">
+          <table class="cmp stack">
+            <thead><tr><th style="width:8em">押すもの</th><th>入るもの</th><th>表での見え方</th></tr></thead>
+            <tbody>
+              <tr><th>出られる</th><td data-l="入るもの">その日の指定をぜんぶ消す</td><td data-l="見え方">空白</td></tr>
+              <tr><th>終日NG</th><td data-l="入るもの">その日まるごと来られない</td><td data-l="見え方">赤い <b>NG</b></td></tr>
+              <tr><th>◯時入り</th><td data-l="入るもの">その時刻より前は居ない（途中から来る）</td><td data-l="見え方">黄色い <b>14入</b></td></tr>
+              <tr><th>◯時出し</th><td data-l="入るもの">その時刻以降は居ない（途中で帰る）</td><td data-l="見え方">黄色い <b>17出</b></td></tr>
+            </tbody>
+          </table>
         </div>
       </figure>
-      <h3><span class="n">15</span>香盤タブに切り替える</h3>
-      <p><kbd>香盤</kbd> タブに切り替えて、組みたい日付を選びます。</p>
+      <h3><span class="n">15</span>マスを押してNGを入れる</h3>
+      <p>てっぱり表のマスを押すと、下から選ぶ画面が出ます。</p>
     </article>
 
     <article class="item" id="i16">
       <figure class="shot">
-        <div class="screen">
-          <div class="lbl" style="margin-bottom:7px">締切（任意）</div>
-          <div style="display:flex; gap:6px; align-items:center; font-size:12.5px">
-            <span class="chip line">5場・バルコニー</span>
-            <span style="color:var(--app-subtle)">を</span>
-            <span class="chip line">16:00</span>
-            <span style="color:var(--app-subtle)">までに</span>
+        <div class="screen" style="padding:12px">
+          <div class="tblwrap">
+            <table class="board">
+              <thead>
+                <tr><th>キャスト</th><th>4<br>火</th><th class="sel">5<br>水</th></tr>
+                <tr class="plan"><td style="text-align:left">その日の予定 ✎</td><td>通し</td><td>…</td></tr>
+              </thead>
+            </table>
           </div>
+          <span class="pin" style="bottom:16px; left:-10px">1</span>
         </div>
       </figure>
-      <h3><span class="n">16</span>締切を入れる（任意）</h3>
-      <p>「◯場を◯時までに」。早く帰る人がいる場面に入れておきます。</p>
-      <p class="fine">無くても組めます。まずは飛ばして大丈夫です。</p>
+      <h3><span class="n">16</span>「その日の予定」を押す</h3>
+      <p>日付のすぐ下にある「その日の予定 ✎」の行を押すと、その日の設定が開きます。</p>
+      <p class="fine">選んだ日の詳細にある <kbd>この日を直す</kbd> からも、同じものが開きます。</p>
     </article>
 
     <article class="item" id="i17">
       <figure class="shot">
         <div class="screen">
-          <div style="text-align:center; margin-bottom:10px"><span class="btn pri">香盤を自動生成</span></div>
-          <div style="display:flex; flex-direction:column; gap:6px">
-            <div style="border:1px solid var(--app-line); border-radius:9px; padding:7px 10px; font-size:12px">案A・番号順消化　<span style="color:var(--app-subtle)">消化5／積み残し1</span></div>
-            <div style="border:1px solid var(--app-line); border-radius:9px; padding:7px 10px; font-size:12px">案B・欠け役優先　<span style="color:var(--app-subtle)">消化4／積み残し2</span></div>
-            <div style="border:1px solid var(--app-line); border-radius:9px; padding:7px 10px; font-size:12px">案C・消化数最大　<span style="color:var(--app-subtle)">消化6／積み残し0</span></div>
+          <div style="display:flex; gap:6px; justify-content:center">
+            <span class="btn pri">稽古あり</span><span class="btn">OFF</span><span class="btn">未定</span>
           </div>
         </div>
       </figure>
-      <h3><span class="n">17</span>自動で3案を出す</h3>
-      <p><kbd>香盤を自動生成</kbd> を押すと、考え方のちがう3案が並びます。</p>
-      <p class="fine">見るところは <b>消化</b>（何場やれるか）・<b>積み残し</b>（できずに残る場面）・<b>✓／⚠️</b>（締切に間に合うか）。</p>
+      <h3><span class="n">17</span>この日の扱い</h3>
+      <ul>
+        <li><b>稽古あり</b>…ふつうの全体稽古</li>
+        <li><b>OFF</b>…全体稽古なし。判定も集計もしません</li>
+        <li><b>未定</b>…判定はしますが、表では黄色く「未定」と出ます</li>
+      </ul>
     </article>
 
     <article class="item" id="i18">
       <figure class="shot">
-        <div class="tblwrap">
-          <table class="cmp stack">
-            <thead><tr><th style="width:8em">案</th><th>考え方</th><th style="width:11em">こんなときに</th></tr></thead>
-            <tbody>
-              <tr><th>番号順消化</th><td data-l="考え方">場番号の若い順に、できるものから詰める</td><td data-l="こんなときに">頭から順に固めたい</td></tr>
-              <tr><th>欠け役優先</th><td data-l="考え方">欠けやすい役がそろった枠を優先して使う</td><td data-l="こんなときに">来られない人が多い日</td></tr>
-              <tr><th>消化数最大</th><td data-l="考え方">短い場面から詰めて、こなす本数を増やす</td><td data-l="こんなときに">とにかく本数をこなしたい</td></tr>
-            </tbody>
-          </table>
+        <div class="screen">
+          <div class="lbl" style="margin-bottom:6px">特別稽古</div>
+          <div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:9px">
+            <span class="chip line">通し</span><span class="chip line">通し②</span>
+            <span class="chip line">殺陣</span><span class="chip line">全ブロック</span>
+            <span class="chip line">衣装合わせ</span>
+          </div>
+          <div class="lbl">この日の稽古時間</div>
+          <div style="font-size:12px; color:var(--app-subtle)">14:00 – 20:00</div>
         </div>
       </figure>
-      <h3><span class="n">18</span>3案のちがい</h3>
-      <p>同じ日でも、詰め方の方針が3つあります。見比べて選びます。</p>
+      <h3><span class="n">18</span>特別稽古・時間・メモ</h3>
+      <p>特別稽古は<strong>開始時刻</strong>も入れられます。その日だけ稽古時間を変えることもできます。</p>
+      <p class="fine">メモ欄には、照明打合せ・小道具搬入などを書いておけます。</p>
     </article>
 
     <article class="item" id="i19">
       <figure class="shot">
         <div class="screen">
           <div style="display:flex; flex-direction:column; gap:6px; font-size:12px">
-            <div style="border:1px solid var(--app-line); border-radius:9px; padding:7px 10px">14:00　3場・広場のけんか　<span style="color:var(--app-subtle)">⠿</span></div>
-            <div style="border:1px solid var(--app-line); border-radius:9px; padding:7px 10px">15:00　7場・決闘　<span style="color:var(--app-subtle)">⠿</span></div>
+            <div style="border:1px solid var(--app-line); border-radius:9px; padding:6px 10px">通し　14:00</div>
+            <div style="border:1px solid var(--app-line); border-radius:9px; padding:6px 10px">通し②　18:00</div>
           </div>
-          <div style="margin-top:9px; text-align:center"><span class="btn pri">この案を採用</span></div>
         </div>
       </figure>
-      <h3><span class="n">19</span>採用して並べ替える</h3>
-      <p><kbd>この案を採用</kbd> のあとは、<strong>ドラッグで自由に並べ替え</strong>できます。</p>
+      <h3><span class="n">19</span>通しを2回入れるとき</h3>
+      <p><b>通し</b>と<b>通し②</b>の両方を選び、それぞれに開始時刻を入れてください。</p>
+      <p class="fine">8/7 は「未定・14:00–20:00・通し14:00／通し②18:00」で、あらかじめ入れてあります。</p>
     </article>
 
     <article class="item" id="i20">
       <figure class="shot">
         <div class="screen">
-          <div style="border:1px solid var(--app-line); border-radius:9px; padding:7px 10px; font-size:12px">
-            16:00　5場・バルコニー<br>
-            <span style="color:#b91c1c; font-size:11.5px">⚠ ジュリエットが不在</span>
-          </div>
+          <div class="bar"><span class="ttl">管理</span></div>
+          <div class="btn" style="display:block; font-weight:400">稽古時間（全日まとめて）</div>
         </div>
       </figure>
-      <h3><span class="n">20</span>役が足りなくても置ける</h3>
-      <p>赤い ⚠ は出ますが、<strong>置くこと自体はできます</strong>。</p>
-      <p class="fine">「本人がいなくても立ち位置だけ確認する」といった現場の判断を止めないためです。</p>
-    </article>
-
-    <article class="item" id="i21">
-      <figure class="shot">
-        <div class="screen">
-          <div style="text-align:center; margin-bottom:9px"><span class="btn">🖨 印刷用表示</span></div>
-          <div style="border:1px solid var(--app-line); border-radius:9px; padding:9px; font-size:11.5px; background:#fff">
-            <div style="font-weight:700; margin-bottom:5px">8/1(土) 香盤</div>
-            <div>14:00　3場・広場のけんか</div>
-            <div>15:00　7場・決闘</div>
-          </div>
-        </div>
-      </figure>
-      <h3><span class="n">21</span>印刷して貼り出す</h3>
-      <p><kbd>🖨 印刷用表示</kbd> で、その日の香盤だけの表になります（ボタンや設定は印刷されません）。</p>
-      <p class="fine">印刷画面で「PDFとして保存」を選べば、そのままLINEやメールで送れます。</p>
+      <h3><span class="n">20</span>稽古時間をまとめて変える</h3>
+      <p>全日の稽古時間を変えるときは、右上の <kbd>管理</kbd> →「稽古時間（全日まとめて）」です。</p>
     </article>
 
   </div>
 </section>
 
-<!-- ==================== 配る・保存する ==================== -->
+<!-- ==================== 進み具合 ==================== -->
 <section class="grp" id="g5">
-  <h2>配る・保存する</h2>
+  <h2>稽古の進み具合</h2>
   <div class="items">
+
+    <article class="item" id="i21">
+      <figure class="shot">
+        <div class="screen">
+          <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap">
+            <b style="font-size:12.5px">稽古の進み具合（全23場面）</b>
+            <span style="font-size:11px; color:var(--app-subtle)">できた <b style="color:#0369a1">5</b> ／ 予定 <b style="color:#047857">21</b></span>
+          </div>
+          <div class="bar3">
+            <i class="did" style="width:22%"></i><i class="can" style="width:69%"></i><i class="no" style="width:9%"></i>
+          </div>
+          <div class="keys">
+            <span><i class="sw" style="background:#0284c7"></i>稽古できた 5</span>
+            <span><i class="sw" style="background:#34d399"></i>これからできる 16</span>
+            <span><i class="sw" style="background:#f87171"></i>このままだとできない 2</span>
+          </div>
+        </div>
+        <figcaption>数字は例です</figcaption>
+      </figure>
+      <h3><span class="n">21</span>進み具合の帯</h3>
+      <p>いちばん上に、全場面を3つに分けた帯が出ます。青＝結果、緑＝これからできる、赤＝できない。</p>
+      <p class="fine"><b>予定</b>＝「稽古できた」＋「これからできる」＝ 最終的に稽古できる見込みの数です。判定はきょう以降の稽古日で行います。</p>
+    </article>
 
     <article class="item" id="i22">
       <figure class="shot">
         <div class="screen">
-          <div class="lbl" style="margin-bottom:7px">データ</div>
-          <div style="text-align:center"><span class="btn pri">この内容を配る（URLをコピー）</span></div>
-        </div>
-      </figure>
-      <h3><span class="n">22</span>この内容を配る</h3>
-      <p><span class="path"><b>設定 → データ</b></span>から、登録内容ぜんぶ（役・場面・稽古日・出欠・香盤）が1本のURLになります。</p>
-      <p class="fine">受け取った人は開くだけ。インストールもログインも要りません。</p>
-    </article>
-
-    <article class="item" id="i23">
-      <figure class="shot">
-        <div class="screen">
-          <strong style="font-size:12.5px">共有された内容を受け取りました</strong>
-          <p style="font-size:11.5px; color:var(--app-subtle); margin:7px 0 6px">
-            受け取った内容（役 3／場面 2）に置き換えますか？</p>
-          <p style="font-size:11px; color:#b91c1c; margin:0 0 10px">
-            置き換えると、この端末の出欠や香盤は元に戻せません。</p>
-          <div style="display:flex; flex-direction:column; gap:6px">
-            <span class="btn pri" style="text-align:center">受け取った内容に置き換える</span>
-            <span class="btn" style="text-align:center">いまの内容のまま開く</span>
+          <div style="background:#fef2f2; border-radius:10px; padding:8px 10px">
+            <div style="font-size:11px; font-weight:700; color:#b91c1c">この先どの稽古日でも顔がそろわない場面</div>
+            <div style="margin-top:4px"><span class="chip line" style="color:#b91c1c">13場</span> <span class="chip line" style="color:#b91c1c">20場</span></div>
           </div>
         </div>
       </figure>
-      <h3><span class="n">23</span>受け取ると置き換わる</h3>
-      <p>URLを開くと、その端末の内容は<strong>受け取った内容に置き換わります</strong>（確認画面は出ます）。</p>
-      <p class="caution fine"><b>⚠ 行き来してやりとりする使い方には向きません。</b>出欠はまとめ役がひとりで入力し、できあがったものを配るのが安全です。</p>
+      <h3><span class="n">22</span>赤が出たときの見かた</h3>
+      <p>赤が0でないときが、<strong>いちばん手を打つべき状態</strong>です。その場面は本番まで一度も稽古できません。</p>
+      <p class="fine">日程の入れ替えや、その方の予定の調整をご検討ください。OFFの日は数えません。</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ==================== 印刷・データ ==================== -->
+<section class="grp" id="g6">
+  <h2>印刷・データ</h2>
+  <div class="items">
+
+    <article class="item" id="i23">
+      <figure class="shot">
+        <div class="screen" style="text-align:center">
+          <span class="btn">この日を印刷（貼り出し用）</span>
+        </div>
+      </figure>
+      <h3><span class="n">23</span>貼り出し用に印刷する</h3>
+      <p>その日の「時間の区切り・欠席者・できる場面」だけが1枚になります。</p>
+      <p class="fine">印刷画面で「PDFとして保存」を選ぶとPDFになります。</p>
     </article>
 
     <article class="item" id="i24">
       <figure class="shot">
-        <div class="flow">
-          <span class="box">この内容を配る</span><span class="arw">→</span>
-          <span class="box">自分あてに送る</span><span class="arw">→</span>
-          <span class="box">それが控え</span>
+        <div class="screen">
+          <div class="bar"><span class="ttl">管理 → バックアップ</span></div>
+          <div style="display:flex; gap:7px; justify-content:center">
+            <span class="btn pri">書き出す</span><span class="btn">読み込む</span>
+          </div>
         </div>
       </figure>
-      <h3><span class="n">24</span>控えの取り方</h3>
-      <p>出したURLを<strong>自分あて</strong>にメールやLINEで送っておけば、それがそのままバックアップです。</p>
-      <p class="fine">端末を変えても、そのURLを開けば元に戻せます。</p>
+      <h3><span class="n">24</span>バックアップを取る</h3>
+      <p><kbd>書き出す</kbd> でファイルとして保存できます。機種変更のときは新しい端末で <kbd>読み込む</kbd>。</p>
     </article>
 
     <article class="item nofig" id="i25">
-      <h3><span class="n">25</span>データは端末の中だけ</h3>
-      <p>入力した内容は<strong>その端末の中に自動保存</strong>されます。保存ボタンはありません。</p>
-      <ul>
-        <li>サーバーには送っていません。他の人からは見えません</li>
-        <li>端末ごとに別々。iPhoneで入れた内容はパソコンには出ません</li>
-        <li>ブラウザの履歴やサイトデータを消すと、一緒に消えることがあります</li>
-      </ul>
+      <h3><span class="n">25</span>消えてしまう場合</h3>
+      <p>入力は<strong>その端末の中だけ</strong>に自動保存されます（どこにも送っていません）。</p>
+      <p class="caution fine"><b>⚠ ブラウザの「履歴・サイトデータを消去」を行うと、入力した内容も消えます。</b>ときどき <b>管理 → バックアップ → 書き出す</b> をしておくと安心です。<br>
+        <b>管理 →「お渡し時の状態に戻す」</b>は、入力をすべて捨ててお渡し直後の状態に戻す機能です（元に戻せません）。</p>
     </article>
 
     <article class="item nofig" id="i26">
       <h3><span class="n">26</span>ホーム画面に置く</h3>
-      <p>毎回URLを探さずに、普通のアプリのように開けます。</p>
+      <p>毎回URLを探さずに済むように、ホーム画面に置いておくと便利です。</p>
       <ul>
-        <li><b>iPhone / iPad</b>：Safariで開く → 共有ボタン（□に↑）→「ホーム画面に追加」</li>
-        <li><b>Android</b>：Chromeで開く → 右上の ⋮ →「ホーム画面に追加」</li>
+        <li><b>iPhone / iPad</b>：Safariで開く → <kbd>共有</kbd>（□に↑）→ <kbd>ホーム画面に追加</kbd></li>
+        <li><b>Android</b>：Chromeで開く → 右上の <kbd>⋮</kbd> → <kbd>ホーム画面に追加</kbd></li>
       </ul>
-      <p class="fine">追加したあとは、いつも同じアイコンから開いてください。別のブラウザで開くと中身が空に見えます（消えたわけではありません）。</p>
+      <p class="fine">パソコンではブックマークに入れておいてください。表が広く見えるので、計画を立てるときはパソコンが見やすいです。</p>
     </article>
 
   </div>
@@ -842,36 +854,35 @@
   <h2>こまったとき</h2>
   <div class="qa">
     <div>
-      <div class="q">「できない場面」ばかりになる</div>
-      <div class="a">その場面の<b>出る役チェックを付けすぎ</b>の可能性が高いです。<span class="path">設定 → 場面</span> で見直してください。</div>
+      <div class="q">キーの入力画面がまた出てきました</div>
+      <div class="a">別の端末で開いたか、履歴・サイトデータを消したときに出ます。メール本文のキーを貼り付けてください。分からなくなったら、いつでもご連絡ください。</div>
     </div>
     <div>
-      <div class="q">できる場面が1つも出ない</div>
-      <div class="a">その時間帯に多くの役がNGになっています。判定の「欠席」に出ている人が、その日の鍵です。</div>
+      <div class="q">てっぱりの中身が実際と違います</div>
+      <div class="a">お預かりしたてっぱり表が<b>雛形</b>のものでしたので、暫定の値が入っています。表のマスを押して直していただくか、最新のものをお送りいただければこちらで入れ直します。</div>
     </div>
     <div>
-      <div class="q">役を消したら、ほかも消えた</div>
-      <div class="a">役を削除すると、その役の場面チェックと出欠も一緒に消えます。名前を直したいだけなら削除せず、名前の欄を書き換えてください。</div>
+      <div class="q">「できる場面」が思ったより少ないです</div>
+      <div class="a">出る人が<b>1人でも欠ける</b>と、その場面は「できる」に入りません。「あと1人でできる場面」に、誰が足りないかが出ています。</div>
     </div>
     <div>
-      <div class="q">稽古日や時間帯を消したら出欠は？</div>
-      <div class="a">その日（その時間帯）の出欠も消えます。日程変更のときは、消して入れ直すより日付や時刻を書き換えるほうが入力が残ります。</div>
+      <div class="q">オフの日を稽古日に変えたい</div>
+      <div class="a">その日の「その日の予定」の行を押して、<b>この日の扱い</b>を切り替えてください。稽古あり／OFF／未定の3つです。</div>
     </div>
     <div>
-      <div class="q">同じ日付が2回追加できない</div>
-      <div class="a">同じ日は1つだけです。1日に2部あるときは日を増やさず、その日に時間帯（コマ）を足してください。</div>
+      <div class="q">キャストが増えた・役が変わった</div>
+      <div class="a">アプリの中で直せます。名前の変更は <kbd>管理</kbd> → キャスト、出番（香盤の●）の入れ替えは香盤表の <kbd>出番を直す</kbd> です。くわしくは <a href="teppari-tsukaikata-v2.html">増えたところの使い方</a> をご覧ください。</div>
     </div>
     <div>
-      <div class="q">最初からやり直したい</div>
-      <div class="a"><span class="path">設定 → データ → 全データを消去</span>。<b>元に戻せません。</b>消す前に「この内容を配る」のURLを自分あてに送っておくと復元できます。</div>
+      <div class="q">それ以外で困ったとき</div>
+      <div class="a">どんなことでも <b>support.tsumiki@gmail.com</b> までご連絡ください。使いにくいところのご指摘も歓迎です。直してお返しします。</div>
     </div>
   </div>
 </section>
 
 <footer>
-  香盤メーカー 使い方<br>
-  つくったもの：つみき<br>
-  2026年8月3日
+  つみき（Tsumiki）／ support.tsumiki@gmail.com<br>
+  香盤メーカー 使い方
 </footer>
 
 </main>
