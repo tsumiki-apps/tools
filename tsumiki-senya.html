@@ -417,7 +417,11 @@
     border-radius:999px; padding:4px 11px; font-variant-numeric:tabular-nums; white-space:nowrap;}
   .tut-later{margin-left:auto; min-height:var(--tap); padding:0 6px; border:none; background:none;
     font-family:inherit; font-size:.82rem; color:var(--ink-mid); cursor:pointer;}
-  .tut-t{margin:0; font-size:.92rem; line-height:1.8;}
+  /* ⚠️ ご案内は「読ませる」ものではなく「見て次に進む」もの。
+     見出しでいま何の話かを一目で分からせ、本文は1行で足りる長さに切る。 */
+  .tut-h{margin:0 0 3px; font-size:1rem; font-weight:700; line-height:1.5;}
+  .tut-h:empty{display:none;}
+  .tut-t{margin:0; font-size:.88rem; line-height:1.7; color:var(--ink-mid);}
   .tut-t b{color:var(--accent-2); font-weight:700;}
   .tut-next{width:100%; min-height:var(--tap); margin-top:12px; border:none; border-radius:12px;
     background:var(--accent-fill); color:var(--on-accent); font-family:inherit; font-size:.94rem;
@@ -426,7 +430,8 @@
   /* 横向きなど高さの低い画面。解説の札が大きいと、光らせた所に重なってしまう */
   @media (max-height:520px){
     .tut-card{padding:10px 13px 12px;}
-    .tut-t{font-size:.86rem; line-height:1.65;}
+    .tut-h{font-size:.94rem;}
+    .tut-t{font-size:.83rem; line-height:1.6;}
     .tut-next{margin-top:9px;}
     .tut-hd{margin-bottom:4px;}
   }
@@ -543,6 +548,7 @@
   <div class="tut-card" id="tutCard" role="dialog" aria-live="polite">
     <div class="tut-hd"><span class="tut-n" id="tutN"></span>
       <button class="tut-later" id="tutLater">あとで</button></div>
+    <p class="tut-h" id="tutH"></p>
     <p class="tut-t" id="tutTxt"></p>
     <button class="tut-next" id="tutNext">つぎへ</button>
   </div>
@@ -1238,23 +1244,26 @@ function tutVisit(){
   const k=tutKey(LS_VISIT); visits=(parseInt(lsGet(k),10)||0)+1; lsSet(k,String(visits));
 }
 
+/* ⚠️ 書き方は「小見出し（h）＋本文1行（text）」で固定。本文は40字を目安に。
+   ご案内は読ませるものではなく、見て次に進むもの。理由や例は使い方ページへ。
+   ⚠️ 店長側（tsumiki-senya-kanri.html）と同じ仕掛け。直すときは両方そろえる。 */
 function tutSteps(){
   const nm=esc(me&&me.name?me.name:'あなた');
   if(cur && cur.editable){
     return [
-      {sel:'.brand',
-       text:'ここは<b>'+nm+'さん専用</b>の入口です。ほかの人の希望は見えません。<br>1分で使い方をご案内します。'},
-      {sel:'#cal', pad:4,
-       text:'まず1日ためしてみましょう。<b>本当に働ける日をひとつタップ</b>してください。',
+      {sel:'.brand', h:nm+'さん専用の入口',
+       text:'ほかの人の希望は見えません。'},
+      {sel:'#cal', pad:4, h:'働ける日をタップ',
+       text:'まず1日、ためしてみましょう。',
        done:sheetOpen},
-      {sel:'#shSlots', need:sheetOpen,
-       text:'時間帯ごとに<b>「入れます」</b>を押します。行けたら行く日は「行けたら」。<br>押さなかった時間帯は、<b>その時間は働けない</b>としてお店に伝わります。',
+      {sel:'#shSlots', need:sheetOpen, h:'「入れます」を押す',
+       text:'押さなかった時間帯は、働けないとしてお店に伝わります。',
        done:function(){ return tutVisible(tq('#shSlots button.sl-time')); }},
       {sel:'#shSlots button.sl-time', need:function(){ return sheetOpen() && tutVisible(tq('#shSlots button.sl-time')); },
-       text:'時間は<b>お店の時間</b>が先に入っています。ちがうときは、ここを押すと直せます。',
+       h:'時間を直す', text:'お店の時間が先に入っています。ちがうときはここ。',
        done:function(){ return tutVisible(tq('#shSlots .times')); }},
-      {sel:'#shSave', need:sheetOpen,
-       text:'最後に<b>「この日で出す」</b>。これでお店に届きます。<br>締切までは<b>何度でも直せます</b>ので、気軽にどうぞ。',
+      {sel:'#shSave', need:sheetOpen, h:'「この日で出す」',
+       text:'これでお店に届きます。締切までは何度でも直せます。',
        done:function(){ return !sheetOpen(); }},
       /* ⚠️ 5歩目で「つぎへ」を押した人（出さずに進んだ人）も、ここへ来られるようにする。
          まだ何も選んでいなければシートを閉じて進む。選びかけている人のぶんは、
@@ -1262,30 +1271,28 @@ function tutSteps(){
       {sel:'#listCard',
        enter:function(){ if(sheetOpen() && !shDirty()) closeSheet(true); },
        need:function(){ return !sheetOpen(); },
-       text:'出した日は、ここに並びます。<br>あとは同じように、<b>働ける日をぜんぶ</b>入れてください。'},
-      /* ⚠️ ここから先は「1日出せた人」がつぎに迷うところ。
-         ためし押しは要らないので、見せて読むだけで終わる歩にする。 */
+       h:'出した日が並びます', text:'同じように、働ける日をぜんぶ入れてください。'},
       {sel:'#usualCard', need:function(){ return !sheetOpen(); },
-       text:'毎週おなじ曜日に入る方は、<b>「いつもの曜日」</b>が早いです。<br>曜日を選ぶと、その月の<b>その曜日ぜんぶ</b>にまとめて入ります。あとから1日ずつ直せます。'},
+       h:'「いつもの曜日」', text:'曜日を選ぶと、その月のその曜日にまとめて入ります。'},
       {sel:'#doneBtn', need:function(){ return !sheetOpen() && tutVisible(tq('#doneBtn')); },
-       text:'ぜんぶ入れ終わったら<b>「今月はこれで出し終わりました」</b>を押してください。<br>お店の画面に<b>✓ 出し終わり</b>と出て、催促が来なくなります。<br>押したあとでも、締切までは直せます。'},
+       h:'「出し終わりました」', text:'お店に✓が出て、催促が来なくなります。'},
       {sel:'#mNext', need:function(){ return !sheetOpen(); },
-       text:'来月ぶんは、ここで<b>月をめくって</b>出します。<br>シフトが決まると、この画面に<b>「決まったシフト」</b>が出て、<b>スマホの予定表にもまとめて入れられます</b>。<br>おつかれさまでした。'}
+       h:'来月ぶん', text:'ここで月をめくって出します。おつかれさまでした。'}
     ];
   }
   /* 締切がすぎた月に、はじめて開いた人（出す操作ができないので読むだけ） */
   return [
-    {sel:'.brand',
-     text:'ここは<b>'+nm+'さん専用</b>の入口です。ほかの人の希望は見えません。'},
-    {sel:'#stateRow',
-     text:'この月は<b>締切がすぎています</b>。いまから希望を出したり、直したりはできません。'},
-    {sel:'#cal', pad:4,
-     text:'日をタップすると、その日の内容が見られます。急な変更は、そこから<b>お願い</b>を出せます。',
+    {sel:'.brand', h:nm+'さん専用の入口',
+     text:'ほかの人の希望は見えません。'},
+    {sel:'#stateRow', h:'この月は締切ずみ',
+     text:'いまから出したり、直したりはできません。'},
+    {sel:'#cal', pad:4, h:'日をタップ',
+     text:'その日の内容が見られます。急な変更はそこから。',
      done:sheetOpen},
-    {sel:'#shLocked', need:sheetOpen,
-     text:'<b>「ここ、入れます」「行けなくなりました」</b>を押すと、お店に届きます。受け入れられると希望に入ります。'},
+    {sel:'#shLocked', need:sheetOpen, h:'お願いを出す',
+     text:'「ここ、入れます」「行けなくなりました」がお店に届きます。'},
     {sel:'#mNext', enter:function(){ if(sheetOpen()) closeSheet(true); },
-     text:'来月ぶんは、ここで月をめくって出せます。<b>締切までに</b>お願いします。'}
+     h:'来月ぶん', text:'ここで月をめくって出せます。締切までにお願いします。'}
   ];
 }
 
@@ -1314,6 +1321,7 @@ function tutGo(i){
   if(i>=tutList.length){ tutEnd(true); return; }
   tutIdx=i;
   const s=tutList[i], el=s.sel?tq(s.sel):null;
+  document.getElementById('tutH').innerHTML=s.h||'';
   document.getElementById('tutTxt').innerHTML=s.text;
   document.getElementById('tutN').textContent = tutMode==='tour' ? (i+1)+' / '+tutList.length : 'ワンポイント';
   document.getElementById('tutNext').textContent = (tutMode!=='tour')?'わかりました':((i===tutList.length-1)?'おしまい':'つぎへ');
@@ -1436,32 +1444,32 @@ document.getElementById('tutAgain').addEventListener('click',function(){
 /* ===== 後出しのワンポイント（必要になった時に1つだけ・一度きり） ===== */
 let tipShown=false;
 function tipDone(id){ return ((lsGet(tutKey(LS_TIP))||'').split(',').indexOf(id)>=0); }
-function tipShow(id, sel, text){
+function tipShow(id, sel, h, text){
   if(tipShown || tutOn || tipDone(id)) return false;
   if(!tutVisible(tq(sel))) return false;
   const v=lsGet(tutKey(LS_TIP))||'';
   lsSet(tutKey(LS_TIP), v?v+','+id:id);
   tipShown=true;
-  tutStart([{sel:sel, text:text}],'tip');
+  tutStart([{sel:sel, h:h, text:text}],'tip');
   return true;
 }
 function tipLocked(){
-  tipShow('locked','#shLocked',
-    '締切をすぎた日は直せません。<b>「ここ、入れます」「行けなくなりました」</b>を押すと、お店にお願いが届きます。');
+  tipShow('locked','#shLocked','締切をすぎた日は直せません',
+    '「ここ、入れます」「行けなくなりました」でお願いが届きます。');
 }
 function tutTips(){
   if(tipShown || tutOn || !cur) return;
   if(!lsGet(tutKey(LS_TUT))) return;            /* 本編をまだ見ていない人には出さない */
   if(sheetOpen()) return;
-  if(tipShow('kakutei','#tabs',
-      '<b>シフトが決まりました。</b>「決まったシフト」で見られます。<br>「カレンダーに追加」を押すと、スマホの予定表にも入ります。')) return;
+  if(tipShow('kakutei','#tabs','シフトが決まりました',
+      '「決まったシフト」で見られます。予定表にも入れられます。')) return;
   if(cur.editable && !cur.submitted && countDays(cur.avail)>=3 &&
-     tipShow('done','#doneBtn',
-      '入れ終わったら、ここを押しておくと、お店に<b>「この人は出し終わり」</b>と伝わります。あとから直すこともできます。')) return;
-  if(tipShow('fill','.fillbar',
-      '<b>いつも入れる曜日</b>を決めておくと、ここから毎月まとめて下ごしらえができます。<br>埋めたあとも、日ごとに直せます。')) return;
-  if(visits>=2 && tipShow('a2hs','#a2hsBox',
-      'このページからは<b>お知らせを出せません</b>。ホーム画面に置いておくと、出し忘れを防げます。')) return;
+     tipShow('done','#doneBtn','入れ終わったら押す',
+      'お店に「この人は出し終わり」と伝わります。あとから直せます。')) return;
+  if(tipShow('fill','.fillbar','いつも入れる曜日',
+      '決めておくと、毎月まとめて下ごしらえができます。')) return;
+  if(visits>=2 && tipShow('a2hs','#a2hsBox','ホーム画面に置く',
+      'このページはお知らせを出せません。置いておくと出し忘れを防げます。')) return;
 }
 
 let tutTried=false;

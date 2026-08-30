@@ -605,7 +605,11 @@
     border-radius:999px; padding:4px 11px; font-variant-numeric:tabular-nums; white-space:nowrap;}
   .tut-later{margin-left:auto; min-height:var(--tap); padding:0 6px; border:none; background:none;
     font-family:inherit; font-size:.82rem; color:var(--ink-mid); cursor:pointer;}
-  .tut-t{margin:0; font-size:.92rem; line-height:1.8;}
+  /* ⚠️ ご案内は「読ませる」ものではなく「見て次に進む」もの。
+     見出しでいま何の話かを一目で分からせ、本文は1行で足りる長さに切る。 */
+  .tut-h{margin:0 0 3px; font-size:1rem; font-weight:700; line-height:1.5;}
+  .tut-h:empty{display:none;}
+  .tut-t{margin:0; font-size:.88rem; line-height:1.7; color:var(--ink-mid);}
   .tut-t b{color:var(--accent-2); font-weight:700;}
   .tut-next{width:100%; min-height:var(--tap); margin-top:12px; border:none; border-radius:12px;
     background:var(--accent-fill); color:var(--on-accent); font-family:inherit; font-size:.94rem;
@@ -614,7 +618,8 @@
   /* 横向きなど高さの低い画面。解説の札が大きいと、光らせた所に重なってしまう */
   @media (max-height:520px){
     .tut-card{padding:10px 13px 12px;}
-    .tut-t{font-size:.86rem; line-height:1.65;}
+    .tut-h{font-size:.94rem;}
+    .tut-t{font-size:.83rem; line-height:1.6;}
     .tut-next{margin-top:9px;}
     .tut-hd{margin-bottom:4px;}
   }
@@ -837,6 +842,7 @@
   <div class="tut-card" id="tutCard" role="dialog" aria-live="polite">
     <div class="tut-hd"><span class="tut-n" id="tutN"></span>
       <button class="tut-later" id="tutLater">あとで</button></div>
+    <p class="tut-h" id="tutH"></p>
     <p class="tut-t" id="tutTxt"></p>
     <button class="tut-next" id="tutNext">つぎへ</button>
   </div>
@@ -2050,6 +2056,9 @@ function viewShown(n){ const v=tq('#view'+n); return !!v && !v.hidden; }
    ⚠️ ここは「アプリを渡したその日」に、中身が何も無いところから読む章。
       だから「赤い日の見かた」など“データがある前提”の話は、いっさい入れない。
       入れる順番は、実際にしないと先へ進めない順番＝設定 → スタッフ → 配る → 待つ。
+   ⚠️ 書き方は「小見出し（h）＋本文1行（text）」で固定する。
+      本文は40字を目安に、それ以上になったら削るか、歩を分ける。
+      ご案内は読ませるものではなく、見て次に進むもの。理由・たとえ話は使い方ページへ。
    ⚠️ 歩を足すときは、必ず need: を書く（その画面に居ないと出ない部品を指したまま
       止まると、押すものが無いのに暗いだけになる）。 */
 function tutSteps1(){
@@ -2057,53 +2066,53 @@ function tutSteps1(){
   const inStaff=function(){ return viewShown(2); };
   const menuOpen=function(){ return sheetOpen() && !tq('#mMenu').hidden; };
   return [
-    {text:'<b>つみき&amp;せんや</b>へようこそ。<br>することは、月に3つだけです。<br>① スタッフに<b>URLを渡す</b>　② 集まった希望から<b>シフトを組む</b>　③ <b>みんなに知らせる</b>。<br>このご案内では、①のいちばん手前＝<b>お店の登録</b>から順にやっていきます。'},
-    {sel:'#cal', pad:4,
-     text:'いま出ているこの画面が<b>「一覧」</b>です。ふだんはここしか使いません。<br>これが今月のカレンダー。希望が集まると、ここに<b>人数</b>が出て、足りない日が<b>赤く</b>なります。<br>いまは空っぽで正解です。'},
-    {sel:'#gearBtn', text:'はじめの準備は、右上の<b>歯車</b>の中にあります。押してください。',
+    {h:'ようこそ',
+     text:'することは月に3つ。①URLを渡す ②シフトを組む ③知らせる。'},
+    {sel:'#cal', pad:4, h:'この画面が「一覧」',
+     text:'ふだんはここだけ。希望が集まると、足りない日が赤くなります。'},
+    {sel:'#gearBtn', h:'準備は歯車の中', text:'右上の歯車を押してください。',
      done:menuOpen},
-    {sel:'#goCfgM', need:menuOpen, text:'中は<b>スタッフ</b>と<b>設定</b>の2つ。<br>まずは<b>「設定」</b>から。押してください。',
+    {sel:'#goCfgM', need:menuOpen, h:'まずは「設定」', text:'押してください。',
      done:inCfg},
-    {sel:'#cfName', need:inCfg,
-     text:'<b>お店の名前</b>です。<br>スタッフの画面と、これからお渡しする「送る文」に、そのまま出ます。'},
-    {sel:'#cfDeadline', need:inCfg,
-     text:'<b>締切</b>＝いつまでに希望を出してもらうか。<b>前の月の◯日まで</b>で入れます。<br>たとえば「25」なら、10月ぶんの締切は<b>9月25日</b>。<br>締切をすぎると、スタッフは自分では直せなくなります（かわりに「お願い」が届きます）。'},
-    {sel:'#cfWdays', need:inCfg,
-     text:'お店の<b>定休日</b>。押した曜日は、はじめから「休」になり、スタッフの画面でも選べなくなります。<br>お休みが無ければ、どこも押さないままで大丈夫です。'},
-    {sel:'#cfSlots', need:inCfg,
-     text:'いちばん大事なところです。<b>時間帯</b>と、その時間に<b>ほしい人数</b>。<br>「昼 9:00〜15:00 ／ 2人」のように入れます。<br>・ここの名前が、スタッフの画面にそのまま出ます<br>・ここの人数を下回った日が、一覧で<b>赤く</b>なります'},
-    {sel:'#saveCfg', need:inCfg, tap:true,
-     text:'決めたら<b>「この内容にする」</b>を押します。<br>あとからいつでも変えられます（変えても、もう出ている希望は消えません）。'},
-    {sel:'#gearBtn', need:inCfg,
-     text:'設定はこれでおしまい。<br>歯車が<b>黒くなっている</b>あいだは、一覧ではなく<b>この中にいる印</b>です。<br><b>もう一度押すと、一覧にもどります</b>。押してみてください。',
+    {sel:'#cfName', need:inCfg, h:'お店の名前',
+     text:'スタッフの画面と「送る文」に、そのまま出ます。'},
+    {sel:'#cfDeadline', need:inCfg, h:'締切を決める',
+     text:'前の月の◯日まで。すぎるとスタッフは直せません。'},
+    {sel:'#cfWdays', need:inCfg, h:'定休日',
+     text:'押した曜日は、はじめから「休」に。無ければそのままで大丈夫です。'},
+    {sel:'#cfSlots', need:inCfg, h:'時間帯と、ほしい人数',
+     text:'この人数を下回った日が、一覧で赤くなります。'},
+    {sel:'#saveCfg', need:inCfg, tap:true, h:'「この内容にする」',
+     text:'あとからいつでも変えられます。'},
+    {sel:'#gearBtn', need:inCfg, h:'歯車が黒い＝この中にいる印',
+     text:'もう一度押すと、一覧にもどります。押してみてください。',
      done:function(){ return viewShown(1); }},
-    {sel:'#gearBtn',
-     text:'もどれました。歯車の色も元にもどっています。<br>つぎは<b>スタッフ</b>の登録です。もう一度、歯車を押してください。',
+    {sel:'#gearBtn', h:'つぎはスタッフ', text:'もう一度、歯車を押してください。',
      done:menuOpen},
-    {sel:'#goStaffM', need:menuOpen, text:'こんどは<b>「スタッフ」</b>。押してください。',
+    {sel:'#goStaffM', need:menuOpen, h:'「スタッフ」を押す', text:'働く方を、ここで登録します。',
      done:inStaff},
-    {sel:'.addrow', need:inStaff,
-     text:'お名前を入れて<b>「追加」</b>。<br>まずは<b>ご自身のお名前</b>で1人つくってみてください。<br>スタッフに届く画面を、そのままご自分で確かめられます。',
+    {sel:'.addrow', need:inStaff, h:'まず、ご自身を1人追加',
+     text:'お名前を入れて「追加」。届く画面を、そのまま確かめられます。',
      done:function(){ return tutVisible(tq('#staffBox .staff')); }},
-    {sel:'#staffBox .staff .cd', need:inStaff,
-     text:'登録すると、その人だけの<b>合言葉</b>と<b>専用URL</b>ができます。<br>URLは人ごとにちがいます。<b>ほかの人のぶんは見えません</b>ので、そのままお渡しして大丈夫です。'},
-    {sel:'#staffBox .staff .acts .btn', need:inStaff,
-     text:'<b>「送る文をコピー」</b>を押すと、その人に渡す文（あいさつ＋URL＋合言葉）ができます。<br>そのまま<b>LINEを開いて貼りつけて</b>お送りください。ひとりにつき1本です。'},
-    {sel:'#staffBox .staff .nm', need:inStaff,
-     text:'渡し忘れは、ここで分かります。<br>まだの人は赤く<b>「まだ渡していません」</b>。渡すと、その人が<b>出し終わったか</b>に変わります。'},
-    {sel:'#staffHd', need:inStaff,
-     text:'上には<b>「◯人中◯人にURLを渡しました」</b>。<br>全員に渡し終わると、ここは「◯／◯人が出し終わり」に変わります。'},
-    {sel:'#staffBox .staff .acts .more', need:inStaff,
-     text:'名前を直す・しばらく<b>休止</b>する・合言葉を作り直す・削除は、この<b>「…」</b>の中です。<br>ふだんは押しません。'},
-    {sel:'#gearBtn', need:inStaff,
-     text:'スタッフの登録はこれでおしまい。<br>右上の<b>歯車をもう一度押す</b>と、一覧にもどります。',
+    {sel:'#staffBox .staff .cd', need:inStaff, h:'合言葉と専用URL',
+     text:'人ごとにちがいます。ほかの人のぶんは見えません。'},
+    {sel:'#staffBox .staff .acts .btn', need:inStaff, h:'「送る文をコピー」',
+     text:'LINEに貼って、ひとりずつお送りください。'},
+    {sel:'#staffBox .staff .nm', need:inStaff, h:'渡し忘れが分かる',
+     text:'まだの人は赤く「まだ渡していません」と出ます。'},
+    {sel:'#staffHd', need:inStaff, h:'「◯人中◯人に渡しました」',
+     text:'全員に渡すと「◯／◯人が出し終わり」に変わります。'},
+    {sel:'#staffBox .staff .acts .more', need:inStaff, h:'「…」の中',
+     text:'名前を直す・休止・合言葉の作り直し・削除。ふだんは押しません。'},
+    {sel:'#gearBtn', need:inStaff, h:'登録はおしまい',
+     text:'歯車をもう一度押すと、一覧にもどります。',
      done:function(){ return viewShown(1); }},
     {sel:'.monthbar', enter:function(){ if(sheetOpen()) closeSheet(); if(!viewShown(1)) showView(1); },
-     text:'一覧に戻りました。<b>‹ ›</b> で見る月を変えられます。<br>希望は<b>月ごと</b>に集めます。まずは<b>来月</b>を出してお待ちください。'},
-    {sel:'#stateRow',
-     text:'ここが今月のようすです。<br>いまは空っぽですが、スタッフが希望を出しはじめると<b>「◯人が出し終わり」</b>「<b>足りない日</b>が◯日」と出てきます。'},
-    {sel:'#gearBtn',
-     text:'準備はこれで終わりです。<br>あとは<b>希望が集まるのを待つだけ</b>。集まったら、この一覧が「足りない日」を赤で教えてくれます。<br>使い方をもう一度見たいときは、<b>歯車 → 設定</b>のいちばん下にあります。'}
+     h:'月をめくる', text:'希望は月ごと。まずは来月を出してお待ちください。'},
+    {sel:'#stateRow', h:'今月のようす',
+     text:'希望が集まると「◯人が出し終わり」「足りない日◯日」と出ます。'},
+    {sel:'#gearBtn', h:'準備はこれで終わり',
+     text:'あとは待つだけ。このご案内は 歯車→設定 の下から、いつでも見られます。'}
   ];
 }
 /* 第2章＝毎月の使い方（希望が集まってから） */
@@ -2111,25 +2120,26 @@ function tutSteps2(){
   const kimeOn=function(){ const b=tq('#modeSeg button[data-m="kime"]'); return !!b && b.classList.contains('on'); };
   return [
     {sel:'#stateRow', enter:function(){ if(!viewShown(1)) showView(1); },
-     text:'ここが今月のようすです。<b>足りない日</b>が何日あるか、<b>何人が出し終わったか</b>が出ます。'},
-    {sel:'#cal', pad:4,
-     text:'<b>赤い日</b>は人手が足りない日。<b>「昼 −1」＝昼にあと1人</b>という意味です。<br>日をタップしてみてください。',
+     h:'今月のようす', text:'足りない日と、出し終わった人数が出ます。'},
+    {sel:'#cal', pad:4, h:'赤い日＝人手が足りない日',
+     text:'「昼 −1」＝昼にあと1人。日をタップしてみてください。',
      done:sheetOpen},
-    {sel:'#slots', need:sheetOpen,
-     text:'その日に<b>入れる人と時間</b>が出ます。<b>○</b>は入れます、<b>△</b>は行けたら。'},
-    {sel:'#modeSeg', need:sheetOpen,
-     text:'<b>「シフトを決める」</b>に切り替えると、この日に<b>誰を入れるか</b>を選べます。',
+    {sel:'#slots', need:sheetOpen, h:'その日に入れる人',
+     text:'○は入れます、△は行けたら。'},
+    {sel:'#modeSeg', need:sheetOpen, h:'「シフトを決める」',
+     text:'この日に誰を入れるかを選べます。',
      done:kimeOn},
     {sel:'#slots', need:function(){ return sheetOpen() && kimeOn(); },
-     text:'名前を押すと<b>入る／外れる</b>。枠ごとに「全員入れる」もできます。'},
-    {sel:'#dayActs', need:sheetOpen,
-     text:'希望を出しそびれた方は、<b>「代わりに入れる」</b>で店長が入れられます。<br>その日だけ人手が要るときは<b>「この日の必要人数」</b>。'},
+     h:'名前を押す', text:'入る／外れる。枠ごとに「全員入れる」もできます。'},
+    {sel:'#dayActs', need:sheetOpen, h:'出しそびれた方',
+     text:'「代わりに入れる」で店長が入れられます。'},
     {sel:'#shiftBox', enter:function(){ if(sheetOpen()) closeSheet(); },
-     text:'決まったら、ここから<b>シフト表</b>を開けます。<br>1日ずつ決めるのが大変なときは、先に<b>「希望どおり、月まるごと入れる」</b>で全部入れて、多いところを外していくのが早いです。'},
-    {sel:'#shiftBox',
-     text:'<b>「シフト表を見る」</b>→ <b>「印刷する」</b>で、<b>横向きの紙1枚</b>にまとまって出てきます。そのまま貼り出せます。'},
-    {sel:'#shiftBox',
-     text:'最後に<b>「みんなに知らせる」</b>。ここを押すまで、スタッフの画面には出ません。<br>知らせたあとに直すと、その場で相手の画面も変わります。'}
+     h:'まとめて入れると早い',
+     text:'「月まるごと入れる」で全部入れて、多いところを外していきます。'},
+    {sel:'#shiftBox', h:'印刷する',
+     text:'「シフト表を見る」→「印刷する」で、横向きの紙1枚に出てきます。'},
+    {sel:'#shiftBox', h:'「みんなに知らせる」',
+     text:'押すまで、スタッフの画面には出ません。'}
   ];
 }
 let tutOn=false, tutIdx=0, tutList=[], tutRaf=0, tutTimer=0, tutLastKey='', tutMode='tour', tutFlag='';
@@ -2157,6 +2167,7 @@ function tutGo(i){
   if(i>=tutList.length){ tutEnd(true); return; }
   tutIdx=i;
   const s=tutList[i], el=s.sel?tq(s.sel):null;
+  document.getElementById('tutH').innerHTML=s.h||'';
   document.getElementById('tutTxt').innerHTML=s.text;
   document.getElementById('tutN').textContent = tutMode==='tour' ? (i+1)+' / '+tutList.length : 'ワンポイント';
   document.getElementById('tutNext').textContent = (tutMode!=='tour')?'わかりました':((i===tutList.length-1)?'おしまい':'つぎへ');
@@ -2286,23 +2297,23 @@ document.getElementById('tutAgain2').addEventListener('click',function(){
 /* ===== 後出しのワンポイント（必要になった時に1つだけ・一度きり） ===== */
 let tipShown=false;
 function tipDone(id){ return ((lsGet(tutKey(LS_TIP))||'').split(',').indexOf(id)>=0); }
-function tipShow(id, sel, text){
+function tipShow(id, sel, h, text){
   if(tipShown || tutOn || tipDone(id)) return false;
   if(!tutVisible(tq(sel))) return false;
   const v=lsGet(tutKey(LS_TIP))||'';
   lsSet(tutKey(LS_TIP), v?v+','+id:id);
   tipShown=true;
-  tutStart([{sel:sel, text:text}],'tip');
+  tutStart([{sel:sel, h:h, text:text}],'tip');
   return true;
 }
 function tutTips(){
   if(tipShown || tutOn || !cur) return;
   if(sheetOpen()) return;
-  if(tipShow('req','.reqbar',
-      '締切のあとに<b>スタッフから届いたお願い</b>です。押すと中身が見られます。<br><b>受け入れると希望に入り</b>、この日の人数に数えられます。')) return;
+  if(tipShow('req','.reqbar','締切あとのお願いです',
+      '押すと中身が見られます。受け入れると希望に入ります。')) return;
   if((cur.assign||[]).length && !cur.published &&
-     tipShow('publish','#shiftBox',
-      'シフトは<b>「みんなに知らせる」</b>を押すまでスタッフには見えません。<br>直しおわってから押してください。')) return;
+     tipShow('publish','#shiftBox','まだ知らせていません',
+      '「みんなに知らせる」を押すまで、スタッフには見えません。')) return;
 }
 
 let tutTried=false;
