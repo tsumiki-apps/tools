@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>つみき&amp;せんや ｜ せんや様 先行ご案内</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#F4F2EE">
+<link rel="apple-touch-icon" href="icon-tsumiki-senya-kanri.png">
+<link rel="icon" href="icon-tsumiki-senya-kanri.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ===========================================================
+   つみき&せんや 先行ご案内（せんや様専用・未掲載ページ）
+   見た目は tsumiki-apps.com の「アプリ詳細」に合わせる。
+   ⚠️ 合言葉・プロダクトキーの実物は、このページに絶対に書かない。
+   =========================================================== */
+:root{
+  --paper:#F4F2EE; --card:#FBFAF7; --surface:#ECE9E3;
+  --ink:#242321; --sub:#77736B; --line:#D8D4CC; --ghost:#BEB9B0;
+  --accent:#D14E26; --accent-soft:#F1CDBB;
+  --radius:20px; --wrap:760px;
+}
+*{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+html{-webkit-text-size-adjust:100%;}
+img{max-width:100%;}
+body{
+  font-family:'Zen Maru Gothic',-apple-system,BlinkMacSystemFont,
+    "Hiragino Maru Gothic ProN","Hiragino Sans","Helvetica Neue",Arial,sans-serif;
+  background:var(--paper); color:var(--ink); line-height:1.85;
+  -webkit-font-smoothing:antialiased;
+  padding:0 clamp(16px,4vw,24px) calc(80px + env(safe-area-inset-bottom));
+}
+.wrap{max-width:var(--wrap); margin:0 auto;
+  padding:calc(env(safe-area-inset-top) + 34px) 0 0;}
+
+/* ---- 先行公開の帯 ---- */
+.pre{display:flex; flex-wrap:wrap; align-items:center; gap:10px;
+  background:var(--card); border:1px solid var(--line); border-radius:16px;
+  padding:14px 16px; margin-bottom:30px;}
+.pre .tag{flex:0 0 auto; font-size:10.5px; font-weight:700; letter-spacing:.14em;
+  color:var(--paper); background:var(--accent); border-radius:999px; padding:4px 11px;}
+.pre .txt{font-size:13px; line-height:1.8; color:#3a3833; min-width:0;}
+.pre .txt b{font-weight:700;}
+
+/* ---- ヘッド ---- */
+.as-head{display:grid; grid-template-columns:112px minmax(0,1fr); gap:20px; align-items:start;}
+.as-icon{width:112px; height:112px; border-radius:24px; border:1px solid var(--line);
+  box-shadow:0 8px 22px rgba(36,35,33,.12); display:block;}
+.as-name{font-size:26px; font-weight:700; letter-spacing:.04em; line-height:1.25;}
+.as-sub{font-size:13px; color:var(--sub); margin-top:4px; letter-spacing:.02em;}
+.as-actions{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:14px;}
+.as-buy{display:inline-flex; align-items:center; gap:8px; border-radius:999px;
+  padding:11px 20px; font-size:13.5px; font-weight:700; letter-spacing:.03em;
+  background:var(--ink); color:var(--paper); text-decoration:none;}
+.as-buy.is-soon{background:var(--surface); color:var(--sub); cursor:default;}
+.as-buy.is-soon small{font-size:10px; font-weight:700; letter-spacing:.06em; color:var(--paper);
+  background:var(--ghost); border-radius:999px; padding:2px 8px;}
+.as-manual{display:inline-flex; align-items:center; gap:7px; border-radius:999px;
+  padding:11px 18px; font-size:13.5px; font-weight:700; letter-spacing:.02em;
+  color:var(--ink); text-decoration:none; border:1px solid var(--ink); background:var(--card);}
+.as-key-ar{transition:transform .2s ease;}
+.as-manual:active .as-key-ar{transform:translateX(3px);}
+
+/* ---- 見出し・本文 ---- */
+.as-h{font-size:15px; font-weight:700; letter-spacing:.02em; margin:38px 0 0; line-height:1.5;}
+.as-h-en{font-size:10px; letter-spacing:.22em; color:var(--accent); font-weight:500; margin-left:10px;
+  white-space:nowrap;}
+.as-about{font-size:14px; line-height:1.95; color:#3a3833; margin-top:14px;}
+.as-bg{font-size:14px; line-height:1.95; color:#3a3833; margin-top:14px;}
+.as-about strong,.as-bg strong{font-weight:700; color:var(--ink);}
+.note{margin-top:14px; border-left:2px solid var(--ghost); padding:2px 0 2px 13px;
+  font-size:12.5px; color:var(--sub); line-height:1.8;}
+
+/* ---- 三本柱 ---- */
+.pts{list-style:none; margin-top:14px; display:grid; gap:10px;}
+.pts li{display:grid; grid-template-columns:auto minmax(0,1fr); gap:15px; align-items:start;
+  background:var(--card); border:1px solid var(--line); border-radius:18px; padding:15px 18px;}
+.pts .n{font-size:12px; font-weight:700; letter-spacing:.08em; color:var(--accent);
+  border:1px solid var(--accent-soft); border-radius:999px; padding:3px 10px; white-space:nowrap;}
+.pts .t{font-size:14px; font-weight:700; line-height:1.7;}
+.pts .d{font-size:13px; color:#3a3833; line-height:1.85; margin-top:4px;}
+
+/* ---- プレビュー ---- */
+.pv-group-k{display:flex; align-items:baseline; gap:9px; font-size:12.5px; font-weight:700;
+  letter-spacing:.04em; color:var(--ink); margin:22px 0 0;}
+.pv-group-en{font-size:9.5px; letter-spacing:.2em; color:var(--sub); font-weight:600;}
+.as-shots{display:flex; gap:16px; margin-top:14px; padding-bottom:4px;
+  overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none;
+  scroll-snap-type:x mandatory;}
+.as-shots::-webkit-scrollbar{display:none;}
+.as-shot{flex:0 0 auto; width:156px; scroll-snap-align:start;
+  display:flex; flex-direction:column; gap:10px; align-items:center;}
+.as-shot figcaption{font-size:12px; color:var(--sub); letter-spacing:.02em; text-align:center;
+  line-height:1.6;}
+.pv{position:relative; width:156px; height:330px; border-radius:26px; overflow:hidden;
+  background:var(--card); border:1px solid var(--line);
+  box-shadow:0 10px 26px rgba(36,35,33,.12); isolation:isolate;}
+.pv::before{content:""; position:absolute; top:9px; left:50%; transform:translateX(-50%);
+  width:34px; height:6px; border-radius:999px; background:rgba(36,35,33,.22); z-index:6;}
+.pv-img{width:100%; height:100%; object-fit:cover; object-position:top center; display:block;}
+.as-shot.as-shot-pc{width:300px;}
+.pv.pv-pc{width:300px; height:200px; border-radius:16px;}
+.pv.pv-pc::before{width:44px; height:5px; top:8px;}
+.as-shots-solo{overflow:visible;}
+.as-shots-solo .as-shot{width:auto; max-width:100%;}
+.pv.pv-doc{width:min(660px, 100%); height:auto; aspect-ratio:920 / 600;
+  border-radius:8px; background:#fff;}
+.pv.pv-doc::before{display:none;}
+.pv.pv-doc .pv-img{object-fit:contain; object-position:top center;}
+.pv-zoomable{cursor:zoom-in;}
+.pv-zoomable:active{transform:scale(.985);}
+
+/* ---- STAR ---- */
+.as-star{margin-top:14px; border:1px solid var(--line); border-radius:18px; background:var(--card); overflow:hidden;}
+.star-row{padding:16px 18px; border-top:1px solid var(--line);}
+.star-row:first-child{border-top:none;}
+.star-row.is-result{background:var(--accent-soft);}
+.star-k{display:flex; align-items:baseline; gap:9px; font-size:14px; font-weight:700; letter-spacing:.02em;}
+.star-en{font-size:9.5px; letter-spacing:.2em; color:var(--sub); font-weight:600;}
+.star-v{font-size:14px; line-height:1.9; color:#3a3833; margin-top:7px;}
+.star-row.is-result .star-v{color:#5a3323;}
+
+/* ---- 情報 ---- */
+.panel{background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  padding:20px 18px; margin-top:14px;}
+.dl{display:flex; flex-direction:column;}
+.dl-row{display:grid; grid-template-columns:104px minmax(0,1fr); gap:12px; padding:13px 0;
+  border-top:1px solid var(--line);}
+.dl-row:first-child{border-top:none; padding-top:0;}
+.dl-k{font-size:12.5px; color:var(--sub); letter-spacing:.02em; padding-top:2px;}
+.dl-v{font-size:13.5px; line-height:1.8; color:#3a3833; word-break:break-word;}
+.dl-v a{color:var(--ink); text-decoration:none; border-bottom:1px solid var(--ghost);}
+
+footer{margin-top:52px; padding-top:22px; border-top:1px solid var(--line);
+  font-size:12px; color:var(--sub); line-height:1.9;}
+
+/* ---- 拡大 ---- */
+.lb{position:fixed; inset:0; z-index:90; background:rgba(28,26,22,.92);
+  display:none; align-items:center; justify-content:center; padding:18px;}
+.lb.on{display:flex;}
+.lb img{max-width:100%; max-height:100%; object-fit:contain; border-radius:6px; background:#fff;}
+.lb button{position:absolute; top:calc(env(safe-area-inset-top) + 12px); right:14px;
+  width:44px; height:44px; border:none; border-radius:12px; background:rgba(244,242,238,.14);
+  color:#F4F2EE; font-family:inherit; font-size:17px; cursor:pointer;}
+
+@media (max-width:600px){
+  .as-head{grid-template-columns:80px minmax(0,1fr); gap:14px;}
+  .as-icon{width:80px; height:80px; border-radius:18px;}
+  .as-name{font-size:21px;}
+  .as-h{font-size:14.5px; margin-top:32px;}
+  .dl-row{grid-template-columns:1fr; gap:2px;}
+}
+@media (min-width:900px){
+  .as-shots{flex-wrap:wrap; overflow:visible;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="pre">
+    <span class="tag">先行ご案内</span>
+    <p class="txt">このページは<b>せんや様にだけ</b>お送りしています。一般には公開しておらず、検索にも出ません。<br>画面の写真は<b>すべて見本のデータ</b>です（実在の方のお名前は入っていません）。</p>
+  </div>
+
+  <div class="as-head">
+    <img class="as-icon" src="icon-tsumiki-senya-kanri.png" alt="つみき&amp;せんや アイコン" width="112" height="112">
+    <div>
+      <div class="as-name">つみき&amp;せんや</div>
+      <div class="as-sub">シフト希望あつめ ／ Senya</div>
+      <div class="as-actions">
+        <span class="as-buy is-soon">アプリ本体 <small>お渡し準備中</small></span>
+        <a class="as-manual" href="tsumiki-senya-tsukaikata.html" target="_blank" rel="noopener">取扱説明書をひらく<span class="as-key-ar">→</span></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ① 簡潔な紹介 -->
+  <p class="as-about">スタッフは、自分だけのURLをひらいて<strong>働ける日をタップするだけ</strong>。店長の画面には全員ぶんが<strong>1枚のカレンダー</strong>で集まり、<strong>人手の足りない日が赤く</strong>出ます。LINEでバラバラに届く希望を書き写す手間と、「誰がまだ出していないか分からない」を無くすための道具です。組んだシフトは<strong>横向きの紙1枚</strong>に印刷して、そのまま貼り出せます。</p>
+
+  <!-- 三本柱 -->
+  <ul class="pts">
+    <li><span class="n">01</span><div>
+      <div class="t">集める手間が、ゼロになる</div>
+      <div class="d">スタッフはURLをタップして、日をタップするだけ。アプリのインストールも、会員登録も要りません。書き写す作業がなくなります。</div>
+    </div></li>
+    <li><span class="n">02</span><div>
+      <div class="t">足りない日が、開いた瞬間に分かる</div>
+      <div class="d">「昼は2人、夜は3人ほしい」を決めておくと、下回った日が赤く出ます。<b>「夜 −1」＝夜にあと1人</b>。探さなくても、向こうから出てきます。</div>
+    </div></li>
+    <li><span class="n">03</span><div>
+      <div class="t">決めたシフトは、紙にもスマホにも</div>
+      <div class="d">横1枚に印刷して厨房に貼り出せます。スタッフ側は「カレンダーに追加」で、1か月ぶんの出勤がスマホの予定表にまとめて入ります。</div>
+    </div></li>
+  </ul>
+
+  <!-- 制作の背景 -->
+  <p class="as-h">制作の背景<span class="as-h-en">BACKGROUND</span></p>
+  <p class="as-bg">シフトづくりで本当に時間を食っているのは、<strong>「組むこと」ではなく「集めること」</strong>でした。LINE・口頭・紙のメモ——届き方がバラバラなので、まず一度どこかへ書き写さないと全体が見えない。書き写している間に新しい希望が届き、また書き直す。そして締切の日になって、やっと「あの人からまだ来ていない」と気づく。<br><br>そこで、このアプリは<strong>「集めるところ」だけを引き受けます。</strong>シフトを自動で組む機能は、あえて入れていません。誰をどこに入れるかは、お店の事情を知っている店長にしか決められないからです。この道具がするのは、<strong>判断に必要な材料を、書き写さずに1枚へまとめること</strong>だけです。<br><br>作るうえで、いちばん気をつけたのは<strong>「スタッフが迷わないこと」</strong>でした。使う方の中には、アプリに慣れていない方もいらっしゃいます。ですので――<b>インストールなし・会員登録なし・パスワードなし</b>。届いたURLをタップすれば、もう自分の画面が開いています。ほかの人の希望は見えません。押すのは「入れます」「行けたら」「休み」の3つだけ。<br><br>店長側も同じ考え方で、<strong>ふだん開く画面を「一覧」ひとつ</strong>にしました。スタッフの登録も設定も、月に一度も触らないものは右上の歯車の中へしまってあります。</p>
+  <p class="note">この節は、面談でうかがったお話をもとにした<b>下書き</b>です。事実とちがうところがあれば、そのまま直します。</p>
+
+  <!-- ② プレビュー -->
+  <p class="as-h">プレビュー<span class="as-h-en">PREVIEW</span></p>
+
+  <p class="pv-group-k">店長の画面<span class="pv-group-en">MANAGER ／ iPhone</span></p>
+  <div class="as-shots">
+    <figure class="as-shot"><div class="pv pv-zoomable"><img class="pv-img" src="senya-shots/senya-ph-list.png" alt="店長の一覧画面。足りない日が赤く出ている" loading="lazy" width="780" height="1688"></div><figcaption>足りない日が、赤で出る</figcaption></figure>
+    <figure class="as-shot"><div class="pv pv-zoomable"><img class="pv-img" src="senya-shots/senya-ph-day.png" alt="その日に入れる人の一覧" loading="lazy" width="780" height="1688"></div><figcaption>その日に入れる人を見る</figcaption></figure>
+    <figure class="as-shot"><div class="pv pv-zoomable"><img class="pv-img" src="senya-shots/senya-ph-kime.png" alt="シフトを決める画面" loading="lazy" width="780" height="1688"></div><figcaption>名前を押して、シフトを決める</figcaption></figure>
+    <figure class="as-shot"><div class="pv pv-zoomable"><img class="pv-img" src="senya-shots/senya-ph-table.png" alt="1か月ぶんのシフト表" loading="lazy" width="780" height="1688"></div><figcaption>1か月ぶんのシフト表</figcaption></figure>
+    <figure class="as-shot"><div class="pv pv-zoomable"><img class="pv-img" src="senya-shots/senya-ph-staff.png" alt="スタッフの登録画面" loading="lazy" width="780" height="1688"></div><figcaption>スタッフを登録して、URLを配る</figcaption></figure>
+  </div>
+
+  <p class="pv-group-k">スタッフの画面<span class="pv-group-en">STAFF ／ iPhone</span></p>
+  <div class="as-shots">
+    <figure class="as-shot"><div class="pv pv-zoomable"><img class="pv-img" src="senya-shots/senya-ph-my.png" alt="スタッフのカレンダー画面" loading="lazy" width="780" height="1688"></div><figcaption>働ける日をタップするだけ</figcaption></figure>
+    <figure class="as-shot"><div class="pv pv-zoomable"><img class="pv-img" src="senya-shots/senya-ph-mysel.png" alt="入れます・行けたら・休みを選ぶ画面" loading="lazy" width="780" height="1688"></div><figcaption>「入れます」「行けたら」「休み」</figcaption></figure>
+    <figure class="as-shot"><div class="pv pv-zoomable"><img class="pv-img" src="senya-shots/senya-ph-mydone.png" alt="決まったシフトの画面" loading="lazy" width="780" height="1688"></div><figcaption>決まったシフトを受け取る</figcaption></figure>
+  </div>
+
+  <p class="pv-group-k">パソコンでも<span class="pv-group-en">DESKTOP</span></p>
+  <div class="as-shots">
+    <figure class="as-shot as-shot-pc"><div class="pv pv-pc pv-zoomable"><img class="pv-img" src="senya-shots/senya-pc-list.png" alt="パソコンで見た店長の一覧画面" loading="lazy" width="2400" height="1600"></div><figcaption>店長の一覧</figcaption></figure>
+    <figure class="as-shot as-shot-pc"><div class="pv pv-pc pv-zoomable"><img class="pv-img" src="senya-shots/senya-pc-table.png" alt="パソコンで見たシフト表" loading="lazy" width="2400" height="1600"></div><figcaption>シフト表</figcaption></figure>
+  </div>
+  <p class="note">スマホ・タブレット・パソコンの、どの幅でも同じように使えます（320px〜1920pxで確認しています）。</p>
+
+  <p class="pv-group-k">印刷したシフト表<span class="pv-group-en">OUTPUT</span></p>
+  <div class="as-shots as-shots-solo">
+    <figure class="as-shot">
+      <div class="pv pv-doc pv-zoomable"><img class="pv-img" src="senya-shots/senya-doc-print.png" alt="印刷したシフト表（A4よこ・1枚・見本データ）" loading="lazy" width="1840" height="1200"></div>
+      <figcaption>タップで拡大：A4よこ1枚のシフト表（貼り出し用）</figcaption>
+    </figure>
+  </div>
+  <p class="note">「印刷する」を押すと、1か月ぶんが<b>A4よこ・かならず1枚</b>にまとまって出てきます。人数が多い月は、入るところまで自動で小さくして1枚に収めます。掲載は見本のデータです。</p>
+
+  <!-- ③ くわしく -->
+  <p class="as-h">くわしく<span class="as-h-en">STORY</span></p>
+  <div class="as-star">
+    <div class="star-row">
+      <p class="star-k">こんな場面で<span class="star-en">SITUATION</span></p>
+      <p class="star-v">飲食店の、来月のシフトづくり。スタッフそれぞれの都合が、LINEや口頭でバラバラに届く。</p>
+    </div>
+    <div class="star-row">
+      <p class="star-k">困っていたこと<span class="star-en">TASK</span></p>
+      <p class="star-v">届いた希望を一度どこかへ書き写さないと全体が見えない。書いている間に新しい希望が届き、また直す。誰がまだ出していないかも、追いかけないと分からない。人手が足りない日は、全部そろってから目で探すことになる。</p>
+    </div>
+    <div class="star-row">
+      <p class="star-k">アプリがすること<span class="star-en">ACTION</span></p>
+      <p class="star-v">スタッフには<strong>ひとりずつ専用のURL</strong>をお渡しします。開いて働ける日をタップし、「入れます」「行けたら」を選ぶだけ。インストールも会員登録も要りません。店長の画面には全員ぶんが1枚のカレンダーで集まり、<strong>ほしい人数を下回った日が赤く</strong>出ます。あとは名前を押していくだけでシフトが決まり、<strong>横1枚に印刷</strong>できます。「みんなに知らせる」を押すと、スタッフの画面にも出ます。</p>
+    </div>
+    <div class="star-row is-result">
+      <p class="star-k">こう変わる<span class="star-en">RESULT</span></p>
+      <p class="star-v">書き写す作業がなくなります。足りない日は、探さなくても<strong>開いた瞬間に赤で出ます</strong>。誰がまだ出していないかも一目。決まったシフトは紙にもなり、スタッフのスマホの予定表にもそのまま入るので、<strong>「言った・聞いてない」が起きにくくなります</strong>。</p>
+    </div>
+  </div>
+
+  <!-- 情報 -->
+  <p class="as-h">情報<span class="as-h-en">INFORMATION</span></p>
+  <div class="panel">
+    <div class="dl">
+      <div class="dl-row"><div class="dl-k">制作</div><div class="dl-v">つみき</div></div>
+      <div class="dl-row"><div class="dl-k">カテゴリ</div><div class="dl-v">シフト希望あつめ（飲食店）</div></div>
+      <div class="dl-row"><div class="dl-k">形式</div><div class="dl-v">ブラウザで動くアプリ（インストール不要）</div></div>
+      <div class="dl-row"><div class="dl-k">画面</div><div class="dl-v"><strong>店長用</strong>と<strong>スタッフ用</strong>の2つ。入口が別々なので、まざりません</div></div>
+      <div class="dl-row"><div class="dl-k">スタッフ側</div><div class="dl-v">インストール・会員登録・パスワードなし。届いたURLをタップするだけ</div></div>
+      <div class="dl-row"><div class="dl-k">対応</div><div class="dl-v">スマホ・タブレット・パソコン（320px〜1920pxで確認）</div></div>
+      <div class="dl-row"><div class="dl-k">お渡し</div><div class="dl-v">店長用アプリはプロダクトキーで解錠してお使いいただけます</div></div>
+      <div class="dl-row"><div class="dl-k">説明書</div><div class="dl-v"><a href="tsumiki-senya-tsukaikata.html" target="_blank" rel="noopener">全40項目の取扱説明書</a>（店長・スタッフ両方ぶん）</div></div>
+    </div>
+    <p class="note">スタッフの方からは、<b>ほかの方のお名前も希望も見えません</b>。自分のぶんだけが返る作りになっています。</p>
+  </div>
+
+  <footer>
+    つみき（Tsumiki）<br>
+    このページはせんや様専用の先行ご案内です。内容は公開前のもので、変わることがあります。
+  </footer>
+</div>
+
+<div class="lb" id="lb"><button id="lbX" aria-label="とじる">✕</button><img id="lbImg" alt=""></div>
+<script>
+/* 画面写真は小さく出しているので、押したら大きく見られるようにする */
+var lb=document.getElementById('lb'), lbImg=document.getElementById('lbImg');
+document.querySelectorAll('.pv-zoomable img').forEach(function(im){
+  im.parentElement.addEventListener('click',function(){
+    lbImg.src=im.currentSrc||im.src; lbImg.alt=im.alt; lb.classList.add('on');
+    document.body.style.overflow='hidden';
+  });
+});
+function close(){ lb.classList.remove('on'); document.body.style.overflow=''; }
+lb.addEventListener('click',close);
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+</script>
+</body>
+</html>
