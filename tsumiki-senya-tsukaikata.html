@@ -291,9 +291,10 @@
   .screen .bar .ttl{font-weight:800; font-size:12.5px; line-height:1.25;}
   .screen .bar .ttl small{display:block; font-size:9px; font-weight:400; color:var(--app-soft);}
   .screen .bar .dot{margin-left:auto; width:7px; height:7px; border-radius:50%; background:var(--good); flex:none;}
-  .screen .vbar{display:flex; align-items:baseline; gap:9px; margin-bottom:11px;}
-  .screen .vbar .bk{font-size:10px; color:var(--app-soft);}
+  .screen .vbar{margin-bottom:11px;}
+  .screen .vbar .bk{display:block; font-size:10px; color:var(--app-soft); margin-top:2px;}
   .screen .vbar b{font-size:13px; font-weight:800;}
+  .screen .gearbar i.on{background:var(--app-ink); border-color:var(--app-ink); color:var(--app-surface);}
   .screen .gearbar{display:flex; align-items:center; gap:6px; justify-content:flex-end; margin-bottom:9px;}
   .screen .gearbar i{font-style:normal; width:20px; height:20px; border:1px solid var(--app-line);
     border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:11px;}
@@ -663,7 +664,8 @@
       </figure>
       <h3><span class="n">4</span>店長の画面をひらく<span class="who-tag m">店長</span></h3>
       <p>店長用のURLを開き、<strong>8文字の合言葉</strong>を入れて <kbd>はいる</kbd> を押します。次からは自動で開きます。</p>
-      <p>入ると、いきなり<strong>今月の一覧（カレンダー）</strong>が出ます。ふだん見るのはこの画面だけです。<br><strong>スタッフの登録</strong>と<strong>設定</strong>は、右上の <kbd>⚙</kbd>（歯車）の中にしまってあります。押すと2つ並んで出てきますので、どちらかを選んでください。もどるときは左上の <kbd>‹ 一覧にもどる</kbd> です。</p>
+      <p>入ると、いきなり<strong>今月の一覧（カレンダー）</strong>が出ます。ふだん見るのはこの画面だけです。<br><strong>スタッフの登録</strong>と<strong>設定</strong>は、右上の <kbd>⚙</kbd>（歯車）の中にしまってあります。押すと2つ並んで出てきますので、どちらかを選んでください。</p>
+      <p><b>出口は歯車ひとつ</b>です。スタッフや設定を見ているあいだ、<b>歯車は黒く塗られたまま</b>になります。「いま一覧ではないところにいる」という印です。<b>もう一度その歯車を押せば、一覧にもどります</b>（「もどる」ボタンはありません）。</p>
       <p class="fine">お渡しした<b>リンクに合言葉が入っている</b>ときは、タップするだけで入れます（打ち込む必要はありません）。入ったあとURLから合言葉は消えるので、画面を人に見せても写りません。</p>
       <p class="fine">合言葉は店長と奥様で共有して大丈夫です。おふたりとも同じ画面が見られます。<b>「渡した」の印も2台で同じ</b>になります。</p>
       <p class="fine">⚠️ このページも<b>お知らせを出せません</b>。初めて開いたときのご案内から、<b>ホーム画面に置いて</b>おくと、締切のころに思い出せます（置き方は項目37・38）。</p>
@@ -672,7 +674,8 @@
     <article class="item" id="i5">
       <figure class="shot">
         <div class="screen">
-          <div class="vbar"><span class="bk">‹ 一覧にもどる</span><b>設定</b></div>
+          <div class="gearbar"><i class="on">⚙</i><i>☾</i></div>
+          <div class="vbar"><b>設定</b><span class="bk">右上の ⚙ をもう一度押すと、一覧にもどります</span></div>
           <div class="fld">
             <div class="lb">昼の時間帯と、ほしい人数</div>
             <div class="row"><div class="bx">11:00</div><span class="u">〜</span><div class="bx">14:30</div>
@@ -1088,8 +1091,8 @@
       </figure>
       <h3><span class="n">28</span>シフト表を、横1枚に印刷して貼り出す<span class="who-tag m">店長</span></h3>
       <p><kbd>シフト表を見る</kbd> を押すと、<strong>1か月ぶんの表</strong>が出ます。<kbd>印刷する</kbd> を押すと、<strong>A4よこ・かならず1枚</strong>にまとまって出てきます。そのまま厨房に貼れます。</p>
-      <p class="fine">1日から月末までを<b>前半・後半の2段</b>に分けて、横に並べています。<b>1か月が一目で見える</b>のが、貼り出す表のいちばん大事なところだからです。<br>人数が多くて入りきらない月は、<b>入るところまで自動で小さくして1枚に収めます</b>（2枚目には行きません）。<br>ひとりずつの合計は、表の下に小さく並びます。<br>まだ人が決まっていない枠は<b>「未定」</b>と出るので、貼る前に抜けに気づけます。定休日は灰色です。</p>
-      <p class="fine">印刷の画面で用紙が「たて」になっているときは、<b>「よこ」</b>を選んでください。ふつうは自動で「よこ」になります。</p>
+      <p class="fine">1か月ぶんを<b>2段（または3段）に分けて横に並べます</b>。何段にするかは、人数と名前の長さを見て<b>いちばん大きく刷れる形が自動で選ばれます</b>。<b>1か月が一目で見える</b>のが、貼り出す表のいちばん大事なところだからです。<br>枠の見出しに時間（「昼 11:00〜14:30」）が出ているので、<b>その時間どおりの方には時刻を書きません</b>。ちがう時間の方だけ、名前のうしろに時刻が付きます。<br>それでも入りきらない月は、<b>入るところまで自動で小さくして1枚に収めます</b>（2枚目には行きません）。<br>ひとりずつの合計は、表の下に小さく並びます。<br>まだ人が決まっていない枠は<b>「未定」</b>と出るので、貼る前に抜けに気づけます。定休日は灰色です。</p>
+      <p class="fine">印刷の画面で用紙が「たて」になっているときは、<b>「よこ」</b>を選んでください。ふつうは自動で「よこ」になります。<br>余白の設定は<b>そのままで大丈夫</b>です。プリンタの既定の余白でも1枚に収まる大きさで組んでいます。</p>
     </article>
 
 <article class="item" id="i29">

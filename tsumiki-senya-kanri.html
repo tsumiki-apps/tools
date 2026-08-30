@@ -84,6 +84,10 @@
   .iconbtn{width:var(--tap); height:var(--tap); flex:none; border:1px solid var(--line); background:var(--surface);
     border-radius:12px; color:var(--ink-mid); display:grid; place-items:center; cursor:pointer;}
   .iconbtn:active{transform:scale(.94);}
+  /* ⚠️ 「もどる」を置かず、同じ歯車をもう一度押して戻る作りにした。
+     押している間ずっと入っていることが見えていないと、出口が分からなくなる。
+     ＝入っているあいだは塗りつぶす（暗い画面では明るい色が「入」になる）。 */
+  .iconbtn.on{background:var(--ink); border-color:var(--ink); color:var(--paper);}
   .sync-dot{width:8px; height:8px; border-radius:50%; background:var(--ink-soft); flex:none;}
   .sync-dot.ok{background:var(--good);} .sync-dot.off{background:var(--warn);}
 
@@ -227,7 +231,8 @@
   .needrow input{flex:1; min-width:0; min-height:var(--tap); font-family:var(--sans); font-size:1.05rem;
     text-align:center; padding:10px; border:1.5px solid var(--line-2); border-radius:12px;
     background:var(--surface); color:var(--ink);}
-  .vhd{margin:2px 0 14px; font-size:1.12rem; font-weight:700;}
+  .vhd{margin:2px 0 4px; font-size:1.12rem; font-weight:700;}
+  .vhd + .vsub{margin:0 0 14px; font-size:.78rem; color:var(--ink-soft);}
   .backb{background:none; border:none; color:var(--ink-soft); font-family:var(--sans); font-size:.88rem;
     padding:8px 2px; cursor:pointer; margin-bottom:2px; min-height:var(--tap);}
 
@@ -506,43 +511,57 @@
         ・前半／後半の2段組にして、たてに長い表を横に寝かせる（時間帯が4つ以上のときは1段のまま）
         ・組んだあとに高さを測り、はみ出すぶんだけ縮める（--pscale）＝ぜったいに2枚目を作らない
      ⚠️ 寸法は px のまま書く。印刷でも 96px = 1inch でそろうので、
-        画面で測った高さがそのまま紙の高さになる（pt で書くと測れない）。 */
+        画面で測った高さがそのまま紙の高さになる（pt で書くと測れない）。
+     ⚠️⚠️ 紙に本当に載る大きさは、@page の指定では決まらない（2026-08-30 実測）。
+        Safari は @page の margin を見ず、プリンタ既定の余白を使う。
+        A4よこで実測 761.9×485.4pt ＝ 1016×647px しか無く、
+        1060×733px 前提で組んでいた前の版は横も縦もあふれて2枚目に流れていた。
+        → 置き幅・置き高さは「どの余白でも載る」控えめな値にする。ここを大きくしない。
+        さらに、縮めても“紙をはみ出す箱”が残ると改ページの元になるので、
+        縮めた実寸ぴったりの入れ物（.pr-fit）に入れて、はみ出しを切り落とす。 */
   .pr{display:none;}
-  .pr-in{width:1060px; transform-origin:top left; color:#000; background:#fff;
+  /* A4よこ（297×210mm）から、余白を上下左右それぞれ 1inch 見ても載る大きさ */
+  .pr-in{width:920px; transform-origin:top left; color:#000; background:#fff;
     font-family:var(--sans); -webkit-print-color-adjust:exact; print-color-adjust:exact;}
-  .pr-t{font-size:19px; font-weight:700; margin-bottom:2px;}
-  .pr-m{font-size:11px; color:#555; margin-bottom:8px;}
-  .pr-cols{display:flex; gap:12px; align-items:flex-start;}
+  .pr-fit{overflow:hidden; break-inside:avoid; page-break-inside:avoid;}
+  .pr-t{font-size:17px; font-weight:700; margin-bottom:2px;}
+  .pr-m{font-size:10.5px; color:#555; margin-bottom:6px;}
+  .pr-cols{display:flex; gap:10px; align-items:flex-start;}
   .pr-cols > .pr-c{flex:1 1 0; min-width:0;}
   /* ⚠️ 表は中身の最小幅より細くならない＝flex に入れても縮まず、紙からはみ出す。
      table-layout:fixed ＋ colgroup で「先に幅を決めてから中身を折り返す」に変える。 */
-  table.prt{width:100%; table-layout:fixed; border-collapse:collapse; font-size:12px; background:#fff;
+  table.prt{width:100%; table-layout:fixed; border-collapse:collapse; font-size:11.5px; background:#fff;
     word-break:break-word; overflow-wrap:anywhere;}
-  table.prt th, table.prt td{border:.75px solid #999; padding:2px 4px; vertical-align:top;
-    line-height:1.35; text-align:left;}
-  table.prt th{background:#ececec; font-weight:700; white-space:nowrap; font-size:11px;}
+  table.prt th, table.prt td{border:.75px solid #999; padding:1.5px 4px; vertical-align:top;
+    line-height:1.3; text-align:left;}
+  table.prt th{background:#ececec; font-weight:700; white-space:nowrap; font-size:10.5px;}
   table.prt td.dt{white-space:nowrap; font-weight:700; font-variant-numeric:tabular-nums;}
   table.prt td.dt .w{font-weight:400; margin-left:2px;}
   table.prt tr.rest td{background:#f2f2f2; color:#666;}
   table.prt td.emp{color:#000;}
-  table.prt td.nm .t{font-size:10.5px; color:#444; margin-left:3px; white-space:nowrap;
+  table.prt td.nm .t{font-size:10px; color:#444; margin-left:3px; white-space:nowrap;
     font-variant-numeric:tabular-nums;}
-  .pr-tot{margin-top:9px; font-size:11.5px;}
-  .pr-tot .h{font-weight:700; margin-bottom:4px; font-size:12px;}
-  .pr-tot .ls{display:flex; flex-wrap:wrap; gap:4px 8px;}
-  .pr-tot .p{border:.75px solid #bbb; border-radius:4px; padding:1px 7px; white-space:nowrap;}
+  table.prt td.nm .sep{color:#aaa; margin:0 2px;}
+  .pr-tot{margin-top:7px; font-size:11px;}
+  .pr-tot .h{font-weight:700; margin-bottom:3px; font-size:11.5px;}
+  .pr-tot .ls{display:flex; flex-wrap:wrap; gap:3px 7px;}
+  .pr-tot .p{border:.75px solid #bbb; border-radius:4px; padding:1px 6px; white-space:nowrap;}
   .pr-tot .p b{font-weight:700;}
   .pr-tot .p span{color:#555; margin-left:5px; font-variant-numeric:tabular-nums;}
-  .pr-f{margin-top:8px; font-size:10.5px; color:#555;}
+  .pr-f{margin-top:6px; font-size:10px; color:#555;}
 
   @media print{
+    /* margin は Safari では効かないが、効くブラウザでは余白を詰められるので残す */
     @page{size:A4 landscape; margin:8mm;}
+    html,body{height:auto !important; overflow:visible !important;}
     body > *{display:none !important;}
     body > .tableview{display:block !important; position:static; inset:auto; padding:0;
       background:#fff; color:#000; overflow:visible;}
     /* 画面ぶんは全部たたんで、印刷用の中身だけを出す */
     .tableview > *{display:none !important;}
     .tableview > .pr{display:block !important;}
+    /* 縮めたぶん、入れ物も同じ実寸にする（＝紙をはみ出す箱を残さない） */
+    .pr-fit{width:var(--pw,920px); height:var(--ph,auto);}
     .pr-in{transform:scale(var(--pscale,1));}
   }
 
@@ -663,8 +682,8 @@
 
   <!-- ===== スタッフ ===== -->
   <section class="card" id="view2" hidden>
-    <button class="backb" id="v2Back">‹ 一覧にもどる</button>
     <h2 class="vhd">スタッフ</h2>
+    <p class="vsub">右上の ⚙ をもう一度押すと、一覧にもどります</p>
     <div class="addrow">
       <input id="newName" placeholder="スタッフのお名前" autocomplete="off">
       <button class="btn" id="addBtn">追加</button>
@@ -678,8 +697,8 @@
 
   <!-- ===== 設定 ===== -->
   <section class="card" id="view3" hidden>
-    <button class="backb" id="v3Back">‹ 一覧にもどる</button>
     <h2 class="vhd">設定</h2>
+    <p class="vsub">右上の ⚙ をもう一度押すと、一覧にもどります</p>
     <div id="cfGrid">
     <div class="field">
       <label>お店の名前</label>
@@ -805,7 +824,9 @@
   <table class="tot" id="tvTotal"></table>
   <p class="tvnote" id="tvNote"></p>
   <!-- 印刷のときだけ出る、横向き1枚ぶんの中身 -->
-  <div class="pr" id="tvPrintArea" aria-hidden="true"><div class="pr-in" id="tvPrintIn"></div></div>
+  <div class="pr" id="tvPrintArea" aria-hidden="true">
+    <div class="pr-fit" id="tvPrintFit"><div class="pr-in" id="tvPrintIn"></div></div>
+  </div>
 </div>
 
 <!-- ===== チュートリアル（穴あきの暗幕） ===== -->
@@ -1087,20 +1108,34 @@ document.getElementById('logoutBtn').addEventListener('click',()=>{
 /* ===== 画面の切り替え（一覧がトップ・あとの2つは歯車の中） =====
    ⚠️ タブを外したので、行き先は「歯車 → メニュー」と「もどる」の2本だけ。
       ほかの場所から飛ばしたいときも、必ず showView() を通す（表示の食い違いを作らない）。 */
+function menuIsOpen(){ return sheet.classList.contains('show') && !document.getElementById('mMenu').hidden; }
+/* 歯車が「入」なのは、メニューを開けているあいだと、その行き先（スタッフ／設定）を見ているあいだ。
+   ここを1か所で塗り直す＝どこから画面が変わっても、印と中身がずれない。 */
+function paintGear(){
+  const on = menuIsOpen() || !viewShown(1);
+  document.getElementById('gearBtn').classList.toggle('on', on);
+  document.getElementById('gearBtn').setAttribute('aria-expanded', on?'true':'false');
+}
 function showView(n){
   [1,2,3].forEach(function(m){ document.getElementById('view'+m).hidden = (m!==n); });
   if(n===2) renderStaff();
+  paintGear();
   window.scrollTo(0,0);
 }
 function openMenu(){
   showMode('mMenu');
   backdrop.classList.add('show'); sheet.classList.add('show');
+  paintGear();
 }
-document.getElementById('gearBtn').addEventListener('click',openMenu);
+/* ⚠️ 出口は歯車ひとつに寄せた（「‹ 一覧にもどる」は置かない）。
+   押すたびに 開く → とじる／もどる を行き来する。「いま入っているか」は色で見せる。 */
+document.getElementById('gearBtn').addEventListener('click',function(){
+  if(!viewShown(1)){ closeSheet(); showView(1); return; }   /* スタッフ・設定を見ている → 一覧へ */
+  if(menuIsOpen()){ closeSheet(); return; }                 /* メニューが開いている → とじる */
+  openMenu();
+});
 document.getElementById('goStaffM').addEventListener('click',function(){ closeSheet(); showView(2); });
 document.getElementById('goCfgM').addEventListener('click',function(){ closeSheet(); showView(3); });
-document.getElementById('v2Back').addEventListener('click',function(){ showView(1); });
-document.getElementById('v3Back').addEventListener('click',function(){ showView(1); });
 
 /* ===== 一覧（月のカレンダー） ===== */
 document.getElementById('mPrev').addEventListener('click',()=>{ month=shiftMonth(month,-1); loadMonth(); });
@@ -1364,12 +1399,17 @@ function openTable(){
 /* ===== 印刷用の中身を組む（横向き・1枚） =====
    画面の表とは別に組み直す。紙は「上から順に読む」のではなく「一目で見る」もので、
    ほしい形がちがう＝31行を前半／後半の2段に寝かせて、合計は小さな札にする。 */
-function prCell(list, rest){
+/* ⚠️ ひとりずつ改行して時刻を添えると、3人入る枠は3行になる。
+   31日ぶんでは、これだけで紙1枚に収まらなくなり、全体を小さく縮める羽目になった。
+   列の見出しに「昼 11:00〜14:30」と出ているので、その時間どおりの人に時刻は要らない。
+   ちがう時間の人だけ、名前のうしろに時刻を添える。 */
+function prCell(list, rest, sl){
   if(rest && !list.length) return '<td class="rest">定休日</td>';
   if(!list.length) return '<td class="emp">未定</td>';
   return '<td class="nm">'+list.map(function(p){
-    return esc(p.name)+'<span class="t">'+m2hm(p.from)+'〜'+m2hm(p.to)+'</span>';
-  }).join('<br>')+'</td>';
+    const same = sl && p.from===sl.from && p.to===sl.to;
+    return esc(p.name)+(same?'':'<span class="t">'+m2hm(p.from)+'〜'+m2hm(p.to)+'</span>');
+  }).join('<span class="sep">／</span>')+'</td>';
 }
 function prTable(rows, dateW){
   const sl=slots();
@@ -1381,22 +1421,21 @@ function prTable(rows, dateW){
     '</tr></thead><tbody>';
   rows.forEach(function(r){
     h+='<tr'+(r.rest?' class="rest"':'')+'><td class="dt">'+r.d+'<span class="w">('+WD[r.w]+')</span></td>';
-    sl.forEach(function(s2){ h+=prCell(r.byK[s2.k], r.rest); });
+    sl.forEach(function(s2){ h+=prCell(r.byK[s2.k], r.rest, s2); });
     h+='</tr>';
   });
   return h+'</tbody></table></div>';
 }
-function buildPrint(rows, undecided){
+/* 段数ちがいの中身を組む。何段がよいかは中身しだいなので、あとで測って決める。 */
+function printHtml(rows, undecided, cols){
   const {y,m1}=parseMonth(cur.month);
-  /* 時間帯が4つ以上あると、2段組では1マスが細くなりすぎる＝そのときだけ1段のまま */
-  const split = slots().length<=3 && rows.length>18;
-  const half = Math.ceil(rows.length/2);
-
+  const dateW=[0,8,15,18][cols]||15;
   let h='<div class="pr-t">'+esc(shop.name)+'　'+y+'年'+m1+'月 シフト表</div>';
   h+='<div class="pr-m">'+(undecided?'⚠ まだ人が決まっていない枠が '+undecided+'日ぶん あります':'')+'</div>';
-  h+='<div class="pr-cols">'+
-       (split ? prTable(rows.slice(0,half),15)+prTable(rows.slice(half),15) : prTable(rows,8))+
-     '</div>';
+  const per=Math.ceil(rows.length/cols);
+  let tbl='';
+  for(let i=0;i<cols;i++) tbl+=prTable(rows.slice(i*per,(i+1)*per), dateW);
+  h+='<div class="pr-cols">'+tbl+'</div>';
 
   const tot=staffList.slice().filter(function(s2){ return s2.active||(s2.fixed_slots||0)>0; })
     .sort(function(a,b){ return (b.fixed_min||0)-(a.fixed_min||0); });
@@ -1408,21 +1447,58 @@ function buildPrint(rows, undecided){
       }).join('')+'</div></div>';
   }
   h+='<div class="pr-f">'+esc(shop.name)+'　'+y+'年'+m1+'月　／　変更があったら貼り替えます</div>';
-  document.getElementById('tvPrintIn').innerHTML=h;
+  return h;
 }
-/* 組んだ中身の高さを測って、A4よこ1枚（内側 約730px）に入るところまで縮める。
-   ⚠️ 96px = 1inch は画面も紙も同じ。だから「画面で測った高さ」がそのまま紙に効く。 */
+let prRows=[], prUndecided=0;
+function buildPrint(rows, undecided){
+  prRows=rows; prUndecided=undecided;
+  document.getElementById('tvPrintIn').innerHTML=printHtml(rows, undecided, 2);
+}
+/* 組んだ中身の高さを測って、A4よこ1枚に入るところまで縮める。
+   ⚠️ 96px = 1inch は画面も紙も同じ。だから「画面で測った高さ」がそのまま紙に効く。
+   ⚠️ 置き場は控えめに取る（PR_W×PR_H）。A4よこ 297×210mm から
+      上下左右それぞれ 1inch 余白を見た大きさで、実測した Safari の
+      1016×647px より小さい＝どのプリンタ既定でも載る。
+      ここを「もっと大きく入るはず」と広げると、また2枚目が出る。 */
+const PR_W=920, PR_H=590;
+/* たてに長い表は、段を増やすと背が低くなるかわりに1マスが細くなる（＝折り返しが増える）。
+   どちらが得かは人数と名前の長さしだいなので、1段・2段・3段を実際に組んで測り、
+   いちばん大きく刷れるものを選ぶ。時間帯が多いお店では細い段は選ばれない。 */
 function fitPrint(){
-  const area=document.getElementById('tvPrintArea'), inn=document.getElementById('tvPrintIn');
-  if(!area||!inn||!inn.innerHTML) return;
+  const area=document.getElementById('tvPrintArea'),
+        fit=document.getElementById('tvPrintFit'),
+        inn=document.getElementById('tvPrintIn');
+  if(!area||!fit||!inn||!prRows.length) return;
   const keep=area.getAttribute('style')||'';
-  area.setAttribute('style','display:block;position:absolute;left:-10000px;top:0;width:1060px;');
-  const h=inn.scrollHeight||inn.getBoundingClientRect().height;
-  const cols=inn.querySelector('.pr-cols');
-  const w=Math.max(inn.scrollWidth, cols?cols.scrollWidth:0);
+  area.setAttribute('style','display:block;position:absolute;left:-10000px;top:0;width:'+PR_W+'px;');
+  fit.style.width=PR_W+'px'; fit.style.height='auto';
+  inn.style.transform='none';
+
+  const nSlots=Math.max(1, slots().length);
+  /* 1段の幅が 260px を切ると、名前が縦に割れて読めなくなる。そこだけ先に落とす。 */
+  const cands=[1,2,3].filter(function(c){ return c===1 || (nSlots<=3 && PR_W/c>=260); });
+  let best=null; const tried=[];
+  cands.forEach(function(c){
+    inn.innerHTML=printHtml(prRows, prUndecided, c);
+    const h=inn.scrollHeight||inn.getBoundingClientRect().height;
+    const cl=inn.querySelector('.pr-cols');
+    const w=Math.max(inn.scrollWidth, cl?cl.scrollWidth:0);
+    const sc=Math.min(1, PR_H/Math.max(1,h), PR_W/Math.max(1,w));
+    tried.push({c:c, sc:sc, h:h});
+    /* ⚠️ 段を増やすほど1マスは細くなる＝読みにくくなる。
+       「ほんの少し大きく刷れる」程度では増やさない（5%以上おおきくなるときだけ）。 */
+    if(!best || sc>best.sc*1.05) best={c:c, sc:sc, w:w, h:h};
+  });
+  fitPrint.tried=tried;
+  inn.innerHTML=printHtml(prRows, prUndecided, best.c);
+
+  inn.style.transform='';
+  fit.style.width=''; fit.style.height='';
   area.setAttribute('style',keep);
-  const sc=Math.min(1, 730/Math.max(1,h), 1060/Math.max(1,w));
-  document.documentElement.style.setProperty('--pscale', String(Math.floor(sc*1000)/1000));
+  const r=document.documentElement.style;
+  r.setProperty('--pscale', String(Math.floor(best.sc*1000)/1000));
+  r.setProperty('--pw', Math.ceil(best.w*best.sc)+'px');
+  r.setProperty('--ph', Math.ceil(best.h*best.sc)+'px');
 }
 function closeTable(){ document.getElementById('tableView').hidden=true; document.body.style.overflow=''; }
 document.getElementById('tvClose').addEventListener('click',closeTable);
@@ -1445,7 +1521,8 @@ function showMode(m){
   ['mDay','mFill','mNeed','mReq','mMore','mMenu'].forEach(id=>{ document.getElementById(id).hidden = (id!==m); });
   sheet.scrollTop=0;
 }
-function closeSheet(){ backdrop.classList.remove('show'); sheet.classList.remove('show'); }
+function closeSheet(){ backdrop.classList.remove('show'); sheet.classList.remove('show');
+  if(typeof paintGear==='function') paintGear(); }
 backdrop.addEventListener('click',closeSheet);
 document.getElementById('shX').addEventListener('click',closeSheet);
 
@@ -1997,9 +2074,11 @@ function tutSteps1(){
      text:'いちばん大事なところです。<b>時間帯</b>と、その時間に<b>ほしい人数</b>。<br>「昼 9:00〜15:00 ／ 2人」のように入れます。<br>・ここの名前が、スタッフの画面にそのまま出ます<br>・ここの人数を下回った日が、一覧で<b>赤く</b>なります'},
     {sel:'#saveCfg', need:inCfg, tap:true,
      text:'決めたら<b>「この内容にする」</b>を押します。<br>あとからいつでも変えられます（変えても、もう出ている希望は消えません）。'},
-    {sel:'#v3Back', need:inCfg,
-     text:'設定はこれでおしまい。<b>「‹ 一覧にもどる」</b>で戻れます。<br>つぎは<b>スタッフ</b>の登録です。'},
-    {sel:'#gearBtn', text:'もう一度、右上の<b>歯車</b>を押してください。',
+    {sel:'#gearBtn', need:inCfg,
+     text:'設定はこれでおしまい。<br>歯車が<b>黒くなっている</b>あいだは、一覧ではなく<b>この中にいる印</b>です。<br><b>もう一度押すと、一覧にもどります</b>。押してみてください。',
+     done:function(){ return viewShown(1); }},
+    {sel:'#gearBtn',
+     text:'もどれました。歯車の色も元にもどっています。<br>つぎは<b>スタッフ</b>の登録です。もう一度、歯車を押してください。',
      done:menuOpen},
     {sel:'#goStaffM', need:menuOpen, text:'こんどは<b>「スタッフ」</b>。押してください。',
      done:inStaff},
@@ -2016,8 +2095,9 @@ function tutSteps1(){
      text:'上には<b>「◯人中◯人にURLを渡しました」</b>。<br>全員に渡し終わると、ここは「◯／◯人が出し終わり」に変わります。'},
     {sel:'#staffBox .staff .acts .more', need:inStaff,
      text:'名前を直す・しばらく<b>休止</b>する・合言葉を作り直す・削除は、この<b>「…」</b>の中です。<br>ふだんは押しません。'},
-    {sel:'#v2Back', need:inStaff,
-     text:'スタッフの登録はこれでおしまい。<b>「‹ 一覧にもどる」</b>で戻ります。'},
+    {sel:'#gearBtn', need:inStaff,
+     text:'スタッフの登録はこれでおしまい。<br>右上の<b>歯車をもう一度押す</b>と、一覧にもどります。',
+     done:function(){ return viewShown(1); }},
     {sel:'.monthbar', enter:function(){ if(sheetOpen()) closeSheet(); if(!viewShown(1)) showView(1); },
      text:'一覧に戻りました。<b>‹ ›</b> で見る月を変えられます。<br>希望は<b>月ごと</b>に集めます。まずは<b>来月</b>を出してお待ちください。'},
     {sel:'#stateRow',
