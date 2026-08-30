@@ -71,6 +71,28 @@ body{
 .as-about{font-size:14px; line-height:1.95; color:#3a3833; margin-top:14px;}
 .as-bg{font-size:14px; line-height:1.95; color:#3a3833; margin-top:14px;}
 .as-about strong,.as-bg strong{font-weight:700; color:var(--ink);}
+.fold{margin-top:14px; border:1px solid var(--line); border-radius:18px;
+  background:var(--card); overflow:hidden;}
+.fold > summary{list-style:none; cursor:pointer; padding:15px 18px; min-height:44px;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  font-size:14px; font-weight:700; color:var(--ink); line-height:1.7;}
+.fold > summary::-webkit-details-marker{display:none;}
+.fold > summary::after{content:'＋'; color:var(--accent); font-weight:700; flex:0 0 auto;}
+.fold[open] > summary::after{content:'－';}
+.fold[open] > summary{border-bottom:1px solid var(--line);}
+.fold .panel{border:none; border-radius:0; margin-top:0;}
+.mini{margin-top:14px; border:1px solid var(--line); border-radius:18px;
+  overflow:hidden; background:var(--card);}
+.mini > div{padding:14px 18px; border-top:1px solid var(--line);}
+.mini > div:first-child{border-top:none;}
+.mini b{display:block; font-size:14px; font-weight:700; line-height:1.7; color:var(--ink);}
+.mini span{display:block; font-size:13px; color:#3a3833; line-height:1.85; margin-top:3px;}
+.steps{list-style:none; margin-top:14px; display:grid; gap:8px;}
+.steps li{display:grid; grid-template-columns:auto minmax(0,1fr); gap:13px; align-items:baseline;
+  background:var(--card); border:1px solid var(--line); border-radius:14px; padding:13px 16px;
+  font-size:13.5px; line-height:1.8; color:#3a3833;}
+.steps .n{font-size:12px; font-weight:700; color:var(--accent); white-space:nowrap;}
+.steps b{font-weight:700; color:var(--ink);}
 .note{margin-top:14px; border-left:2px solid var(--ghost); padding:2px 0 2px 13px;
   font-size:12.5px; color:var(--sub); line-height:1.8;}
 
@@ -161,25 +183,25 @@ footer{margin-top:52px; padding-top:22px; border-top:1px solid var(--line);
 <body>
 <div class="wrap">
 
-  <div class="pre">
-    <span class="tag">先行ご案内</span>
-    <p class="txt">このページは<b>せんや様にだけ</b>お送りしています。一般には公開しておらず、検索にも出ません。<br>画面の写真は<b>すべて見本のデータ</b>です（実在の方のお名前は入っていません）。</p>
-  </div>
-
   <div class="as-head">
     <img class="as-icon" src="icon-tsumiki-senya-kanri.png" alt="つみき&amp;せんや アイコン" width="112" height="112">
     <div>
       <div class="as-name">つみき&amp;せんや</div>
       <div class="as-sub">シフト希望あつめ ／ Senya</div>
       <div class="as-actions">
-        <span class="as-buy is-soon">アプリ本体 <small>お渡し準備中</small></span>
+        <span class="as-buy is-soon">アプリ本体 <small>8月31日におわたしします</small></span>
         <a class="as-manual" href="tsumiki-senya-tsukaikata.html" target="_blank" rel="noopener">取扱説明書をひらく<span class="as-key-ar">→</span></a>
       </div>
     </div>
   </div>
 
+  <div class="pre">
+    <span class="tag">先行ご案内</span>
+    <p class="txt">このページは<b>せんや様にだけ</b>お送りしています。一般には公開しておらず、検索にも出ません。<br>画面の写真は<b>すべて見本のデータ</b>です（実在の方のお名前は入っていません）。</p>
+  </div>
+
   <!-- ① 簡潔な紹介 -->
-  <p class="as-about">スタッフは、自分だけのURLをひらいて<strong>働ける日をタップするだけ</strong>。店長の画面には全員ぶんが<strong>1枚のカレンダー</strong>で集まり、<strong>人手の足りない日が赤く</strong>出ます。LINEでバラバラに届く希望を書き写す手間と、「誰がまだ出していないか分からない」を無くすための道具です。組んだシフトは<strong>横向きの紙1枚</strong>に印刷して、そのまま貼り出せます。</p>
+  <p class="as-about">スタッフは自分だけのURLをひらいて、<strong>働ける日をタップするだけ</strong>。店長の画面には全員ぶんが<strong>1枚のカレンダー</strong>で集まり、<strong>人手の足りない日が赤く</strong>出ます。</p>
 
   <!-- 三本柱 -->
   <ul class="pts">
@@ -199,7 +221,7 @@ footer{margin-top:52px; padding-top:22px; border-top:1px solid var(--line);
 
   <!-- 制作の背景 -->
   <p class="as-h">制作の背景<span class="as-h-en">BACKGROUND</span></p>
-  <p class="as-bg">シフトづくりで本当に時間を食っているのは、<strong>「組むこと」ではなく「集めること」</strong>でした。LINE・口頭・紙のメモ——届き方がバラバラなので、まず一度どこかへ書き写さないと全体が見えない。書き写している間に新しい希望が届き、また書き直す。そして締切の日になって、やっと「あの人からまだ来ていない」と気づく。<br><br>そこで、このアプリは<strong>「集めるところ」だけを引き受けます。</strong>シフトを自動で組む機能は、あえて入れていません。誰をどこに入れるかは、お店の事情を知っている店長にしか決められないからです。この道具がするのは、<strong>判断に必要な材料を、書き写さずに1枚へまとめること</strong>だけです。<br><br>作るうえで、いちばん気をつけたのは<strong>「スタッフが迷わないこと」</strong>でした。使う方の中には、アプリに慣れていない方もいらっしゃいます。ですので――<b>インストールなし・会員登録なし・パスワードなし</b>。届いたURLをタップすれば、もう自分の画面が開いています。ほかの人の希望は見えません。押すのは「入れます」「行けたら」「休み」の3つだけ。<br><br>店長側も同じ考え方で、<strong>ふだん開く画面を「一覧」ひとつ</strong>にしました。スタッフの登録も設定も、月に一度も触らないものは右上の歯車の中へしまってあります。</p>
+  <p class="as-bg">シフトづくりで時間を食っているのは、<strong>組むことではなく集めること</strong>でした。だからこのアプリは、<strong>集めるところだけを引き受けます</strong>。誰をどこに入れるかは、お店の事情を知っている店長にしか決められないからです。するのは、<strong>判断に必要な材料を、書き写さずに1枚へまとめること</strong>だけです。</p>
 
   <!-- ② プレビュー -->
   <p class="as-h">プレビュー<span class="as-h-en">PREVIEW</span></p>
@@ -215,9 +237,18 @@ footer{margin-top:52px; padding-top:22px; border-top:1px solid var(--line);
 
   <p class="pv-group-k">スタッフの画面<span class="pv-group-en">STAFF ／ iPhone</span></p>
   <div class="as-shots">
-    <figure class="as-shot"><div class="pv pv-zoomable"><img class="pv-img" src="senya-shots/senya-ph-my.png" alt="スタッフのカレンダー画面" loading="lazy" width="780" height="1688"></div><figcaption>働ける日をタップするだけ</figcaption></figure>
-    <figure class="as-shot"><div class="pv pv-zoomable"><img class="pv-img" src="senya-shots/senya-ph-mysel.png" alt="入れます・行けたら・休みを選ぶ画面" loading="lazy" width="780" height="1688"></div><figcaption>「入れます」「行けたら」「休み」</figcaption></figure>
+    <figure class="as-shot"><div class="pv pv-zoomable"><img class="pv-img" src="senya-shots/senya-ph-my0.png" alt="届いたURLをひらいたところ" loading="lazy" width="780" height="1688"></div><figcaption>URLをひらくと、もう自分の画面</figcaption></figure>
+    <figure class="as-shot"><div class="pv pv-zoomable"><img class="pv-img" src="senya-shots/senya-ph-mysel.png" alt="入れます・行けたら・休みを選ぶ画面" loading="lazy" width="780" height="1688"></div><figcaption>押すのは「入れます」「行けたら」「休み」</figcaption></figure>
+    <figure class="as-shot"><div class="pv pv-zoomable"><img class="pv-img" src="senya-shots/senya-ph-mytime.png" alt="時間をその場で直せる画面" loading="lazy" width="780" height="1688"></div><figcaption>時間はその場で直せる</figcaption></figure>
+    <figure class="as-shot"><div class="pv pv-zoomable"><img class="pv-img" src="senya-shots/senya-ph-my.png" alt="スタッフのカレンダー画面" loading="lazy" width="780" height="1688"></div><figcaption>出し終わったら、お店に✓が届く</figcaption></figure>
+    <figure class="as-shot"><div class="pv pv-zoomable"><img class="pv-img" src="senya-shots/senya-ph-myusual.png" alt="いつも入れる曜日の設定画面" loading="lazy" width="780" height="1688"></div><figcaption>「いつもの曜日」で、翌月からは楽に</figcaption></figure>
     <figure class="as-shot"><div class="pv pv-zoomable"><img class="pv-img" src="senya-shots/senya-ph-mydone.png" alt="決まったシフトの画面" loading="lazy" width="780" height="1688"></div><figcaption>決まったシフトを受け取る</figcaption></figure>
+  </div>
+  <div class="mini">
+    <div><b>押すのは3つだけ</b><span>「入れます」「行けたら」「休み」。それ以上のことは覚えなくて大丈夫です。</span></div>
+    <div><b>なにも要りません</b><span>インストールなし・会員登録なし・パスワードなし。届いたURLをタップすれば、もう自分の画面です。</span></div>
+    <div><b>ほかの人のは見えません</b><span>お名前も希望も、自分のぶんだけが返ります。</span></div>
+    <div><b>決まったら届きます</b><span>「カレンダーに追加」で、1か月ぶんの出勤がスマホの予定表に入ります。</span></div>
   </div>
 
   <p class="pv-group-k">パソコンでも<span class="pv-group-en">DESKTOP</span></p>
@@ -241,24 +272,39 @@ footer{margin-top:52px; padding-top:22px; border-top:1px solid var(--line);
   <div class="as-star">
     <div class="star-row">
       <p class="star-k">こんな場面で<span class="star-en">SITUATION</span></p>
-      <p class="star-v">飲食店の、来月のシフトづくり。スタッフそれぞれの都合が、LINEや口頭でバラバラに届く。</p>
+      <p class="star-v">飲食店の、来月のシフトづくり。都合がLINEや口頭でバラバラに届く。</p>
     </div>
     <div class="star-row">
       <p class="star-k">困っていたこと<span class="star-en">TASK</span></p>
-      <p class="star-v">届いた希望を一度どこかへ書き写さないと全体が見えない。書いている間に新しい希望が届き、また直す。誰がまだ出していないかも、追いかけないと分からない。人手が足りない日は、全部そろってから目で探すことになる。</p>
+      <p class="star-v">一度どこかへ書き写さないと全体が見えない。書いている間に新しい希望が届き、また直す。</p>
     </div>
     <div class="star-row">
       <p class="star-k">アプリがすること<span class="star-en">ACTION</span></p>
-      <p class="star-v">スタッフには<strong>ひとりずつ専用のURL</strong>をお渡しします。開いて働ける日をタップし、「入れます」「行けたら」を選ぶだけ。インストールも会員登録も要りません。店長の画面には全員ぶんが1枚のカレンダーで集まり、<strong>ほしい人数を下回った日が赤く</strong>出ます。あとは名前を押していくだけでシフトが決まり、<strong>横1枚に印刷</strong>できます。「みんなに知らせる」を押すと、スタッフの画面にも出ます。</p>
+      <p class="star-v">スタッフは<strong>専用のURL</strong>で日をタップ。店長の画面に全員ぶんが<strong>1枚</strong>で集まる。</p>
     </div>
     <div class="star-row is-result">
       <p class="star-k">こう変わる<span class="star-en">RESULT</span></p>
-      <p class="star-v">書き写す作業がなくなります。足りない日は、探さなくても<strong>開いた瞬間に赤で出ます</strong>。誰がまだ出していないかも一目。決まったシフトは紙にもなり、スタッフのスマホの予定表にもそのまま入るので、<strong>「言った・聞いてない」が起きにくくなります</strong>。</p>
+      <p class="star-v">書き写す作業が消える。足りない日は<strong>開いた瞬間に赤で出る</strong>。決まったシフトは紙にもスマホにも。</p>
     </div>
   </div>
 
+  <!-- おわたし -->
+  <p class="as-h">明日、おわたしするもの<span class="as-h-en">HANDOVER</span></p>
+  <div class="mini">
+    <div><b>店長用アプリのURL</b><span>プロダクトキーと、お店の合言葉をいっしょにお渡しします。</span></div>
+    <div><b>取扱説明書</b><span>全40項目。店長ぶんとスタッフぶんの両方が入っています。</span></div>
+  </div>
+  <ol class="steps">
+    <li><span class="n">01</span><div><b>設定を合わせる</b>／昼と夜の時間・ほしい人数・定休日・締切日</div></li>
+    <li><span class="n">02</span><div><b>スタッフを登録する</b>／お名前を入れるだけ。その人だけのURLができます</div></li>
+    <li><span class="n">03</span><div><b>URLを配る</b>／ひとりずつ「送る文をコピー」してLINEで送るだけ</div></li>
+  </ol>
+  <p class="note">はじめて開くと画面が暗くなり、押すところだけが光ります。その案内どおりに進めば、<b>5分ほど</b>で準備が終わります。集まりはじめるのは<b>10月分から</b>（締切は9月20日）です。</p>
+
   <!-- 情報 -->
   <p class="as-h">情報<span class="as-h-en">INFORMATION</span></p>
+  <details class="fold">
+  <summary>くわしい情報をみる</summary>
   <div class="panel">
     <div class="dl">
       <div class="dl-row"><div class="dl-k">制作</div><div class="dl-v">つみき</div></div>
@@ -272,6 +318,7 @@ footer{margin-top:52px; padding-top:22px; border-top:1px solid var(--line);
     </div>
     <p class="note">スタッフの方からは、<b>ほかの方のお名前も希望も見えません</b>。自分のぶんだけが返る作りになっています。</p>
   </div>
+  </details>
 
   <footer>
     つみき（Tsumiki）<br>
