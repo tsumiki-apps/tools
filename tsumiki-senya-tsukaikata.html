@@ -26,7 +26,8 @@
     background:var(--paper); color:var(--ink);
     font-family:'Hiragino Maru Gothic ProN',-apple-system,BlinkMacSystemFont,'Hiragino Sans','Noto Sans JP',sans-serif;
     line-height:1.75; -webkit-font-smoothing:antialiased;
-    padding:0 18px calc(48px + env(safe-area-inset-bottom));
+    padding:0 max(18px, env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom))
+            max(18px, env(safe-area-inset-left));
     font-size:15px;
   }
   .wrap{max-width:1180px; margin:0 auto;}
@@ -133,64 +134,11 @@
   /* 番号ピンが枠の外に11px＋影ぶんはみ出す。その余白を figure 側に持たせる。 */
   figure.shot{margin:0; padding:2px 14px 0;}
   figcaption{font-size:11.5px; color:var(--muted); margin-top:7px; text-align:center;}
-  /* 注釈：番号ピンと矢印（使うのは「ここを押す」が言葉で伝わらない図だけ） */
-  .pin{
-    position:absolute; z-index:3; width:21px; height:21px; border-radius:50%;
-    background:var(--mark); color:#fff; font-size:11.5px; font-weight:700;
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 0 0 3px rgba(255,255,255,.9);
-  }
-  .arrow{position:absolute; z-index:2; height:2px; background:var(--mark); transform-origin:left center;}
-  .arrow::after{
-    content:''; position:absolute; right:-2px; top:-4px;
-    border:5px solid transparent; border-left-color:var(--mark);
-  }
-
   /* 流れ図（「どんな道具か」の1枚目に使う） */
   .flow{display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center;
     background:#fff; border:1px solid var(--hair); border-radius:14px; padding:16px 12px;}
   .flow .box{background:var(--surface); border-radius:10px; padding:7px 12px; font-size:13px; font-weight:700;}
   .flow .arw{color:var(--mark); font-weight:700;}
-
-  /* 計算式の図 */
-  .calc{
-    background:#fff; border:1px solid var(--hair); border-radius:14px;
-    padding:13px 14px; font-size:14.5px; font-weight:700;
-    font-variant-numeric:tabular-nums; text-align:center; line-height:2;
-  }
-  .calc .op{color:var(--ghost); margin:0 3px;}
-  .calc .res{color:var(--mark);}
-  .calc small{font-size:11px; color:var(--muted); font-weight:500; margin-left:1px;}
-  .calc .note2{display:block; font-size:11.5px; color:var(--muted); font-weight:500; margin-top:3px;}
-
-  /* 注意（赤の細い帯。多用しない） */
-  .warnbox{
-    border-left:3px solid #B03A22; background:#F7EFEA; border-radius:0 10px 10px 0;
-    padding:9px 12px; margin:9px 0 0 32px; font-size:13px; color:#7d2c19;
-  }
-  .warnbox b{color:#7d2c19;}
-
-  /* 比較表（巻末で使う） */
-  table.cmp{border-collapse:collapse; width:100%; margin:8px 0 0; font-size:13.5px; background:#fff;
-    border:1px solid var(--hair); border-radius:14px; overflow:hidden;}
-  table.cmp th, table.cmp td{border-bottom:1px solid var(--hair); padding:9px 12px; text-align:left; vertical-align:top;}
-  table.cmp thead th{background:var(--surface); font-size:11.5px; color:var(--muted); font-weight:700;}
-  table.cmp tbody tr:last-child th, table.cmp tbody tr:last-child td{border-bottom:none;}
-  table.cmp tbody th{font-weight:700; white-space:nowrap;}
-  /* 表は項目カードの中に入るので、常に行ごとのカードへ積み替える
-     （列が細って1字ずつ縦に折れるのを防ぐ） */
-  table.cmp.stack{display:block;}
-  table.cmp.stack thead{display:none;}
-  table.cmp.stack tbody,table.cmp.stack tbody tr{display:block;}
-  table.cmp.stack tbody tr{padding:11px 13px; border-bottom:1px solid var(--hair);}
-  table.cmp.stack tbody tr:last-child{border-bottom:none;}
-  table.cmp.stack tbody th,table.cmp.stack tbody td{
-    display:block; width:auto!important; padding:0; border:none; white-space:normal;}
-  table.cmp.stack tbody th{font-size:14px;}
-  table.cmp.stack tbody td{margin-top:5px; font-size:13px;}
-  table.cmp.stack tbody td[data-l]::before{
-    content:attr(data-l); display:block; font-size:10.5px; font-weight:700;
-    letter-spacing:.08em; color:var(--muted);}
 
   /* ================= 巻末（小さく・端に） ================= */
   .appendix{padding-top:34px;}
@@ -215,13 +163,13 @@
     .qa{grid-template-columns:1fr 1fr; gap:11px 26px;}
   }
   @media (min-width:1000px){
-    body{padding-left:28px; padding-right:28px;}
+    body{padding-left:max(28px, env(safe-area-inset-left)); padding-right:max(28px, env(safe-area-inset-right));}
     .wrap{max-width:1280px;}
     h1{font-size:32px;}
     .layout{display:grid; grid-template-columns:212px minmax(0,1fr); gap:40px; align-items:start;}
     details.toc{
       position:sticky; top:22px; margin-top:40px; background:none; border:none; padding:0;
-      max-height:calc(100vh - 56px); overflow:auto;
+      max-height:calc(100dvh - 56px); overflow:auto;
     }
     details.toc summary{display:none;}
     .grp{padding-top:40px;}
@@ -230,20 +178,16 @@
        図の中身は px 直書きが多く、箱を広げるだけでは字が大きくならないので zoom で
        中身ごと拡大する（幅は親いっぱいのままなので横はみ出しは起きない）。 */
     .items{grid-template-columns:minmax(0,1fr);}
-    figure.shot > :not(figcaption){zoom:1.25;}
     figcaption{font-size:12.5px;}
   }
-  @media (min-width:1120px){
-    /* 横幅に余裕があるときだけ、図を左・文章を右に並べる。
-       HTMLを変えずに済むよう、図に縦方向のスパンを持たせて
-       残りの子（h3/p/ul）を右の列へ流し込む。 */
+  @media (min-width:1000px){
+    /* 横幅に余裕があるときは、図を左・文章を右に並べる。
+       図は .figs、本文は .txt に包んであるので、2列に置くだけで済む。 */
     .item{
-      display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);
-      column-gap:30px; align-content:start; padding:18px 22px 20px;
+      display:grid; grid-template-columns:minmax(0,420px) minmax(0,1fr);
+      column-gap:32px; align-items:start; padding:18px 22px 20px;
     }
-    .item > figure.shot{grid-column:1; grid-row:1 / span 30; align-self:center; padding:0 12px;}
-    .item > *:not(figure.shot){grid-column:2;}
-    .item > h3{margin-top:0;}
+    .item .txt > :first-child{margin-top:0;}
     /* 図のない項目は横に伸びすぎないよう、行の長さだけ抑える */
     .item.nofig{display:block;}
     .item.nofig p, .item.nofig ul{max-width:58em;}
@@ -263,232 +207,67 @@
     .item{background:#fff; page-break-inside:avoid;}
     .qa{grid-template-columns:1fr 1fr;}
     .qa > div{page-break-inside:avoid;}
-    .screen{box-shadow:none;}
     footer{color:#555;}
   }
 
-  /* つみき&せんや 本体と同じ色（画面再現に使う） */
-  :root{
-    --app-paper:#f5f4f0; --app-surface:#fffefb; --app-surface2:#efece5;
-    --app-ink:#1d1a15; --app-mid:#5b554a; --app-soft:#7c7464;   /* アプリと同じ値にそろえた（読みやすさ 3.5→4.6） */
-    --app-line:#e2ded4; --app-line2:#d8d3c7;
-    --acc:#b06f26; --acc2:#8a5a24; --acc-wash:#f0e4d1;
-    --good:#3f6a44; --good-wash:#dde9dd; --warn:#9b4520; --warn-wash:#f2e0d4;   /* アプリと同じ値 */
-    --sat:#3f6b8a; --sun:#a2513f;
+
+  /* ================= 図（実機のスクリーンショット） ================= */
+  /* 実寸で見せる。スマホで見ている人の画面と同じ大きさになるよう 390px で止める。 */
+  .figs{display:grid; gap:14px; align-content:start;}
+  figure.shot{margin:0; padding:0;}
+  figure.shot img{
+    display:block; width:100%; max-width:390px; height:auto; margin:0 auto;
+    border:1px solid var(--hair); border-radius:12px; background:#fff;
   }
-
-  /* ================= アプリ画面の再現（図） ================= */
-  .screen{
-    position:relative; border:1px solid var(--app-line); border-radius:14px;
-    background:var(--app-surface); padding:13px; color:var(--app-ink);
-    font-size:12.5px; line-height:1.6; box-shadow:0 1px 3px rgba(36,35,33,.06);
+  figure.shot.pair{display:grid; gap:10px;}
+  figure.shot.pair figcaption{grid-column:1 / -1;}
+  @media (min-width:600px){
+    figure.shot.pair{grid-template-columns:1fr 1fr;}
   }
-  .screen .bar{
-    display:flex; align-items:center; gap:7px; margin:-13px -13px 11px; padding:9px 13px;
-    border-bottom:1px solid var(--app-line); border-radius:14px 14px 0 0; background:var(--app-paper);
-  }
-  .screen .bar .mk{width:17px; height:17px; border-radius:5px; background:#242321; flex:none;}
-  .screen .bar .ttl{font-weight:800; font-size:12.5px; line-height:1.25;}
-  .screen .bar .ttl small{display:block; font-size:9px; font-weight:400; color:var(--app-soft);}
-  .screen .bar .dot{margin-left:auto; width:7px; height:7px; border-radius:50%; background:var(--good); flex:none;}
-  .screen .vbar{margin-bottom:11px;}
-  .screen .vbar .bk{display:block; font-size:10px; color:var(--app-soft); margin-top:2px;}
-  .screen .vbar b{font-size:13px; font-weight:800;}
-  .screen .gearbar i.on{background:var(--app-ink); border-color:var(--app-ink); color:var(--app-surface);}
-  .screen .gearbar{display:flex; align-items:center; gap:6px; justify-content:flex-end; margin-bottom:9px;}
-  .screen .gearbar i{font-style:normal; width:20px; height:20px; border:1px solid var(--app-line);
-    border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:11px;}
-  .screen .tabs{display:flex; gap:5px; background:var(--app-surface2); border-radius:11px; padding:3px; margin-bottom:11px;}
-  .screen .tabs span{flex:1; text-align:center; font-size:11px; font-weight:700; color:var(--app-soft); padding:6px 2px; border-radius:8px;}
-  .screen .tabs .on{background:var(--app-surface); color:var(--app-ink); box-shadow:0 1px 2px rgba(40,32,18,.1);}
+  figcaption{font-size:11.5px; color:var(--muted); margin-top:8px; text-align:center; line-height:1.65;}
 
-  /* 月バーとピル */
-  .mbar{display:flex; align-items:center; gap:7px; margin-bottom:9px;}
-  .mbar .nv{width:26px; height:26px; flex:none; border:1px solid var(--app-line); border-radius:8px;
-    background:var(--app-surface2); color:var(--app-mid); text-align:center; line-height:24px; font-size:12px;}
-  .mbar .mt{flex:1; text-align:center; font-weight:800; font-size:14px;}
-  .pills{display:flex; flex-wrap:wrap; gap:5px; margin-bottom:9px;}
-  .pills i{font-style:normal; font-size:10px; font-weight:700; padding:3px 9px; border-radius:999px;
-    background:var(--app-surface2); color:var(--app-mid); border:1px solid var(--app-line);}
-  .pills i.ok{background:var(--good-wash); color:var(--good); border-color:transparent;}
-  .pills i.cnt{background:var(--acc-wash); color:var(--acc2); border-color:transparent;}
-  .pills i.ng{background:var(--warn-wash); color:var(--warn); border-color:transparent;}
-  /* 開いた瞬間の主役。ほかの札より強い */
-  .pills i.lack{background:var(--warn); color:#fff; border-color:transparent;}
-  /* お願いの帯（名前のチップをやめて1本にした） */
-  .reqbar2{display:flex; align-items:center; gap:8px; background:var(--warn-wash); color:var(--warn);
-    font-size:11.5px; font-weight:800; border-radius:12px; padding:10px 12px; margin-bottom:10px;}
-  .reqbar2 span{margin-left:auto;}
-
-  /* 足りない日のまとめ */
-  .lackbox{background:var(--warn-wash); border-radius:12px; padding:10px 12px; margin-bottom:10px;}
-  .lackbox.okbox{background:var(--good-wash);}
-  .lackbox .hd{font-weight:800; font-size:12px; color:var(--warn);}
-  .lackbox.okbox .hd{color:var(--good);}
-  .lackbox .cs{display:flex; flex-wrap:wrap; gap:5px; margin-top:7px;}
-  .lackbox .cs i{font-style:normal; font-size:11px; font-weight:700; color:var(--warn);
-    border:1.5px solid var(--warn); background:var(--app-surface); border-radius:9px; padding:3px 9px;}
-  .lackbox .rest{font-size:10px; color:var(--app-soft); margin-top:6px;}
-
-  /* カレンダー */
-  .cal7{display:grid; grid-template-columns:repeat(7,1fr); gap:3px;}
-  .cal7.hd7{margin-bottom:3px;}
-  .cal7.hd7 i{font-style:normal; text-align:center; font-size:9.5px; font-weight:700; color:var(--app-soft);}
-  .cal7.hd7 i.sat{color:var(--sat);} .cal7.hd7 i.sun{color:var(--sun);}
-  /* アプリと同じ考え方＝高さは中身ではなく幅から決める（比率1.12）。
-     min-height だと図ごとに縦横比がばらつく（実測 1.06〜1.18）。 */
-  .cal7 .c{border:1px solid var(--app-line); border-radius:7px; background:var(--app-surface);
-    aspect-ratio:1 / 1.2; min-height:38px; display:flex; flex-direction:column;
-    align-items:center; justify-content:center; gap:1px; padding:2px 1px; overflow:hidden;}
-  .cal7 .c .d{font-size:10.5px; font-weight:800; line-height:1.05;}
-  .cal7 .c .s{font-size:8px; color:var(--app-soft); line-height:1.15; text-align:center;}
-  .cal7 .c.bl{border:none; background:transparent;}
-  .cal7 .c.rest{background:var(--app-surface2); border-style:dashed;}
-  .cal7 .c.rest .d{color:var(--app-soft);}
-  .cal7 .c.ng{background:var(--warn-wash); border-color:var(--warn); border-width:1.5px;}
-  .cal7 .c.ng .d, .cal7 .c.ng .s{color:var(--warn); font-weight:800;}
-  .cal7 .c.on{background:var(--acc-wash); border-color:var(--acc); border-width:1.5px;}
-  .cal7 .c.on .d, .cal7 .c.on .s{color:var(--acc2); font-weight:800;}
-  .cal7 .c.sat .d{color:var(--sat);} .cal7 .c.sun .d{color:var(--sun);}
-
-  /* 日の詳細（昼／夜） */
-  .slotbox{border-top:1px solid var(--app-line); padding:9px 0 2px;}
-  .slotbox:first-child{border-top:none; padding-top:2px;}
-  .slotbox .sh{display:flex; align-items:baseline; gap:6px; margin-bottom:6px;}
-  .slotbox .sh b{font-size:13px;}
-  .slotbox .sh .tm{font-size:10px; color:var(--app-soft);}
-  .slotbox .sh .ct{margin-left:auto; font-size:10.5px; font-weight:800; color:var(--good); white-space:nowrap;}
-  .slotbox .sh .ct.ng{color:var(--warn);}
-  .slotbox .pp{display:flex; align-items:center; background:var(--app-surface2); border-radius:9px;
-    padding:6px 10px; margin-bottom:4px; font-size:11.5px;}
-  .slotbox .pp b{font-weight:800;}
-  .slotbox .pp span{margin-left:auto; color:var(--app-soft); font-size:10.5px;}
-  .slotbox .nobody{color:var(--warn); font-weight:700; font-size:11px; padding:4px 2px;}
-
-  /* 入力まわり */
-  .prebtns{display:flex; gap:5px; margin-bottom:7px;}
-  .prebtns i{flex:1; font-style:normal; text-align:center; font-size:11.5px; font-weight:700;
-    border:1.5px solid var(--app-line2); border-radius:9px; background:var(--app-surface2); padding:7px 2px;}
-  .prebtns i.on{background:var(--acc-wash); border-color:var(--acc); color:var(--acc2);}
-  .tmrow{display:flex; align-items:center; gap:6px;}
-  .tmrow b{flex:1; text-align:center; font-size:13px; font-weight:800; border:1.5px solid var(--app-line2);
-    border-radius:9px; background:var(--app-surface); padding:7px 3px; min-width:0;}
-  .tmrow b.hit{border-color:var(--acc);}
-  .tmrow span{color:var(--app-soft); flex:none;}
-  .bigbtn{display:block; text-align:center; background:var(--acc); color:#fff; font-weight:800;
-    border-radius:11px; padding:9px; font-size:12.5px; margin-top:8px;}
-  .subbtns{display:flex; gap:6px; margin-top:8px;}
-  .subbtns i{flex:1; font-style:normal; text-align:center; background:var(--app-surface2); color:var(--app-mid);
-    border:1px solid var(--app-line); border-radius:9px; padding:8px 4px; font-size:11px; font-weight:700;}
-
-  /* 合言葉とURL */
-  .codechip{display:inline-block; background:var(--app-surface); border:1px dashed var(--acc); color:var(--acc2);
-    font-weight:800; letter-spacing:.14em; border-radius:9px; padding:5px 14px; font-size:15px;}
-  .urlchip{display:block; background:var(--app-surface2); border:1px solid var(--app-line); border-radius:9px;
-    padding:7px 10px; font-size:10.5px; color:var(--app-mid); word-break:break-all; line-height:1.55;}
-
-  /* スタッフのカード */
-  .stcard{border:1px solid var(--app-line); border-radius:11px; padding:9px 11px; background:var(--app-surface);}
-  .stcard + .stcard{margin-top:7px;}
-  .stcard .nm{font-weight:800; font-size:12.5px;}
-  .stcard .cd{font-size:10px; color:var(--app-soft); letter-spacing:.06em;}
-  .stcard .acts{display:flex; flex-wrap:wrap; gap:5px; margin-top:7px;}
-  .stcard .acts i{font-style:normal; font-size:10px; font-weight:700; border-radius:7px; padding:4px 8px;
-    background:var(--app-surface2); border:1px solid var(--app-line); color:var(--app-mid);}
-  .stcard .acts i.pri{background:var(--acc); color:#fff; border-color:var(--acc);}
-  .stcard .acts i.dg{background:transparent; color:var(--warn); border-color:var(--warn);}
-  .stcard .acts i.more{background:none; border-color:transparent; color:var(--app-soft); letter-spacing:.12em;}
-  /* 「…」をひらいたところ */
-  .morelist2{display:grid; gap:6px; margin-top:8px;}
-  .morelist2 i{font-style:normal; display:block; border:1px solid var(--app-line); border-radius:10px;
-    padding:8px 10px; background:var(--app-surface2); font-size:11px; font-weight:700;}
-  .morelist2 i b{display:block; font-weight:400; font-size:10px; color:var(--app-mid); margin-top:2px;}
-  .morelist2 i.dg{margin-top:6px; background:transparent; border-color:var(--warn); color:var(--warn);}
-  .addrow{display:flex; gap:6px; margin-bottom:9px;}
-  .addrow .bx{flex:1; min-width:0; border:1.5px solid var(--app-line2); border-radius:9px;
-    background:var(--app-surface); padding:8px 10px; font-size:12px; color:var(--app-soft);}
-  .addrow i{font-style:normal; flex:none; background:var(--acc); color:#fff; font-weight:800;
-    border-radius:9px; padding:8px 14px; font-size:12px;}
-
-  /* 設定 */
-  .fld{margin-bottom:10px;}
-  .fld .lb{font-size:10.5px; font-weight:700; color:var(--app-mid); margin-bottom:4px;}
-  .fld .bx{border:1.5px solid var(--app-line2); border-radius:9px; background:var(--app-surface);
-    padding:7px 10px; font-size:12px;}
-  .fld .row{display:flex; align-items:center; gap:6px 6px; flex-wrap:wrap;}
-  .fld .np{display:flex; align-items:center; gap:6px; flex:0 0 auto;}
-  .fld .row .bx{flex:1 1 78px; text-align:center; min-width:0;}
-  .fld .row .n{flex:0 0 auto; width:50px;}
-  .fld .row .u{font-size:10.5px; color:var(--app-soft); flex:none; white-space:nowrap;}
-  .wdrow{display:flex; gap:4px;}
-  .wdrow i{flex:1; font-style:normal; text-align:center; font-size:11px; font-weight:700;
-    border:1.5px solid var(--app-line2); border-radius:8px; padding:6px 0; color:var(--app-soft);}
-  .wdrow i.on{background:var(--warn-wash); border-color:var(--warn); color:var(--warn);}
-
-  /* 2つのアプリを並べる図 */
-  .two{display:flex; gap:9px;}
-  .two > div{flex:1; min-width:0;}
-  .two .cap{font-size:10.5px; font-weight:700; color:var(--muted); text-align:center; margin-bottom:5px;}
-  @media (max-width:430px){ .two{flex-direction:column;} }
-
-  /* 誰がやるかの札（スタッフ／店長） */
+  /* 「誰がやるか」の札 */
   .who-tag{display:inline-block; font-size:10.5px; font-weight:700; border-radius:999px;
     padding:1px 9px; vertical-align:middle; margin-left:6px; white-space:nowrap;}
-  .who-tag.w{background:var(--good-wash); color:#356b3b;}
-  .who-tag.m{background:var(--acc-wash); color:var(--acc2);}
+  .who-tag.w{background:#DDE9DD; color:#356B3B;}
+  .who-tag.m{background:#F0E4D1; color:#8A5A24;}
+  .codechip{display:inline-block; background:#fff; border:1px dashed #B06F26; color:#8A5A24;
+    font-weight:800; letter-spacing:.1em; border-radius:9px; padding:2px 10px; font-size:13px;}
 
-  /* ===== v2：枠の印・シフトを決める・提出ぐあい・お願い ===== */
-  .cal7 .c .kk{display:flex; gap:2px; justify-content:center; margin-top:2px; flex-wrap:nowrap;}
-  .cal7 .c .kk i{font-style:normal; font-size:8px; font-weight:800; line-height:1; padding:2px 3px;
-    border-radius:4px; background:var(--acc); color:#fff; white-space:nowrap;}
-  .cal7 .c .kk i.t{background:transparent; color:var(--acc2); box-shadow:0 0 0 1px var(--acc) inset;}
-  .cal7 .c .kk i.a{background:var(--good); color:#fff;}
-  .slotbox .pp .mk2{margin-left:6px; font-size:9px; font-weight:800; color:var(--acc2);
-    box-shadow:0 0 0 1px var(--acc) inset; border-radius:4px; padding:1px 4px;}
-  .slotbox .pp .ck{flex:none; width:14px; height:14px; border-radius:4px; border:1.5px solid var(--app-line2);
-    margin-right:8px; display:inline-flex; align-items:center; justify-content:center; font-size:9px; color:#fff;}
-  .slotbox .pp.on{background:var(--acc-wash);}
-  .slotbox .pp.on .ck{background:var(--acc); border-color:var(--acc);}
-  .slotbox .allb{display:block; text-align:center; font-size:10.5px; font-weight:700; color:var(--app-soft);
-    border:1px dashed var(--app-line2); border-radius:9px; padding:7px 2px; margin-top:6px;}
-  .stb{display:inline-block; font-size:9.5px; font-weight:800; padding:2px 8px; border-radius:999px; margin-left:6px;}
-  .stb.none{background:var(--warn-wash); color:var(--warn);}
-  .stb.part{background:var(--acc-wash); color:var(--acc2);}
-  .stb.done{background:var(--good-wash); color:var(--good);}
-  .reqb{border:1.5px solid var(--warn); border-radius:10px; padding:9px 10px;
-    background:var(--app-surface); margin-top:6px;}
-  .reqb .h{font-weight:800; font-size:11.5px;}
-  .reqb .d{font-size:10px; color:var(--app-soft); margin:2px 0 7px; line-height:1.5;}
-  .reqb .a{display:flex; gap:6px;}
-  .reqb .a i{font-style:normal; flex:1; text-align:center; font-size:10.5px; font-weight:800;
-    border-radius:8px; padding:6px 2px; background:var(--acc); color:#fff;}
-  .reqb .a i.sub{background:var(--app-surface2); color:var(--app-mid); border:1px solid var(--app-line);}
-  .pubb{display:flex; align-items:center; gap:8px; background:var(--app-surface2); border-radius:10px;
-    padding:8px 10px; font-size:10.5px; color:var(--app-mid); line-height:1.5;}
-  .pubb i{font-style:normal; margin-left:auto; background:var(--acc); color:#fff; font-weight:800;
-    border-radius:8px; padding:5px 10px; white-space:nowrap; flex:none;}
-  .uw{display:flex; align-items:center; gap:6px; margin-bottom:5px;}
-  .uw b{flex:0 0 34px; font-size:11px;}
-  .uw i{flex:1; font-style:normal; text-align:center; font-size:11px; font-weight:700;
-    border:1.5px solid var(--app-line2); border-radius:8px; background:var(--app-surface2);
-    padding:6px 2px; color:var(--app-soft);}
-  .uw i.on{background:var(--acc-wash); border-color:var(--acc); color:var(--acc2);}
+  /* お店から届くメッセージの見本（画面ではないので、そのまま文で見せる） */
+  .msg{
+    background:#fff; border:1px solid var(--hair); border-radius:12px;
+    padding:11px 13px; font-size:12px; line-height:1.75; color:var(--muted);
+    word-break:break-all;
+  }
+  .msg b{color:var(--ink); font-weight:700;}
 
-  /* ===== v3：シフト表・偏り・頼めそうな人 ===== */
-  .al2{display:flex; flex-wrap:wrap; gap:5px;}
-  .al2 i{font-style:normal; font-size:10px; background:var(--app-surface2); border-radius:7px;
-    padding:5px 8px; color:var(--app-mid);}
-  .al2 i b{font-weight:800; color:var(--app-ink);}
-  table.sft2{width:100%; border-collapse:collapse; font-size:10px;}
-  table.sft2 th, table.sft2 td{border:1px solid var(--app-line); padding:4px 6px;
-    text-align:left; vertical-align:top; line-height:1.45;}
-  table.sft2 th{background:var(--app-surface2); font-weight:800; white-space:nowrap;}
-  /* 狭い画面では見出しが長くて図からはみ出すので、折り返させる */
-  @media (max-width:420px){ table.sft2 th{white-space:normal;} }
-  table.sft2 td.dt2{white-space:nowrap; font-weight:800; width:4.6em;}
-  table.sft2 td.emp2{color:var(--warn); font-weight:800;}
-  table.sft2 tr.rest2 td{background:var(--app-surface2); color:var(--app-soft);}
-  .totbar{height:6px; border-radius:99px; background:var(--acc); display:block;}
+  /* ================= 「くわしく」（こまかい注記をたたむ） ================= */
+  /* ⚠️ 読む人がまず要るのは「何をすればいいか」。注意書きや例外は、
+     読みたい人だけが開けるようにして、本文を短く保つ。 */
+  .txt > :first-child{margin-top:13px;}
+  details.more{margin:11px 0 0 32px; border-top:1px dashed var(--hair);}
+  details.more > summary{
+    cursor:pointer; list-style:none; display:flex; align-items:center;
+    min-height:44px; font-size:12.5px; font-weight:700; color:var(--muted);
+  }
+  details.more > summary::-webkit-details-marker{display:none;}
+  details.more > summary::after{content:'▾'; margin-left:7px; font-size:10px;}
+  details.more[open] > summary::after{content:'▴';}
+  details.more .mb{padding-bottom:4px;}
+  .item details.more .mb p{padding-left:0; margin:0 0 9px;}
+  .item details.more .mb p:last-child{margin-bottom:0;}
+
+  /* ================= 印刷（図は小さめに・たたんだ中身は開いて出す） ================= */
+  /* ⚠️ 上の @media print より あとに書く。同じ強さの指定は、あとに書いたほうが勝つため。 */
+  @media print{
+    figure.shot img{max-width:250px; border-color:#bbb;}
+    figure.shot.pair{grid-template-columns:1fr 1fr;}
+    .figs{gap:8pt;}
+    details.more{border-top-color:#ccc;}
+    details.more > summary{display:none;}
+    details.more > .mb{display:block;}
+  }
 </style>
 </head>
 <body>
@@ -577,7 +356,7 @@
   <div class="items">
 
     <article class="item" id="i1">
-      <figure class="shot">
+      <div class="figs"><figure class="shot">
         <div class="flow">
           <div class="box">スタッフが<br>働ける日を出す</div>
           <div class="arw">→</div>
@@ -585,48 +364,23 @@
           <div class="arw">→</div>
           <div class="box">足りない日が<br>赤く出る</div>
         </div>
-      </figure>
-      <h3><span class="n">1</span>どんな道具か</h3>
+      </figure></div>
+      <div class="txt"><h3><span class="n">1</span>どんな道具か</h3>
       <p>シフトを組む前の「<strong>希望を集める</strong>」ところだけを引き受ける道具です。LINEや紙で集めて書き写す手間が消えます。</p>
-      <p class="fine">シフトを自動で組む機能は入っていません。組むのは今までどおり店長です。この道具は「誰がいつ入れるか」を、書き写さずに1枚にまとめます。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">シフトを自動で組む機能は入っていません。組むのは今までどおり店長です。この道具は「誰がいつ入れるか」を、書き写さずに1枚にまとめます。</p></div></details></div>
     </article>
 
     <article class="item" id="i2">
-      <figure class="shot">
-        <div class="two">
-          <div>
-            <div class="cap">スタッフ用</div>
-            <div class="screen">
-              <div class="bar"><div class="mk"></div><div class="ttl">つみき&amp;せんや<small>さとうさん</small></div><div class="dot"></div></div>
-              <div class="mbar"><i class="nv">‹</i><div class="mt">10月分</div><i class="nv">›</i></div>
-              <div class="cal7 hd7"><i class="sun">日</i><i>月</i><i>火</i><i>水</i><i>木</i><i>金</i><i class="sat">土</i></div>
-              <div class="cal7">
-                <div class="c bl"></div><div class="c bl"></div><div class="c bl"></div><div class="c bl"></div>
-                <div class="c on"><span class="d">1</span><span class="s">17:30<br>21:00</span></div>
-                <div class="c"><span class="d">2</span></div>
-                <div class="c sat on"><span class="d">3</span><span class="s">11:00<br>14:30</span></div>
-              </div>
-            </div>
-          </div>
-          <div>
-            <div class="cap">店長用</div>
-            <div class="screen">
-              <div class="bar"><div class="mk"></div><div class="ttl">つみき&amp;せんや 店長<small>せんや</small></div><div class="dot"></div></div>
-              <div class="gearbar"><i>⚙</i><i>☾</i></div>
-              <div class="pills"><i class="lack">足りない日 3日</i><i class="ok">9月20日まで 受付中</i></div>
-            </div>
-          </div>
-        </div>
-      </figure>
-      <h3><span class="n">2</span>アプリは2つある</h3>
+      <div class="figs"><figure class="shot pair"><img src="senya-shots/s-cal.png" alt="スタッフ用アプリのカレンダー" loading="lazy" decoding="async" width="780" height="1110"><img src="senya-shots/k-cal.png" alt="店長用アプリのカレンダー" loading="lazy" decoding="async" width="780" height="1028"><figcaption>左＝スタッフ用（自分のぶんだけ）　右＝店長用（全員ぶん）</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">2</span>アプリは2つある</h3>
       <p>URLが2本あります。<strong>スタッフ用</strong>は希望を出す画面、<strong>店長用</strong>は全員ぶんを見る画面です。入口も別々なので、まざることはありません。</p>
-      <p class="fine">スタッフからは、ほかの人の名前も希望も見えません。見えるのは自分のぶんだけです。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">スタッフからは、ほかの人の名前も希望も見えません。見えるのは自分のぶんだけです。</p></div></details></div>
     </article>
 
     <article class="item nofig" id="i3">
-      <h3><span class="n">3</span>この説明書の見かた</h3>
+      <div class="txt"><h3><span class="n">3</span>この説明書の見かた</h3>
       <p>項目ごとに <span class="who-tag w">スタッフ</span> <span class="who-tag m">店長</span> の札で「誰がやるか」を出しています。自分の札のところだけ読めば大丈夫です。</p>
-      <p class="fine">用語は「用語（＝かんたんに言うと◯◯）」の形で説明します。上から順に読まなくても、もくじから必要なところだけ開けます。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">用語は「用語（＝かんたんに言うと◯◯）」の形で説明します。上から順に読まなくても、もくじから必要なところだけ開けます。</p></div></details></div>
     </article>
 
   </div>
@@ -653,97 +407,44 @@
   <div class="items">
 
     <article class="item" id="i4">
-      <figure class="shot">
-        <div class="screen">
-          <div class="bar"><div class="mk"></div><div class="ttl">つみき&amp;せんや 店長</div></div>
-          <p style="font-weight:800;font-size:13px">店長の画面</p>
-          <p style="font-size:11px;color:var(--app-soft);margin:5px 0 9px">店長用の合言葉を入れてください。<br>スタッフの合言葉では入れません。</p>
-          <div style="text-align:center;margin-bottom:8px"><span class="codechip">SAMPLE47</span></div>
-          <div class="bigbtn">はいる</div>
-        </div>
-      </figure>
-      <h3><span class="n">4</span>店長の画面をひらく<span class="who-tag m">店長</span></h3>
-      <p><b>いちばん最初の1回だけ</b>、<strong>プロダクトキー</strong>（<span class="codechip">TSUMIKI-◯◯◯◯-◯◯◯◯-◯◯◯◯</span>）を聞く画面が出ます。お渡しした案内に書いてありますので、そのまま入れて <kbd>利用をはじめる</kbd> を押してください。<b>次からは聞かれません。</b></p>
+      <div class="figs"><figure class="shot pair"><img src="senya-shots/k-lic.png" alt="プロダクトキーを入れる画面" loading="lazy" decoding="async" width="780" height="706"><img src="senya-shots/k-login.png" alt="店長の合言葉を入れる画面" loading="lazy" decoding="async" width="780" height="642"><figcaption>左＝いちばん最初の1回だけ　右＝そのあと毎回（ふだんは自動）</figcaption></figure><figure class="shot"><img src="senya-shots/k-menu.png" alt="歯車を押して出るメニュー" loading="lazy" decoding="async" width="780" height="582"><figcaption>⚙ を押すと、この2つが出る</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">4</span>店長の画面をひらく<span class="who-tag m">店長</span></h3>
+      <p><b>いちばん最初の1回だけ</b>、<strong>プロダクトキー</strong>（<span class="codechip">TSUMIKI-◯◯◯◯-◯◯◯◯-◯◯◯◯</span>）を聞かれます。お渡しした案内のとおり入れて <kbd>利用をはじめる</kbd>。<b>次からは聞かれません。</b></p>
       <p>そのあと、<strong>8文字の合言葉</strong>を入れて <kbd>はいる</kbd> を押します。こちらも次からは自動で開きます。</p>
-      <p class="fine"><b>2つの鍵は別のものです。</b><br><b>プロダクトキー</b>＝「このアプリをお使いいただける方か」の鍵。<b>お店に1本</b>で、最初の1回だけ。<br><b>合言葉</b>＝「どのお店の画面を出すか」の鍵。ログインのたびに使います（ふだんは自動）。<br>スタッフの方は<b>プロダクトキーを使いません</b>（スタッフ用アプリにはこの画面が出てきません）。</p>
-      <p>入ると、いきなり<strong>今月の一覧（カレンダー）</strong>が出ます。ふだん見るのはこの画面だけです。<br><strong>スタッフの登録</strong>と<strong>設定</strong>は、右上の <kbd>⚙</kbd>（歯車）の中にしまってあります。押すと2つ並んで出てきますので、どちらかを選んでください。</p>
-      <p><b>出口は歯車ひとつ</b>です。スタッフや設定を見ているあいだ、<b>歯車は黒く塗られたまま</b>になります。「いま一覧ではないところにいる」という印です。<b>もう一度その歯車を押せば、一覧にもどります</b>（「もどる」ボタンはありません）。</p>
-      <p class="fine">⚠️ この説明書の図に出ている合言葉・URLは、すべて<b>見本</b>です。お店の本物の合言葉は、別途お渡しした案内をご覧ください。</p>
-      <p class="fine">お渡しした<b>リンクに合言葉が入っている</b>ときは、タップするだけで入れます（打ち込む必要はありません）。入ったあとURLから合言葉は消えるので、画面を人に見せても写りません。</p>
-      <p class="fine">合言葉は店長と奥様で共有して大丈夫です。おふたりとも同じ画面が見られます。<b>「渡した」の印も2台で同じ</b>になります。</p>
-      <p class="fine">⚠️ このページも<b>お知らせを出せません</b>。初めて開いたときのご案内から、<b>ホーム画面に置いて</b>おくと、締切のころに思い出せます（置き方は項目37・38）。</p>
+      
+      <p>入ると<strong>今月の一覧（カレンダー）</strong>が出ます。ふだん見るのはこの画面だけです。<strong>スタッフの登録</strong>と<strong>設定</strong>は、右上の <kbd>⚙</kbd>（歯車）の中にしまってあります。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine"><b>2つの鍵は別のものです。</b><br><b>プロダクトキー</b>＝「このアプリをお使いいただける方か」の鍵。<b>お店に1本</b>で、最初の1回だけ。<br><b>合言葉</b>＝「どのお店の画面を出すか」の鍵。ログインのたびに使います（ふだんは自動）。<br>スタッフの方は<b>プロダクトキーを使いません</b>（スタッフ用アプリにはこの画面が出てきません）。</p><p class="fine"><b>出口は歯車ひとつ</b>です。スタッフや設定を見ているあいだ、<b>歯車は黒く塗られたまま</b>になります。「いま一覧ではないところにいる」という印です。<b>もう一度その歯車を押せば、一覧にもどります</b>（「もどる」ボタンはありません）。</p><p class="fine">⚠️ この説明書の図に出ている合言葉・URLは、すべて<b>見本</b>です。お店の本物の合言葉は、別途お渡しした案内をご覧ください。</p><p class="fine">お渡しした<b>リンクに合言葉が入っている</b>ときは、タップするだけで入れます（打ち込む必要はありません）。入ったあとURLから合言葉は消えるので、画面を人に見せても写りません。</p><p class="fine">合言葉は店長と奥様で共有して大丈夫です。おふたりとも同じ画面が見られます。<b>「渡した」の印も2台で同じ</b>になります。</p><p class="fine">⚠️ このページも<b>お知らせを出せません</b>。初めて開いたときのご案内から、<b>ホーム画面に置いて</b>おくと、締切のころに思い出せます（置き方は項目37・38）。</p></div></details></div>
     </article>
 
     <article class="item" id="i5">
-      <figure class="shot">
-        <div class="screen">
-          <div class="gearbar"><i class="on">⚙</i><i>☾</i></div>
-          <div class="vbar"><b>設定</b><span class="bk">入っている値は仮のものです。はじめに、お店に合わせて直してください</span></div>
-          <div class="fld">
-            <div class="lb">昼の時間帯と、ほしい人数</div>
-            <div class="row"><div class="bx">11:00</div><span class="u">〜</span><div class="bx">14:30</div>
-              <span class="np"><span class="bx n">2</span><span class="u">人ほしい</span></span></div>
-          </div>
-          <div class="fld">
-            <div class="lb">夜の時間帯と、ほしい人数</div>
-            <div class="row"><div class="bx">17:30</div><span class="u">〜</span><div class="bx">21:00</div>
-              <span class="np"><span class="bx n">3</span><span class="u">人ほしい</span></span></div>
-          </div>
-        </div>
-      </figure>
-      <h3><span class="n">5</span>昼と夜、ほしい人数を決める<span class="who-tag m">店長</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/k-cfg2.png" alt="設定の「時間帯と、ほしい人数」" loading="lazy" decoding="async" width="780" height="688"><figcaption>⚙ →「設定」の中。ここの人数を下回った日が赤くなる</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">5</span>昼と夜、ほしい人数を決める<span class="who-tag m">店長</span></h3>
       <p>右上の <kbd>⚙</kbd> から <span class="path"><b>設定</b></span> をひらいて、昼と夜の時間帯と「<strong>その枠に何人ほしいか</strong>」を入れます。<strong>この人数を下回った日が、一覧で赤くなります。</strong></p>
-      <p class="fine"><b>はじめは仮の値が入っています。</b>お店の時間と人数に、かならず直してください。スタッフの画面に出る「昼」「夜」の選び方も、ここの時間帯から自動で作られます。設定するのはここ1か所だけです。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine"><b>はじめは仮の値が入っています。</b>お店の時間と人数に、かならず直してください。スタッフの画面に出る「昼」「夜」の選び方も、ここの時間帯から自動で作られます。設定するのはここ1か所だけです。</p></div></details></div>
     </article>
 
     <article class="item" id="i6">
-      <figure class="shot">
-        <div class="screen">
-          <div class="fld">
-            <div class="lb">締切（前の月の何日まで）</div>
-            <div class="row"><div class="bx" style="flex:1 1 auto;text-align:left">20</div><span class="u">日まで</span></div>
-          </div>
-          <div class="fld">
-            <div class="lb">定休日</div>
-            <div class="wdrow"><i>日</i><i class="on">月</i><i>火</i><i>水</i></div>
-            <div class="wdrow" style="margin-top:4px"><i>木</i><i>金</i><i>土</i><i style="visibility:hidden">-</i></div>
-          </div>
-          <div class="bigbtn">この内容にする</div>
-        </div>
-      </figure>
-      <h3><span class="n">6</span>締切と定休日を決める<span class="who-tag m">店長</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/k-cfg1.png" alt="設定のお店の名前・締切・定休日" loading="lazy" decoding="async" width="780" height="742"><figcaption>締切と定休日も、同じ「設定」の中</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">6</span>締切と定休日を決める<span class="who-tag m">店長</span></h3>
       <p>締切を <strong>20</strong> にすると「10月分は9月20日まで」になります。定休日はタップして選びます。選んだ曜日は人数を数えません。<b>どちらもはじめは仮の値（20日・月曜）です。お店に合わせて直してください。</b></p>
-      <p class="fine">祝日で臨時営業する月曜などは、その日をタップして「この日の必要人数」を入れれば数えるようになります（項目20）。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">祝日で臨時営業する月曜などは、その日をタップして「この日の必要人数」を入れれば数えるようになります（項目20）。</p></div></details></div>
     </article>
 
     <article class="item" id="i7">
-      <figure class="shot">
-        <div class="screen">
-          <div class="addrow"><div class="bx">スタッフのお名前</div><i>追加</i></div>
-          <div class="stcard">
-            <div class="nm">やまだ はな</div>
-            <div class="cd">合言葉 SAMPLE</div>
-            <div class="acts"><i>送る文をコピー</i><i class="more">…</i></div>
-          </div>
-        </div>
-      </figure>
-      <h3><span class="n">7</span>スタッフを追加する<span class="who-tag m">店長</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/k-staffadd.png" alt="スタッフを追加したところ" loading="lazy" decoding="async" width="780" height="498"><figcaption>名前を入れて「追加」。合言葉と専用URLがその場でできる</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">7</span>スタッフを追加する<span class="who-tag m">店長</span></h3>
       <p>右上の <kbd>⚙</kbd> から <span class="path"><b>スタッフ</b></span> をひらき、名前を入れて <kbd>追加</kbd>。追加した瞬間に、<strong>その人だけの合言葉と専用URL</strong>ができます。</p>
-      <p class="fine">合言葉は自動で作られます。似た文字（I・O・0・1）は使わないので、口で伝えるときも間違えにくくなっています。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">合言葉は自動で作られます。似た文字（I・O・0・1）は使わないので、口で伝えるときも間違えにくくなっています。</p></div></details></div>
     </article>
 
     <article class="item" id="i8">
-      <figure class="shot">
-        <div class="screen">
-          <div class="urlchip">やまだ はなさん<br>せんや高崎インター店のシフト希望は、こちらから出してください。<br><br>https://tools.tsumiki-apps.com/tsumiki-senya.html?c=SAMPLE<br><br>・2026年10月分をお願いします<br>・働ける日をタップして、時間を入れるだけです</div>
-          <div class="subbtns"><i>送る文をコピー</i></div>
-        </div>
-      </figure>
-      <h3><span class="n">8</span>ひとりずつURLを渡す<span class="who-tag m">店長</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/k-sending.png" alt="URLをまだ渡していない人が赤く出ているスタッフ一覧" loading="lazy" decoding="async" width="780" height="936"><figcaption>「9人中 5人にURLを渡しました」＝配り漏れが見える</figcaption></figure><figure class="shot"><div class="msg"><b>やまだ はなさん</b><br>せんや高崎インター店のシフト希望は、こちらから出してください。<br><br>https://tools.tsumiki-apps.com/tsumiki-senya.html?c=SAMPLE<br><br>・2026年10月分をお願いします<br>・働ける日をタップして、昼と夜それぞれを選ぶだけです<br>・あとから何度でも直せます<br>・合言葉は SAMPLE です（リンクが開かないときに使ってください）</div><figcaption>「送る文をコピー」でできる文。LINEに貼るだけ</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">8</span>ひとりずつURLを渡す<span class="who-tag m">店長</span></h3>
       <p><kbd>送る文をコピー</kbd> を押して、<strong>LINEに貼るだけ</strong>です。あいさつ・URL・締切・合言葉が入った文ができています。</p>
+      
       <p><strong>配り漏れが分かります。</strong>まだの人には赤く <kbd>まだ渡していません</kbd> と出て、上に <b>「◯人中◯人にURLを渡しました」</b> と出ます。渡し終わると、いつもの「出しぐあい」の表示に戻ります。</p>
       <p class="caution fine">⚠ URLは<b>ひとりにつき1本</b>です。他の人に転送すると、その人の希望として入ってしまいます。ひとりずつ送ってください。</p>
-      <p class="fine">リンクだけをお渡ししたいときは、お名前の右の <kbd>…</kbd> から <kbd>URLだけコピー</kbd> が使えます。<br>口頭やAirDropでお渡ししたときは、<kbd>…</kbd> の <kbd>渡したことにする</kbd> で印だけつけられます。<br><b>合言葉を作り直すと印は自動で戻ります</b>（古いURLが使えなくなるので、渡し直しが要るため）。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">リンクだけをお渡ししたいときは、お名前の右の <kbd>…</kbd> から <kbd>URLだけコピー</kbd> が使えます。<br>口頭やAirDropでお渡ししたときは、<kbd>…</kbd> の <kbd>渡したことにする</kbd> で印だけつけられます。<br><b>合言葉を作り直すと印は自動で戻ります</b>（古いURLが使えなくなるので、渡し直しが要るため）。</p></div></details></div>
     </article>
 
   </div>
@@ -755,186 +456,83 @@
   <div class="items">
 
     <article class="item" id="i9">
-      <figure class="shot">
-        <div class="screen">
-          <div class="bar"><div class="mk"></div><div class="ttl">つみき&amp;せんや<small>やまだ はなさん・せんや高崎インター店</small></div><div class="dot"></div></div>
-          <div class="mbar"><i class="nv">‹</i><div class="mt">2026年10月分</div><i class="nv">›</i></div>
-          <div class="pills"><i class="ok">9月20日まで 受付中</i><i class="cnt">0日 出しました</i></div>
-        </div>
-      </figure>
-      <h3><span class="n">9</span>届いたURLをひらく<span class="who-tag w">スタッフ</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/s-empty.png" alt="届いたURLをひらいた直後のスタッフ画面" loading="lazy" decoding="async" width="780" height="1800"><figcaption>URLをタップしただけ。もう自分の画面になっている</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">9</span>届いたURLをひらく<span class="who-tag w">スタッフ</span></h3>
       <p>LINEで届いたURLをタップするだけです。<strong>合言葉を打つ必要はありません。</strong>自分の名前が上に出ていれば、それであなたの画面です。</p>
-      <p class="fine">はじめて開いたときは、<b>画面のほうから使い方が始まります</b>（項目39）。あとから読み返すときは、画面のいちばん下の <kbd>くわしい使い方（説明書）</kbd> からこの説明書が開けます。<br>URLが開けないときだけ、スタッフ用のトップページで6文字の合言葉を入れてください。合言葉はメッセージの最後に書いてあります。<br>上には <b>「9月20日まで（あと3日）」</b> と、締切までの残りが出ます。<b>3日を切ると赤くなります。</b><br>⚠️ このページは<b>こちらからお知らせを出せません</b>。初めて開いたときのご案内にしたがって、<b>ホーム画面に置いておく</b>と出し忘れが防げます（置き方は項目37・38）。<br>⚠️ <b>お店から届いたLINEのメッセージは消さないでください。</b>しばらく開かないと、端末に覚えさせた合言葉が消えることがあります。そのときは、メッセージのURLをもう一度開けば入れます。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">はじめて開いたときは、<b>画面のほうから使い方が始まります</b>（項目39）。あとから読み返すときは、画面のいちばん下の <kbd>くわしい使い方（説明書）</kbd> からこの説明書が開けます。<br>URLが開けないときだけ、スタッフ用のトップページで6文字の合言葉を入れてください。合言葉はメッセージの最後に書いてあります。<br>上には <b>「9月20日まで（あと3日）」</b> と、締切までの残りが出ます。<b>3日を切ると赤くなります。</b><br>⚠️ このページは<b>こちらからお知らせを出せません</b>。初めて開いたときのご案内にしたがって、<b>ホーム画面に置いておく</b>と出し忘れが防げます（置き方は項目37・38）。<br>⚠️ <b>お店から届いたLINEのメッセージは消さないでください。</b>しばらく開かないと、端末に覚えさせた合言葉が消えることがあります。そのときは、メッセージのURLをもう一度開けば入れます。</p></div></details></div>
     </article>
 
     <article class="item" id="i10">
-      <figure class="shot">
-        <div class="cal7 hd7"><i class="sun">日</i><i>月</i><i>火</i><i>水</i><i>木</i><i>金</i><i class="sat">土</i></div>
-        <div class="cal7">
-          <div class="c bl"></div><div class="c bl"></div><div class="c bl"></div><div class="c bl"></div>
-          <div class="c on"><span class="d">1</span><span class="kk"><i>夜</i></span></div>
-          <div class="c"><span class="d">2</span></div>
-          <div class="c sat on"><span class="d">3</span><span class="kk"><i>昼</i><i>夜</i></span></div>
-          <div class="c sun"><span class="d">4</span></div>
-          <div class="c rest"><span class="d">5</span><span class="s">休</span></div>
-          <div class="c"><span class="d">6</span></div>
-          <div class="c on"><span class="d">7</span><span class="kk"><i class="t">夜</i></span></div>
-          <div class="c"><span class="d">8</span></div>
-          <div class="c on"><span class="d">9</span><span class="kk"><i>昼</i></span></div>
-          <div class="c sat"><span class="d">10</span></div>
-        </div>
-      </figure>
-      <h3><span class="n">10</span>働ける日をタップする<span class="who-tag w">スタッフ</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/s-cal.png" alt="働ける日に色がついたカレンダー" loading="lazy" decoding="async" width="780" height="1110"><figcaption>入れた日に色がつき、「昼」「夜」の札が出る</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">10</span>働ける日をタップする<span class="who-tag w">スタッフ</span></h3>
       <p>カレンダーで<strong>働ける日をタップ</strong>します。入れた日には色がつき、<strong>入れる時間帯が「昼」「夜」の小さな札</strong>で出ます。両方に入れる日は札が2つ並びます。点線の「休」はお店の定休日です。</p>
-      <p class="fine">出していない日・選ばなかった時間帯は「そこは働けない」として店長に伝わります。×をつける必要はありません。<br>白ヌキの札（例：7日の「夜」）は「行けたら行きます」の印です。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">出していない日・選ばなかった時間帯は「そこは働けない」として店長に伝わります。×をつける必要はありません。<br>白ヌキの札（例：7日の「夜」）は「行けたら行きます」の印です。</p></div></details></div>
     </article>
 
     <article class="item" id="i11">
-      <figure class="shot">
-        <div class="screen">
-          <p style="font-weight:800;font-size:13px">10月8日（木）</p>
-          <div class="slotbox" style="margin-top:6px">
-            <div class="sh"><b>昼</b><span class="ct" style="color:var(--acc2)">11:00〜14:30 ›</span></div>
-            <div class="prebtns" style="margin-bottom:0"><i>入れます</i><i>行けたら</i><i class="on">休み</i></div>
-          </div>
-          <div class="slotbox">
-            <div class="sh"><b>夜</b><span class="ct" style="color:var(--acc2)">17:30〜21:00 ›</span></div>
-            <div class="prebtns" style="margin-bottom:0"><i class="on">入れます</i><i>行けたら</i><i>休み</i></div>
-          </div>
-          <div class="bigbtn">この日で出す</div>
-        </div>
-      </figure>
-      <h3><span class="n">11</span>入れます・行けたら・休み<span class="who-tag w">スタッフ</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/s-sheet.png" alt="昼と夜それぞれを選ぶ画面" loading="lazy" decoding="async" width="780" height="764"><figcaption>昼と夜、別々に選んで「この日で出す」</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">11</span>入れます・行けたら・休み<span class="who-tag w">スタッフ</span></h3>
       <p>日をタップすると、<strong>昼と夜が別々に</strong>出ます。それぞれ <kbd>入れます</kbd> <kbd>行けたら</kbd> <kbd>休み</kbd> の3つから選び、<kbd>この日で出す</kbd> を押せば終わりです。</p>
-      <p class="fine"><b>最後に必ず <kbd>この日で出す</kbd> を押してください。</b>押さずに閉じようとすると「まだ出していません」と確認が出ます。<br><strong>通しで入れる日は、昼と夜の両方を「入れます」にします。</strong>こうすると、あいだの中抜けの時間（14:30〜17:30）は働かない、と正しく伝わります。<br><kbd>行けたら</kbd> は「たぶん行けます」の意味です。店長の画面では人数に数えず、△として別に出ます。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine"><b>最後に必ず <kbd>この日で出す</kbd> を押してください。</b>押さずに閉じようとすると「まだ出していません」と確認が出ます。<br><strong>通しで入れる日は、昼と夜の両方を「入れます」にします。</strong>こうすると、あいだの中抜けの時間（14:30〜17:30）は働かない、と正しく伝わります。<br><kbd>行けたら</kbd> は「たぶん行けます」の意味です。店長の画面では人数に数えず、△として別に出ます。</p></div></details></div>
     </article>
 
     <article class="item" id="i12">
-      <figure class="shot">
-        <div class="screen">
-          <div class="slotbox" style="padding-top:2px">
-            <div class="sh"><b>夜</b><span class="ct" style="color:var(--acc2)">18:00〜20:00 ›</span></div>
-            <div class="prebtns"><i class="on">入れます</i><i>行けたら</i><i>休み</i></div>
-            <div class="tmrow"><b class="hit">18:00</b><span>〜</span><b class="hit">20:00</b></div>
-          </div>
-        </div>
-      </figure>
-      <h3><span class="n">12</span>時間を手で直す<span class="who-tag w">スタッフ</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/s-time.png" alt="時間を手で直しているところ" loading="lazy" decoding="async" width="780" height="764"><figcaption>時間の字をタップすると、入力欄が出る</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">12</span>時間を手で直す<span class="who-tag w">スタッフ</span></h3>
       <p>右側の<strong>時間の字をタップすると、時間の入力欄が出ます</strong>。「18時から20時まで」のような中途半端な時間もそのまま出せます。もう一度タップすると閉じます。</p>
-      <p class="fine">短い時間でも大丈夫です。その枠に入れる1人として数えられ、実際の時間は店長の画面にそのまま出ます。<br>⚠️ <b>その時間帯からまるごと外れた時間</b>（昼の枠に「20:00〜21:00」など）を入れると、画面が注意を出します。そのままでも出せますが、お店には<b>「昼に入れる人」として伝わります</b>のでご注意ください。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">短い時間でも大丈夫です。その枠に入れる1人として数えられ、実際の時間は店長の画面にそのまま出ます。<br>⚠️ <b>その時間帯からまるごと外れた時間</b>（昼の枠に「20:00〜21:00」など）を入れると、画面が注意を出します。そのままでも出せますが、お店には<b>「昼に入れる人」として伝わります</b>のでご注意ください。</p></div></details></div>
     </article>
 
     <article class="item" id="i13">
-      <figure class="shot">
-        <div class="screen">
-          <p style="font-weight:800;font-size:12.5px;margin-bottom:7px">いつも入れる曜日</p>
-          <div class="uw"><b>日曜</b><i>昼</i><i>夜</i></div>
-          <div class="uw"><b>火曜</b><i>昼</i><i class="on">夜</i></div>
-          <div class="uw"><b>土曜</b><i class="on">昼</i><i class="on">夜</i></div>
-        </div>
-      </figure>
-      <h3><span class="n">13</span>いつもの曜日で下ごしらえ<span class="who-tag w">スタッフ</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/s-usual.png" alt="いつも入れる曜日を決める画面" loading="lazy" decoding="async" width="780" height="1110"><figcaption>決めておくと、翌月からは1回押すだけ</figcaption></figure><figure class="shot"><img src="senya-shots/s-fill.png" alt="「いつもので埋める」の帯が出たカレンダー" loading="lazy" decoding="async" width="780" height="964"><figcaption>翌月からは、この帯を押すだけ</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">13</span>いつもの曜日で下ごしらえ<span class="who-tag w">スタッフ</span></h3>
       <p>いちばん下の <kbd>いつも入れる曜日</kbd> をひらいて、ふだん入れる曜日と時間帯を選んでおきます。すると次の月からは、カレンダーの上に <kbd>いつもので埋める</kbd> が出ます。</p>
-      <p class="fine">押すまで何も入りません。埋めたあとも、いつもどおり日ごとに直せます。<b>すでに出している日は上書きされません。</b>定休日にも入りません。<br><b>途中からでも使えます</b>＝何日か手で入れたあとでも、残っている日だけを埋められます。</p>
+      
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">押すまで何も入りません。埋めたあとも、いつもどおり日ごとに直せます。<b>すでに出している日は上書きされません。</b>定休日にも入りません。<br><b>途中からでも使えます</b>＝何日か手で入れたあとでも、残っている日だけを埋められます。</p></div></details></div>
     </article>
 
     <article class="item" id="i14">
-      <figure class="shot">
-        <div class="screen">
-          <div class="pills"><i class="ok">9月20日まで（あと26日）</i><i class="cnt">14日・61時間 出しました</i></div>
-          <div class="bigbtn" style="background:var(--app-surface2);color:var(--app-mid);border:1px solid var(--app-line)">✓ 出し終わりました（取り消す）</div>
-        </div>
-      </figure>
-      <h3><span class="n">14</span>「出し終わりました」を押す<span class="who-tag w">スタッフ</span></h3>
+      <div class="figs"><figure class="shot pair"><img src="senya-shots/s-done0.png" alt="「今月はこれで出し終わりました」のボタン" loading="lazy" decoding="async" width="780" height="172"><img src="senya-shots/s-done.png" alt="「✓ 出し終わりました（取り消す）」に変わったボタン" loading="lazy" decoding="async" width="780" height="172"><figcaption>押す前（上）と、押したあと（下）</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">14</span>「出し終わりました」を押す<span class="who-tag w">スタッフ</span></h3>
       <p>ひととおり出したら、カレンダーの下の <kbd>今月はこれで出し終わりました</kbd> を押してください。店長の画面に「✓ 出し終わり」と出て、<strong>催促の連絡が来なくなります</strong>。</p>
       <p class="caution fine">⚠ <strong>押し忘れても、出した希望はちゃんと届いています。</strong>これは「もう直しません」という合図なので、押したあとでも締切までは直せます。直したら押し直す必要もありません。</p>
-      <p class="fine">押したあとは、このボタンが「<b>✓ 出し終わりました（取り消す）</b>」に変わります。それが出し終わりの印なので、上の札には出しません。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">押したあとは、このボタンが「<b>✓ 出し終わりました（取り消す）</b>」に変わります。それが出し終わりの印なので、上の札には出しません。</p></div></details></div>
     </article>
 
     <article class="item" id="i15">
-      <figure class="shot">
-        <div class="screen">
-          <div class="tabs"><span class="on">出した日</span><span>決まったシフト</span></div>
-          <div class="slotbox" style="border:none;padding:0">
-            <div class="pp"><b>10月1日(木)</b><span>夜 17:30〜21:00</span></div>
-            <div class="pp"><b>10月3日(土)</b><span>昼 11:00〜14:30</span></div>
-            <div class="pp"><b>10月7日(水)</b><span>夜 17:30〜21:00</span></div>
-          </div>
-        </div>
-      </figure>
-      <h3><span class="n">15</span>出した日を見返す<span class="who-tag w">スタッフ</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/s-list.png" alt="出した日の一覧" loading="lazy" decoding="async" width="780" height="1754"><figcaption>カレンダーの下に、出した日が並ぶ</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">15</span>出した日を見返す<span class="who-tag w">スタッフ</span></h3>
       <p>カレンダーの下に、<strong>出した日の一覧</strong>が出ます。上のほうには「何日出したか」「合計で何時間か」も出るので、出し忘れに気づけます。</p>
-      <p class="fine">あとから何度でも開けます。締切までなら、何回直しても大丈夫です。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">あとから何度でも開けます。締切までなら、何回直しても大丈夫です。</p></div></details></div>
     </article>
 
     <article class="item" id="i16">
-      <figure class="shot">
-        <div class="screen">
-          <p style="font-weight:800;font-size:13px">10月8日（木）</p>
-          <div class="slotbox" style="margin-top:6px">
-            <div class="sh"><b>昼</b></div>
-            <div class="prebtns" style="margin-bottom:0"><i>入れます</i><i>行けたら</i><i class="on">休み</i></div>
-          </div>
-          <div class="slotbox">
-            <div class="sh"><b>夜</b></div>
-            <div class="prebtns" style="margin-bottom:0"><i>入れます</i><i>行けたら</i><i class="on">休み</i></div>
-          </div>
-          <div class="bigbtn">この日で出す</div>
-        </div>
-      </figure>
-      <h3><span class="n">16</span>まちがえた日を取り消す<span class="who-tag w">スタッフ</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/s-cancel.png" alt="昼も夜も「休み」にした画面" loading="lazy" decoding="async" width="780" height="764"><figcaption>昼・夜の両方を「休み」にして「この日で出す」</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">16</span>まちがえた日を取り消す<span class="who-tag w">スタッフ</span></h3>
       <p>出した日をもう一度タップして、<strong>昼と夜の両方を <kbd>休み</kbd> にしてから</strong> <kbd>この日で出す</kbd> を押します。その日の希望は消えます。</p>
-      <p class="fine">片方だけ取り消すこともできます（例：昼はやめて、夜だけ残す）。取り消してもお店に通知は飛びません。締切までに正しい形になっていれば大丈夫です。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">片方だけ取り消すこともできます（例：昼はやめて、夜だけ残す）。取り消してもお店に通知は飛びません。締切までに正しい形になっていれば大丈夫です。</p></div></details></div>
     </article>
 
     <article class="item" id="i17">
-      <figure class="shot">
-        <div class="screen">
-          <div class="pills"><i class="ng">締切ずみ（9月20日）</i><i class="cnt">14日 出しました</i></div>
-          <div class="slotbox">
-            <div class="sh"><b>昼</b><span class="tm">11:00 〜 14:30 で出しています</span></div>
-            <div class="bigbtn" style="background:var(--app-surface2);color:var(--app-mid);border:1px solid var(--app-line);margin-top:6px">行けなくなりました</div>
-          </div>
-          <div class="slotbox">
-            <div class="sh"><b>夜</b><span class="tm">出していません</span></div>
-            <div class="bigbtn" style="background:var(--app-surface2);color:var(--app-mid);border:1px solid var(--app-line);margin-top:6px">ここ、入れます</div>
-          </div>
-        </div>
-      </figure>
-      <h3><span class="n">17</span>締切をすぎたら（お願いを出す）<span class="who-tag w">スタッフ</span></h3>
+      <div class="figs"><figure class="shot pair"><img src="senya-shots/s-locked.png" alt="締切ずみと出ているスタッフのカレンダー" loading="lazy" decoding="async" width="780" height="1084"><img src="senya-shots/s-lockedsheet.png" alt="締切後にお願いを出す画面" loading="lazy" decoding="async" width="780" height="754"><figcaption>上＝締切をすぎた月　下＝日をタップすると、この2つが出る</figcaption></figure><figure class="shot"><img src="senya-shots/s-req.png" alt="お願い中と出ている画面" loading="lazy" decoding="async" width="780" height="774"><figcaption>出したお願いは、取り消せます</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">17</span>締切をすぎたら（お願いを出す）<span class="who-tag w">スタッフ</span></h3>
       <p>締切をすぎた月は<strong>自分では直せません</strong>。でも日をタップすると <kbd>行けなくなりました</kbd> <kbd>ここ、入れます</kbd> が出ます。押すと<strong>お店にお願いが届きます</strong>。</p>
-      <p class="fine">お願いを出すと、上に「お願い ◯件」と出て、その日に赤い枠がつきます。取り消すこともできます。<br>店長が受け入れると、その内容が希望に反映されます。<strong>LINEで別に連絡する必要はありません。</strong></p>
+      
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">お願いを出すと、上に「お願い ◯件」と出て、その日に赤い枠がつきます。取り消すこともできます。<br>店長が受け入れると、その内容が希望に反映されます。<strong>LINEで別に連絡する必要はありません。</strong></p></div></details></div>
     </article>
 
     <article class="item" id="i18">
-      <figure class="shot">
-        <div class="screen">
-          <div class="tabs"><span>出した日</span><span class="on">決まったシフト</span></div>
-          <div class="slotbox" style="border:none;padding:0">
-            <div class="pp"><b>10月1日(木)</b><span>夜 17:30〜21:00</span></div>
-            <div class="pp"><b>10月3日(土)</b><span>昼 11:00〜14:30</span></div>
-          </div>
-        </div>
-      </figure>
-      <h3><span class="n">18</span>決まったシフトを見る<span class="who-tag w">スタッフ</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/s-kakutei.png" alt="決まったシフトのタブ" loading="lazy" decoding="async" width="780" height="1800"><figcaption>「決まったシフト」に切り替えたところ</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">18</span>決まったシフトを見る<span class="who-tag w">スタッフ</span></h3>
       <p>店長がシフトを組んで知らせると、<kbd>決まったシフト</kbd> のタブが出ます。<strong>そこがあなたの確定した出勤日</strong>です。カレンダーの札も緑に変わります。</p>
-      <p class="fine">出す前の「希望」と、決まったあとの「シフト」は別ものです。タブで切り替えて見比べられます。知らせが出るまではタブ自体が出ません。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">出す前の「希望」と、決まったあとの「シフト」は別ものです。タブで切り替えて見比べられます。知らせが出るまではタブ自体が出ません。</p></div></details></div>
     </article>
 
     <article class="item" id="i19">
-      <figure class="shot">
-        <div class="screen">
-          <div class="tabs"><span>出した日</span><span class="on">決まったシフト</span></div>
-          <div class="prebtns" style="margin-bottom:0"><i class="on">カレンダーに追加</i></div>
-          <div class="slotbox" style="border:none;padding:8px 0 0">
-            <div class="pp"><b>10月1日(木)</b><span>夜 17:30〜21:00</span></div>
-            <div class="pp"><b>10月3日(土)</b><span>昼 11:00〜14:30</span></div>
-          </div>
-        </div>
-      </figure>
-      <h3><span class="n">19</span>決まったシフトを、自分のカレンダーに入れる<span class="who-tag w">スタッフ</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/s-ics.png" alt="カレンダーに追加ボタン" loading="lazy" decoding="async" width="780" height="1598"><figcaption>押すと1か月ぶんがまとめて入る</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">19</span>決まったシフトを、自分のカレンダーに入れる<span class="who-tag w">スタッフ</span></h3>
       <p><kbd>カレンダーに追加</kbd> を押すと、<strong>1か月ぶんの出勤がまとめてカレンダーに入ります</strong>。ひとつずつ手で書き写す必要はありません。</p>
-      <p class="fine">押すとカレンダーのアプリが開き、「追加しますか」と聞かれます。<b>予定の名前は「お店の名前　昼／夜」</b>、時間はシフトのとおりです。<br>あとでシフトが変わったときは、<b>もう一度押してください</b>。同じ日・同じ時間帯の予定は<b>上書きされる作り</b>にしてあります。<br>ボタンの下に <b>「最終更新　◯月◯日 ◯時◯分」</b> が出ます。お店がシフトを直すとここが新しくなるので、<b>入れ直すかどうかの目印</b>にしてください。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">押すとカレンダーのアプリが開き、「追加しますか」と聞かれます。<b>予定の名前は「お店の名前　昼／夜」</b>、時間はシフトのとおりです。<br>あとでシフトが変わったときは、<b>もう一度押してください</b>。同じ日・同じ時間帯の予定は<b>上書きされる作り</b>にしてあります。<br>ボタンの下に <b>「最終更新　◯月◯日 ◯時◯分」</b> が出ます。お店がシフトを直すとここが新しくなるので、<b>入れ直すかどうかの目印</b>にしてください。</p></div></details></div>
     </article>
 
   </div>
@@ -946,225 +544,103 @@
   <div class="items">
 
 <article class="item" id="i20">
-      <figure class="shot">
-        <div class="screen">
-          <div class="pills"><i class="lack">足りない日 5日</i><i class="ok">9月20日まで 受付中</i><i class="cnt">8 / 8 人が提出</i></div>
-          <div class="reqbar2">スタッフからのお願いが 2件 あります<span>›</span></div>
-        </div>
-      </figure>
-      <h3><span class="n">20</span>足りない日がすぐ分かる<span class="who-tag m">店長</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/k-list.png" alt="店長の一覧画面" loading="lazy" decoding="async" width="780" height="1368"><figcaption>開いていちばん上。赤い札とカレンダーの赤が同じことを指す</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">20</span>足りない日がすぐ分かる<span class="who-tag m">店長</span></h3>
       <p>開くといちばん上に <strong>「足りない日 ◯日」</strong> の赤い札が出ます。<strong>どの日かは、すぐ下のカレンダーが赤で教えてくれます。</strong>赤いマスを押すと、その日の画面が開きます。</p>
-      <p class="fine">足りない日が1日も無いときは「足りない日なし」と緑で出ます。<br>スタッフから締切後のお願いが届いていると、その下に帯が出ます。押すと一覧がひらきます。<br>「◯人が出し終わり」の数は、右上の <kbd>⚙</kbd> →<span class="path"><b>スタッフ</b></span> にあります。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">足りない日が1日も無いときは「足りない日なし」と緑で出ます。<br>スタッフから締切後のお願いが届いていると、その下に帯が出ます。押すと一覧がひらきます。<br>「◯人が出し終わり」の数は、右上の <kbd>⚙</kbd> →<span class="path"><b>スタッフ</b></span> にあります。</p></div></details></div>
     </article>
 
 <article class="item" id="i21">
-      <figure class="shot">
-        <div class="cal7 hd7"><i class="sun">日</i><i>月</i><i>火</i><i>水</i><i>木</i><i>金</i><i class="sat">土</i></div>
-        <div class="cal7">
-          <div class="c bl"></div><div class="c bl"></div><div class="c bl"></div><div class="c bl"></div>
-          <div class="c"><span class="d">1</span><span class="s">4人</span></div>
-          <div class="c"><span class="d">2</span><span class="s">5人</span></div>
-          <div class="c sat"><span class="d">3</span><span class="s">4人</span></div>
-          <div class="c sun"><span class="d">4</span><span class="s">4人</span></div>
-          <div class="c rest"><span class="d">5</span><span class="s">休</span></div>
-          <div class="c"><span class="d">6</span><span class="s">3人</span></div>
-          <div class="c"><span class="d">7</span><span class="s">4人</span></div>
-          <div class="c ng"><span class="d">8</span><span class="s">夜 −1</span></div>
-          <div class="c"><span class="d">9</span><span class="s">4人</span></div>
-          <div class="c sat ng"><span class="d">10</span><span class="s">昼 −1<br>夜 −2</span></div>
-        </div>
-      </figure>
-      <h3><span class="n">21</span>カレンダーの読み方<span class="who-tag m">店長</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/k-cal.png" alt="足りない日が赤くなったカレンダー" loading="lazy" decoding="async" width="780" height="1028"><figcaption>「夜 −1」＝夜にあと1人ほしい</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">21</span>カレンダーの読み方<span class="who-tag m">店長</span></h3>
       <p>足りている日は<strong>その日に入れる人数だけ</strong>。足りない日は<strong>赤くなって「夜 −1」</strong>と出ます。これは「夜にあと1人ほしい」という意味です。</p>
-      <p class="fine">点線の「休」は定休日で、人数は数えません。四角い枠が出ている日は今日です。<br><strong>「行けたら」（△）の人は、この数には入れていません。</strong>あてにできる人だけで足りているかを見るためです。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">点線の「休」は定休日で、人数は数えません。四角い枠が出ている日は今日です。<br><strong>「行けたら」（△）の人は、この数には入れていません。</strong>あてにできる人だけで足りているかを見るためです。</p></div></details></div>
     </article>
 
 <article class="item" id="i22">
-      <figure class="shot">
-        <div class="screen">
-          <p style="font-weight:800;font-size:13px">10月14日（水）</p>
-          <p style="font-size:10.5px;color:var(--app-soft);margin-bottom:8px">ほしい人数　昼 2人・夜 3人</p>
-          <div class="slotbox">
-            <div class="sh"><b>昼</b><span class="tm">11:00〜14:30</span><span class="ct ng">1 / 2人（あと1人）</span></div>
-            <div class="pp"><b>たなか けん</b><span>11:00〜14:30</span></div>
-          </div>
-          <div class="slotbox">
-            <div class="sh"><b>夜</b><span class="tm">17:30〜21:00</span><span class="ct ng">2 / 3人（＋△1）（あと1人）</span></div>
-            <div class="pp"><b>すずき たろう</b><span>17:30〜21:00</span></div>
-            <div class="pp"><b>わたなべ ゆう</b><span>18:00〜21:00</span></div>
-            <div class="pp"><b>さとう みお</b><span class="mk2">行けたら</span><span>17:30〜21:00</span></div>
-          </div>
-        </div>
-      </figure>
-      <h3><span class="n">22</span>入れる人を見る（○と△）<span class="who-tag m">店長</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/k-day.png" alt="その日に入れる人の一覧" loading="lazy" decoding="async" width="780" height="1280"><figcaption>昼と夜に分けて、名前と時間が出る</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">22</span>入れる人を見る（○と△）<span class="who-tag m">店長</span></h3>
       <p>日をタップすると、<strong>昼と夜に分けて名前と時間</strong>が出ます。「2 / 3人（＋△1）（あと1人）」は「3人ほしい・確実なのは2人・あと1人は行けたらの人がいる」という意味です。</p>
-      <p class="fine">「行けたら」の人には札がつき、いちばん下にまとめて並びます。<strong>人数には数えていません</strong>ので、足りないときの当たり先として使ってください。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">「行けたら」の人には札がつき、いちばん下にまとめて並びます。<strong>人数には数えていません</strong>ので、足りないときの当たり先として使ってください。</p></div></details></div>
     </article>
 
 <article class="item" id="i23">
-      <figure class="shot">
-        <div class="screen">
-          <div class="prebtns"><i>出ている希望</i><i class="on">シフトを決める</i></div>
-          <div class="slotbox">
-            <div class="sh"><b>夜</b><span class="tm">17:30〜21:00</span><span class="ct ng">決定 2 / 3人</span></div>
-            <div class="pp on"><span class="ck">✓</span><b>すずき たろう</b><span>17:30〜21:00</span></div>
-            <div class="pp on"><span class="ck">✓</span><b>わたなべ ゆう</b><span>18:00〜21:00</span></div>
-            <div class="pp"><span class="ck"></span><b>さとう みお</b><span class="mk2">行けたら</span><span>17:30〜21:00</span></div>
-            <span class="allb">希望どおり、○の2人を全員入れる</span>
-          </div>
-        </div>
-      </figure>
-      <h3><span class="n">23</span>シフトを決める<span class="who-tag m">店長</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/k-kime.png" alt="シフトを決める画面" loading="lazy" decoding="async" width="780" height="1704"><figcaption>名前を押すだけ。✓がついた人がその日のシフト</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">23</span>シフトを決める<span class="who-tag m">店長</span></h3>
       <p>日をひらいて <kbd>シフトを決める</kbd> に切り替えると、<strong>名前を押すだけでその日のシフトが決まります</strong>。もう一度押せば外れます。「決定 2 / 3人」で、ほしい人数まであと何人かが分かります。</p>
-      <p class="fine"><kbd>希望どおり、○の◯人を全員入れる</kbd> を押すと、その枠の「入れます」の人を一度に入れられます。<b>月ぜんぶを一度に入れる近道もあります（次の項目）。</b><br><strong>自動では組みません。</strong>誰を入れるかは、必ず店長が決めます。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine"><kbd>希望どおり、○の◯人を全員入れる</kbd> を押すと、その枠の「入れます」の人を一度に入れられます。<b>月ぜんぶを一度に入れる近道もあります（次の項目）。</b><br><strong>自動では組みません。</strong>誰を入れるかは、必ず店長が決めます。</p></div></details></div>
     </article>
 
     <article class="item" id="i24">
-      <figure class="shot">
-        <div class="screen">
-          <div style="border:1px solid var(--app-line);border-radius:11px;padding:10px 11px">
-            <p style="font-weight:800;font-size:12px">シフトを組む</p>
-            <p style="font-size:10px;color:var(--app-soft);margin:3px 0 8px;line-height:1.5">まだ決まっていません。希望どおりに月まるごと入れて、そこから外していくのが早いです。</p>
-            <div class="bigbtn" style="margin:0">希望どおり、月まるごと入れる</div>
-          </div>
-        </div>
-      </figure>
-      <h3><span class="n">24</span>希望どおり、月まるごと入れる<span class="who-tag m">店長</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/k-assign.png" alt="「希望どおり、月まるごと入れる」のボタン" loading="lazy" decoding="async" width="780" height="292"><figcaption>カレンダーのすぐ下にある</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">24</span>希望どおり、月まるごと入れる<span class="who-tag m">店長</span></h3>
       <p>1日ずつ決めていくと、31日×昼夜で<strong>60回以上シートを開くこと</strong>になります。一覧の下の <kbd>希望どおり、月まるごと入れる</kbd> を押すと、<strong>「入れます」の希望を一度に全部シフトに入れます</strong>。そこから<strong>多いところを外していく</strong>ほうが、ずっと早く終わります。</p>
-      <p class="fine">入るのは <b>○（入れます）</b> の方だけです。<b>「行けたら」の方と定休日は入りません</b>。<br>やり直したいときは <kbd>この月のシフトを全部やり直す</kbd> で消せます（希望のほうは消えません）。<br>⚠️ <b>すでに知らせたあとで消すと、知らせも一緒に取り消されます</b>（押す前に画面が教えます）。中途半端に「決まったシフトのタブだけあって中身が空」にならないようにするためです。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">入るのは <b>○（入れます）</b> の方だけです。<b>「行けたら」の方と定休日は入りません</b>。<br>やり直したいときは <kbd>この月のシフトを全部やり直す</kbd> で消せます（希望のほうは消えません）。<br>⚠️ <b>すでに知らせたあとで消すと、知らせも一緒に取り消されます</b>（押す前に画面が教えます）。中途半端に「決まったシフトのタブだけあって中身が空」にならないようにするためです。</p></div></details></div>
     </article>
 
     <article class="item" id="i25">
-      <figure class="shot">
-        <div class="screen">
-          <p style="font-weight:800;font-size:12px;margin-bottom:7px">ひとりずつの合計</p>
-          <table class="sft2">
-            <tr><th>お名前</th><th style="text-align:right">出る日</th><th style="text-align:right">時間</th><th>　</th></tr>
-            <tr><td>やまだ はな</td><td style="text-align:right">16日</td><td style="text-align:right">70時間</td><td><span class="totbar" style="width:100%"></span></td></tr>
-            <tr><td>たなか けん</td><td style="text-align:right">13日</td><td style="text-align:right">59時間30分</td><td><span class="totbar" style="width:85%"></span></td></tr>
-            <tr><td>こばやし あお</td><td style="text-align:right">9日</td><td style="text-align:right">31時間30分</td><td><span class="totbar" style="width:45%"></span></td></tr>
-          </table>
-        </div>
-      </figure>
-      <h3><span class="n">25</span>入りすぎ・入らなすぎを見る<span class="who-tag m">店長</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/k-total.png" alt="ひとりずつの合計" loading="lazy" decoding="async" width="780" height="1128"><figcaption>シフト表のいちばん下。棒の長さで偏りが見える</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">25</span>入りすぎ・入らなすぎを見る<span class="who-tag m">店長</span></h3>
       <p>シフト表のいちばん下に、<strong>ひとりずつの「出る日」と「時間」</strong>が棒つきで並びます。<strong>誰かに寄っていないか、誰かの希望を叶えられていないか</strong>が、ひと目で分かります。</p>
-      <p class="fine">決めている最中も、名前の横に <b>「今月◯日」</b> と出ます。<b>少ない方は緑、多い方は赤</b>で色がつくので、押す前に気づけます。<br><kbd>⚙</kbd> →「スタッフ」でも、ひとりずつ「希望◯日／シフト◯日」を確かめられます。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">決めている最中も、名前の横に <b>「今月◯日」</b> と出ます。<b>少ない方は緑、多い方は赤</b>で色がつくので、押す前に気づけます。<br><kbd>⚙</kbd> →「スタッフ」でも、ひとりずつ「希望◯日／シフト◯日」を確かめられます。</p></div></details></div>
     </article>
 
     <article class="item" id="i26">
-      <figure class="shot">
-        <div class="screen">
-          <div class="slotbox" style="padding-top:2px">
-            <div class="sh"><b>昼</b><span class="tm">11:00〜14:30</span><span class="ct ng">決定 1 / 2人</span></div>
-            <div style="border:1px dashed var(--app-line2);border-radius:9px;padding:8px 9px;margin-top:6px">
-              <p style="font-size:10px;font-weight:800;color:var(--app-mid);margin:0 0 6px">頼めそうな人（今月の少ない順）</p>
-              <div class="al2"><i><b>ふじた かえで</b> 今月0日</i><i><b>こばやし あお</b> 今月9日</i></div>
-              <span class="allb" style="margin-top:7px">この昼を頼む文をコピー</span>
-            </div>
-          </div>
-        </div>
-      </figure>
-      <h3><span class="n">26</span>足りない枠を、誰に頼むか<span class="who-tag m">店長</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/k-ask.png" alt="頼めそうな人の一覧" loading="lazy" decoding="async" width="780" height="460"><figcaption>足りない枠にだけ出る。今月シフトが少ない順</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">26</span>足りない枠を、誰に頼むか<span class="who-tag m">店長</span></h3>
       <p>ほしい人数に届いていない枠には、<strong>「頼めそうな人」</strong>が出ます。<strong>その日その時間に希望を出していない方</strong>を、<strong>今月シフトが少ない順</strong>に並べたものです。</p>
-      <p class="fine"><kbd>この昼を頼む文をコピー</kbd> を押すと、日付・時間・あと何人か・お声がけ先の名前が入った文ができます。LINEに貼るだけです。<br>「行けたら」の方は、その上のリストにすでに並んでいます。まずはそちらに当たるのが早いはずです。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine"><kbd>この昼を頼む文をコピー</kbd> を押すと、日付・時間・あと何人か・お声がけ先の名前が入った文ができます。LINEに貼るだけです。<br>「行けたら」の方は、その上のリストにすでに並んでいます。まずはそちらに当たるのが早いはずです。</p></div></details></div>
     </article>
 
 <article class="item" id="i27">
-      <figure class="shot">
-        <div class="screen">
-          <div class="pubb"><span>いま 42つ決まっています。知らせるまでスタッフには見えません。</span><i>みんなに知らせる</i></div>
-        </div>
-      </figure>
-      <h3><span class="n">27</span>みんなに知らせる<span class="who-tag m">店長</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/k-shift.png" alt="みんなに知らせるボタン" loading="lazy" decoding="async" width="780" height="402"><figcaption>押すまで、スタッフには見えない</figcaption></figure><figure class="shot"><img src="senya-shots/k-pub.png" alt="知らせたあとの店長画面" loading="lazy" decoding="async" width="780" height="1200"><figcaption>知らせると「✓ シフトを知らせました」に変わる</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">27</span>みんなに知らせる<span class="who-tag m">店長</span></h3>
       <p>組んでいる途中は<strong>スタッフには見えません</strong>。ひととおり決まったら、カレンダーの下の <kbd>みんなに知らせる</kbd> を押します。全員の画面に「決まったシフト」が出ます。</p>
-      <p class="caution fine">⚠ 知らせたあとも中身は直せます。直すとスタッフの画面もすぐ変わるので、<strong>大きく組み替えるときは、いったん <kbd>知らせを取り消す</kbd> を押してからにすると混乱がありません。</strong></p>
+      
+      <p class="caution fine">⚠ 知らせたあとも中身は直せます。直すとスタッフの画面もすぐ変わるので、<strong>大きく組み替えるときは、いったん <kbd>知らせを取り消す</kbd> を押してからにすると混乱がありません。</strong></p></div>
     </article>
 
     <article class="item" id="i28">
-      <figure class="shot">
-        <div class="screen">
-          <p style="font-weight:800;font-size:12px;margin-bottom:7px">せんや高崎インター店　2026年10月 シフト表</p>
-          <table class="sft2">
-            <tr><th>日</th><th>昼 11:00〜14:30</th><th>夜 17:30〜21:00</th></tr>
-            <tr><td class="dt2">1日(木)</td><td>たなか けん</td><td>すずき たろう<br>わたなべ ゆう</td></tr>
-            <tr><td class="dt2">2日(金)</td><td>やまだ はな</td><td class="emp2">未定</td></tr>
-            <tr class="rest2"><td class="dt2">5日(月)</td><td>定休日</td><td>定休日</td></tr>
-          </table>
-        </div>
-      </figure>
-      <h3><span class="n">28</span>シフト表を、横1枚に印刷して貼り出す<span class="who-tag m">店長</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/k-table.png" alt="1か月ぶんのシフト表" loading="lazy" decoding="async" width="780" height="2300"><figcaption>「シフト表を見る」を押したところ</figcaption></figure><figure class="shot"><img src="senya-shots/senya-doc-print.png" alt="印刷したシフト表（A4よこ・1枚）" loading="lazy" decoding="async" width="1840" height="1200"><figcaption>印刷したところ。A4よこ・かならず1枚</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">28</span>シフト表を、横1枚に印刷して貼り出す<span class="who-tag m">店長</span></h3>
       <p><kbd>シフト表を見る</kbd> を押すと、<strong>1か月ぶんの表</strong>が出ます。<kbd>印刷する</kbd> を押すと、<strong>A4よこ・かならず1枚</strong>にまとまって出てきます。そのまま厨房に貼れます。</p>
-      <p class="fine">1か月ぶんを<b>2段（または3段）に分けて横に並べます</b>。何段にするかは、人数と名前の長さを見て<b>いちばん大きく刷れる形が自動で選ばれます</b>。<b>1か月が一目で見える</b>のが、貼り出す表のいちばん大事なところだからです。<br>枠の見出しに時間（「昼 11:00〜14:30」）が出ているので、<b>その時間どおりの方には時刻を書きません</b>。ちがう時間の方だけ、名前のうしろに時刻が付きます。<br>それでも入りきらない月は、<b>入るところまで自動で小さくして1枚に収めます</b>（2枚目には行きません）。<br>ひとりずつの合計は、表の下に小さく並びます。<br>まだ人が決まっていない枠は<b>「未定」</b>と出るので、貼る前に抜けに気づけます。定休日は灰色です。</p>
-      <p class="fine">印刷の画面で用紙が「たて」になっているときは、<b>「よこ」</b>を選んでください。ふつうは自動で「よこ」になります。<br>余白の設定は<b>そのままで大丈夫</b>です。プリンタの既定の余白でも1枚に収まる大きさで組んでいます。</p>
+      
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">1か月ぶんを<b>2段（または3段）に分けて横に並べます</b>。何段にするかは、人数と名前の長さを見て<b>いちばん大きく刷れる形が自動で選ばれます</b>。<b>1か月が一目で見える</b>のが、貼り出す表のいちばん大事なところだからです。<br>枠の見出しに時間（「昼 11:00〜14:30」）が出ているので、<b>その時間どおりの方には時刻を書きません</b>。ちがう時間の方だけ、名前のうしろに時刻が付きます。<br>それでも入りきらない月は、<b>入るところまで自動で小さくして1枚に収めます</b>（2枚目には行きません）。<br>ひとりずつの合計は、表の下に小さく並びます。<br>まだ人が決まっていない枠は<b>「未定」</b>と出るので、貼る前に抜けに気づけます。定休日は灰色です。</p><p class="fine">印刷の画面で用紙が「たて」になっているときは、<b>「よこ」</b>を選んでください。ふつうは自動で「よこ」になります。<br>余白の設定は<b>そのままで大丈夫</b>です。プリンタの既定の余白でも1枚に収まる大きさで組んでいます。</p></div></details></div>
     </article>
 
 <article class="item" id="i29">
-      <figure class="shot">
-        <div class="screen">
-          <div class="reqb">
-            <div class="h">いとう けんさん</div>
-            <div class="d">10月7日（水）の夜　行けなくなりました</div>
-            <div class="a"><i>受け入れる</i><i class="sub">見送る</i></div>
-          </div>
-        </div>
-      </figure>
-      <h3><span class="n">29</span>お願いを受け取る<span class="who-tag m">店長</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/k-req.png" alt="スタッフからのお願い" loading="lazy" decoding="async" width="780" height="872"><figcaption>受け入れるか、見送るかを選ぶ</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">29</span>お願いを受け取る<span class="who-tag m">店長</span></h3>
       <p>締切のあとにスタッフが出したお願いは、<strong>一覧のいちばん上に赤く出ます</strong>。名前を押すと中身が開き、<kbd>受け入れる</kbd> か <kbd>見送る</kbd> を選べます。</p>
-      <p class="fine"><kbd>受け入れる</kbd> を押すと、その内容が希望に反映されます（「行けなくなりました」なら、決まっていたシフトからも外れます）。<br><kbd>見送る</kbd> は希望を変えずに、お願いだけ片づけます。どちらもスタッフの画面から消えます。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine"><kbd>受け入れる</kbd> を押すと、その内容が希望に反映されます（「行けなくなりました」なら、決まっていたシフトからも外れます）。<br><kbd>見送る</kbd> は希望を変えずに、お願いだけ片づけます。どちらもスタッフの画面から消えます。</p></div></details></div>
     </article>
 
 <article class="item" id="i30">
-      <figure class="shot">
-        <div class="screen">
-          <p style="font-size:10.5px;color:var(--app-soft);margin-bottom:6px">誰の希望を入れますか</p>
-          <div class="pp" style="background:var(--app-surface);border:1px solid var(--app-line)"><b>やまだ はな</b><span>出ていません</span></div>
-          <div class="pp" style="background:var(--app-surface);border:1px solid var(--app-line)"><b>さとう みお</b><span>出ていません</span></div>
-          <div class="pp" style="background:var(--app-surface);border:1px solid var(--app-line)"><b>たなか けん</b><span>昼・夜</span></div>
-        </div>
-      </figure>
-      <h3><span class="n">30</span>代わりに入れる<span class="who-tag m">店長</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/k-fill.png" alt="代わりに入れる画面" loading="lazy" decoding="async" width="780" height="1226"><figcaption>誰の希望を入れるかを選ぶ</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">30</span>代わりに入れる<span class="who-tag m">店長</span></h3>
       <p>「電話で聞いた」「LINEで来た」希望は、<kbd>代わりに入れる</kbd> から店長が入れられます。名前を選ぶと、<strong>スタッフの画面と同じ形（昼／夜ごとに 入れます・行けたら・休み）</strong>が出ます。</p>
-      <p class="fine">まだ出していない人が上に並びます。<strong>締切をすぎていても店長は入れられます。</strong>入れたぶんは、その人の画面にもそのまま出ます。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">まだ出していない人が上に並びます。<strong>締切をすぎていても店長は入れられます。</strong>入れたぶんは、その人の画面にもそのまま出ます。</p></div></details></div>
     </article>
 
 <article class="item" id="i31">
-      <figure class="shot">
-        <div class="screen">
-          <p style="font-weight:800;font-size:13px">10月24日（土）</p>
-          <p style="font-size:10.5px;color:var(--app-soft);margin-bottom:8px">この日だけの人数です。ふだんは設定の人数を使います。</p>
-          <div class="uw"><b>昼</b><i style="flex:0 0 auto;padding:6px 10px">11:00〜14:30</i><i class="on">3</i></div>
-          <div class="uw"><b>夜</b><i style="flex:0 0 auto;padding:6px 10px">17:30〜21:00</i><i class="on">5</i></div>
-        </div>
-      </figure>
-      <h3><span class="n">31</span>その日だけ人数を増やす<span class="who-tag m">店長</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/k-need.png" alt="この日だけの必要人数" loading="lazy" decoding="async" width="780" height="694"><figcaption>その日だけ人数を変えられる</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">31</span>その日だけ人数を増やす<span class="who-tag m">店長</span></h3>
       <p>宴会や貸切のように、<strong>その日だけ人手が要る日</strong>は、日をひらいて <kbd>この日の必要人数</kbd> から変えられます。ふだんの人数はそのままです。</p>
-      <p class="fine">変えた日は「（この日だけの設定）」と出ます。<kbd>ふだんに戻す</kbd> でいつでも元に戻せます。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">変えた日は「（この日だけの設定）」と出ます。<kbd>ふだんに戻す</kbd> でいつでも元に戻せます。</p></div></details></div>
     </article>
 
 <article class="item" id="i32">
-      <figure class="shot">
-        <div class="screen">
-          <p style="font-size:11px;font-weight:700;margin-bottom:8px">6 / 8人が出し終わり</p>
-          <p style="font-weight:800;font-size:12px">やまだ はな<span class="stb done">✓ 出し終わり</span></p>
-          <p style="font-weight:800;font-size:12px;margin-top:6px">たなか けん<span class="stb part">3日 出した（途中）</span></p>
-          <p style="font-weight:800;font-size:12px;margin-top:6px">さとう みお<span class="stb none">まだ出していません</span></p>
-        </div>
-      </figure>
-      <h3><span class="n">32</span>まだ出していない人<span class="who-tag m">店長</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/k-staff.png" alt="スタッフの提出ぐあい一覧" loading="lazy" decoding="async" width="780" height="1784"><figcaption>⚙ →「スタッフ」。3つの状態が出る</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">32</span>まだ出していない人<span class="who-tag m">店長</span></h3>
       <p>右上の <kbd>⚙</kbd> →「スタッフ」で、ひとりずつ<strong>3つの状態</strong>が分かります。<br>「まだ出していません」「◯日 出した（途中）」「✓ 出し終わり」。</p>
-      <p class="fine">催促の文をつくるボタンはありません。<b>言い回しはお店ごとに違う</b>ので、ここは<b>「誰がまだか」を見るところ</b>に絞ってあります。赤い印の方に、いつものやり方で声をかけてください。<br><strong>「途中」の人にも、まだ出し終わっていない可能性があります。</strong>締切前に一度声をかけると確実です。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">催促の文をつくるボタンはありません。<b>言い回しはお店ごとに違う</b>ので、ここは<b>「誰がまだか」を見るところ</b>に絞ってあります。赤い印の方に、いつものやり方で声をかけてください。<br><strong>「途中」の人にも、まだ出し終わっていない可能性があります。</strong>締切前に一度声をかけると確実です。</p></div></details></div>
     </article>
 
 <article class="item" id="i33">
-      <figure class="shot">
-        <div class="screen">
-          <div class="mbar"><i class="nv">‹</i><div class="mt">2026年10月分</div><i class="nv">›</i></div>
-          <div class="pills"><i class="ng">締切ずみ（9月20日）</i><i class="cnt">8 / 8 人が提出</i></div>
-        </div>
-      </figure>
-      <h3><span class="n">33</span>前の月・次の月<span class="who-tag m">店長</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/k-month.png" alt="月を移る ‹ › ボタン" loading="lazy" decoding="async" width="780" height="290"><figcaption>上の ‹ › で前の月・次の月へ</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">33</span>前の月・次の月<span class="who-tag m">店長</span></h3>
       <p>上の <kbd>‹</kbd> <kbd>›</kbd> で月を移れます。過ぎた月も見返せますし、<strong>先の月を先に組んでおくこともできます</strong>。</p>
-      <p class="fine">開いたときに出るのは「いま募集している月」です。締切前ならその月、締切をすぎていたら次の月になります。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">開いたときに出るのは「いま募集している月」です。締切前ならその月、締切をすぎていたら次の月になります。</p></div></details></div>
     </article>
 
   </div>
@@ -1176,48 +652,27 @@
   <div class="items">
 
     <article class="item" id="i34">
-      <figure class="shot">
-        <div class="screen">
-          <div class="stcard">
-            <div class="nm">やまだ はな</div>
-            <div class="cd">合言葉 SAMPLE</div>
-            <div class="acts"><i>送る文をコピー</i><i class="more">…</i></div>
-          </div>
-          <div class="morelist2">
-            <i>URLだけコピー<b>リンクだけをお渡しするとき</b></i>
-            <i>名前を直す</i>
-            <i>休止する<b>しばらくお休みの方。希望も シフト表も残ります</b></i>
-            <i>合言葉を再発行<b>URLを無くされたとき。いまのURLは開けなくなります</b></i>
-            <i class="dg">この方を削除する<b>これまでに出した希望も一緒に消えます</b></i>
-          </div>
-        </div>
-      </figure>
-      <h3><span class="n">34</span>URLを無くしたとき<span class="who-tag m">店長</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/k-more.png" alt="「…」を押して出るそのほかの操作" loading="lazy" decoding="async" width="780" height="1148"><figcaption>たまにしか使わない操作は、この中</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">34</span>URLを無くしたとき<span class="who-tag m">店長</span></h3>
       <p>右上の <kbd>⚙</kbd> →<span class="path"><b>スタッフ</b></span> でその人の <kbd>送る文をコピー</kbd> を押して、もう一度LINEで送るだけです。</p>
       <p>お名前の右にある <kbd>…</kbd> を押すと、<strong>たまにしか使わない操作</strong>がまとまって出てきます。<br><kbd>URLだけコピー</kbd> <kbd>名前を直す</kbd> <kbd>休止する</kbd> <kbd>合言葉を再発行</kbd> <kbd>この方を削除する</kbd> の5つです。</p>
-      <p class="caution fine">⚠ <kbd>…</kbd> の中の <kbd>合言葉を再発行</kbd> を押すと<b>古いURLはその瞬間に開けなくなります</b>。スマホを人に譲ったときなど、本当に無効にしたいときだけ使ってください。出した希望は消えません。<br>古いURLをお使いだった端末には <b>「この合言葉は使えなくなりました。お店から新しいURLを受け取ってください」</b> と出ます。<b>そのとき画面を開いたままだった方にも、その場で同じご案内が出ます</b>（休止・削除のときも同じです）。新しい <kbd>送る文をコピー</kbd> をお渡しください。</p>
+      <p class="caution fine">⚠ <kbd>合言葉を再発行</kbd> を押すと<b>古いURLはその瞬間に開けなくなります</b>。スマホを人に譲ったときなど、本当に無効にしたいときだけ使ってください。出した希望は消えません。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">古いURLをお使いだった端末には <b>「この合言葉は使えなくなりました。お店から新しいURLを受け取ってください」</b> と出ます。<b>そのとき画面を開いたままだった方にも、その場で同じご案内が出ます</b>（休止・削除のときも同じです）。新しい <kbd>送る文をコピー</kbd> をお渡しください。</p></div></details></div>
     </article>
 
     <article class="item" id="i35">
-      <figure class="shot">
-        <div class="screen">
-          <div class="stcard" style="opacity:.55">
-            <div class="nm">すずき たろう <span style="font-size:10px;color:var(--app-soft);font-weight:400">（休止中）</span></div>
-            <div class="cd">合言葉 SAMPL2</div>
-            <div class="acts"><i>送る文をコピー</i><i class="more">…</i></div>
-          </div>
-        </div>
-      </figure>
-      <h3><span class="n">35</span>やめた人・お休みの人<span class="who-tag m">店長</span></h3>
+      <div class="figs"><figure class="shot"><img src="senya-shots/k-paused.png" alt="休止中のスタッフが薄く残っている一覧" loading="lazy" decoding="async" width="780" height="864"><figcaption>休止した人は「（休止中）」として残る</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">35</span>やめた人・お休みの人<span class="who-tag m">店長</span></h3>
       <p>しばらく入れない人は、お名前の右の <kbd>…</kbd> から <kbd>休止する</kbd>。<b>一覧には「（休止中）」として残ります</b>ので、戻ってきたら同じ <kbd>…</kbd> の <kbd>再開する</kbd> を押すだけです。出した希望も残ります。</p>
-      <p class="caution fine">⚠ <kbd>…</kbd> の中の <kbd>この方を削除する</kbd> は、その人が出した希望も<b>いっしょに消えます</b>。迷ったら休止のほうを使ってください。<br>休止した人は<b>人数の集計から外れます</b>（提出のかぞえ・足りない日の判定・頼めそうな人）。ただし<b>すでに決まっているシフトには「（休止中）」つきで残ります</b>ので、シフト表からも消えませんし、外すこともできます。</p>
+      <p class="caution fine">⚠ <kbd>…</kbd> の中の <kbd>この方を削除する</kbd> は、その人が出した希望も<b>いっしょに消えます</b>。迷ったら休止のほうを使ってください。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">休止した人は<b>人数の集計から外れます</b>（提出のかぞえ・足りない日の判定・頼めそうな人）。ただし<b>すでに決まっているシフトには「（休止中）」つきで残ります</b>ので、シフト表からも消えませんし、外すこともできます。</p></div></details></div>
     </article>
 
     <article class="item nofig" id="i36">
-      <h3><span class="n">36</span>データはどこにあるか</h3>
+      <div class="txt"><h3><span class="n">36</span>データはどこにあるか</h3>
       <p>希望はインターネット上（＝クラウド）に保存されます。だから<strong>スタッフのスマホと店長の画面が、すぐにつながります</strong>。スマホを換えても、URLさえあれば同じ内容が出ます。</p>
-      <p class="fine">スタッフの合言葉では、自分のぶんしか取り出せない作りになっています。ほかの人の名前も希望も、サーバー側から返ってきません。</p>
       <p class="caution fine">⚠ 電波がないところでは新しく出せません。電波の届くところで開いてください。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">スタッフの合言葉では、自分のぶんしか取り出せない作りになっています。ほかの人の名前も希望も、サーバー側から返ってきません。</p></div></details></div>
     </article>
 
   </div>
@@ -1228,17 +683,19 @@
   <h2>ホーム画面に置く</h2>
   <div class="items">
 
-    <article class="item nofig" id="i37">
-      <h3><span class="n">37</span>iPhoneの場合</h3>
+    <article class="item" id="i37">
+      <div class="figs"><figure class="shot"><img src="senya-shots/s-a2hs.png" alt="iPhoneでの、ホーム画面に追加のご案内" loading="lazy" decoding="async" width="780" height="618"><figcaption>はじめて開いたときに、この案内が出ます（iPhone）</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">37</span>iPhoneの場合</h3>
       <p>Safariで開いて、下の <kbd>共有</kbd>（四角に↑）→ <kbd>ホーム画面に追加</kbd>。アプリのように1タップで開けます。</p>
-      <p class="fine">iOS 26 では、下に <kbd>共有</kbd> が見あたらないことがあります。そのときは<b>右下の「…」を押す</b>と、その中にあります。</p>
       <p class="caution fine">⚠ Chromeなど<b>Safari以外では「ホーム画面に追加」が出ません</b>。うまくいかないときは、URLをSafariで開き直してください。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">iOS 26 では、下に <kbd>共有</kbd> が見あたらないことがあります。そのときは<b>右下の「…」を押す</b>と、その中にあります。</p></div></details></div>
     </article>
 
-    <article class="item nofig" id="i38">
-      <h3><span class="n">38</span>Androidの場合</h3>
+    <article class="item" id="i38">
+      <div class="figs"><figure class="shot"><img src="senya-shots/s-a2hs-and.png" alt="Androidでの、ホーム画面に追加のご案内" loading="lazy" decoding="async" width="780" height="524"><figcaption>Androidでは、こう出ます</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">38</span>Androidの場合</h3>
       <p>Chromeで開いて、右上の <kbd>⋮</kbd> → <kbd>ホーム画面に追加</kbd>。</p>
-      <p class="fine">機種によっては「アプリをインストール」と出ます。どちらでも同じです。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">機種によっては「アプリをインストール」と出ます。どちらでも同じです。</p></div></details></div>
     </article>
 
   </div>
@@ -1248,19 +705,19 @@
   <h2>画面の案内（チュートリアル）</h2>
   <div class="items">
 
-    <article class="item nofig" id="i39">
-      <h3><span class="n">39</span>はじめて開くと、画面が案内します</h3>
+    <article class="item" id="i39">
+      <div class="figs"><figure class="shot pair"><img src="senya-shots/s-tut.png" alt="スタッフ画面の案内" loading="lazy" decoding="async" width="780" height="1688"><img src="senya-shots/k-tut.png" alt="店長画面の案内" loading="lazy" decoding="async" width="780" height="1688"><figcaption>はじめて開くと、画面のほうから案内が始まる</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">39</span>はじめて開くと、画面が案内します</h3>
       <p>スタッフも店長も、<strong>はじめて開いたときは画面ぜんたいが暗くなり、押すところだけが明るく光ります</strong>。光っているところの近くに短い説明が出るので、読みながらそのとおりに押していけば、そのまま使いはじめられます。</p>
-      <p class="fine">スタッフは<b>「働ける日をひとつ出す」</b>まで、店長は<b>「設定 → スタッフを追加 → URLを渡す」</b>までをご案内します。店長側は、希望が集まった月をはじめて開いたときに、<b>「赤い日の見かた → シフトを決める → シフト表を出す」</b>の案内があらためて出ます。</p>
-      <p class="fine">説明の右上の <kbd>あとで</kbd> でいつでもやめられます。<b>つぎへ</b> を押しても進みます（押しそこねても止まりません）。暗いところは押せません。</p>
       <p class="caution fine">⚠ 案内の中の操作は<b>本物</b>です。スタッフの「この日で出す」は、そのままお店に届きます（締切までは何度でも直せます）。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">スタッフは<b>「働ける日をひとつ出す」</b>まで、店長は<b>「設定 → スタッフを追加 → URLを渡す」</b>までをご案内します。店長側は、希望が集まった月をはじめて開いたときに、<b>「赤い日の見かた → シフトを決める → シフト表を出す」</b>の案内があらためて出ます。</p><p class="fine">説明の右上の <kbd>あとで</kbd> でいつでもやめられます。<b>つぎへ</b> を押しても進みます（押しそこねても止まりません）。暗いところは押せません。</p></div></details></div>
     </article>
 
-    <article class="item nofig" id="i40">
-      <h3><span class="n">40</span>もう一度、案内を見る</h3>
+    <article class="item" id="i40">
+      <div class="figs"><figure class="shot"><img src="senya-shots/s-again.png" alt="画面のいちばん下の「使い方をもう一度みる」" loading="lazy" decoding="async" width="780" height="304"><figcaption>スタッフは画面のいちばん下から呼び出せる</figcaption></figure></div>
+      <div class="txt"><h3><span class="n">40</span>もう一度、案内を見る</h3>
       <p>スタッフは画面のいちばん下の <kbd>使い方をもう一度みる</kbd>、店長は <kbd>設定</kbd> の中の <kbd>はじめの準備を、画面でなぞる</kbd> ／ <kbd>毎月の使い方を、画面でなぞる</kbd> から、いつでも見直せます。</p>
-      <p class="fine">このほかに、<b>その機能がはじめて出てきたときだけ</b>、ひとことの案内が1回出ます（「いつもので埋める」「出し終わりました」「決まったシフト」「スタッフからのお願い」など）。読んだら二度と出ません。</p>
-      <p class="fine">案内を見たかどうかは<b>その端末に覚えます</b>。スマホを換えたときは、もう一度出ます。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">このほかに、<b>その機能がはじめて出てきたときだけ</b>、ひとことの案内が1回出ます（「いつもので埋める」「出し終わりました」「決まったシフト」「スタッフからのお願い」など）。読んだら二度と出ません。</p><p class="fine">案内を見たかどうかは<b>その端末に覚えます</b>。スマホを換えたときは、もう一度出ます。</p></div></details></div>
     </article>
 
   </div>
@@ -1330,7 +787,7 @@
 <footer>
   つみき&amp;せんや 使い方<br>
   つくったもの：つみき<br>
-  2026年8月24日
+  2026年8月31日
 </footer>
 
 </div><!-- /.wrap -->
@@ -1362,6 +819,25 @@
     for(var k in links) links[k].classList.toggle('on', k === cur);
   }, {rootMargin:'-10% 0px -70% 0px'});
   targets.forEach(function(el){ io.observe(el); });
+})();
+
+/* 印刷のときは「くわしく」を全部ひらく（紙はたためない）。刷り終わったら元に戻す。 */
+(function(){
+  var opened = [];
+  function open(){
+    opened = [];
+    document.querySelectorAll('details.more:not([open])').forEach(function(d){
+      d.open = true; opened.push(d);
+    });
+  }
+  function close(){ opened.forEach(function(d){ d.open = false; }); opened = []; }
+  window.addEventListener('beforeprint', open);
+  window.addEventListener('afterprint', close);
+  if(window.matchMedia){
+    var mq = window.matchMedia('print');
+    var on = function(e){ e.matches ? open() : close(); };
+    mq.addEventListener ? mq.addEventListener('change', on) : mq.addListener(on);
+  }
 })();
 </script>
 </body>
