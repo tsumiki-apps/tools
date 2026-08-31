@@ -110,11 +110,18 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
   border-radius:26px 26px 0 0; box-shadow:var(--sh-up); transform:translateY(101%);
   transition:transform .34s cubic-bezier(.32,.72,.32,1); max-height:88vh; display:flex; flex-direction:column;}
 .sheet.on{transform:translateY(0);}
-.grip{width:38px; height:4px; border-radius:2px; background:var(--hair); margin:10px auto 2px; flex-shrink:0;}
+/* ⚠️ 以前はここに横棒（グリップ）を置いていたが、引っぱって閉じる操作は付いていない
+   （閉じるのは背景タップだけ）。効かない印は「押しても動かないボタン」に見える。
+   → 横棒はやめて、実際に閉じられる ✕ を置く（2026-08-31）。 */
+.sheet-x{position:absolute; top:10px; right:14px; z-index:2; width:44px; height:44px;
+  border:none; background:none; color:var(--muted); font:inherit; font-size:17px;
+  line-height:1; cursor:pointer; border-radius:12px; flex-shrink:0;}
+.sheet-x:active{transform:scale(.94);}
 .sheet-scroll{overflow-y:auto; -webkit-overflow-scrolling:touch; touch-action:pan-y;
-  padding:8px 22px calc(env(safe-area-inset-bottom) + 22px);}
+  /* 上は ✕（44px＋上10px）に重ならない高さを空ける */
+  padding:16px 22px calc(env(safe-area-inset-bottom) + 22px);}
 
-.sp-head{display:flex; gap:13px; align-items:flex-start; padding-top:6px;}
+.sp-head{display:flex; gap:13px; align-items:flex-start; padding-top:6px; padding-right:40px;}
 .sp-em{width:52px; height:52px; border-radius:16px; background:var(--surface); flex-shrink:0;
   display:flex; align-items:center; justify-content:center; font-size:26px;}
 .sp-t h2{font-size:19px; font-weight:700; line-height:1.4;}
@@ -147,7 +154,7 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
 .btnrow .btn{flex:1;}
 
 /* ルート比較 */
-.rt-head{padding-top:6px;}
+.rt-head{padding-top:6px; padding-right:40px;}  /* 右上の ✕ に潜り込ませない */
 .rt-head .ab{display:flex; align-items:center; gap:9px; font-size:13.5px; font-weight:700; flex-wrap:wrap;}
 .rt-head .ab .ar{color:var(--ghost);}
 .rt-head .sm{font-size:11.5px; color:var(--muted); font-weight:500; margin-top:4px;}
@@ -278,8 +285,8 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
 
 <!-- ===== シート ===== -->
 <div class="veil" id="veil"></div>
-<div class="sheet" id="sheet"><div class="grip"></div><div class="sheet-scroll" id="sheet-body"></div></div>
-<div class="sheet" id="rsheet"><div class="grip"></div><div class="sheet-scroll" id="rsheet-body"></div></div>
+<div class="sheet" id="sheet"><button class="sheet-x" onclick="closeSheets()" aria-label="とじる">✕</button><div class="sheet-scroll" id="sheet-body"></div></div>
+<div class="sheet" id="rsheet"><button class="sheet-x" onclick="closeSheets()" aria-label="とじる">✕</button><div class="sheet-scroll" id="rsheet-body"></div></div>
 
 <script>
 "use strict";
