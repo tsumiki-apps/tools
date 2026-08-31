@@ -217,7 +217,9 @@
     max-height:88vh; max-height:88dvh; overflow-y:auto; -webkit-overflow-scrolling:touch;
   }
   .sheet.show{transform:translateY(0);}
-  .sheet .grip{width:38px; height:4px; border-radius:99px; background:var(--line-2); margin:0 auto 14px;}
+  /* ⚠️ シート上部の横棒（グリップ）は撤去した（2026-08-31）。
+     iOSの引き出しに見えるが、このアプリは引っぱって閉じる操作を持っていない。
+     押しても引いても何も起きない印は「効かないボタン」に見える。閉じるは右上の ✕ 一本。 */
   .sheet h2{margin:0 0 3px; font-size:1.12rem; font-weight:700;}
   /* ⚠️ `.sheet .sub` は、シートの中の <button class="btn sub"> まで巻き込んでいた
      （＝クラス名の衝突）。「代わりに入れる」「この日の必要人数」「見送る」
@@ -520,7 +522,6 @@
 
 <div class="backdrop" id="backdrop"></div>
 <div class="sheet" id="sheet">
-  <div class="grip"></div>
   <!-- ⚠️ 前は「この日で出す」の真下に、同じ幅の「とじる」が並んでいた。
        同じ大きさのボタンが2つ縦に並ぶと、どちらを押すのか迷う。
        閉じるは右上の ✕ ひとつに寄せて、下は「出す」だけにする（背景タップでも閉じる）。 -->

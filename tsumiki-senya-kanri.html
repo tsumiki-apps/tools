@@ -290,7 +290,9 @@
     width:100%; max-width:min(520px,100%); margin:0 auto; box-shadow:0 -12px 40px -20px rgba(30,22,10,.5);
     max-height:88vh; max-height:88dvh; overflow-y:auto; -webkit-overflow-scrolling:touch;}
   .sheet.show{transform:translateY(0);}
-  .sheet .grip{width:38px; height:4px; border-radius:99px; background:var(--line-2); margin:0 auto 14px;}
+  /* ⚠️ シート上部の横棒（グリップ）は撤去した（2026-08-31）。
+     iOSの引き出しに見えるが、このアプリは引っぱって閉じる操作を持っていない。
+     押しても引いても何も起きない印は「効かないボタン」に見える。閉じるは右上の ✕ 一本。 */
   .sheet h2{margin:0 0 3px; font-size:1.1rem; font-weight:700;}
   /* ⚠️ `.sheet .sub` は、シートの中の <button class="btn sub"> まで巻き込んでいた
      （＝クラス名の衝突）。「代わりに入れる」「この日の必要人数」「見送る」
@@ -406,8 +408,10 @@
   /* ⚠️ 以前は #shiftBox の中にもう1枚 div を入れていたため、
      ほかの箱（足りない日・お願い）と左右がずれていた（左25/中身39 対 左19/中身25）。
      #reqBox と同じく、箱そのものに class を付けて形をそろえる。 */
+  /* ⚠️ padding を書き忘れていて、見出し「シフトを組む」と説明文が枠線に重なっていた
+     （2026-08-31 実機で指摘）。同じ役目の .sumbox と同じ 12px 14px にそろえる。 */
   .shiftcard{border:1px solid var(--line); border-radius:14px; margin-top:13px;
-    background:var(--surface);}
+    padding:12px 14px; background:var(--surface);}
   .shiftcard.on{border-color:var(--good); background:var(--good-wash);}
   .shiftcard .hd2{font-weight:700; font-size:.92rem; margin-bottom:3px;}
   .shiftcard.on .hd2{color:var(--good);}
@@ -489,9 +493,11 @@
   .closex:active{transform:scale(.94);}
   .sheet h2{padding-right:var(--tap);}
 
-  /* スタッフの「…」と、その中身 */
-  .btn.sm.more{flex:none; padding:8px 16px; letter-spacing:.12em;
-    background:none; border:none; color:var(--ink-soft);}
+  /* スタッフの「そのほか」と、その中身 */
+  /* ⚠️ 以前は「…」の一文字だけで、枠も背景も無かった（.btn.sm.more で background:none; border:none）。
+     何のボタンか読めず、押せる場所にも見えない、と実機で指摘があった（2026-08-31）。
+     → 中身どおり「そのほか」と書き、ほかのボタンと同じ枠を付ける（.sub と同じ見た目）。 */
+  .btn.sm.more{flex:none; padding:8px 14px;}
   .morelist{display:grid; gap:9px; margin-top:14px;}
   .morebtn{display:block; width:100%; min-height:var(--tap); text-align:left;
     padding:12px 14px; border:1px solid var(--line); border-radius:13px;
@@ -746,7 +752,6 @@
 
 <div class="backdrop" id="backdrop"></div>
 <div class="sheet" id="sheet">
-  <div class="grip"></div>
   <!-- ⚠️ 「とじる」の全幅ボタンと「やめる」は、どちらも背景タップ・「‹ もどる」と同じことをしていた。
        閉じるは右上の ✕ ひとつに寄せる。 -->
   <button class="closex" id="shX" aria-label="とじる">✕</button>
@@ -1899,7 +1904,7 @@ function renderStaff(){
       if(ok) sentSet(s2.id,true); else renderStaff();
       toast(ok?'コピーしました。LINEに貼ってお送りください':'コピーできませんでした');
     });
-    mk('…','more',()=>openMore(s2.id)).setAttribute('aria-label',s2.name+'さんの、そのほかの操作');
+    mk('そのほか','sub more',()=>openMore(s2.id)).setAttribute('aria-label',s2.name+'さんの、そのほかの操作');
     box.appendChild(el);
   });
 }
@@ -2102,7 +2107,7 @@ function tutSteps1(){
      text:'まだの人は赤く「まだ渡していません」と出ます。'},
     {sel:'#staffHd', need:inStaff, h:'「◯人中◯人に渡しました」',
      text:'全員に渡すと「◯／◯人が出し終わり」に変わります。'},
-    {sel:'#staffBox .staff .acts .more', need:inStaff, h:'「…」の中',
+    {sel:'#staffBox .staff .acts .more', need:inStaff, h:'「そのほか」の中',
      text:'名前を直す・休止・合言葉の作り直し・削除。ふだんは押しません。'},
     {sel:'#gearBtn', need:inStaff, h:'登録はおしまい',
      text:'歯車をもう一度押すと、一覧にもどります。',
