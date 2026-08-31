@@ -157,6 +157,7 @@
     padding:3px 1px; cursor:pointer; -webkit-tap-highlight-color:transparent; overflow:hidden;
   }
   .cell.blank{border:none; background:transparent; cursor:default;}
+  .cell{overflow:hidden;}
   .cell .dn{font-size:.82rem; font-weight:700; line-height:1.1; font-variant-numeric:tabular-nums;}
   .cell.s6 .dn{color:var(--sat);} .cell.s0 .dn{color:var(--sun);}
   .cell.rest{background:var(--surface-2); border-style:dashed;}
@@ -286,9 +287,16 @@
 
   /* ===== v2：枠（昼/夜）まわり ===== */
   /* ⚠️ 折り返させると、札2つの日だけ高さが増えて行がガタつく。折り返さない。 */
-  .cell .mk{display:flex; gap:2px; justify-content:center; margin-top:3px; flex-wrap:nowrap;}
+  /* ⚠️ 枠は最大6つになった（2026-08-31）。横1列に並べると 320px のマスから出るので、
+     折り返せるようにし、出すのは3つまで＋「+N」にする。詳しくは日をタップすれば全部出る。 */
+  .cell .mk{display:flex; gap:2px; justify-content:center; margin-top:3px;
+    flex-wrap:wrap; max-width:100%; min-width:0;}
+  /* ⚠️ flex の既定は「縮む」。縮ませると札の字が潰れて読めなくなるので、
+     縮ませずに折り返させる（flex:0 0 auto）。2026-08-31 に 320px で実際に潰れた。 */
   .cell .k{font-size:clamp(.5rem,1.9vw,.6rem); font-weight:700; line-height:1;
-    padding:2px 3px; border-radius:4px; white-space:nowrap;}
+    padding:2px 3px; border-radius:4px; white-space:nowrap;
+    flex:0 0 auto; max-width:100%; overflow:hidden;}
+  .cell .k.more{background:transparent; color:var(--sub); box-shadow:0 0 0 1px var(--line) inset;}
   .cell .k.o{background:var(--accent-fill); color:var(--on-accent);}
   .cell .k.t{background:transparent; color:var(--accent-2); box-shadow:0 0 0 1px var(--accent) inset;}
   .cell .k.a{background:var(--good); color:var(--on-accent);}
@@ -875,10 +883,14 @@ function render(){
               +(key===me.today?' today':'')+(hasReq?' req':'');
     let inner='<div class="dn">'+d+'</div>';
     if(has){
-      inner+='<div class="mk">'+(me.slots||[]).filter(s=>got[s.k]).map(s=>{
+      const on=(me.slots||[]).filter(s=>got[s.k]);
+      const MK_MAX=2;   /* マスの高さは決まっている。3つ出すと3行になって下が切れる（320pxで実測） */
+      let mk=on.slice(0,MK_MAX).map(s=>{
         const cls=showAssign?'a':(got[s.k].mark==='t'?'t':'o');
-        return '<span class="k '+cls+'">'+esc(s.label)+'</span>';
-      }).join('')+'</div>';
+        return '<span class="k '+cls+'">'+esc(String(s.label).slice(0,3))+'</span>';
+      }).join('');
+      if(on.length>MK_MAX) mk+='<span class="k more">+'+(on.length-MK_MAX)+'</span>';
+      inner+='<div class="mk">'+mk+'</div>';
     }else if(closed.has(w)){ inner+='<div class="restmark">休</div>'; }
     e.innerHTML=inner;
     e.addEventListener('click',()=>openSheet(key));
@@ -901,7 +913,7 @@ function render(){
      締切後の案内（お願いの出しかた）は、めったに出ない状況の説明なので残す。 */
   const hintEl=document.getElementById('hint');
   const hintTxt = cur.editable
-    ? (n===0 ? '働ける日をタップして、昼と夜それぞれを選んでください。選ばなかったところは「その時間は働けない」として伝わります。' : '')
+    ? (n===0 ? '働ける日をタップして、'+((me.slots||[]).map(s=>s.label).join('・')||'時間帯')+' それぞれを選んでください。選ばなかったところは「その時間は働けない」として伝わります。' : '')
     : '締切をすぎたので直せません。急な変更は、日をタップして「お願い」を出してください。';
   hintEl.textContent=hintTxt; hintEl.hidden=!hintTxt;
 

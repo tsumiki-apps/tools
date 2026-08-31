@@ -402,7 +402,20 @@
   .staffhd .cnt{font-size:.84rem; font-weight:700; color:var(--ink-mid);}
 
   /* 設定：枠ごと */
-  .slotcfg .lab{flex:0 0 auto; font-weight:700; font-size:.95rem; min-width:2.4em;}
+  /* 枠は1〜6個。1行が長いので、名前と「消す」を上の段、時間と人数を下の段にする。 */
+  .slotcfg{display:block; border:1px solid var(--line); border-radius:14px; padding:12px 13px;}
+  .slotcfg .hd{display:flex; align-items:center; gap:8px; margin-bottom:9px;}
+  .field .slotcfg .hd input.cf-label{flex:0 1 8.5em; min-width:0; width:auto; font-weight:700;}
+  .slotcfg .hd .cf-del{flex:0 0 auto; margin-left:auto; min-height:44px; padding:0 12px;
+    background:none; border:none; color:var(--shu); font-size:.86rem; font-family:inherit; cursor:pointer;}
+  .slotcfg .hd .cf-del[hidden]{display:none;}
+  .slotcfg .bd{display:flex; flex-wrap:wrap; gap:8px; align-items:center;}
+  .slotcfg .bd input[type=time]{flex:1 1 108px; min-width:0;}
+  #cfAddSlot{width:100%; min-height:44px; margin-top:10px; background:var(--card);
+    border:1px dashed var(--line); border-radius:14px; color:var(--ink);
+    font-family:inherit; font-size:.92rem; cursor:pointer;}
+  #cfAddSlot:disabled{color:var(--ink-soft); cursor:default;}
+  #cfSlotNote{margin:8px 0 0; font-size:.82rem; line-height:1.65; color:var(--ink-soft);}
 
   /* ===== v3：シフト表・偏り・まとめて決める・頼めそうな人 ===== */
   /* ⚠️ 以前は #shiftBox の中にもう1枚 div を入れていたため、
@@ -731,9 +744,12 @@
     <div class="field">
       <label>時間帯と、ほしい人数</label>
       <div id="cfSlots"></div>
+      <button type="button" id="cfAddSlot">＋ 時間帯をふやす</button>
+      <p id="cfSlotNote"></p>
       <p class="muted" style="margin:8px 0 0; line-height:1.6">
         この人数を下回った日が、一覧で赤くなります。<br>
-        時間帯は、スタッフの画面の「昼／夜」にもそのまま出ます。
+        ここで決めた名前と時間が、そのままスタッフの画面に出ます。<br>
+        <b>時間帯は6つまで</b>ふやせます（例：昼を「10:00〜」と「11:00〜」の2つに分ける）。
       </p>
     </div>
     <button class="btn" id="saveCfg">この内容にする</button>
@@ -948,6 +964,9 @@ function staffById(id){ return staffList.find(s=>s.id===id); }
 /* 入れた時間が、その枠の時間帯と少しでも重なっているか */
 function overlapsSlot(st, sl){ return st.from < sl.to && sl.from < st.to; }
 function slotOf(k){ return slots().find(s=>s.k===k); }
+/* 説明文の「例」に使う名前。枠の名前はお店が決めるので、直書きしない */
+function slotEg(){ const a=slots(); return a.length?a[0].label:'昼'; }
+function slotNames(){ const a=slots(); return a.length?a.map(s=>s.label).join('・'):'時間帯'; }
 async function copyText(t){
   try{ await navigator.clipboard.writeText(t); return true; }
   catch(e){
@@ -1261,7 +1280,14 @@ function renderMonth(){
     let inner='<div class="dn">'+d+'</div>';
     if(rest) inner+='<div class="num">休</div>';
     else if(isShort){
-      const parts=slots().filter(s=>l[s.k]>0).map(s=>esc(s.label)+' −'+l[s.k]);
+      /* ⚠️ マスの高さは決まっている。枠が6つあると3行以上になって下が切れる（320pxで実測・2026-08-31）。
+         2行までにして、残りは「ほか◯」。中身は日をタップすれば全部出る。 */
+      const short=slots().filter(s=>l[s.k]>0);
+      /* 入るのは2行まで（320px・幅44pxのマスで実測。3行にすると2px足りずに切れる）。
+         2つなら両方、3つ以上なら1つ＋「ほか◯」で、必ず2行に収める。 */
+      const LK_MAX = short.length<=2 ? 2 : 1;
+      const parts=short.slice(0,LK_MAX).map(s=>esc(s.label)+' −'+l[s.k]);
+      if(short.length>LK_MAX) parts.push('ほか'+(short.length-LK_MAX));
       inner+='<div class="lack">'+parts.join('<br>')+'</div>';
     }else{
       inner+='<div class="num">'+peopleCount(avail[key])+'人</div>';
@@ -1275,7 +1301,7 @@ function renderMonth(){
 
   /* ⚠️ 赤い日が1つも無いときに「赤い日は…」と説明するのは、無いものの説明になる。 */
   document.getElementById('hint1').textContent =
-      shortDays.length ? '赤い日は人手が足りない日（「昼 −1」＝昼にあと1人）。日をタップすると、その日に入れる人が出ます。'
+      shortDays.length ? '赤い日は人手が足りない日（「'+slotEg()+' −1」＝'+slotEg()+'にあと1人）。日をタップすると、その日に入れる人が出ます。'
     : anySubmitted     ? '日をタップすると、その日に入れる人と、決めたシフトが出ます。'
     :                    '日をタップすると、その日に入れる人が出ます。ほしい人数を下回ると赤くなります（人数は「設定」で決めます）。';
   tutMaybeStart();
@@ -1857,7 +1883,7 @@ function inviteText(s2){
   return s2.name+'さん\n'+shop.name+'のシフト希望は、こちらから出してください。\n\n'+
     staffUrl(s2.code)+'\n\n'+
     '・'+y+'年'+m1+'月分をお願いします\n'+
-    '・働ける日をタップして、昼と夜それぞれを選ぶだけです\n'+
+    '・働ける日をタップして、'+slotNames()+' それぞれを選ぶだけです\n'+
     '・あとから何度でも直せます\n'+
     '・合言葉は '+s2.code+' です（リンクが開かないときに使ってください）';
 }
@@ -1961,21 +1987,71 @@ async function addStaff(){
   catch(e){ toast('追加できませんでした'); }
 }
 
+/* ===== 設定：時間帯の枠（1〜6個） =====
+   ⚠️ もともと画面は昼／夜の2つ固定だった（表も通信もはじめから何個でも持てる作りなのに、
+   ふやす手立てだけが無かった）。2026-08-31、せんや様から
+   「昼夜とも出勤時間をずらして募集したい。1日で最大6枠あれば十分」とご要望をいただいて開けた。
+   ・枠の合言葉（slot_key）は一度決めたら変えない。希望・シフト・お願いが全部これで紐づいている。
+   ・枠を消すと、その枠に出ていた希望も消える（サーバー側が片付ける）。消す前に必ず数を伝える。 */
+const SLOT_MAX = 6;
+
+function newSlotKey(){
+  const used = new Set([...document.querySelectorAll('#cfSlots .slotcfg')].map(r=>r.dataset.k));
+  slots().forEach(s=>used.add(s.k));
+  for(let n=1; n<=99; n++){ const k='s'+n; if(!used.has(k)) return k; }
+  return 's'+Date.now();
+}
+function slotRow(s){
+  const row=document.createElement('div');
+  row.className='slotcfg'; row.style.marginBottom='10px';
+  row.dataset.k=s.k;
+  row.innerHTML=
+    '<div class="hd">'+
+      '<input type="text" class="cf-label" maxlength="6" value="'+esc(s.label)+'" '+
+        'placeholder="名前" aria-label="この時間帯の名前">'+
+      '<button type="button" class="cf-del">この時間帯を消す</button>'+
+    '</div>'+
+    '<div class="bd">'+
+      '<input type="time" step="900" class="cf-from" value="'+m2hm(s.from)+'" aria-label="はじまりの時刻">'+
+      '<span class="sep">〜</span>'+
+      '<input type="time" step="900" class="cf-to" value="'+m2hm(s.to)+'" aria-label="おわりの時刻">'+
+      '<span class="need"><input type="number" class="cf-need" min="0" max="99" inputmode="numeric" '+
+        'value="'+s.need+'" aria-label="ほしい人数"><span class="muted">人ほしい</span></span>'+
+    '</div>';
+  row.querySelector('.cf-del').addEventListener('click',function(){ removeSlotRow(row); });
+  return row;
+}
+/* その枠に、いま何人ぶんの希望が出ているか（消す前に伝えるため） */
+function availCountOfSlot(k){
+  return (cur && cur.avail ? cur.avail : []).filter(a=>a.k===k).length;
+}
+function removeSlotRow(row){
+  const rows=[...document.querySelectorAll('#cfSlots .slotcfg')];
+  if(rows.length<=1){ toast('時間帯は1つ以上必要です'); return; }
+  const k=row.dataset.k, nm=(row.querySelector('.cf-label').value||'').trim()||'この時間帯';
+  const n=availCountOfSlot(k);
+  if(n>0 && !confirm(nm+'を消すと、この時間帯に出ている希望 '+n+'件 も一緒に消えます。\n消してよろしいですか？')) return;
+  row.remove(); syncSlotUI();
+}
+function syncSlotUI(){
+  const rows=[...document.querySelectorAll('#cfSlots .slotcfg')];
+  const add=document.getElementById('cfAddSlot');
+  if(add){
+    add.disabled = rows.length>=SLOT_MAX;
+    add.textContent = rows.length>=SLOT_MAX ? '時間帯は6つまでです' : '＋ 時間帯をふやす';
+  }
+  rows.forEach(r=>{ r.querySelector('.cf-del').hidden = (rows.length<=1); });
+  const note=document.getElementById('cfSlotNote');
+  if(note) note.textContent = 'いま '+rows.length+' つ（6つまで）。保存すると、はじまりの早い順に並びます。';
+}
+
 /* ===== 設定 ===== */
 function fillConfig(){
   document.getElementById('cfName').value=shop.name;
   document.getElementById('cfDeadline').value=shop.deadline_day;
   const box=document.getElementById('cfSlots'); box.innerHTML='';
-  slots().forEach(s=>{
-    const row=document.createElement('div'); row.className='slotcfg'; row.style.marginBottom='10px';
-    row.dataset.k=s.k;
-    row.innerHTML='<span class="lab">'+esc(s.label)+'</span>'+
-      '<input type="time" step="900" class="cf-from" value="'+m2hm(s.from)+'" aria-label="'+esc(s.label)+'のはじまり">'+
-      '<span class="sep">〜</span>'+
-      '<input type="time" step="900" class="cf-to" value="'+m2hm(s.to)+'" aria-label="'+esc(s.label)+'のおわり">'+
-      '<span class="need"><input type="number" class="cf-need" min="0" max="99" inputmode="numeric" value="'+s.need+'" aria-label="'+esc(s.label)+'にほしい人数"><span class="muted">人ほしい</span></span>';
-    box.appendChild(row);
-  });
+  slots().forEach(s=>box.appendChild(slotRow(s)));
+  syncSlotUI();
   const wd=document.getElementById('cfWdays'); wd.innerHTML='';
   const closed=new Set(shop.closed_wdays||[]);
   WD.forEach((w,i)=>{
@@ -1985,6 +2061,20 @@ function fillConfig(){
   });
   updateDlHint();
 }
+document.getElementById('cfAddSlot').addEventListener('click',function(){
+  const box=document.getElementById('cfSlots');
+  if(box.children.length>=SLOT_MAX) return;
+  /* 直前の枠の終わりを、次の枠のはじまりの目安にする（打ち直す手間を減らす） */
+  const last=box.lastElementChild;
+  let f=660, t=870;
+  if(last){
+    const lt=hm2m(last.querySelector('.cf-to').value);
+    if(lt!=null){ f=Math.min(lt, 22*60); t=Math.min(f+180, 23*60+45); }
+  }
+  const row=slotRow({k:newSlotKey(), label:'', from:f, to:t, need:1});
+  box.appendChild(row); syncSlotUI();
+  row.querySelector('.cf-label').focus();
+});
 document.getElementById('cfDeadline').addEventListener('input',updateDlHint);
 function updateDlHint(){
   const d=parseInt(document.getElementById('cfDeadline').value,10);
@@ -1996,16 +2086,37 @@ document.getElementById('saveCfg').addEventListener('click',async()=>{
   const dd=parseInt(document.getElementById('cfDeadline').value,10);
   if(!name){ toast('お店の名前を入れてください'); return; }
   if(isNaN(dd)||dd<1||dd>31){ toast('締切は1〜31の数で入れてください'); return; }
-  const arr=[]; let bad=null;
-  [...document.querySelectorAll('#cfSlots .slotcfg')].forEach((row,i)=>{
-    const k=row.dataset.k, s=slotOf(k);
+  const rows=[...document.querySelectorAll('#cfSlots .slotcfg')];
+  if(!rows.length){ toast('時間帯を1つ以上入れてください'); return; }
+  if(rows.length>SLOT_MAX){ toast('時間帯は'+SLOT_MAX+'つまでです'); return; }
+  const arr=[]; let bad=null, badFull=null; const seen=new Set();
+  rows.forEach((row)=>{
+    if(bad||badFull) return;
+    const k=row.dataset.k;
+    const label=(row.querySelector('.cf-label').value||'').trim();
     const f=hm2m(row.querySelector('.cf-from').value), t=hm2m(row.querySelector('.cf-to').value);
     const need=parseInt(row.querySelector('.cf-need').value,10);
-    if(f==null||t==null||t<=f){ bad=s.label+'の時間帯'; return; }
-    if(isNaN(need)||need<0||need>99){ bad=s.label+'のほしい人数'; return; }
-    arr.push({k:k, label:s.label, sort:i+1, f:f, t:t, need:need});
+    if(!label){ badFull='時間帯の名前が空いています。短い名前をつけてください'; return; }
+    if(seen.has(label)){ badFull='「'+label+'」が2つあります。名前はひとつずつ違うものにしてください'; return; }
+    seen.add(label);
+    if(f==null||t==null||t<=f){ bad=label+'の時間帯'; return; }
+    if(isNaN(need)||need<0||need>99){ bad=label+'のほしい人数'; return; }
+    arr.push({k:k, label:label, f:f, t:t, need:need});
   });
+  if(badFull){ toast(badFull); return; }
   if(bad){ toast(bad+'を見直してください'); return; }
+  /* はじまりの早い順に並べる（昼→夜の順に見えるように） */
+  arr.sort(function(a,b){ return a.f-b.f || a.t-b.t; });
+  arr.forEach(function(x,i){ x.sort=i+1; });
+
+  /* 消える枠がないか、保存する前に本人に伝える（サーバー側は黙って片付けてしまう） */
+  const keep=new Set(arr.map(x=>x.k));
+  const gone=slots().filter(s=>!keep.has(s.k));
+  if(gone.length){
+    const n=gone.reduce((a,s2)=>a+availCountOfSlot(s2.k),0);
+    const nm=gone.map(s2=>s2.label).join('・');
+    if(!confirm(nm+' が無くなります。'+(n?'この時間帯に出ている希望 '+n+'件 も一緒に消えます。':'')+'\n続けてよろしいですか？')) return;
+  }
   const closed=[...document.getElementById('cfWdays').children].filter(b=>b.classList.contains('on')).map(b=>+b.dataset.w);
   try{
     await arpc('kibo_admin_update_shop',{p_name:name, p_deadline_day:dd, p_closed:closed, p_slots:arr});
@@ -2087,6 +2198,8 @@ function tutSteps1(){
      text:'いまは月曜。ちがえば押して直してください。'},
     {sel:'#cfSlots', need:inCfg, h:'時間帯と、ほしい人数',
      text:'仮の値です。お店の時間と人数に直してください。'},
+    {sel:'#cfAddSlot', need:inCfg, h:'時間帯は6つまでふやせます',
+     text:'「10:00〜」と「11:00〜」のように、ずらして募集できます。'},
     {sel:'#saveCfg', need:inCfg, tap:true, h:'「この内容にする」',
      text:'あとからいつでも変えられます。'},
     {sel:'#gearBtn', need:inCfg, h:'歯車が黒い＝この中にいる印',
@@ -2127,7 +2240,7 @@ function tutSteps2(){
     {sel:'#stateRow', enter:function(){ if(!viewShown(1)) showView(1); },
      h:'今月のようす', text:'足りない日と、出し終わった人数が出ます。'},
     {sel:'#cal', pad:4, h:'赤い日＝人手が足りない日',
-     text:'「昼 −1」＝昼にあと1人。日をタップしてみてください。',
+     text:'「'+slotEg()+' −1」＝'+slotEg()+'にあと1人。日をタップしてみてください。',
      done:sheetOpen},
     {sel:'#slots', need:sheetOpen, h:'その日に入れる人',
      text:'○は入れます、△は行けたら。'},
