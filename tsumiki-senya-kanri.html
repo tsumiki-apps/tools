@@ -1880,9 +1880,13 @@ async function resolveReq(id,action){
 function staffUrl(code){ return STAFF_URL+'?c='+code; }
 function inviteText(s2){
   const {y,m1}=parseMonth(shop.open_month);
+  /* ⚠️ 締切がどこにも書いていなかった。受け取った側は「いつまでに出すのか」が分からない。
+     締切は前の月の◯日。短い月は月末に寄せる（サーバーの kibo_deadline と同じ決め方）。 */
+  const pv=parseMonth(shiftMonth(shop.open_month,-1));
+  const dlM=pv.m1, dlD=Math.min(shop.deadline_day||20, daysInMonth(pv.y,pv.m1));
   return s2.name+'さん\n'+shop.name+'のシフト希望は、こちらから出してください。\n\n'+
     staffUrl(s2.code)+'\n\n'+
-    '・'+y+'年'+m1+'月分をお願いします\n'+
+    '・'+y+'年'+m1+'月分を '+dlM+'月'+dlD+'日までにお願いします\n'+
     '・働ける日をタップして、'+slotNames()+' それぞれを選ぶだけです\n'+
     '・あとから何度でも直せます\n'+
     '・合言葉は '+s2.code+' です（リンクが開かないときに使ってください）';
@@ -2193,9 +2197,15 @@ function tutSteps1(){
     {sel:'#cfName', need:inCfg, h:'お店の名前',
      text:'ちがっていれば直してください。スタッフの画面にも出ます。'},
     {sel:'#cfDeadline', need:inCfg, h:'締切を決める',
-     text:'いまは20日。お店に合わせて直してください。'},
+     /* ⚠️ 「いまは20日」「いまは月曜」とベタ書きだった。お店ごとに違うので、いま入っている値を読む。
+        ちがう値が入っているのに「いまは月曜」と言われると、直す必要がないところを直してしまう。 */
+     text:'いまは'+(shop.deadline_day||20)+'日。お店に合わせて直してください。'},
     {sel:'#cfWdays', need:inCfg, h:'定休日',
-     text:'いまは月曜。ちがえば押して直してください。'},
+     text:(function(){
+       const a=(shop.closed_wdays||[]).slice().sort(function(p,q){return p-q;});
+       return a.length ? 'いまは'+a.map(function(w){return WD[w];}).join('・')+'曜。ちがえば押して直してください。'
+                       : 'いまは「定休日なし」。お休みの曜日があれば押して選んでください。';
+     })()},
     {sel:'#cfSlots', need:inCfg, h:'時間帯と、ほしい人数',
      text:'仮の値です。お店の時間と人数に直してください。'},
     {sel:'#cfAddSlot', need:inCfg, h:'時間帯は6つまでふやせます',
@@ -2593,6 +2603,7 @@ function tutMaybeStart(){
   })();
 </script>
 <!-- /tsumiki-license-gate -->
+
 
 </body>
 </html>
