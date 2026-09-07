@@ -246,6 +246,32 @@
   .slotcfg .need > span{white-space:nowrap;}
   .slotcfg .sep{color:var(--ink-soft); flex:0 0 auto;}
 
+  /* 設定の「曜日ごとのほしい人数」
+     ⚠️ 時間帯は6つまでふえる。狭い画面では表だけを横に流し、ページはあふれさせない。 */
+  .wntog{display:flex; align-items:center; gap:9px; width:100%; min-height:var(--tap);
+    padding:10px 13px; border:1.5px solid var(--line-2); border-radius:12px;
+    background:var(--surface); color:var(--ink); font-family:var(--sans);
+    font-size:.95rem; font-weight:700; cursor:pointer; text-align:left;}
+  .wntog::before{content:''; flex:0 0 auto; width:20px; height:20px; border-radius:6px;
+    border:2px solid var(--line-2); background:var(--surface);}
+  .wntog.on{border-color:var(--accent); background:var(--accent-wash);}
+  .wntog.on::before{border-color:var(--accent); background:var(--accent-fill);
+    box-shadow:inset 0 0 0 2px var(--surface);}
+  .wnwrap{overflow-x:auto; -webkit-overflow-scrolling:touch; margin-top:11px;}
+  .wntable{border-collapse:collapse; min-width:100%;}
+  .wntable th,.wntable td{padding:4px clamp(2px,1.3vw,6px); text-align:center; white-space:nowrap;}
+  .wntable thead th{font-size:.8rem; font-weight:700; color:var(--ink-mid); line-height:1.3;}
+  .wntable thead th .tm3{display:block; font-weight:400; font-size:.68rem; color:var(--ink-soft);
+    font-variant-numeric:tabular-nums;}
+  .wntable tbody th{text-align:left; font-weight:700; padding-right:9px;}
+  .wntable tbody tr + tr td, .wntable tbody tr + tr th{border-top:1px solid var(--line);}
+  .wntable tbody th.sun{color:var(--sun);} .wntable tbody th.sat{color:var(--sat);}
+  .wntable tbody th .rest{display:block; font-size:.68rem; font-weight:400; color:var(--ink-soft);}
+  .field .wntable td input{width:clamp(46px,14vw,68px); min-height:var(--tap); text-align:center;
+    padding:8px 4px; font-family:var(--sans); font-size:1.05rem;
+    border:1.5px solid var(--line-2); border-radius:11px; background:var(--surface); color:var(--ink);}
+  .field .wntable td input.zero{color:var(--ink-soft); background:var(--surface-2);}
+
   /* スタッフ */
   .staff{border:1px solid var(--line); border-radius:14px; padding:13px; margin-bottom:10px; background:var(--surface);}
   .staff.off{opacity:.55;}
@@ -752,6 +778,19 @@
         <b>時間帯は6つまで</b>ふやせます（例：昼を「10:00〜」と「11:00〜」の2つに分ける）。
       </p>
     </div>
+    <div class="field">
+      <label>曜日ごとの、ほしい人数</label>
+      <button type="button" class="wntog" id="cfWnOn" aria-pressed="false">曜日で人数を変える</button>
+      <div id="cfWnBox" hidden>
+        <div class="wnwrap"><table class="wntable" id="cfWnTable"></table></div>
+        <p class="muted" style="margin:11px 0 0; line-height:1.6">
+          曜日ごとに人数がだいたい決まっているときは、ここで決めておけば<b>1日ずつ直さずに済みます</b>。<br>
+          <b>0人</b>にすると、その曜日のその時間帯は募集しません（例：月曜の夜）。<br>
+          ある日だけちがうときは、その日をタップして <b>「この日の必要人数」</b> で上書きできます。
+        </p>
+        <button type="button" class="btn sub" id="cfWnFlat" hidden style="margin-top:11px"></button>
+      </div>
+    </div>
     <button class="btn" id="saveCfg">この内容にする</button>
     <div style="height:10px"></div>
     <button class="btn sub" id="tutAgain1">はじめの準備を、画面でなぞる</button>
@@ -803,7 +842,7 @@
   <div id="mNeed" hidden>
     <button class="backb" id="needBack">‹ もどる</button>
     <h2 id="needTitle">—</h2>
-    <div class="sub">この日だけの人数です。ふだんは設定の人数を使います。</div>
+    <div class="sub" id="needSub">この日だけの人数です。ふだんは設定の人数を使います。</div>
     <div id="needRows"></div>
     <button class="btn" id="needSave" style="margin-top:4px">この日はこの人数にする</button>
     <div class="row2">
@@ -918,6 +957,10 @@ function indexAssign(list){
     k[a.staff_id]={from:a.from,to:a.to};
   }); return m;
 }
+/* 曜日ごとの人数 → {曜日:{枠:人数}} */
+function indexWneed(list){
+  const m={}; (list||[]).forEach(x=>{ (m[x.wday]=m[x.wday]||{})[x.k]=x.need; }); return m;
+}
 /* その日だけの人数 → {日付:{枠:人数}} */
 function indexNeed(list){
   const m={}; (list||[]).forEach(x=>{ (m[x.d]=m[x.d]||{})[x.k]=x.need; }); return m;
@@ -930,6 +973,7 @@ function submitState(s){ return s.done?'done':(s.days>0?'part':'none'); }
 /* ===== 状態 ===== */
 let admin=null, shopId=null, shop=null, month=null, cur=null;
 let avail={}, assign={}, dayNeed={}, staffList=[], dayMode='kibo';
+let wdayNeed={};   /* 曜日ごとのほしい人数 {曜日:{枠:人数}} */
 
 async function rpc(fn,params){
   let r;
@@ -1050,7 +1094,7 @@ async function doLogin(c, forShop){
     if(!info){ err.textContent='その合言葉は見つかりません'; return; }
     admin=v; lsSet(LS_CODE,v);
     if(info.mode==='pick'){ showPicker(info.shops); return; }
-    shop=info; shopId=info.shop_id; lsSet(LS_SHOP, shopId);
+    shop=info; wdayNeed=indexWneed(shop.wday_needs); shopId=info.shop_id; lsSet(LS_SHOP, shopId);
     // URLに合言葉が入ったままだと、画面を見せたときに他の人に見えてしまう
     history.replaceState(null,'',location.pathname);
     enter();
@@ -1149,6 +1193,7 @@ function paintGear(){
 function showView(n){
   [1,2,3].forEach(function(m){ document.getElementById('view'+m).hidden = (m!==n); });
   if(n===2) renderStaff();
+  if(n===3 && wnReady) renderWnFlat();
   paintGear();
   window.scrollTo(0,0);
 }
@@ -1184,12 +1229,18 @@ async function loadMonth(){
   avail=indexAvail(cur.avail); assign=indexAssign(cur.assign);
   dayNeed=indexNeed(cur.dayneeds); staffList=cur.staff||[];
   renderMonth();
+  if(wnReady) renderWnFlat();
   if(!document.getElementById('view2').hidden) renderStaff();
 }
 
 /* --- 数え方（推定なし・枠そのもので数える） --- */
+/* 人数は3段。上から順に、見つかったところで決まる。
+     ① その日だけの上書き（この日の必要人数）
+     ② 曜日ごと（設定の「曜日ごとの、ほしい人数」）
+     ③ 枠の既定（設定の「時間帯と、ほしい人数」） */
 function needOf(key,k){
   const o=dayNeed[key]; if(o && o[k]!=null) return o[k];
+  const w=wdayNeed[wdayOf(key)]; if(w && w[k]!=null) return w[k];
   const s=slotOf(k); return s?s.need:0;
 }
 function peopleOn(key,k){
@@ -1817,7 +1868,13 @@ document.getElementById('actNeed').addEventListener('click',()=>{
     i.value=needOf(shDate,s.k); i.dataset.k=s.k; i.setAttribute('aria-label',s.label+'にほしい人数');
     row.appendChild(i); box.appendChild(row);
   });
-  document.getElementById('needReset').hidden=!dayNeed[shDate];
+  const rb=document.getElementById('needReset');
+  rb.hidden=!dayNeed[shDate];
+  rb.textContent = wdayNeed[w] ? WD[w]+'曜の人数に戻す' : 'ふだんに戻す';
+  const sb=document.getElementById('needSub');
+  if(sb) sb.textContent = wdayNeed[w]
+    ? 'この日だけの人数です。ふだんは'+WD[w]+'曜の人数（設定で決めた曜日ごとの人数）を使います。'
+    : 'この日だけの人数です。ふだんは設定の人数を使います。';
   showMode('mNeed');
 });
 document.getElementById('needBack').addEventListener('click',()=>openDay(shDate));
@@ -1838,8 +1895,10 @@ document.getElementById('needSave').addEventListener('click',async()=>{
 });
 document.getElementById('needReset').addEventListener('click',async()=>{
   if(busy) return; busy=true;
+  const w0=wdayOf(shDate);
   try{ await arpc('kibo_admin_clear_day_need',{p_date:shDate});
-       await loadMonth(); openDay(shDate); toast('ふだんの人数に戻しました'); }
+       await loadMonth(); openDay(shDate);
+       toast(wdayNeed[w0] ? WD[w0]+'曜の人数に戻しました' : 'ふだんの人数に戻しました'); }
   catch(e){ if(!authLost(e)) toast('戻せませんでした'); }
   finally{ busy=false; }
 });
@@ -2047,22 +2106,111 @@ function syncSlotUI(){
   rows.forEach(r=>{ r.querySelector('.cf-del').hidden = (rows.length<=1); });
   const note=document.getElementById('cfSlotNote');
   if(note) note.textContent = 'いま '+rows.length+' つ（6つまで）。保存すると、はじまりの早い順に並びます。';
+  if(wnReady) renderWneed();
 }
+
+/* ===== 曜日ごとの、ほしい人数 =====
+   ⚠️ せんや様のご要望・2026-09-07。
+   曜日で人数がほぼ決まっているのに、1日ずつ「この日の必要人数」を開いて入れておられた（10月は16日ぶん）。
+   表の列は「保存ずみの枠」ではなく **いま設定画面に並んでいる行** から作る。
+   名前を変えた・時間帯を足した直後でも、保存前の見た目とズレないようにするため。 */
+let wnDraft={}, wnReady=false;
+
+function cfSlotRows(){
+  return [...document.querySelectorAll('#cfSlots .slotcfg')].map(r=>({
+    k:r.dataset.k,
+    label:(r.querySelector('.cf-label').value||'').trim()||'（名前なし）',
+    from:hm2m(r.querySelector('.cf-from').value),
+    to:hm2m(r.querySelector('.cf-to').value),
+    need:parseInt(r.querySelector('.cf-need').value,10)
+  }));
+}
+function markZero(i){ i.classList.toggle('zero', parseInt(i.value,10)===0); }
+function wnOn(){ return document.getElementById('cfWnOn').classList.contains('on'); }
+
+function renderWneed(){
+  const on=wnOn(), tog=document.getElementById('cfWnOn');
+  tog.setAttribute('aria-pressed', on?'true':'false');
+  document.getElementById('cfWnBox').hidden=!on;
+  if(!on) return;
+  const cols=cfSlotRows();
+  const closed=new Set([...document.getElementById('cfWdays').children]
+                        .filter(b=>b.classList.contains('on')).map(b=>+b.dataset.w));
+  let h='<thead><tr><th></th>';
+  /* 時刻は2行に折る。1行のままだと1列が66pxになり、320pxで表が横にはみ出した（実測） */
+  cols.forEach(c=>{ h+='<th>'+esc(c.label)+'<span class="tm3">'+
+      (c.from!=null?m2hm(c.from):'—')+'<br>〜'+(c.to!=null?m2hm(c.to):'—')+'</span></th>'; });
+  h+='</tr></thead><tbody>';
+  WD.forEach((w,i)=>{
+    h+='<tr><th class="'+(i===0?'sun':(i===6?'sat':''))+'">'+w+
+       (closed.has(i)?'<span class="rest">定休日</span>':'')+'</th>';
+    cols.forEach(c=>{
+      const d=wnDraft[i]||{};
+      const v=(d[c.k]!=null)?d[c.k]:(isNaN(c.need)?0:c.need);
+      h+='<td><input type="number" min="0" max="99" inputmode="numeric" value="'+v+'"'+
+         ' data-w="'+i+'" data-k="'+esc(c.k)+'"'+
+         ' aria-label="'+esc(w+'曜の'+c.label+'にほしい人数')+'"></td>';
+    });
+    h+='</tr>';
+  });
+  const t=document.getElementById('cfWnTable');
+  t.innerHTML=h+'</tbody>';
+  [...t.querySelectorAll('input')].forEach(i=>{
+    markZero(i);
+    i.addEventListener('input',function(){
+      const v=parseInt(i.value,10);
+      (wnDraft[+i.dataset.w]=wnDraft[+i.dataset.w]||{})[i.dataset.k]=isNaN(v)?null:v;
+      markZero(i);
+    });
+  });
+  renderWnFlat();
+}
+/* すでに1日ずつ入れてある月は、曜日ごとを決めても そちらが優先されて変わらない。
+   気づけないまま「効かない」と見えるので、その場で消せるようにしておく。 */
+function renderWnFlat(){
+  const b=document.getElementById('cfWnFlat');
+  if(!b) return;
+  const days=new Set((cur&&cur.dayneeds?cur.dayneeds:[]).map(x=>x.d));
+  b.hidden=!days.size;
+  if(days.size){
+    const p=parseMonth(cur.month);
+    b.textContent=p.m1+'月の「この日だけ」の人数（'+days.size+'日ぶん）を消して、曜日ごとにそろえる';
+  }
+}
+document.getElementById('cfWnOn').addEventListener('click',function(){
+  this.classList.toggle('on'); renderWneed();
+});
+document.getElementById('cfSlots').addEventListener('input',function(){ if(wnReady) renderWneed(); });
+document.getElementById('cfWnFlat').addEventListener('click',async function(){
+  if(!cur || !cur.month) return;
+  const p=parseMonth(cur.month);
+  if(!confirm(p.m1+'月の「この日だけ」の人数を消して、曜日ごとの人数にそろえます。\n\nよろしいですか？')) return;
+  try{
+    const r=await arpc('kibo_admin_clear_month_need',{p_month:cur.month});
+    await loadMonth(); renderWnFlat();
+    toast((r&&r.n?p.m1+'月の'+'この日だけの人数を消しました':'消すものはありませんでした'));
+  }catch(e){ if(!authLost(e)) toast('消せませんでした'); }
+});
 
 /* ===== 設定 ===== */
 function fillConfig(){
+  wnReady=false;
   document.getElementById('cfName').value=shop.name;
   document.getElementById('cfDeadline').value=shop.deadline_day;
-  const box=document.getElementById('cfSlots'); box.innerHTML='';
-  slots().forEach(s=>box.appendChild(slotRow(s)));
-  syncSlotUI();
   const wd=document.getElementById('cfWdays'); wd.innerHTML='';
   const closed=new Set(shop.closed_wdays||[]);
   WD.forEach((w,i)=>{
     const b=document.createElement('button'); b.textContent=w; b.dataset.w=i;
     if(closed.has(i)) b.classList.add('on');
-    b.addEventListener('click',()=>b.classList.toggle('on')); wd.appendChild(b);
+    b.addEventListener('click',()=>{ b.classList.toggle('on'); if(wnReady) renderWneed(); });
+    wd.appendChild(b);
   });
+  const box=document.getElementById('cfSlots'); box.innerHTML='';
+  slots().forEach(s=>box.appendChild(slotRow(s)));
+  syncSlotUI();
+  wnDraft={}; (shop.wday_needs||[]).forEach(x=>{ (wnDraft[x.wday]=wnDraft[x.wday]||{})[x.k]=x.need; });
+  document.getElementById('cfWnOn').classList.toggle('on', (shop.wday_needs||[]).length>0);
+  wnReady=true; renderWneed();
   updateDlHint();
 }
 document.getElementById('cfAddSlot').addEventListener('click',function(){
@@ -2121,10 +2269,24 @@ document.getElementById('saveCfg').addEventListener('click',async()=>{
     const nm=gone.map(s2=>s2.label).join('・');
     if(!confirm(nm+' が無くなります。'+(n?'この時間帯に出ている希望 '+n+'件 も一緒に消えます。':'')+'\n続けてよろしいですか？')) return;
   }
+  /* 曜日ごとの人数。チェックを外していれば空で送る＝曜日ごとの指定をやめ、上の枠の人数に戻る */
+  const wn=[];
+  if(wnOn()){
+    let badw=null;
+    [...document.querySelectorAll('#cfWnTable input')].forEach(i=>{
+      if(badw) return;
+      const v=parseInt(i.value,10);
+      if(isNaN(v)||v<0||v>99){ badw=WD[+i.dataset.w]; return; }
+      wn.push({wday:+i.dataset.w, k:i.dataset.k, need:v});
+    });
+    if(badw){ toast(badw+'曜の人数を、0〜99の数で入れてください'); return; }
+  }
   const closed=[...document.getElementById('cfWdays').children].filter(b=>b.classList.contains('on')).map(b=>+b.dataset.w);
   try{
     await arpc('kibo_admin_update_shop',{p_name:name, p_deadline_day:dd, p_closed:closed, p_slots:arr});
-    shop=await arpc('kibo_admin_login');
+    /* 枠より後に送る。曜日ごとの人数は枠にぶら下がっているので、先に送ると消えた枠のぶんが落ちる */
+    await arpc('kibo_admin_set_wday_need',{p_needs:wn});
+    shop=await arpc('kibo_admin_login'); wdayNeed=indexWneed(shop.wday_needs);
     document.getElementById('who').textContent=shop.name+(shop.is_master?'　（マスターキー）':'');
     fillConfig(); loadMonth(); toast('変えました');
   }catch(e){ if(!authLost(e)) toast('保存できませんでした'); }
@@ -2210,6 +2372,8 @@ function tutSteps1(){
      text:'仮の値です。お店の時間と人数に直してください。'},
     {sel:'#cfAddSlot', need:inCfg, h:'時間帯は6つまでふやせます',
      text:'「10:00〜」と「11:00〜」のように、ずらして募集できます。'},
+    {sel:'#cfWnOn', need:inCfg, h:'曜日で人数が変わるお店は、ここ',
+     text:'チェックを入れると、日〜土の表が出ます。0人にした曜日は募集しません。'},
     {sel:'#saveCfg', need:inCfg, tap:true, h:'「この内容にする」',
      text:'あとからいつでも変えられます。'},
     {sel:'#gearBtn', need:inCfg, h:'歯車が黒い＝この中にいる印',

@@ -61,6 +61,8 @@
   details.toc summary{
     cursor:pointer; list-style:none; font-size:12.5px; font-weight:700;
     letter-spacing:.08em; color:var(--muted);
+    /* 高さ21.9pxで、指では押しにくかった（8幅の検品で毎回ここだけ NG になっていた） */
+    display:flex; align-items:center; min-height:44px;
   }
   details.toc summary::-webkit-details-marker{display:none;}
   details.toc summary::after{content:'▾'; margin-left:7px; font-size:11px;}
@@ -180,6 +182,11 @@
     .items{grid-template-columns:minmax(0,1fr);}
     figcaption{font-size:12.5px;}
   }
+  /* 1つの項目の中の小見出し（例：項目5の「曜日ごとに、ほしい人数を変える」）。
+     項目番号を増やすと、後ろの項目と目次の番号が全部ずれる。だから項目の中で分ける。 */
+  .sub-h{margin:20px 0 7px; font-size:1.02rem; font-weight:700; color:var(--ink);
+    padding-top:14px; border-top:1px solid var(--surface);}
+
   @media (min-width:1000px){
     /* 横幅に余裕があるときは、図を左・文章を右に並べる。
        図は .figs、本文は .txt に包んであるので、2列に置くだけで済む。 */
@@ -296,7 +303,7 @@
 
     <p class="g">はじめの準備（最初の1回だけ）</p>
     <a href="#i4"><span class="n">4</span>店長の画面をひらく</a>
-    <a href="#i5"><span class="n">5</span>時間帯とほしい人数を決める（6つまで）</a>
+    <a href="#i5"><span class="n">5</span>時間帯とほしい人数を決める（曜日ごとにも）</a>
     <a href="#i6"><span class="n">6</span>締切と定休日を決める</a>
     <a href="#i7"><span class="n">7</span>スタッフを追加する</a>
     <a href="#i8"><span class="n">8</span>ひとりずつURLを渡す</a>
@@ -418,12 +425,19 @@
 
     <article class="item" id="i5">
       <div class="figs"><figure class="shot"><img src="senya-shots/k-cfg2.png" alt="設定の「時間帯と、ほしい人数」" loading="lazy" decoding="async" width="780" height="688"><figcaption>⚙ →「設定」の中。ここの人数を下回った日が赤くなる</figcaption></figure></div>
-      <div class="txt"><h3><span class="n">5</span>時間帯とほしい人数を決める（6つまで）<span class="who-tag m">店長</span></h3>
+      <div class="txt"><h3><span class="n">5</span>時間帯とほしい人数を決める（曜日ごとにも）<span class="who-tag m">店長</span></h3>
       <p>右上の <kbd>⚙</kbd> から <span class="path"><b>設定</b></span> をひらいて、時間帯の<strong>名前・はじまり・おわり・その枠に何人ほしいか</strong>を入れます。<strong>この人数を下回った日が、一覧で赤くなります。</strong></p>
       <p><kbd>＋ 時間帯をふやす</kbd> を押すと、<strong>1日に6つまで</strong>時間帯を作れます。<strong>出勤の時間をずらして集めたいときに使います。</strong>たとえば昼を2つに分けて、<b>昼A 10:00〜14:30 を1名</b>／<b>昼B 11:00〜14:30 を1名</b>。合計は昼2名のまま、入り時間だけずらせます。</p>
       <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine"><b>はじめは仮の値が入っています。</b>お店の時間と人数に、かならず直してください。ここで決めた<b>名前と時間が、そのままスタッフ様の画面に出ます</b>。設定するのはここ1か所だけです。</p>
       <p class="fine">名前は<b>短いほど見やすい</b>です（例：昼A・昼B・夜A・夜B・朝・締め）。保存すると<b>はじまりの早い順に並びます</b>。</p>
-      <p class="fine">⚠️ 時間帯を<b>消す</b>と、その時間帯にスタッフ様が出していた希望も一緒に消えます。消す前に「希望◯件も消えます」と確認が出ます。</p></div></details></div>
+      <p class="fine">⚠️ 時間帯を<b>消す</b>と、その時間帯にスタッフ様が出していた希望も一緒に消えます。消す前に「希望◯件も消えます」と確認が出ます。</p></div></details>
+
+      <h4 class="sub-h">曜日ごとに、ほしい人数を変える</h4>
+      <p>曜日で人数がだいたい決まっているときは、同じ<span class="path"><b>設定</b></span>の中の <kbd>曜日で人数を変える</kbd> にチェックを入れてください。<strong>日〜土の7行 × 時間帯の表</strong>が出るので、そこに入れるだけです。<b>1日ずつ直す必要はなくなります。</b></p>
+      <p><b>0人</b>と入れた曜日のその時間帯は、募集しません（例：<b>月曜の夜</b>）。<b>一覧で赤くならず、足りない人数にも数えません。</b>日をタップした先には時間帯そのものは並びますが、「0 / 0人」と出るだけです。</p>
+      <details class="more"><summary>くわしく</summary><div class="mb"><p class="fine">人数は<b>3段</b>で決まります。上から順に、見つかったところで決まります。<br>① <b>その日だけの人数</b>（日をタップ →「この日の必要人数」）<br>② <b>曜日ごとの人数</b>（いま入れたところ）<br>③ <b>時間帯の人数</b>（すぐ上の「◯人ほしい」）<br>チェックを外すと ② をやめて、③ の人数にもどります。入れた数字は消えます。</p>
+      <p class="fine">⚠️ <b>すでに「この日の必要人数」で入れた日は、そちらが優先されます</b>（曜日ごとを決めても変わりません）。表の下に <b>◯月の「この日だけ」の人数を消して、曜日ごとにそろえる</b> が出ているときは、その月に1日ずつの設定が残っている印です。押すとその月ぶんだけ消えて、曜日ごとの人数にそろいます（希望やシフトは消えません）。</p>
+      <p class="fine">祝日は、その曜日として数えます（例：月曜の祝日は「月」の人数）。祝日だけ人数を変えたいときは、その日をタップして <b>「この日の必要人数」</b> で上書きしてください。</p></div></details></div>
     </article>
 
     <article class="item" id="i6">
@@ -754,6 +768,9 @@
       <div class="a">そういう作りです。店長用と スタッフ用は別の合言葉で、混ざらないようになっています。</div>
     </div>
     <div>
+      <div class="q">曜日ごとの人数を決めたのに、ある日だけ変わらない</div>
+      <div class="a">その日に <b>「この日の必要人数」</b> で入れた人数が残っています。<b>その日だけの人数のほうが優先されます。</b>その日をタップして <kbd>◯曜の人数に戻す</kbd> を押すか、<span class="path"><b>設定</b></span>の曜日の表の下にある <b>◯月の「この日だけ」の人数を消して、曜日ごとにそろえる</b> でまとめて消せます。</div>
+
       <div class="q">昼と夜の両方に数えられている人がいる</div>
       <div class="a">昼と夜の<b>両方を「入れます」にした人</b>です（＝通しで入れる人）。それぞれの枠に1人として数えます。あいだの中抜けの時間は働きません。</div>
     </div>
