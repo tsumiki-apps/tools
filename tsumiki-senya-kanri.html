@@ -2342,7 +2342,13 @@ function viewShown(n){ const v=tq('#view'+n); return !!v && !v.hidden; }
       本文は40字を目安に、それ以上になったら削るか、歩を分ける。
       ご案内は読ませるものではなく、見て次に進むもの。理由・たとえ話は使い方ページへ。
    ⚠️ 歩を足すときは、必ず need: を書く（その画面に居ないと出ない部品を指したまま
-      止まると、押すものが無いのに暗いだけになる）。 */
+      止まると、押すものが無いのに暗いだけになる）。
+   ⚠️ 2026-09-09 に 24歩 → 16歩 に減らした。物差しは「その歩で手が動くか」。
+      手が動かない“読むだけの歩”は説明書（tsumiki-senya-tsukaikata.html）に受け皿があるので、
+      ここには置かない。外したのは お店の名前／時間帯6つまで（時間帯の歩に1行で吸収）／
+      歯車が黒い印（つぎの歩に統合）／合言葉と専用URL（送る文の歩に吸収）／
+      渡し忘れが分かる（◯人中◯人の歩に吸収）／「そのほか」の中／月をめくる／今月のようす。
+      ⚠️ 減らしていいのは説明の歩だけ。設定・スタッフ登録・配布の“手が動く歩”は削らない。 */
 function tutSteps1(){
   const inCfg=function(){ return viewShown(3); };
   const inStaff=function(){ return viewShown(2); };
@@ -2356,8 +2362,6 @@ function tutSteps1(){
      done:menuOpen},
     {sel:'#goCfgM', need:menuOpen, h:'まずは「設定」', text:'押してください。',
      done:inCfg},
-    {sel:'#cfName', need:inCfg, h:'お店の名前',
-     text:'ちがっていれば直してください。スタッフの画面にも出ます。'},
     {sel:'#cfDeadline', need:inCfg, h:'締切を決める',
      /* ⚠️ 「いまは20日」「いまは月曜」とベタ書きだった。お店ごとに違うので、いま入っている値を読む。
         ちがう値が入っているのに「いまは月曜」と言われると、直す必要がないところを直してしまう。 */
@@ -2369,40 +2373,28 @@ function tutSteps1(){
                        : 'いまは「定休日なし」。お休みの曜日があれば押して選んでください。';
      })()},
     {sel:'#cfSlots', need:inCfg, h:'時間帯と、ほしい人数',
-     text:'仮の値です。お店の時間と人数に直してください。'},
-    {sel:'#cfAddSlot', need:inCfg, h:'時間帯は6つまでふやせます',
-     text:'「10:00〜」と「11:00〜」のように、ずらして募集できます。'},
+     text:'仮の値です。お店に合わせて直してください。＋で6つまでふやせます。'},
     {sel:'#cfWnOn', need:inCfg, h:'曜日で人数が変わるお店は、ここ',
      text:'チェックを入れると、日〜土の表が出ます。0人にした曜日は募集しません。'},
     {sel:'#saveCfg', need:inCfg, tap:true, h:'「この内容にする」',
      text:'あとからいつでも変えられます。'},
-    {sel:'#gearBtn', need:inCfg, h:'歯車が黒い＝この中にいる印',
-     text:'もう一度押すと、一覧にもどります。押してみてください。',
-     done:function(){ return viewShown(1); }},
-    {sel:'#gearBtn', h:'つぎはスタッフ', text:'もう一度、歯車を押してください。',
+    /* ⚠️ 歯車は「設定にいる → 一覧」「一覧 → メニュー」の2回ぶんを1歩でまかなう。
+       need: を書くと、1回目を押した瞬間に設定から出て need が外れ、歩が飛んでしまう。 */
+    {sel:'#gearBtn', h:'つぎはスタッフ',
+     text:'歯車を押すと一覧にもどります。もう一度押すとメニューです。',
      done:menuOpen},
     {sel:'#goStaffM', need:menuOpen, h:'「スタッフ」を押す', text:'働く方を、ここで登録します。',
      done:inStaff},
     {sel:'.addrow', need:inStaff, h:'まず、ご自身を1人追加',
      text:'お名前を入れて「追加」。届く画面を、そのまま確かめられます。',
      done:function(){ return tutVisible(tq('#staffBox .staff')); }},
-    {sel:'#staffBox .staff .cd', need:inStaff, h:'合言葉と専用URL',
-     text:'人ごとにちがいます。ほかの人のぶんは見えません。'},
     {sel:'#staffBox .staff .acts .btn', need:inStaff, h:'「送る文をコピー」',
-     text:'LINEに貼って、ひとりずつお送りください。'},
-    {sel:'#staffBox .staff .nm', need:inStaff, h:'渡し忘れが分かる',
-     text:'まだの人は赤く「まだ渡していません」と出ます。'},
+     text:'人ごとに専用のURLです。LINEに貼って、ひとりずつお送りください。'},
     {sel:'#staffHd', need:inStaff, h:'「◯人中◯人に渡しました」',
-     text:'全員に渡すと「◯／◯人が出し終わり」に変わります。'},
-    {sel:'#staffBox .staff .acts .more', need:inStaff, h:'「そのほか」の中',
-     text:'名前を直す・休止・合言葉の作り直し・削除。ふだんは押しません。'},
+     text:'まだの人は赤く出ます。全員に渡すと「出し終わり」の数に変わります。'},
     {sel:'#gearBtn', need:inStaff, h:'登録はおしまい',
      text:'歯車をもう一度押すと、一覧にもどります。',
      done:function(){ return viewShown(1); }},
-    {sel:'.monthbar', enter:function(){ if(sheetOpen()) closeSheet(); if(!viewShown(1)) showView(1); },
-     h:'月をめくる', text:'希望は月ごと。まずは来月を出してお待ちください。'},
-    {sel:'#stateRow', h:'今月のようす',
-     text:'希望が集まると「◯人が出し終わり」「足りない日◯日」と出ます。'},
     {sel:'#gearBtn', h:'準備はこれで終わり',
      text:'あとは待つだけ。このご案内は 歯車→設定 の下から、いつでも見られます。'}
   ];
@@ -2767,6 +2759,7 @@ function tutMaybeStart(){
   })();
 </script>
 <!-- /tsumiki-license-gate -->
+
 
 
 </body>
