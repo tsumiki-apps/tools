@@ -19,6 +19,7 @@
     --accent:#b06f26; --accent-2:#8a5a24; --accent-wash:#f0e4d1;
     --good:#4c7a51; --good-wash:#dde9dd; --good-ink:#416845;
     --warn:#b0522a; --warn-wash:#f2e0d4; --warn-ink:#974624;
+    --fill:var(--accent-2); --on-fill:var(--paper);
     --shadow:0 1px 2px rgba(40,32,18,.05), 0 10px 26px -16px rgba(40,32,18,.18);
     --mask-clear:rgba(29,26,21,0); --mask-06:rgba(29,26,21,.06); --mask-50:rgba(29,26,21,.5);
     --mask-94:rgba(29,26,21,.94); --mask-solid:rgba(29,26,21,1);
@@ -33,92 +34,160 @@
       --accent:#d59a4d; --accent-2:#e0ab63; --accent-wash:#362a19;
       --good:#7fae82; --good-wash:#23301f; --good-ink:#7fae82;
       --warn:#d9825a; --warn-wash:#39251a; --warn-ink:#d9825a;
+      --fill:#d59a4d; --on-fill:#1d1a15;
       --shadow:0 1px 2px rgba(15,13,7,.3), 0 12px 30px -18px rgba(15,13,7,.65);
     }
   }
 
   *{box-sizing:border-box}
+  [hidden]{display:none !important}
   html{-webkit-text-size-adjust:100%}
   body{
     margin:0; min-height:100dvh; background:var(--paper); color:var(--ink);
     font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN','Hiragino Sans',sans-serif;
-    font-size:16px; line-height:1.7; -webkit-font-smoothing:antialiased;
-    padding:env(safe-area-inset-top) 16px calc(40px + env(safe-area-inset-bottom));
+    font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased;
+    padding:env(safe-area-inset-top) 14px calc(32px + env(safe-area-inset-bottom));
   }
+  button{font:inherit; color:inherit}
+  .i{width:22px; height:22px; flex:0 0 auto; display:block; fill:none; stroke:currentColor;
+    stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+  .i.solid{fill:currentColor; stroke:none}
   .wrap{max-width:560px; margin:0 auto}
-  header{display:flex; align-items:center; gap:12px; padding:24px 2px 20px}
-  .mark{width:36px; height:36px; flex:0 0 auto; display:block}
-  .mark rect{fill:var(--ink)}
-  .mark g{fill:var(--ink); stroke:var(--paper)}
-  h1{margin:0; font-size:22px; line-height:1.3; font-weight:700}
-  .lead{margin:2px 0 0; font-size:13px; color:var(--ink-mid); line-height:1.5}
+  header{display:flex; align-items:center; gap:8px; padding:18px 4px 12px}
+  header .i{width:26px; height:26px; color:var(--accent-2)}
+  h1{margin:0; font-size:20px; line-height:1.3; font-weight:700}
 
   .card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
-    padding:20px; margin-bottom:16px; box-shadow:var(--shadow)}
-  .card h2{margin:0 0 12px; font-size:16px; font-weight:700}
-  .card h2 small{font-weight:400; font-size:13px; color:var(--ink-soft); margin-left:6px}
-  .stack{display:flex; flex-direction:column; gap:16px}
-  .pos{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px}
-  .pos .tn-field > label, .grid2 .tn-field > label{font-size:13px; color:var(--ink-mid)}
-  .grid2{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px}
-  .tn-input[type=date]{-webkit-appearance:none; appearance:none; min-width:0; min-height:44px}
-  .tn-select,.tn-input{background-color:var(--surface)}
-  .optrow{display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:44px}
-  .optrow span{font-size:15px}
-  .optrow small{display:block; font-size:13px; color:var(--ink-soft); line-height:1.5}
-  .optrow .tn-switch{font-size:16px}
-  .tn-hint{color:var(--ink-mid)}
+    padding:16px; margin-bottom:14px; box-shadow:var(--shadow)}
+
+  /* 陣営：ぐにゃりタブ（Rare UI「Gooey nav」(MIT) の考え方を素のJSに） */
+  .gnav-row{display:flex; align-items:stretch}
+  .gnav-seg{position:relative; flex:1 1 0; min-width:0; background:var(--surface-2);
+    transition:border-radius .2s var(--ease), background-color .12s var(--ease)}
+  .gnav-seg.on{background:var(--fill)}
+  .gnav-seg button{display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
+    min-height:52px; padding:0 6px; border:0; background:none; cursor:pointer; white-space:nowrap;
+    font-size:15px; font-weight:700; color:var(--ink-mid); -webkit-tap-highlight-color:transparent}
+  .gnav-seg.on button{color:var(--on-fill)}
+  .gnav-seg button:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:12px}
+  .gnav .neck{position:absolute; top:0; right:100%; height:100%; display:block; pointer-events:none}
+
+  /* いま → ゴール */
+  .route{display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:stretch; gap:6px; margin-top:14px}
+  .route > .i{align-self:center; color:var(--ghost)}
+  .rank{display:flex; flex-direction:column; align-items:flex-start; gap:2px; min-width:0; min-height:44px;
+    padding:10px 12px; text-align:left; background:var(--paper); border:1px solid var(--line-2);
+    border-radius:14px; cursor:pointer; -webkit-tap-highlight-color:transparent;
+    transition:transform .12s var(--ease), border-color .12s var(--ease)}
+  .rank:active{transform:scale(.98)}
+  @media (hover:hover){ .rank:hover{border-color:var(--accent)} }
+  .rk-cap{display:flex; align-items:center; gap:4px; font-size:13px; color:var(--ink-mid)}
+  .rk-cap .i{width:16px; height:16px}
+  .rk-main{display:flex; align-items:baseline; gap:6px; white-space:nowrap}
+  .rk-main b{font-size:24px; line-height:1.2}
+  .rk-main em{font-style:normal; font-size:16px; font-weight:700; color:var(--ink-mid)}
+  .rk-stars{display:flex; align-items:center; gap:2px; min-height:16px; color:var(--accent-2); font-weight:700; font-size:15px}
+  .rk-stars .i{width:14px; height:14px}
+  .rk-stars .i.off{color:var(--ghost)}
+
+  /* 条件の行 */
+  .rows{display:flex; flex-direction:column; gap:6px}
+  .row{display:grid; grid-template-columns:28px minmax(0,1fr) auto; align-items:center; gap:10px; min-height:48px}
+  .row > .i{color:var(--ink-mid); justify-self:center}
+  .val{min-width:3.4em; text-align:right; font-weight:700; font-variant-numeric:tabular-nums; line-height:1.2}
+  .val small{display:block; font-size:12px; font-weight:500; color:var(--ink-soft)}
+  .tn-input[type=date]{-webkit-appearance:none; appearance:none; min-width:0; min-height:44px; background-color:var(--paper)}
+  input[type=range]{width:100%; min-height:44px; margin:0; font-size:16px; accent-color:var(--accent-2); background:transparent}
+  .stepper{display:flex; align-items:center; gap:6px}
+  .stepper button, .sq{width:44px; height:44px; flex:0 0 auto; display:grid; place-items:center;
+    border:1px solid var(--line-2); border-radius:12px; background:var(--paper); cursor:pointer;
+    color:var(--ink); -webkit-tap-highlight-color:transparent}
+  .stepper button:active, .sq:active{transform:scale(.95)}
+  .stepper output{min-width:3.2em; text-align:center; font-weight:700; font-variant-numeric:tabular-nums}
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:6px}
+  .chip{display:inline-flex; align-items:center; gap:6px; min-height:44px; padding:0 14px;
+    border:1px solid var(--line-2); border-radius:999px; background:var(--paper); cursor:pointer;
+    font-size:14px; font-weight:700; color:var(--ink-mid); -webkit-tap-highlight-color:transparent}
+  .chip .i{width:18px; height:18px}
+  .chip[aria-pressed=true]{background:var(--accent-wash); border-color:var(--accent-2); color:var(--accent-2)}
 
   /* 結果 */
-  .hero{text-align:center; padding:8px 0 4px}
-  .hero .cap{margin:0; font-size:14px; color:var(--ink-mid)}
-  .big{display:flex; align-items:baseline; justify-content:center; gap:6px; margin:4px 0 0}
-  .big .unit{font-size:20px; font-weight:700}
-  .big .star{font-size:26px; color:var(--accent-2)}
-  .hero .total{margin:2px 0 0; font-size:14px; color:var(--ink-soft)}
-  .lines{list-style:none; margin:16px 0 0; padding:0; border-top:1px solid var(--line)}
-  .lines li{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:2px 12px;
-    padding:12px 2px; border-bottom:1px solid var(--line)}
-  .lines li > span:first-child{color:var(--ink-mid); font-size:14px; white-space:nowrap}
-  .lines li > span:last-child{margin-left:auto; text-align:right; min-width:0}
-  .lines b{font-size:20px; font-variant-numeric:tabular-nums}
-  .lines li small{display:block; font-size:13px; color:var(--ink-soft); text-align:right; line-height:1.4}
-  .msg{padding:14px 16px; border-radius:12px; margin:0; font-size:14px; line-height:1.6}
-  .msg.good{background:var(--good-wash); color:var(--good-ink)}
-  .msg.warn{background:var(--warn-wash); color:var(--warn-ink)}
-  .msg + .msg{margin-top:8px}
-  .notes{margin-top:16px}
-  .tn-acc{margin-top:12px; background:var(--surface)}
-  .tn-acc p, .tn-acc li{font-size:14px; color:var(--ink-mid)}
+  .hero{display:flex; align-items:center; justify-content:center; gap:4px; padding:6px 0 0}
+  .hero > .i{width:40px; height:40px; color:var(--accent-2)}
+  .hero .per{font-size:18px; font-weight:700; color:var(--ink-mid); align-self:flex-end; padding-bottom:14px}
+  .meta{display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:4px 14px;
+    margin:0; font-size:14px; color:var(--ink-mid); font-variant-numeric:tabular-nums}
+  .meta span{display:inline-flex; align-items:center; gap:4px}
+  .meta .i{width:16px; height:16px}
+  .tiles{display:grid; grid-template-columns:repeat(auto-fit, minmax(6.5rem, 1fr)); gap:8px; margin-top:14px}
+  .tile{background:var(--surface-2); border-radius:14px; padding:10px 12px; min-width:0}
+  .tile .i{width:20px; height:20px; color:var(--ink-mid)}
+  .tile b{display:block; font-size:26px; line-height:1.25; margin-top:4px; font-variant-numeric:tabular-nums}
+  .tile b span{font-size:13px; font-weight:700; color:var(--ink-mid); margin-left:2px}
+  .tile small{display:block; font-size:12px; color:var(--ink-soft); line-height:1.4}
+  .pill{display:flex; align-items:center; gap:8px; margin:10px 0 0; padding:10px 12px; border-radius:12px; font-size:14px; line-height:1.5}
+  .pill .i{width:18px; height:18px}
+  .pill.good{background:var(--good-wash); color:var(--good-ink)}
+  .pill.warn{background:var(--warn-wash); color:var(--warn-ink)}
+  .tn-acc{margin-top:10px; background:var(--surface)}
+  .tn-acc > summary .i{width:18px; height:18px; color:var(--ink-mid)}
+  .tn-acc li{font-size:13px; color:var(--ink-mid); line-height:1.6}
   .tn-acc ul{padding-left:1.2em; margin:0 16px 16px}
   .tn-table{font-size:14px}
   .tn-table th{color:var(--ink-mid)}
-  footer{margin:24px 2px 0; font-size:13px; color:var(--ink-soft); line-height:1.7}
-  footer .brand{display:flex; align-items:center; gap:8px; margin-top:12px; font-weight:700; color:var(--ink)}
-  footer .brand .mark{width:22px; height:22px}
+  footer{display:flex; align-items:flex-start; gap:6px; margin:18px 4px 0; font-size:12px; color:var(--ink-soft); line-height:1.6}
+  footer .i{width:16px; height:16px; margin-top:2px}
 
-  /* くるくる回る数字（Rare UI「Animated counter」の考え方を移植・MIT） */
+  /* 段位をえらぶシート */
+  .tn-sheet{background:var(--surface); color:var(--ink)}
+  .sheet-head{display:flex; align-items:center; gap:8px; margin-bottom:6px}
+  .sheet-head b{font-size:18px; flex:1}
+  .sheet-head .i{color:var(--ink-mid)}
+  .done{width:48px; height:48px; display:grid; place-items:center; border:0; border-radius:14px;
+    background:var(--fill); color:var(--on-fill); cursor:pointer}
+  .done:focus{outline:none}
+  .done:focus-visible, .pick:focus-visible, .starpick button:focus-visible, .chip:focus-visible,
+  .rank:focus-visible, .stepper button:focus-visible, .sq:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  .pk{margin-top:12px}
+  .grid-tier{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:6px}
+  .grid-sub{display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:6px}
+  .pick{min-height:48px; border:1px solid var(--line-2); border-radius:12px; background:var(--paper);
+    font-weight:700; font-size:16px; cursor:pointer; color:var(--ink); -webkit-tap-highlight-color:transparent}
+  .pick small{font-size:12px; font-weight:500; margin-left:1px}
+  .pick[aria-pressed=true]{background:var(--accent-wash); border-color:var(--accent-2); color:var(--accent-2)}
+  .starpick{display:flex; flex-wrap:wrap; gap:4px; align-items:center}
+  .starpick button{width:48px; height:48px; display:grid; place-items:center; border:0; background:none;
+    cursor:pointer; color:var(--ghost); border-radius:12px; -webkit-tap-highlight-color:transparent}
+  .starpick button .i{width:32px; height:32px}
+  .starpick button.on{color:var(--accent-2)}
+  .starpick .zero{font-weight:700; font-size:15px; color:var(--ink-mid); border:1px solid var(--line-2); background:var(--paper)}
+  .starpick .zero.on{color:var(--accent-2); border-color:var(--accent-2); background:var(--accent-wash)}
+  .seven{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+  .seven .tn-input{width:6em; text-align:center; font-weight:700; background-color:var(--paper)}
+  .seven .star7{display:flex; align-items:center; gap:4px; color:var(--accent-2)}
+
+  /* くるくる回る数字（Rare UI「Animated counter」(MIT) の考え方を移植） */
   .counter{display:inline-flex; align-items:baseline; font-variant-numeric:tabular-nums;
-    font-weight:700; font-size:48px; line-height:1}
-  /* 桁の窓：わざと1桁ぶんだけ見せるので、はみ出しを隠す overflow ではなく clip-path で切る */
+    font-weight:700; font-size:56px; line-height:1}
+  /* 桁の窓：わざと1桁ぶんだけ見せるので、overflow ではなく clip-path で切る */
   .counter .win{display:block; height:1.5em; clip-path:inset(0);
     -webkit-mask-image:var(--fade); mask-image:var(--fade); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat}
-  .sr{position:absolute; left:0; top:0; width:1px; height:1px; margin:-1px; padding:0; border:0; clip-path:inset(50%); white-space:nowrap}
   .counter .col{display:block; will-change:transform}
   .counter .col span{display:block; height:1.5em; line-height:1.5em; text-align:center}
   .counter .fixed{display:block; height:1.5em; line-height:1.5em}
+  .sr{position:absolute; left:0; top:0; width:1px; height:1px; margin:-1px; padding:0; border:0; clip-path:inset(50%); white-space:nowrap}
 
   @media (min-width:600px){
     body{padding-left:24px; padding-right:24px}
-    h1{font-size:24px}
+    .card{padding:20px}
   }
   @media (min-width:900px){
-    .wrap{max-width:1040px}
-    .cols{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:20px; align-items:start}
+    .wrap{max-width:1000px}
+    .cols{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:18px; align-items:start}
     .cols > .result{position:sticky; top:16px}
   }
   @media (prefers-reduced-motion: reduce){
-    .counter .col{transition:none !important}
+    .counter .col, .gnav-seg, .rank{transition:none !important}
   }
 </style>
 <!-- tsumiki-native-parts sha=a7ab3c12 -->
@@ -800,112 +869,99 @@
 <!-- /tsumiki-native-parts -->
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-star" viewBox="0 0 24 24"><polygon points="12,2.8 14.7,8.6 21,9.3 16.3,13.6 17.6,19.9 12,16.7 6.4,19.9 7.7,13.6 3,9.3 9.3,8.6"/></symbol>
+  <symbol id="i-surv" viewBox="0 0 24 24"><circle cx="14.5" cy="4.5" r="2"/><path d="M13.5 8 10.8 13.6"/><path d="M13.5 8l3.5 3 2.5-.5"/><path d="M12.6 9.2 8.5 9.6 6.5 12"/><path d="M10.8 13.6l3.2 3-1 4.9"/><path d="M10.8 13.6 7.6 16l-3.1 1"/></symbol>
+  <symbol id="i-hunt" viewBox="0 0 24 24"><circle cx="12" cy="3.6" r="1.6"/><path d="M12 5.2V13"/><path d="M12 13a4.5 4.5 0 1 1-4.5 4.5"/><path d="M7.5 17.5 5.3 15.3"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5.5 21V3.5"/><path d="M5.5 4h12l-2.5 4 2.5 4h-12"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17"/><path d="M8 3v4"/><path d="M16 3v4"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 3.5h8v5.5a4 4 0 0 1-8 0z"/><path d="M8 5.5H5.2A3.2 3.2 0 0 0 8.4 10"/><path d="M16 5.5h2.8a3.2 3.2 0 0 1-3.2 4.5"/><path d="M12 13v4.5"/><path d="M8.5 20.5h7"/></symbol>
+  <symbol id="i-draw" viewBox="0 0 24 24"><path d="M6 9h12"/><path d="M6 15h12"/></symbol>
+  <symbol id="i-swords" viewBox="0 0 24 24"><path d="M14.5 17.5 3.5 6.5V3.5h3l11 11"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/><path d="M14.5 6.5l3-3h3v3l-3 3"/><path d="M5 14l4 4"/><path d="M7 17l-3 3"/><path d="M3 19l2 2"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-solo" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M5 20.5a7 7 0 0 1 14 0"/></symbol>
+  <symbol id="i-hourglass" viewBox="0 0 24 24"><path d="M6.5 3h11"/><path d="M6.5 21h11"/><path d="M8 3v2.5a4 4 0 0 0 1.6 3.2L12 10.5l2.4-1.8A4 4 0 0 0 16 5.5V3"/><path d="M8 21v-2.5a4 4 0 0 1 1.6-3.2L12 13.5l2.4 1.8a4 4 0 0 1 1.6 3.2V21"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M6 12h12"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M6 12h12"/><path d="M12 6v12"/></symbol>
+  <symbol id="i-table" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17"/><path d="M3.5 14.5h17"/><path d="M10 9.5v10"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5"/><path d="M12 7.8v.1"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4.5"/><path d="M12 17.2v.1"/></symbol>
+  <symbol id="i-peak" viewBox="0 0 24 24"><path d="M3 19.5 9.5 8l3.5 5.5 2.5-3.5 5.5 9.5z"/></symbol>
+</svg>
+
 <div class="wrap">
   <header>
-    <svg class="mark" viewBox="0 0 100 100" aria-hidden="true">
-      <rect width="100" height="100" rx="24"/>
-      <g stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round">
-        <polygon points="35,46 50,53.5 35,61 20,53.5"/>
-        <polygon points="20,53.5 35,61 35,76 20,68.5"/>
-        <polygon points="50,53.5 35,61 35,76 50,68.5"/>
-        <polygon points="65,46 80,53.5 65,61 50,53.5"/>
-        <polygon points="50,53.5 65,61 65,76 50,68.5"/>
-        <polygon points="80,53.5 65,61 65,76 80,68.5"/>
-        <polygon points="50,24 65,31.5 50,39 35,31.5"/>
-        <polygon points="35,31.5 50,39 50,54 35,46.5"/>
-        <polygon points="65,31.5 50,39 50,54 65,46.5"/>
-      </g>
-    </svg>
-    <div>
-      <h1>ほしのみち</h1>
-      <p class="lead">第五人格のランク戦。ゴールまで、1日に★いくつ？</p>
-    </div>
+    <svg class="i solid"><use href="#i-star"/></svg>
+    <h1>ほしのみち</h1>
   </header>
 
   <div class="cols">
     <div class="inputs">
-      <section class="card stack">
-        <div>
-          <h2>陣営</h2>
-          <div class="tn-seg" id="side" role="group" aria-label="陣営">
-            <button type="button" data-side="surv" class="on">サバイバー</button>
-            <button type="button" data-side="hunt">ハンター</button>
-          </div>
-          <p class="tn-hint">段位は陣営ごとに別。切り替えると、それぞれの段位を覚えています。</p>
-        </div>
-
-        <div>
-          <h2>いまの段位</h2>
-          <div class="pos" id="cur"></div>
-        </div>
-
-        <div>
-          <h2>ゴール</h2>
-          <div class="pos" id="goal"></div>
-          <p class="tn-hint" id="goalHint"></p>
+      <section class="card">
+        <nav class="gnav" id="side" aria-label="陣営"></nav>
+        <div class="route">
+          <button type="button" class="rank" id="curTile" aria-haspopup="dialog"></button>
+          <svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg>
+          <button type="button" class="rank" id="goalTile" aria-haspopup="dialog"></button>
         </div>
       </section>
 
-      <section class="card stack">
-        <div>
-          <h2>期間</h2>
-          <div class="grid2">
-            <div class="tn-field"><label for="today">今日</label><input class="tn-input" type="date" id="today"></div>
-            <div class="tn-field"><label for="deadline">締切（最後に遊ぶ日）</label><input class="tn-input" type="date" id="deadline"></div>
+      <section class="card">
+        <div class="rows">
+          <div class="row">
+            <svg class="i" aria-hidden="true"><use href="#i-cal"/></svg>
+            <input class="tn-input" type="date" id="deadline" aria-label="締切（最後に遊ぶ日）">
+            <div class="val" id="daysVal"></div>
           </div>
-          <p class="tn-hint" id="seasonHint"></p>
-          <label class="optrow" for="doneToday">
-            <span>今日の分はもう遊び終えた<small>オンにすると明日から数えます</small></span>
-            <input type="checkbox" class="tn-switch" id="doneToday">
-          </label>
+          <div class="row">
+            <svg class="i" aria-hidden="true"><use href="#i-trophy"/></svg>
+            <input type="range" id="winRate" min="0" max="100" step="5" aria-label="勝率">
+            <div class="val"><span id="winVal"></span><small>勝率</small></div>
+          </div>
+          <div class="row">
+            <svg class="i" aria-hidden="true"><use href="#i-draw"/></svg>
+            <input type="range" id="drawRate" min="0" max="50" step="5" aria-label="引き分けの割合">
+            <div class="val"><span id="drawVal"></span><small>引分</small></div>
+          </div>
+          <div class="row">
+            <svg class="i" aria-hidden="true"><use href="#i-clock"/></svg>
+            <div class="stepper">
+              <button type="button" id="minDown" aria-label="1試合の分数を減らす"><svg class="i"><use href="#i-minus"/></svg></button>
+              <output id="minVal" aria-live="polite"></output>
+              <button type="button" id="minUp" aria-label="1試合の分数を増やす"><svg class="i"><use href="#i-plus"/></svg></button>
+            </div>
+            <div class="val"><small>1試合</small></div>
+          </div>
         </div>
-
-        <div>
-          <h2>勝ち方の見込み</h2>
-          <div class="grid2">
-            <div class="tn-field"><label for="winRate">勝率（%）</label><input class="tn-input" type="number" inputmode="decimal" min="0" max="100" step="1" id="winRate"></div>
-            <div class="tn-field"><label for="drawRate">引き分けの割合（%）</label><input class="tn-input" type="number" inputmode="decimal" min="0" max="100" step="1" id="drawRate"></div>
-          </div>
-          <p class="tn-hint" id="rateHint">残りは負けとして数えます。</p>
-          <div class="tn-field" style="margin-top:12px">
-            <label for="minutes">1試合にかかる分数（ピック込み・自分の感覚で）</label>
-            <input class="tn-input" type="number" inputmode="decimal" min="5" max="60" step="1" id="minutes">
-          </div>
+        <div class="chips">
+          <button type="button" class="chip" id="doneToday" aria-pressed="false"><svg class="i"><use href="#i-check"/></svg>今日は済</button>
+          <button type="button" class="chip" id="solo" aria-pressed="false"><svg class="i"><use href="#i-solo"/></svg>ソロ</button>
+          <button type="button" class="chip" id="limited" aria-pressed="false"><svg class="i"><use href="#i-hourglass"/></svg>期間限定</button>
         </div>
-
-        <details class="tn-acc" id="bonusBox">
-          <summary>おまけの点も入れる</summary>
-          <div>
-            <label class="optrow" for="solo" id="soloRow">
-              <span>ひとりで参加する（ソロ）<small>勝ち+2（7段以上は+1）・引き分け+1</small></span>
-              <input type="checkbox" class="tn-switch" id="solo">
-            </label>
-            <label class="optrow" for="limited">
-              <span>シーズン期間限定の追加点<small>勝ち+2・引き分け+1。付く陣営は時期で変わります</small></span>
-              <input type="checkbox" class="tn-switch" id="limited">
-            </label>
-            <p class="tn-hint">連勝ボーナスとスーパープレー（+30）は、条件がシーズン中に変わるので計算に入れていません。入るぶん、実際は少し早く着きます。</p>
-          </div>
-        </details>
       </section>
     </div>
 
     <div class="result">
-      <section class="card" id="resultCard" aria-live="polite">
+      <section class="card">
         <div class="hero">
-          <p class="cap" id="heroCap">1日に取りたい★</p>
-          <div class="big"><span class="star" aria-hidden="true">★</span><span class="counter" id="perDay" aria-hidden="true"></span><span class="unit" aria-hidden="true">個</span><span class="sr" id="perDaySr"></span></div>
-          <p class="total" id="heroTotal"></p>
+          <svg class="i solid" aria-hidden="true"><use href="#i-star"/></svg>
+          <span class="counter" id="perDay" aria-hidden="true"></span>
+          <span class="per" aria-hidden="true">/日</span>
+          <span class="sr" id="perDaySr" aria-live="polite"></span>
         </div>
-        <ul class="lines" id="lines"></ul>
-        <div class="notes" id="notes"></div>
+        <p class="meta" id="meta"></p>
+        <div class="tiles" id="tiles"></div>
+        <div id="notes"></div>
 
         <details class="tn-acc">
-          <summary>段位ごとの内訳</summary>
+          <summary><svg class="i" aria-hidden="true"><use href="#i-table"/></svg>内訳</summary>
           <div class="tn-scroll"><table class="tn-table" id="breakdown"></table></div>
         </details>
         <details class="tn-acc">
-          <summary>計算に使っている数字</summary>
+          <summary><svg class="i" aria-hidden="true"><use href="#i-info"/></svg>計算のもと</summary>
           <div id="basis"></div>
         </details>
       </section>
@@ -913,28 +969,30 @@
   </div>
 
   <footer>
-    非公式のファンツールです。Identity V 第五人格の運営とは関係ありません。
-    数字は2026年9月11日時点の攻略情報（攻略wiki・公式のお知らせ）から組んだ目安で、ゲーム内の表示が正しい値です。
-    入力はこの端末の中にだけ保存され、どこにも送りません。
-    <div class="brand">
-      <svg class="mark" viewBox="0 0 100 100" aria-hidden="true">
-        <rect width="100" height="100" rx="24"/>
-        <g stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round">
-          <polygon points="35,46 50,53.5 35,61 20,53.5"/>
-          <polygon points="20,53.5 35,61 35,76 20,68.5"/>
-          <polygon points="50,53.5 35,61 35,76 50,68.5"/>
-          <polygon points="65,46 80,53.5 65,61 50,53.5"/>
-          <polygon points="50,53.5 65,61 65,76 50,68.5"/>
-          <polygon points="80,53.5 65,61 65,76 80,68.5"/>
-          <polygon points="50,24 65,31.5 50,39 35,31.5"/>
-          <polygon points="35,31.5 50,39 50,54 35,46.5"/>
-          <polygon points="65,31.5 50,39 50,54 65,46.5"/>
-        </g>
-      </svg>
-      つみき
-    </div>
+    <svg class="i" aria-hidden="true"><use href="#i-info"/></svg>
+    <span>非公式の目安です（2026/9/11時点の攻略情報）。入力はこの端末にだけ保存します。</span>
   </footer>
 </div>
+
+<dialog class="tn-sheet" id="picker" aria-labelledby="pkTitle">
+  <div class="tn-sheet-body">
+    <div class="sheet-head">
+      <svg class="i" aria-hidden="true" id="pkIcon"><use href="#i-pin"/></svg>
+      <b id="pkTitle">いま</b>
+      <button type="button" class="done" id="pkDone" aria-label="決定して閉じる"><svg class="i"><use href="#i-check"/></svg></button>
+    </div>
+    <div class="pk grid-tier" id="pkTier" role="group" aria-label="段位"></div>
+    <div class="pk grid-sub" id="pkSub" role="group" aria-label="小段位"></div>
+    <div class="pk starpick" id="pkStars" role="group" aria-label="★の数"></div>
+    <div class="pk seven" id="pk7" hidden>
+      <button type="button" class="sq" id="st7Down" aria-label="★を減らす"><svg class="i"><use href="#i-minus"/></svg></button>
+      <span class="star7"><svg class="i solid" aria-hidden="true"><use href="#i-star"/></svg></span>
+      <input class="tn-input" type="number" inputmode="numeric" min="0" max="999" step="1" id="st7" aria-label="★の数">
+      <button type="button" class="sq" id="st7Up" aria-label="★を増やす"><svg class="i"><use href="#i-plus"/></svg></button>
+      <button type="button" class="chip" id="st7Peak" aria-pressed="false"><svg class="i"><use href="#i-peak"/></svg>最高峰 ★25</button>
+    </div>
+  </div>
+</dialog>
 
 <script>
 'use strict';
@@ -943,7 +1001,7 @@
    出典: wikiwiki 5ch攻略「ランク戦」2026-08-23 / bilibili wiki「排位模式」
          日本公式お知らせ 2024-03-20（昇格戦の廃止）・2026-09-09（S44開始）
    ================================================================ */
-const SEASON = { name:'S44', lastDay:'2026-11-18', endNote:'11/19 のメンテで終了' };
+const SEASON = { name:'S44', lastDay:'2026-11-18' };
 
 // 段位ごと：小段位の数・1小段位の★・1★のpt・その段位の最初までの累計pt
 const TIERS = {
@@ -954,7 +1012,7 @@ const TIERS = {
   5:{ subs:5, stars:5, pps:30, base:1500, labels:['V','IV','III','II','I'] },
   6:{ subs:5, stars:5, pps:30, base:2250, labels:['V','IV','III','II','I'] },
 };
-const SEVEN_BASE = 3000, SEVEN_PPS = 30, PEAK_STARS = 25;
+const SEVEN_BASE = 3000, SEVEN_PPS = 30, PEAK_STARS = 25, SEVEN_MAX = 999;
 
 const tierEnd = t => t === 7 ? Infinity : TIERS[t].base + TIERS[t].subs * TIERS[t].stars * TIERS[t].pps;
 const ppsOf  = t => t === 7 ? SEVEN_PPS : TIERS[t].pps;
@@ -963,10 +1021,6 @@ function cumOf(p){
   if (p.t === 7) return SEVEN_BASE + p.st * SEVEN_PPS;
   const T = TIERS[p.t];
   return T.base + p.s * T.stars * T.pps + p.st * T.pps;
-}
-function labelOf(p){
-  if (p.t === 7) return (p.st >= PEAK_STARS ? '最高峰7段' : '7段') + ' ★' + p.st;
-  return p.t + '段' + TIERS[p.t].labels[p.s] + ' ★' + p.st;
 }
 
 /* 1試合でもらえるptの見込み（基本点＋必ず付く点の平均＋段位ガード） */
@@ -984,7 +1038,7 @@ function matchPts(side, t, opt){
     r = { win4, win3, win:(win4 + win3) / 2,
           draw:(low ? 1 : 3) + RANK + gDraw,
           loss:((b1 + gLoss1) + (b0 + gLoss0)) / 2 + RANK };
-    if (opt.solo){ r.win += t >= 7 ? 1 : 2; r.win4 += t >= 7 ? 1 : 2; r.win3 += t >= 7 ? 1 : 2; r.draw += 1; }
+    if (opt.solo){ const s = t >= 7 ? 1 : 2; r.win += s; r.win4 += s; r.win3 += s; r.draw += 1; }
   } else {
     // 脱落させた人数の点：1吊り+1 … 4吊り+4、0吊り0（読み取り）
     const gDraw = {1:4, 2:3, 3:2}[t] || 0;
@@ -997,82 +1051,134 @@ function matchPts(side, t, opt){
   if (opt.limited){ r.win += 2; r.win4 += 2; r.win3 += 2; r.draw += 1; }
   return r;
 }
-
 /* 開放時間（日本時間）：5段以下 8時間／6段以上 6時間 */
 const openMinutes = t => t <= 5 ? 480 : 360;
 
+/* ---------------- 日付 ---------------- */
+const pad = n => String(n).padStart(2, '0');
+function todayStr(){
+  const q = new URLSearchParams(location.search).get('today');      // 動作確認用の上書き
+  if (q && /^\d{4}-\d{2}-\d{2}$/.test(q)) return q;
+  const d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+}
+function dayNum(s){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) / 86400000 : NaN; }
+
 /* ---------------- 保存（この端末の中だけ） ---------------- */
-const KEY = 'hoshinomichi:v1';
-const DEFAULT = {
-  side:'surv',
-  pos:{ surv:{ cur:{t:3,s:0,st:0}, goal:{t:5,s:0,st:0} },
-        hunt:{ cur:{t:3,s:0,st:0}, goal:{t:5,s:0,st:0} } },
-  deadline:SEASON.lastDay, doneToday:false,
-  winRate:50, drawRate:10, minutes:20, solo:false, limited:false,
-};
+const KEY = 'hoshinomichi:v2';
+const num = (v, lo, hi, dflt) => { const n = Number(v); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : dflt; };
+function cleanPos(p, isGoal){
+  p = p || {};
+  let t = Math.round(Number(p.t)); if (!(t >= 1 && t <= 7)) t = isGoal ? 5 : 3;
+  if (t === 7) return { t, s:0, st:Math.round(num(p.st, 0, SEVEN_MAX, isGoal ? PEAK_STARS : 0)) };
+  const T = TIERS[t];
+  return { t, s:Math.round(num(p.s, 0, T.subs - 1, 0)), st:Math.round(num(p.st, 0, T.stars, 0)) };
+}
 function load(){
-  try {
-    const s = JSON.parse(localStorage.getItem(KEY) || 'null');
-    if (s && s.pos && s.pos.surv && s.pos.hunt) return Object.assign({}, DEFAULT, s);
-  } catch (e) {}
-  return JSON.parse(JSON.stringify(DEFAULT));
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+  if (!s || typeof s !== 'object') s = {};
+  const pos = s.pos || {};
+  const side = (k) => ({ cur:cleanPos(pos[k] && pos[k].cur, false), goal:cleanPos(pos[k] && pos[k].goal, true) });
+  return {
+    side: s.side === 'hunt' ? 'hunt' : 'surv',
+    pos: { surv:side('surv'), hunt:side('hunt') },
+    deadline: typeof s.deadline === 'string' ? s.deadline : SEASON.lastDay,
+    doneDate: typeof s.doneDate === 'string' ? s.doneDate : '',
+    winRate: Math.round(num(s.winRate, 0, 100, 50)),
+    drawRate: Math.round(num(s.drawRate, 0, 50, 10)),
+    minutes: Math.round(num(s.minutes, 5, 60, 20)),
+    solo: !!s.solo, limited: !!s.limited,
+  };
 }
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
 const state = load();
 
-/* ---------------- 日付 ---------------- */
-const pad = n => String(n).padStart(2, '0');
-function todayStr(){ const d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
-function dayNum(s){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) / 86400000 : NaN; }
-function mdOf(s){ const m = /^\d{4}-(\d{2})-(\d{2})$/.exec(s || ''); return m ? (+m[1]) + '/' + (+m[2]) : ''; }
-
-/* ---------------- 段位の入力 ---------------- */
+/* ---------------- 部品 ---------------- */
 const $ = id => document.getElementById(id);
-function buildPos(host, key){
-  host.innerHTML =
-    '<div class="tn-field"><label>段位</label><select class="tn-select" data-k="t"></select></div>' +
-    '<div class="tn-field" data-wrap="s"><label>小段位</label><select class="tn-select" data-k="s"></select></div>' +
-    '<div class="tn-field" data-wrap="st"><label>★の数</label><select class="tn-select" data-k="st"></select>' +
-    '<input class="tn-input" type="number" inputmode="numeric" min="0" step="1" data-k="st7" hidden></div>';
-  const tSel = host.querySelector('[data-k=t]');
-  for (let t = 1; t <= 7; t++) tSel.add(new Option(t === 7 ? '7段・最高峰' : t + '段', t));
-  host.querySelectorAll('select,input').forEach(el => el.addEventListener('input', () => {
-    const p = state.pos[state.side][key];
-    const k = el.dataset.k;
-    if (k === 't'){ p.t = +el.value; p.s = 0; p.st = (p.t === 7 && key === 'goal') ? PEAK_STARS : 0; }
-    else if (k === 's'){ p.s = +el.value; p.st = Math.min(p.st, TIERS[p.t].stars); }
-    else if (k === 'st'){ p.st = +el.value; }
-    else if (k === 'st7'){ p.st = Math.max(0, Math.floor(+el.value || 0)); }
-    syncPos(host, key); update();
-  }));
-}
-function syncPos(host, key){
-  const p = state.pos[state.side][key];
-  const tSel = host.querySelector('[data-k=t]'), sSel = host.querySelector('[data-k=s]');
-  const stSel = host.querySelector('[data-k=st]'), st7 = host.querySelector('[data-k=st7]');
-  const labS = host.querySelector('[data-wrap=s] label'), labSt = host.querySelector('[data-wrap=st] label');
-  tSel.value = p.t;
-  if (p.t === 7){
-    sSel.innerHTML = ''; sSel.add(new Option('—', 0)); sSel.disabled = true;
-    stSel.hidden = true; st7.hidden = false;
-    if (document.activeElement !== st7) st7.value = p.st;
-    labSt.textContent = '★の数';
-    labS.textContent = '小段位';
-  } else {
-    const T = TIERS[p.t];
-    sSel.disabled = false;
-    sSel.innerHTML = ''; T.labels.forEach((l, i) => sSel.add(new Option(l, i)));
-    sSel.value = p.s;
-    stSel.hidden = false; st7.hidden = true;
-    stSel.innerHTML = ''; for (let i = 0; i <= T.stars; i++) stSel.add(new Option('★' + i, i));
-    stSel.value = p.st;
-    labSt.textContent = '★の数';
-  }
+const icon = (id, cls) => '<svg class="i' + (cls ? ' ' + cls : '') + '" aria-hidden="true"><use href="#i-' + id + '"/></svg>';
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* 小さな時間送り（rAF が止まる環境でも進むよう setTimeout で刻む） */
+function tween(ms, fn){
+  if (!ms || reduced){ fn(1); return; }
+  const t0 = performance.now();
+  (function step(){
+    const p = Math.min(1, (performance.now() - t0) / ms);
+    fn(1 - Math.pow(1 - p, 3));
+    if (p < 1) setTimeout(step, 16);
+  })();
 }
 
-/* ---------------- くるくる回る数字 ---------------- */
-// Rare UI「Animated counter」(MIT) の考え方をつみき用に書き直し。上下を段階的に抜くマスクが肝。
-const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* 陣営のタブ：Rare UI「Gooey nav」(MIT) の考え方を素のJSに */
+function gooeyTabs(host, items, activeIndex, onChange){
+  const SPAN = 10, CORNER = 14, BREAK = 0.22, NS = 'http://www.w3.org/2000/svg';
+  const row = document.createElement('div'); row.className = 'gnav-row'; row.setAttribute('role', 'tablist');
+  host.appendChild(row);
+  let active = activeIndex, tok = 0;
+  const segs = items.map((it, i) => {
+    const li = document.createElement('div'); li.className = 'gnav-seg';
+    const btn = document.createElement('button'); btn.type = 'button'; btn.setAttribute('role', 'tab');
+    btn.innerHTML = icon(it.icon) + '<span>' + it.label + '</span>';
+    btn.addEventListener('click', () => { if (i !== active) select(i, true); });
+    btn.addEventListener('keydown', e => {
+      const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (!d) return; e.preventDefault();
+      const n = (active + d + items.length) % items.length; select(n, true); segs[n].btn.focus();
+    });
+    let path = null, stops = null;
+    if (i > 0){
+      const svg = document.createElementNS(NS, 'svg');
+      svg.setAttribute('class', 'neck'); svg.setAttribute('width', SPAN);
+      svg.setAttribute('viewBox', '0 0 ' + SPAN + ' 100'); svg.setAttribute('preserveAspectRatio', 'none');
+      svg.setAttribute('aria-hidden', 'true');
+      svg.innerHTML = '<defs><linearGradient id="neck' + i + '" x1="0" x2="1"><stop offset="0"></stop><stop offset="1"></stop></linearGradient></defs><path fill="url(#neck' + i + ')"></path>';
+      path = svg.querySelector('path'); stops = svg.querySelectorAll('stop');
+      li.appendChild(svg);
+    }
+    li.appendChild(btn); row.appendChild(li);
+    return { li, btn, path, stops, gap: i === 0 ? 0 : -1 };
+  });
+  // すき間 gap のとき、首を2本の二次ベジェで描く。すき間が SPAN×0.22 を超えると首は切れる
+  function neckPath(gap){
+    if (!(gap > 0)) return '';
+    const waist = 100 * (1 - gap / (SPAN * BREAK));
+    if (waist <= 0) return '';
+    const start = SPAN - gap, mid = start + gap / 2;
+    return 'M' + start + ' 0 Q' + mid + ' ' + (100 - waist) + ' ' + SPAN + ' 0 L' + SPAN + ' 100 Q' + mid + ' ' + waist + ' ' + start + ' 100 Z';
+  }
+  const isOpen = k => k === 0 || k === items.length || k - 1 === active || k === active;
+  function select(i, user){
+    active = i;
+    const from = segs.map(s => s.gap);
+    const to = segs.map((s, k) => k === 0 ? 0 : (isOpen(k) ? SPAN : -1));
+    segs.forEach((s, k) => {
+      const on = k === active;
+      s.li.classList.toggle('on', on);
+      s.btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      s.btn.tabIndex = on ? 0 : -1;
+      const l = isOpen(k) ? CORNER : 0, r = isOpen(k + 1) ? CORNER : 0;
+      s.li.style.borderRadius = l + 'px ' + r + 'px ' + r + 'px ' + l + 'px';
+      if (s.stops){
+        s.stops[0].style.setProperty('stop-color', k - 1 === active ? 'var(--fill)' : 'var(--surface-2)');
+        s.stops[1].style.setProperty('stop-color', on ? 'var(--fill)' : 'var(--surface-2)');
+      }
+    });
+    const my = ++tok;
+    tween(user ? 200 : 0, p => {
+      if (my !== tok) return;
+      segs.forEach((s, k) => {
+        s.gap = from[k] + (to[k] - from[k]) * p;
+        if (k > 0) s.li.style.marginLeft = s.gap + 'px';
+        if (s.path) s.path.setAttribute('d', neckPath(s.gap));
+      });
+    });
+    if (user) onChange(i);
+  }
+  select(active, false);
+  return { select };
+}
+
+/* くるくる回る数字：Rare UI「Animated counter」(MIT) の考え方を素のJSに */
 function counter(host){
   host.style.setProperty('--fade', 'linear-gradient(to bottom, var(--mask-clear) 0%, var(--mask-06) 5.5%, var(--mask-50) 11%, var(--mask-94) 16.5%, var(--mask-solid) 22%, var(--mask-solid) 78%, var(--mask-94) 83.5%, var(--mask-50) 89%, var(--mask-06) 94.5%, var(--mask-clear) 100%)');
   let slots = [], shape = null;
@@ -1086,8 +1192,7 @@ function counter(host){
         win.appendChild(col); host.appendChild(win);
         slots.push({ col, digit:0 });
       } else {
-        const f = document.createElement('span'); f.className = 'fixed'; f.textContent = ch;
-        host.appendChild(f);
+        const f = document.createElement('span'); f.className = 'fixed'; f.textContent = ch; host.appendChild(f);
       }
     });
   }
@@ -1097,131 +1202,193 @@ function counter(host){
     let i = 0;
     [...text].forEach(ch => {
       if (ch < '0' || ch > '9') return;
-      const s = slots[i++], next = +ch;
-      const wrap = s.digit === 9 && next === 0;
+      const s = slots[i++], next = +ch, wrap = s.digit === 9 && next === 0;
       s.col.style.transition = reduced ? 'none' : 'transform .6s cubic-bezier(.22,1,.36,1) ' + (i * 0.02) + 's';
       s.col.style.transform = 'translateY(' + (-(wrap ? 10 : next) * 1.5) + 'em)';
       if (wrap) setTimeout(() => { s.col.style.transition = 'none'; s.col.style.transform = 'translateY(0em)'; }, 640);
       s.digit = next;
     });
-    $('perDaySr').textContent = '1日に★' + text + '個';
   };
 }
 const setPerDay = counter($('perDay'));
 
+/* ---------------- 段位のタイル ---------------- */
+function tileHtml(p, which){
+  const cap = which === 'cur' ? icon('pin') + 'いま' : icon('flag') + 'ゴール';
+  let main, stars;
+  if (p.t === 7){
+    main = '<b>' + (p.st >= PEAK_STARS ? '最高峰' : '7段') + '</b>';
+    stars = icon('star', 'solid') + p.st;
+  } else {
+    const T = TIERS[p.t];
+    main = '<b>' + p.t + '段</b><em>' + T.labels[p.s] + '</em>';
+    stars = '';
+    for (let k = 1; k <= T.stars; k++) stars += icon('star', k <= p.st ? 'solid' : 'off');
+  }
+  return '<span class="rk-cap">' + cap + '</span><span class="rk-main">' + main + '</span><span class="rk-stars">' + stars + '</span>';
+}
+function tileLabel(p){
+  if (p.t === 7) return (p.st >= PEAK_STARS ? '最高峰7段' : '7段') + ' ★' + p.st;
+  return p.t + '段' + TIERS[p.t].labels[p.s] + ' ★' + p.st;
+}
+function renderTiles(){
+  const P = state.pos[state.side];
+  $('curTile').innerHTML = tileHtml(P.cur, 'cur');
+  $('goalTile').innerHTML = tileHtml(P.goal, 'goal');
+  $('curTile').setAttribute('aria-label', 'いまの段位 ' + tileLabel(P.cur) + '（押すと変更）');
+  $('goalTile').setAttribute('aria-label', 'ゴール ' + tileLabel(P.goal) + '（押すと変更）');
+}
+
+/* ---------------- 段位をえらぶシート ---------------- */
+let editing = 'cur';
+function openPicker(which){
+  editing = which;
+  $('pkTitle').textContent = which === 'cur' ? 'いま' : 'ゴール';
+  $('pkIcon').innerHTML = '<use href="#i-' + (which === 'cur' ? 'pin' : 'flag') + '"/>';
+  renderPicker();
+  if ($('picker').showModal) $('picker').showModal(); else $('picker').setAttribute('open', '');
+}
+function renderPicker(){
+  const p = state.pos[state.side][editing];
+  let h = '';
+  for (let t = 1; t <= 7; t++) h += '<button type="button" class="pick" data-t="' + t + '" aria-pressed="' + (p.t === t) + '">' + (t === 7 ? '7<small>段〜</small>' : t + '<small>段</small>') + '</button>';
+  $('pkTier').innerHTML = h;
+  const seven = p.t === 7;
+  $('pkSub').hidden = seven; $('pkStars').hidden = seven; $('pk7').hidden = !seven;
+  if (!seven){
+    const T = TIERS[p.t];
+    $('pkSub').style.gridTemplateColumns = 'repeat(' + T.subs + ', minmax(0,1fr))';
+    $('pkSub').innerHTML = T.labels.map((l, i) => '<button type="button" class="pick" data-s="' + i + '" aria-pressed="' + (p.s === i) + '">' + l + '</button>').join('');
+    let s = '<button type="button" class="zero' + (p.st === 0 ? ' on' : '') + '" data-st="0" aria-label="★0">0</button>';
+    for (let k = 1; k <= T.stars; k++) s += '<button type="button" data-st="' + k + '" class="' + (k <= p.st ? 'on' : '') + '" aria-label="★' + k + '">' + icon('star', 'solid') + '</button>';
+    $('pkStars').innerHTML = s;
+  } else {
+    if (document.activeElement !== $('st7')) $('st7').value = p.st;
+    $('st7Peak').setAttribute('aria-pressed', String(p.st === PEAK_STARS));
+  }
+}
+function changePos(fn){
+  const P = state.pos[state.side], p = P[editing];
+  fn(p);
+  P[editing] = cleanPos(p, editing === 'goal');
+  renderPicker(); renderTiles(); update();
+}
+$('pkTier').addEventListener('click', e => {
+  const b = e.target.closest('[data-t]'); if (!b) return;
+  changePos(p => { const t = +b.dataset.t; if (p.t !== t){ p.t = t; p.s = 0; p.st = (t === 7 && editing === 'goal') ? PEAK_STARS : 0; } });
+});
+$('pkSub').addEventListener('click', e => { const b = e.target.closest('[data-s]'); if (b) changePos(p => { p.s = +b.dataset.s; }); });
+$('pkStars').addEventListener('click', e => { const b = e.target.closest('[data-st]'); if (b) changePos(p => { p.st = +b.dataset.st; }); });
+$('st7Down').addEventListener('click', () => changePos(p => { p.st = Math.max(0, p.st - 1); }));
+$('st7Up').addEventListener('click', () => changePos(p => { p.st = Math.min(SEVEN_MAX, p.st + 1); }));
+$('st7Peak').addEventListener('click', () => changePos(p => { p.st = PEAK_STARS; }));
+$('st7').addEventListener('input', e => { if (e.target.value === '') return; changePos(p => { p.st = Math.floor(Number(e.target.value) || 0); }); });
+$('st7').addEventListener('blur', () => renderPicker());
+$('pkDone').addEventListener('click', () => $('picker').close ? $('picker').close() : $('picker').removeAttribute('open'));
+$('picker').addEventListener('click', e => { if (e.target === $('picker')) $('picker').close(); });   // 背景を押したら閉じる
+$('curTile').addEventListener('click', () => openPicker('cur'));
+$('goalTile').addEventListener('click', () => openPicker('goal'));
+
 /* ---------------- 計算と表示 ---------------- */
-const up1 = x => Math.ceil(x * 10 - 1e-9) / 10;                 // 小数1桁に切り上げ
+const up1 = x => Math.ceil(x * 10 - 1e-9) / 10;
 const fmt1 = x => up1(x).toFixed(1);
+const ceilInt = x => Math.ceil(x - 1e-9);
 const ptsTxt = x => (x > 0 ? '+' : x < 0 ? '−' : '±') + (Math.round(Math.abs(x) * 10) / 10);
 
 function segments(from, to){
   const out = []; let c = from;
-  while (c < to){
-    const t = tierAt(c), e = Math.min(tierEnd(t), to);
-    out.push({ t, pt:e - c }); c = e;
-  }
+  while (c < to){ const t = tierAt(c), e = Math.min(tierEnd(t), to); out.push({ t, pt:e - c }); c = e; }
   return out;
 }
 
 function update(){
   const side = state.side, P = state.pos[side];
   const opt = { solo:state.solo && side === 'surv', limited:state.limited };
-  $('soloRow').hidden = side !== 'surv';
+  const today = todayStr();
+  const done = state.doneDate === today;
+  $('solo').hidden = side !== 'surv';
+  $('solo').setAttribute('aria-pressed', String(state.solo));
+  $('limited').setAttribute('aria-pressed', String(state.limited));
+  $('doneToday').setAttribute('aria-pressed', String(done));
+  $('winVal').textContent = state.winRate + '%';
+  $('drawVal').textContent = state.drawRate + '%';
+  $('minVal').textContent = state.minutes + '分';
 
-  // 期間
-  const today = $('today').value || todayStr();
-  const start = dayNum(today) + (state.doneToday ? 1 : 0);
-  const days = dayNum(state.deadline) - start + 1;
-  const lastT = dayNum(SEASON.lastDay);
-  $('seasonHint').textContent = dayNum(today) <= lastT
-    ? '今のシーズン（' + SEASON.name + '）は ' + SEASON.endNote + '。最後に遊べるのは ' + mdOf(SEASON.lastDay) + ' まで（11/19 の朝の枠は予定しだい）。'
-    : 'シーズン ' + SEASON.name + ' は終わっています。新しいシーズンの締切を入れてください。';
+  const days = dayNum(state.deadline) - (dayNum(today) + (done ? 1 : 0)) + 1;
+  $('daysVal').innerHTML = days >= 1 ? days + '<small>日</small>' : '—';
 
-  const curCum = cumOf(P.cur), goalCum = cumOf(P.goal);
-  const need = goalCum - curCum;
-  $('goalHint').textContent = P.goal.t === 7 ? '★' + PEAK_STARS + 'で最高峰7段。その先も★は増え続けます。' : '';
-
-  const lines = $('lines'), notes = $('notes');
-  lines.innerHTML = ''; notes.innerHTML = '';
-  const note = (cls, html) => { const p = document.createElement('p'); p.className = 'msg ' + cls; p.innerHTML = html; notes.appendChild(p); };
-  const line = (label, value, sub) => {
-    const li = document.createElement('li');
-    li.innerHTML = '<span>' + label + '</span><span><b>' + value + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</span>';
-    lines.appendChild(li);
+  const need = cumOf(P.goal) - cumOf(P.cur);
+  const notes = $('notes'), tiles = $('tiles');
+  notes.innerHTML = ''; tiles.innerHTML = '';
+  const pill = (cls, ic, html) => { const p = document.createElement('p'); p.className = 'pill ' + cls; p.innerHTML = icon(ic) + '<span>' + html + '</span>'; notes.appendChild(p); };
+  const tile = (ic, value, unit, cap) => {
+    const d = document.createElement('div'); d.className = 'tile';
+    d.innerHTML = icon(ic) + '<b>' + value + '<span>' + unit + '</span></b><small>' + cap + '</small>';
+    tiles.appendChild(d);
   };
+  const finish = () => { renderBasis(side, opt); save(); };
 
   if (need <= 0){
-    setPerDay('0.0');
-    $('heroTotal').textContent = labelOf(P.cur) + ' → ' + labelOf(P.goal);
-    note('good', 'もうゴールに届いています。ゴールを上の段位にすると、1日のペースが出ます。');
-    $('breakdown').innerHTML = ''; renderBasis(side, opt); save(); return;
+    setPerDay('0.0'); $('perDaySr').textContent = 'ゴールに届いています';
+    $('meta').innerHTML = '';
+    pill('good', 'check', 'ゴールに届いています');
+    $('breakdown').innerHTML = ''; finish(); return;
   }
   if (!(days >= 1)){
-    setPerDay('0.0');
-    $('heroTotal').textContent = '';
-    note('warn', '締切が今日より前になっています。締切の日付を直してください。');
-    $('breakdown').innerHTML = ''; renderBasis(side, opt); save(); return;
+    setPerDay('0.0'); $('perDaySr').textContent = '締切を直してください';
+    $('meta').innerHTML = '';
+    const dl = dayNum(state.deadline);
+    pill('warn', 'warn', !Number.isFinite(dl) ? '締切の日付を入れてください'
+      : dl < dayNum(today) ? '締切が過ぎています'
+      : '今日は済なので、残りの日がありません');
+    $('breakdown').innerHTML = ''; finish(); return;
   }
 
-  const segs = segments(curCum, goalCum);
-  const w = Math.max(0, Math.min(100, +state.winRate || 0)) / 100;
-  let d = Math.max(0, Math.min(100, +state.drawRate || 0)) / 100;
-  const rateOver = w + d > 1; if (rateOver) d = 1 - w;
-  const l = 1 - w - d;
-
-  let stars = 0, winsAll = 0, wins4 = 0, wins3 = 0, matches = 0, winsRate = 0, stuck = null, maxPerDay = Infinity;
+  const w = state.winRate / 100, d = Math.min(state.drawRate / 100, 1 - w), l = 1 - w - d;
+  let stars = 0, winsAll = 0, wins4 = 0, wins3 = 0, matches = 0, winsRate = 0, stuck = null, cap = Infinity;
   const rows = [];
-  segs.forEach(sg => {
+  segments(cumOf(P.cur), cumOf(P.goal)).forEach(sg => {
     const m = matchPts(side, sg.t, opt);
-    const st = sg.pt / ppsOf(sg.t);
     const e = w * m.win + d * m.draw + l * m.loss;
-    const row = { t:sg.t, pt:sg.pt, st, winsAll:sg.pt / m.win, e, matches:e > 0 ? sg.pt / e : Infinity };
-    stars += st; winsAll += row.winsAll; wins4 += sg.pt / m.win4; wins3 += sg.pt / m.win3;
-    if (e > 0){ matches += row.matches; winsRate += row.matches * w; }
-    else if (!stuck) stuck = { t:sg.t, e };
-    maxPerDay = Math.min(maxPerDay, openMinutes(sg.t) / Math.max(5, +state.minutes || 20));
+    const row = { t:sg.t, pt:sg.pt, st:sg.pt / ppsOf(sg.t), winsAll:sg.pt / m.win, matches:e > 0 ? sg.pt / e : Infinity };
+    stars += row.st; winsAll += row.winsAll; wins4 += sg.pt / m.win4; wins3 += sg.pt / m.win3;
+    if (e > 0){ matches += row.matches; winsRate += row.matches * w; } else if (!stuck) stuck = { t:sg.t, e };
+    cap = Math.min(cap, Math.floor(openMinutes(sg.t) / state.minutes));
     rows.push(row);
   });
 
-  setPerDay(fmt1(stars / days));
-  $('heroTotal').textContent = labelOf(P.cur) + ' → ' + labelOf(P.goal) + '　あと★' + Math.ceil(stars - 1e-9) + '個（' + need + 'pt）・' + days + '日';
+  const perDay = fmt1(stars / days);
+  setPerDay(perDay);
+  $('perDaySr').textContent = '1日に★' + perDay + '個';
+  $('meta').innerHTML = '<span>' + icon('flag') + 'あと★' + ceilInt(stars) + '</span><span>' + icon('cal') + days + '日</span>';
 
   if (side === 'surv'){
-    line('負けなしなら', '1日 ' + fmt1(winsAll / days) + '勝', 'ぜんぶで ' + Math.ceil(winsAll - 1e-9) + '勝（4人・3人脱出の平均）');
+    tile('trophy', fmt1(winsAll / days), '勝/日', '全勝なら');
   } else {
-    line('4吊りだけなら', '1日 ' + fmt1(wins4 / days) + '勝', 'ぜんぶで ' + Math.ceil(wins4 - 1e-9) + '勝');
-    line('3吊りだけなら', '1日 ' + fmt1(wins3 / days) + '勝', 'ぜんぶで ' + Math.ceil(wins3 - 1e-9) + '勝');
+    tile('hunt', fmt1(wins4 / days), '勝/日', '4吊りなら');
+    tile('hunt', fmt1(wins3 / days), '勝/日', '3吊りなら');
   }
-  if (!stuck){
-    line('勝率' + Math.round(w * 100) + '%なら', '1日 ' + fmt1(matches / days) + '試合',
-      'うち勝ち 約' + fmt1(winsRate / days) + '・ぜんぶで ' + Math.ceil(matches - 1e-9) + '試合');
-  } else {
-    line('勝率' + Math.round(w * 100) + '%なら', '届きません', stuck.t + '段で1試合あたり ' + ptsTxt(stuck.e) + 'pt');
-    note('warn', 'この勝率だと、' + stuck.t + '段では1試合ごとのptが増えません（平均 ' + ptsTxt(stuck.e) + 'pt）。勝率を上げるか、引き分けの割合を見直してください。');
-  }
-  if (rateOver) note('warn', '勝率と引き分けの割合を足すと100%を超えています。引き分けを ' + Math.round(d * 100) + '% として計算しました。');
+  if (!stuck) tile('swords', fmt1(matches / days), '戦/日', '勝率' + state.winRate + '%');
+  else tile('swords', '—', '', '勝率' + state.winRate + '%');
 
-  // 1日の枠に収まるか
-  if (!stuck){
-    const perDay = matches / days, cap = Math.floor(maxPerDay);
-    if (perDay <= cap){
-      note('good', '1試合' + (+state.minutes || 20) + '分なら、開いている時間で1日 最大' + cap + '試合。十分まにあいます。');
-    } else {
-      note('warn', '1試合' + (+state.minutes || 20) + '分だと、開いている時間では1日 最大' + cap + '試合。この勝率のままでは締切に届かない見込みです。');
-    }
-    if (perDay < 3) note('good', '毎日3試合すると、翌日0時にランク秘宝ももらえます。');
+  if (stuck){
+    pill('warn', 'warn', '勝率' + state.winRate + '%だと' + stuck.t + '段で増えません（1戦 ' + ptsTxt(stuck.e) + 'pt）');
+  } else if (matches / days <= cap * 0.5){
+    pill('good', 'clock', '開いている時間で1日' + cap + '戦まで。余裕があります');
+  } else if (matches / days <= cap){
+    pill('warn', 'clock', '1日' + cap + '戦が上限。毎日ほぼ全枠です');
+  } else {
+    pill('warn', 'clock', '1日' + cap + '戦までしか入りません');
   }
 
-  // 内訳
-  let h = '<thead><tr><th>段位</th><th class="tn-num">pt</th><th class="tn-num">★</th><th class="tn-num">負けなし</th><th class="tn-num">勝率' + Math.round(w * 100) + '%</th></tr></thead><tbody>';
+  let h = '<thead><tr><th>段位</th><th class="tn-num">pt</th><th class="tn-num">★</th><th class="tn-num">全勝</th><th class="tn-num">勝率' + state.winRate + '%</th></tr></thead><tbody>';
   rows.forEach(r => {
     h += '<tr><td>' + (r.t === 7 ? '7段〜' : r.t + '段') + '</td><td class="tn-num">' + r.pt + '</td><td class="tn-num">' + Math.round(r.st * 10) / 10 +
-      '</td><td class="tn-num">' + Math.ceil(r.winsAll - 1e-9) + '勝</td><td class="tn-num">' + (isFinite(r.matches) ? Math.ceil(r.matches - 1e-9) + '試合' : '—') + '</td></tr>';
+      '</td><td class="tn-num">' + ceilInt(r.winsAll) + '</td><td class="tn-num">' + (isFinite(r.matches) ? ceilInt(r.matches) : '—') + '</td></tr>';
   });
+  h += '<tr><td>合計</td><td class="tn-num">' + need + '</td><td class="tn-num">' + ceilInt(stars) + '</td><td class="tn-num">' + ceilInt(winsAll) + '</td><td class="tn-num">' + (stuck ? '—' : ceilInt(matches)) + '</td></tr>';
   $('breakdown').innerHTML = h + '</tbody>';
-
-  renderBasis(side, opt);
-  save();
+  finish();
 }
 
 function renderBasis(side, opt){
@@ -1229,50 +1396,48 @@ function renderBasis(side, opt){
                                  : [[1,'1段'],[2,'2段'],[3,'3段'],[4,'4段'],[5,'5〜6段'],[7,'7段〜']];
   let h = '<div class="tn-scroll"><table class="tn-table"><thead><tr><th>段位</th>' +
     (side === 'surv' ? '<th class="tn-num">勝ち</th>' : '<th class="tn-num">4吊り</th><th class="tn-num">3吊り</th>') +
-    '<th class="tn-num">引き分け</th><th class="tn-num">負け</th><th class="tn-num">1★</th></tr></thead><tbody>';
+    '<th class="tn-num">引分</th><th class="tn-num">負け</th><th class="tn-num">1★</th></tr></thead><tbody>';
   groups.forEach(([t, name]) => {
     const m = matchPts(side, t, opt);
     h += '<tr><td>' + name + '</td>' +
       (side === 'surv' ? '<td class="tn-num">' + ptsTxt(m.win) + '</td>' : '<td class="tn-num">' + ptsTxt(m.win4) + '</td><td class="tn-num">' + ptsTxt(m.win3) + '</td>') +
-      '<td class="tn-num">' + ptsTxt(m.draw) + '</td><td class="tn-num">' + ptsTxt(m.loss) + '</td><td class="tn-num">' + ppsOf(t) + 'pt</td></tr>';
+      '<td class="tn-num">' + ptsTxt(m.draw) + '</td><td class="tn-num">' + ptsTxt(m.loss) + '</td><td class="tn-num">' + ppsOf(t) + '</td></tr>';
   });
   h += '</tbody></table></div><ul>';
-  if (side === 'surv'){
-    h += '<li>1試合のpt＝基本点＋演繹得点の順位点（+1〜4）の平均+2.5。負けは1人脱出と0人脱出の平均。</li>' +
-         '<li>4段以下は、負け・引き分けで自動で足される「段位ガード」を含みます。</li>';
-  } else {
-    h += '<li>1試合のpt＝基本点＋脱落させた人数の点（1吊り+1〜4吊り+4、0吊りは0として計算）。負けは1吊りと0吊りの平均。</li>' +
-         '<li>3段以下は「段位ガード」を含みます。4段のガードは資料で確かめられなかったので0にしています。</li>';
-  }
-  h += '<li>段位の境目は、4段以下が1★20pt、5段以上が1★30pt。昇格戦は2024年3月に無くなっています。</li>' +
-       '<li>1日に開いている時間：5段以下8時間（5〜7時・13〜15時・19〜23時）、6段以上6時間（夜は20〜22時）。</li></ul>';
+  h += side === 'surv'
+    ? '<li>1戦のpt＝基本点＋順位点の平均(+2.5)。勝ちは4人・3人脱出、負けは1人・0人脱出の平均。4段以下は段位ガード込み。</li>'
+    : '<li>1戦のpt＝基本点＋吊った人数の点（0吊りは0とした）。勝率の計算の勝ちは4吊り・3吊りの平均、負けは1吊り・0吊りの平均。</li>' +
+      '<li>段位ガードは3段以下だけ（3段の負け+2。資料によっては+3。4段は資料になく0）。</li>';
+  h += '<li>2段以下は★0で負けても降格せず0まで補填されますが、その分は入れていません（低い段位では少し多めに出ます）。</li>';
+  h += '<li>連勝ボーナス・スーパープレー(+30)は入れていません。</li>' +
+       '<li>1日の枠：5段以下8時間、6段以上6時間。</li>' +
+       '<li>' + SEASON.name + 'は11/19のメンテで終了（最終日の既定は11/18）。</li></ul>';
   $('basis').innerHTML = h;
 }
 
 /* ---------------- つなぐ ---------------- */
-buildPos($('cur'), 'cur'); buildPos($('goal'), 'goal');
-function syncAll(){
-  document.querySelectorAll('#side button').forEach(b => b.classList.toggle('on', b.dataset.side === state.side));
-  syncPos($('cur'), 'cur'); syncPos($('goal'), 'goal');
-}
-document.querySelectorAll('#side button').forEach(b => b.addEventListener('click', () => {
-  state.side = b.dataset.side; syncAll(); update();
-}));
+gooeyTabs($('side'), [{ label:'サバイバー', icon:'surv' }, { label:'ハンター', icon:'hunt' }],
+  state.side === 'hunt' ? 1 : 0, i => { state.side = i ? 'hunt' : 'surv'; renderTiles(); update(); });
 
-$('today').value = todayStr();
-if (!(dayNum(state.deadline) >= dayNum(todayStr())) && dayNum(SEASON.lastDay) >= dayNum(todayStr())) state.deadline = SEASON.lastDay;
+// 締切が過ぎていたら：シーズン中なら既定の最終日に戻す／シーズンが終わっていたら空にして入れてもらう
+if (!(dayNum(state.deadline) >= dayNum(todayStr()))) state.deadline = dayNum(SEASON.lastDay) >= dayNum(todayStr()) ? SEASON.lastDay : '';
 $('deadline').value = state.deadline;
-$('doneToday').checked = !!state.doneToday;
-$('winRate').value = state.winRate; $('drawRate').value = state.drawRate; $('minutes').value = state.minutes;
-$('solo').checked = !!state.solo; $('limited').checked = !!state.limited;
+$('winRate').value = state.winRate;
+$('drawRate').value = state.drawRate;
 
-$('today').addEventListener('input', update);
 $('deadline').addEventListener('input', e => { state.deadline = e.target.value; update(); });
-$('doneToday').addEventListener('change', e => { state.doneToday = e.target.checked; update(); });
-['winRate','drawRate','minutes'].forEach(id => $(id).addEventListener('input', e => { state[id] = e.target.value; update(); }));
-['solo','limited'].forEach(id => $(id).addEventListener('change', e => { state[id] = e.target.checked; update(); }));
+$('winRate').addEventListener('input', e => { state.winRate = Math.round(num(e.target.value, 0, 100, 50)); update(); });
+$('drawRate').addEventListener('input', e => { state.drawRate = Math.round(num(e.target.value, 0, 50, 10)); update(); });
+$('minDown').addEventListener('click', () => { state.minutes = Math.max(5, state.minutes - 1); update(); });
+$('minUp').addEventListener('click', () => { state.minutes = Math.min(60, state.minutes + 1); update(); });
+$('doneToday').addEventListener('click', () => { const t = todayStr(); state.doneDate = state.doneDate === t ? '' : t; update(); });
+$('solo').addEventListener('click', () => { state.solo = !state.solo; update(); });
+$('limited').addEventListener('click', () => { state.limited = !state.limited; update(); });
 
-syncAll(); update();
+// ホーム画面から開き直したとき、日付が変わっていれば数え直す
+document.addEventListener('visibilitychange', () => { if (!document.hidden) update(); });
+
+renderTiles(); update();
 </script>
 </body>
 </html>
