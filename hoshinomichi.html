@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="apple-touch-icon" href="icon-hoshinomichi.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ほしのみち">
+<meta name="description" content="第五人格のランク戦で、ゴールの段位まで1日に★何個・何勝・何試合すればいいかを出す計算ツール（非公式）">
+<title>ほしのみち｜第五人格ランク戦の1日ペース</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f5f4f0; --surface:#fffefb; --surface-2:#efece5;
+    --ink:#1d1a15; --ink-mid:#5b554a; --ink-soft:#666154; --sub:#68645d; --ghost:#887f70;
+    --line:#e2ded4; --line-2:#d8d3c7;
+    --accent:#b06f26; --accent-2:#8a5a24; --accent-wash:#f0e4d1;
+    --good:#4c7a51; --good-wash:#dde9dd; --good-ink:#416845;
+    --warn:#b0522a; --warn-wash:#f2e0d4; --warn-ink:#974624;
+    --shadow:0 1px 2px rgba(40,32,18,.05), 0 10px 26px -16px rgba(40,32,18,.18);
+    --mask-clear:rgba(29,26,21,0); --mask-06:rgba(29,26,21,.06); --mask-50:rgba(29,26,21,.5);
+    --mask-94:rgba(29,26,21,.94); --mask-solid:rgba(29,26,21,1);
+    --radius:20px;
+    --ease:cubic-bezier(0.2, 0, 0, 1);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#0f0d07; --surface:#211d14; --surface-2:#2b2619;
+      --ink:#efe8da; --ink-mid:#a89e8b; --ink-soft:#9f988a; --sub:#9f988a;
+      --line:#36301f; --line-2:#443d2b;
+      --accent:#d59a4d; --accent-2:#e0ab63; --accent-wash:#362a19;
+      --good:#7fae82; --good-wash:#23301f; --good-ink:#7fae82;
+      --warn:#d9825a; --warn-wash:#39251a; --warn-ink:#d9825a;
+      --shadow:0 1px 2px rgba(15,13,7,.3), 0 12px 30px -18px rgba(15,13,7,.65);
+    }
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; min-height:100dvh; background:var(--paper); color:var(--ink);
+    font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN','Hiragino Sans',sans-serif;
+    font-size:16px; line-height:1.7; -webkit-font-smoothing:antialiased;
+    padding:env(safe-area-inset-top) 16px calc(40px + env(safe-area-inset-bottom));
+  }
+  .wrap{max-width:560px; margin:0 auto}
+  header{display:flex; align-items:center; gap:12px; padding:24px 2px 20px}
+  .mark{width:36px; height:36px; flex:0 0 auto; display:block}
+  .mark rect{fill:var(--ink)}
+  .mark g{fill:var(--ink); stroke:var(--paper)}
+  h1{margin:0; font-size:22px; line-height:1.3; font-weight:700}
+  .lead{margin:2px 0 0; font-size:13px; color:var(--ink-mid); line-height:1.5}
+
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:20px; margin-bottom:16px; box-shadow:var(--shadow)}
+  .card h2{margin:0 0 12px; font-size:16px; font-weight:700}
+  .card h2 small{font-weight:400; font-size:13px; color:var(--ink-soft); margin-left:6px}
+  .stack{display:flex; flex-direction:column; gap:16px}
+  .pos{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px}
+  .pos .tn-field > label, .grid2 .tn-field > label{font-size:13px; color:var(--ink-mid)}
+  .grid2{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px}
+  .tn-input[type=date]{-webkit-appearance:none; appearance:none; min-width:0; min-height:44px}
+  .tn-select,.tn-input{background-color:var(--surface)}
+  .optrow{display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:44px}
+  .optrow span{font-size:15px}
+  .optrow small{display:block; font-size:13px; color:var(--ink-soft); line-height:1.5}
+  .optrow .tn-switch{font-size:16px}
+  .tn-hint{color:var(--ink-mid)}
+
+  /* 結果 */
+  .hero{text-align:center; padding:8px 0 4px}
+  .hero .cap{margin:0; font-size:14px; color:var(--ink-mid)}
+  .big{display:flex; align-items:baseline; justify-content:center; gap:6px; margin:4px 0 0}
+  .big .unit{font-size:20px; font-weight:700}
+  .big .star{font-size:26px; color:var(--accent-2)}
+  .hero .total{margin:2px 0 0; font-size:14px; color:var(--ink-soft)}
+  .lines{list-style:none; margin:16px 0 0; padding:0; border-top:1px solid var(--line)}
+  .lines li{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:2px 12px;
+    padding:12px 2px; border-bottom:1px solid var(--line)}
+  .lines li > span:first-child{color:var(--ink-mid); font-size:14px; white-space:nowrap}
+  .lines li > span:last-child{margin-left:auto; text-align:right; min-width:0}
+  .lines b{font-size:20px; font-variant-numeric:tabular-nums}
+  .lines li small{display:block; font-size:13px; color:var(--ink-soft); text-align:right; line-height:1.4}
+  .msg{padding:14px 16px; border-radius:12px; margin:0; font-size:14px; line-height:1.6}
+  .msg.good{background:var(--good-wash); color:var(--good-ink)}
+  .msg.warn{background:var(--warn-wash); color:var(--warn-ink)}
+  .msg + .msg{margin-top:8px}
+  .notes{margin-top:16px}
+  .tn-acc{margin-top:12px; background:var(--surface)}
+  .tn-acc p, .tn-acc li{font-size:14px; color:var(--ink-mid)}
+  .tn-acc ul{padding-left:1.2em; margin:0 16px 16px}
+  .tn-table{font-size:14px}
+  .tn-table th{color:var(--ink-mid)}
+  footer{margin:24px 2px 0; font-size:13px; color:var(--ink-soft); line-height:1.7}
+  footer .brand{display:flex; align-items:center; gap:8px; margin-top:12px; font-weight:700; color:var(--ink)}
+  footer .brand .mark{width:22px; height:22px}
+
+  /* くるくる回る数字（Rare UI「Animated counter」の考え方を移植・MIT） */
+  .counter{display:inline-flex; align-items:baseline; font-variant-numeric:tabular-nums;
+    font-weight:700; font-size:48px; line-height:1}
+  /* 桁の窓：わざと1桁ぶんだけ見せるので、はみ出しを隠す overflow ではなく clip-path で切る */
+  .counter .win{display:block; height:1.5em; clip-path:inset(0);
+    -webkit-mask-image:var(--fade); mask-image:var(--fade); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat}
+  .sr{position:absolute; left:0; top:0; width:1px; height:1px; margin:-1px; padding:0; border:0; clip-path:inset(50%); white-space:nowrap}
+  .counter .col{display:block; will-change:transform}
+  .counter .col span{display:block; height:1.5em; line-height:1.5em; text-align:center}
+  .counter .fixed{display:block; height:1.5em; line-height:1.5em}
+
+  @media (min-width:600px){
+    body{padding-left:24px; padding-right:24px}
+    h1{font-size:24px}
+  }
+  @media (min-width:900px){
+    .wrap{max-width:1040px}
+    .cols{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:20px; align-items:start}
+    .cols > .result{position:sticky; top:16px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .counter .col{transition:none !important}
+  }
+</style>
+<!-- tsumiki-native-parts sha=a7ab3c12 -->
+<style>
+/* ================================================================
+   つみき用「ネイティブ部品」CSS  v2  (2026-09-09)
+   sashimi UI (MIT / yuto-hasegawa) の作り方を参考に、
+   つみきの決まりごと（タップ44px・入力16px・8幅・変数名）へ書き直したもの。
+   コードはコピーではなく書き直し。考え方の出どころだけ上に記す。
+
+   使い方：単一HTMLの <style> にこのまま貼る。クラスはすべて tn- 始まり。
+   色は既存アプリの変数（--card/--ink/--sub/--line/--accent/--radius など）を
+   そのまま使う。無いアプリでも下の既定値で動く。
+   ================================================================ */
+
+/* すべてを @layer tn に入れてある。
+   層に入れた規則は、層に入っていないアプリ側の規則に**必ず負ける**（順番も詳細度も関係ない）。
+   だから tn.css を </head> の直前＝アプリのCSSより後に入れても、
+   アプリが持っている見た目が勝つ。上書きに !important は要らない。 */
+@layer tn {
+
+:root{
+  /* 既存アプリの変数があればそちらが勝つ。無ければ次の候補→最後に既定値。
+     ⚠ --accent を持たないアプリに青を差し込まないよう、accent は最後に --ink へ落とす
+        （墨色なら何色のアプリに混ぜても浮かない）。 */
+  --tn-paper:      var(--paper,  var(--card, var(--surface, #ffffff)));
+  --tn-ink:        var(--ink,     var(--text,  #1d1d1f));
+  --tn-sub:        var(--sub,     var(--muted, #6e6e73));
+  --tn-line:       var(--line,    var(--hair,  #e3e3e6));
+  --tn-accent:     var(--accent,  var(--ink,   #0071e3));
+  /* 塗りつぶしの地は --accent-2（濃い側）。DESIGN.md いわく --accent に白文字は 4.08:1 で不合格 */
+  --tn-fill:       var(--accent-2, var(--tn-accent));
+  --tn-on-fill:    var(--paper,    #ffffff);
+  --tn-radius:     var(--radius, 14px);
+  --tn-good:       var(--good,   var(--ok,   #34c759));
+  --tn-warn:       var(--warn,   #ff9500);
+  --tn-danger:     var(--danger, var(--red,  #ff3b30));
+  /* 洗い色の帯に載せる文字は濃い側を使う（--good をそのまま置くと 3.98:1） */
+  --tn-good-ink:   var(--good-ink, var(--tn-good));
+  --tn-warn-ink:   var(--warn-ink, var(--tn-warn));
+
+  /* 1色から淡い面を自動でつくる（--accent-soft などを手で持たなくていい） */
+  --tn-accent-wash: color-mix(in srgb, var(--tn-accent) 12%, transparent);
+  --tn-hover:       color-mix(in srgb, var(--tn-ink)    5%, transparent);
+
+  --tn-tap: 44px;          /* つみきの最小タップ。ここだけ直せば全部そろう */
+  --tn-gap: 12px;
+}
+
+/* ---- 触れるものすべてに同じフォーカスの輪（キーボード操作のときだけ出る） ---- */
+:where(.tn-choice,.tn-optrow):has(:focus-visible),
+:where(.tn-chip,.tn-tab,.tn-acc>summary,.tn-check,.tn-radio,.tn-switch,.tn-row):focus-visible{
+  outline:2px solid var(--tn-accent); outline-offset:2px; border-radius:8px;
+}
+
+/* ================================================================
+   1. tn-choice — 押せる選択カード（JS 0行）
+   <label class="tn-choice"><input type="radio" class="tn-radio" name="x">
+     <b>おまかせ</b><small>その日のおすすめ</small></label>
+   選ばれたかどうかは :has(:checked) が見てくれる。
+   ================================================================ */
+.tn-choice{
+  display:grid; grid-template-columns:auto 1fr; align-items:start;
+  column-gap:var(--tn-gap); row-gap:2px;
+  width:100%; min-height:var(--tn-tap); padding:14px;
+  box-sizing:border-box; cursor:pointer;
+  background:var(--tn-paper); color:var(--tn-ink);
+  border:1px solid var(--tn-line); border-radius:var(--tn-radius);
+  transition:background .15s, border-color .15s;
+}
+.tn-choice > :not(input){ grid-column:2; }
+.tn-choice > input{ grid-row:1; margin:0; margin-top:2px; }
+@supports (margin-top:1lh){ .tn-choice > input{ margin-top:calc((1lh - 22px) / 2) } }
+.tn-choice > small{ color:var(--tn-sub); font-size:13px; line-height:1.5; }
+.tn-choice:has(:checked){
+  background:var(--tn-accent-wash); border-color:var(--tn-accent);
+}
+.tn-choice:has(:disabled){ opacity:.5; cursor:default; }
+@media (hover:hover){ .tn-choice:hover:not(:has(:disabled)){ background:var(--tn-hover); } }
+.tn-choice:active:not(:has(:disabled)){ transform:scale(.99); }
+
+/* ================================================================
+   2. tn-check / tn-radio — チェックと丸。画像もJSも使わない
+   ✓ は疑似要素2本の線を「短い方 → 長い方」の順に伸ばして描く。
+   ※ input 自体は22px。指で押す44pxは必ず親の .tn-optrow / .tn-choice が持つ。
+   <label class="tn-optrow"><input type="checkbox" class="tn-check">同意する</label>
+   ================================================================ */
+.tn-optrow{
+  display:flex; align-items:center; gap:10px;
+  min-height:var(--tn-tap); padding:4px 2px; cursor:pointer;
+}
+.tn-optrow:has(:disabled){ opacity:.45; cursor:default }
+
+.tn-check,.tn-radio{
+  appearance:none; -webkit-appearance:none; background-color:transparent;
+  position:relative; flex:0 0 auto; box-sizing:border-box;
+  width:22px; height:22px; min-width:22px; margin:0; padding:0; cursor:pointer;
+}
+
+.tn-check{
+  border-radius:7px; box-shadow:inset 0 0 0 2px var(--tn-line);
+  background-image:radial-gradient(circle, var(--tn-fill) 50%, transparent 50%);
+  background-position:center; background-repeat:no-repeat; background-size:0 0;
+  transition:box-shadow .15s, background-size 60ms cubic-bezier(1,.35,1,.27);
+}
+.tn-check:checked{
+  box-shadow:inset 0 0 0 2px var(--tn-fill);
+  background-size:44px 44px;
+  transition:box-shadow .15s, background-size .16s ease-out;
+}
+/* ✓ は「線2本を順に伸ばす」書き方もできるが、それだと ::before と ::after を
+   両方使い切ってしまい、44px の当たり判定（下の .tn-hit）を載せる場所が無くなる。
+   つみきは 44px のほうが決まりごとなので、✓ は ::before ひとつ＝角を回した枠で描く。 */
+.tn-check::before{
+  content:""; position:absolute; left:7.5px; top:3.5px;
+  width:5.5px; height:11px; box-sizing:border-box;
+  border:solid var(--tn-on-fill); border-width:0 2.6px 2.6px 0;
+  transform:rotate(45deg) scale(.2); transform-origin:center; opacity:0;
+  transition:transform 120ms cubic-bezier(.5,1.5,.5,1), opacity 90ms ease-out;
+}
+.tn-check:checked::before{ transform:rotate(45deg) scale(1); opacity:1 }
+
+.tn-radio{
+  border-radius:50%; border:2px solid var(--tn-line); transition:border-color .15s;
+}
+.tn-radio::before{
+  content:""; position:absolute; inset:50% auto auto 50%;
+  width:0; height:0; border-radius:50%; background:var(--tn-fill);
+  transform:translate(-50%,-50%); transition:width .12s ease-out, height .12s ease-out;
+}
+.tn-radio:checked{ border-color:var(--tn-fill) }
+.tn-radio:checked::before{ width:12px; height:12px }
+
+.tn-check:disabled,.tn-radio:disabled{ cursor:default }
+.tn-check:disabled:not(:checked),.tn-radio:disabled:not(:checked){ opacity:.45 }
+
+/* ================================================================
+   3. tn-switch — 入／切のつまみ（input[type=checkbox] 1個だけ）
+   ================================================================ */
+.tn-switch{
+  appearance:none; -webkit-appearance:none;
+  position:relative; flex:0 0 auto; vertical-align:middle;
+  width:52px; height:32px; margin:0; border-radius:999px; cursor:pointer;
+  background:var(--tn-line); transition:background-color .18s ease;
+}
+.tn-switch::before{                      /* つまみ。見た目は ::before に統一し
+                                            ::after は当たり判定(.tn-hit)に空けておく */
+  content:""; position:absolute; top:3px; left:3px;
+  width:26px; height:26px; border-radius:50%; background:var(--tn-paper);
+  box-shadow:0 1px 3px rgba(0,0,0,.25);
+  transition:left .18s ease;
+}
+.tn-switch:checked{ background:var(--tn-fill); }
+.tn-switch:checked::before{ left:23px; }
+.tn-switch:disabled{ opacity:.45; cursor:default; }
+
+/* ================================================================
+   4. tn-acc — 開いて読むところ（details / summary。JS 0行）
+   <details class="tn-acc"><summary>くわしく</summary><p>…</p></details>
+   ================================================================ */
+.tn-acc{
+  width:100%; box-sizing:border-box; overflow:hidden;
+  background:var(--tn-paper); border:1px solid var(--tn-line);
+  border-radius:var(--tn-radius);
+}
+.tn-acc > summary{
+  display:flex; align-items:center; gap:8px;
+  min-height:var(--tn-tap); padding:14px 16px;
+  font-weight:700; list-style:none; cursor:pointer;
+}
+.tn-acc > summary::-webkit-details-marker{ display:none; }
+.tn-acc > summary::after{                /* ▾ を線2本で作る（画像不要） */
+  content:""; width:.5em; height:.5em; margin-inline-start:auto;
+  border-right:2px solid currentColor; border-bottom:2px solid currentColor;
+  transform:translateY(-2px) rotate(45deg); transition:transform .18s ease-out;
+}
+.tn-acc[open] > summary::after{ transform:translateY(2px) rotate(225deg); }
+.tn-acc > :not(summary){ margin:0 16px 16px; }
+@media (hover:hover){ .tn-acc > summary:hover{ background:var(--tn-hover); } }
+
+/* ================================================================
+   5. tn-sheet — ダイアログ（<dialog>。Escで閉じる・背面固定はブラウザ任せ）
+   出す: el.showModal()   閉じる: el.close()
+   ================================================================ */
+.tn-sheet{
+  border:0; padding:0; max-width:min(560px, calc(100% - 32px));
+  width:100%; box-sizing:border-box;
+  background:var(--tn-paper); color:var(--tn-ink);
+  border-radius:var(--tn-radius);
+  box-shadow:0 10px 40px rgba(0,0,0,.18);
+}
+.tn-sheet::backdrop{ background:rgba(0,0,0,.45); }
+.tn-sheet > .tn-sheet-body{ padding:20px; }
+/* 幅600px以下では下からせり上がる「シート」にする */
+@media (max-width:600px){
+  .tn-sheet{
+    max-width:100%; margin:auto auto 0; 
+    border-radius:var(--tn-radius) var(--tn-radius) 0 0;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+}
+
+/* ================================================================
+   6. tn-kv — 明細（<dl>。合計・内訳・レシート）
+   ================================================================ */
+.tn-kv{
+  display:grid; grid-template-columns:1fr auto;
+  column-gap:16px; row-gap:8px; margin:0;
+}
+.tn-kv dt{ color:var(--tn-sub); }
+.tn-kv dd{ margin:0; justify-self:end; font-variant-numeric:tabular-nums; }
+.tn-kv .tn-total{ font-weight:700; color:var(--tn-ink); }
+
+/* ================================================================
+   7. tn-meter / tn-bar / tn-spin / tn-skel — 量と待ち時間
+   <meter class="tn-meter" value=".8" low=".3" high=".7" optimum=".1">
+   → しきい値を超えると自動で色が変わる（JSで色を出し分けなくていい）
+   ================================================================ */
+.tn-meter{
+  appearance:none; -webkit-appearance:none;
+  width:100%; height:10px; border:0; border-radius:999px; overflow:hidden;
+  background:var(--tn-line);
+}
+.tn-meter::-webkit-meter-bar{ background:var(--tn-line); border:0; border-radius:999px; }
+.tn-meter::-webkit-meter-optimum-value        { background:var(--tn-good);   border-radius:999px; }
+.tn-meter::-webkit-meter-suboptimum-value     { background:var(--tn-warn);   border-radius:999px; }
+.tn-meter::-webkit-meter-even-less-good-value { background:var(--tn-danger); border-radius:999px; }
+.tn-meter::-moz-meter-bar{ background:var(--tn-good); border-radius:999px; }
+.tn-meter:-moz-meter-sub-optimum::-moz-meter-bar{ background:var(--tn-warn); }
+.tn-meter:-moz-meter-sub-sub-optimum::-moz-meter-bar{ background:var(--tn-danger); }
+
+.tn-bar{
+  appearance:none; -webkit-appearance:none;
+  position:relative; width:100%; height:8px; border:0; border-radius:999px;
+  overflow:hidden; background:var(--tn-line);
+}
+.tn-bar::-webkit-progress-bar{ background:var(--tn-line); }
+.tn-bar::-webkit-progress-value{ background:var(--tn-accent); border-radius:999px; }
+.tn-bar::-moz-progress-bar{ background:var(--tn-accent); }
+.tn-bar:indeterminate::before{
+  content:""; position:absolute; inset:0; background:var(--tn-accent);
+  transform-origin:0 50%; animation:tn-run 1s linear infinite;
+}
+@keyframes tn-run{
+  0%{ transform:translateX(0) scaleX(0) }
+  40%{ transform:translateX(0) scaleX(.4) }
+  100%{ transform:translateX(100%) scaleX(.5) }
+}
+
+.tn-spin{                                  /* ぐるぐる（画像もJSも無し） */
+  width:32px; height:32px; border-radius:50%;
+  border:3px solid var(--tn-line); border-top-color:var(--tn-accent);
+  animation:tn-turn .8s linear infinite;
+}
+@keyframes tn-turn{ to{ transform:rotate(360deg) } }
+
+.tn-skel{                                  /* 読み込み中の灰色の板 */
+  border-radius:12px; background:var(--tn-line); position:relative; overflow:hidden;
+}
+.tn-skel::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(100deg, transparent 20%,
+             color-mix(in srgb, var(--tn-paper) 70%, transparent) 50%, transparent 80%);
+  animation:tn-sweep 1.1s linear infinite;
+}
+@keyframes tn-sweep{ from{ transform:translateX(-100%) } to{ transform:translateX(100%) } }
+
+@media (prefers-reduced-motion:reduce){
+  .tn-spin,.tn-skel::after,.tn-bar:indeterminate::before{ animation:none }
+  /* 止めるのは tn の部品だけ。アプリ全体に !important を撃たない
+     （@layer の中の !important は層の外＝アプリ側の指定に勝ってしまう）。
+     JS側の動きは tn.js の TN.reduced() が別に見ている。 */
+  [class*="tn-"], [class*="tn-"] *{ transition-duration:.01ms }
+}
+
+/* ================================================================
+   8. tn-note — おしらせの囲み。1色から淡い面を color-mix で作る
+   ================================================================ */
+.tn-note{
+  padding:14px 16px; margin:0; border-radius:var(--tn-radius);
+  background:var(--tn-accent-wash);
+  border:1px solid color-mix(in srgb, var(--tn-accent) 25%, transparent);
+}
+.tn-note.tn-good  { background:color-mix(in srgb, var(--tn-good)   12%, transparent);
+                    border-color:color-mix(in srgb, var(--tn-good)   28%, transparent); }
+.tn-note.tn-warn  { background:color-mix(in srgb, var(--tn-warn)   14%, transparent);
+                    border-color:color-mix(in srgb, var(--tn-warn)   32%, transparent); }
+.tn-note.tn-danger{ background:color-mix(in srgb, var(--tn-danger) 10%, transparent);
+                    border-color:color-mix(in srgb, var(--tn-danger) 28%, transparent); }
+.tn-note > :first-child{ margin-top:0 } .tn-note > :last-child{ margin-bottom:0 }
+
+/* ================================================================
+   9. tn-chip / tn-tabs — 絞り込みと切り替え（どちらも44px）
+   ================================================================ */
+.tn-chip{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-height:var(--tn-tap); padding:0 16px; box-sizing:border-box;
+  font:inherit; font-size:14px; font-weight:700; line-height:1;
+  color:var(--tn-ink); background:var(--tn-paper);
+  border:1px solid var(--tn-line); border-radius:999px;
+  cursor:pointer; white-space:nowrap;
+}
+.tn-chip.on{ color:var(--tn-fill); background:var(--tn-accent-wash); border-color:var(--tn-fill); }
+.tn-chip:disabled{ opacity:.45; cursor:default; }
+.tn-chips{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px;
+           scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+.tn-chips::-webkit-scrollbar{ display:none }
+
+.tn-tabs{ display:flex; gap:4px; border-bottom:1px solid var(--tn-line); overflow-x:auto;
+          scrollbar-width:none } .tn-tabs::-webkit-scrollbar{ display:none }
+.tn-tab{
+  position:relative; flex:0 0 auto;
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:64px; min-height:var(--tn-tap); padding:0 16px;
+  font:inherit; font-weight:600; color:var(--tn-sub);
+  background:none; border:0; cursor:pointer; white-space:nowrap;
+}
+.tn-tab.on{ color:var(--tn-fill); font-weight:700 }
+.tn-tab.on::after{
+  content:""; position:absolute; inset-inline:12px; bottom:0;
+  height:3px; border-radius:3px 3px 0 0; background:currentColor;
+}
+
+/* ================================================================
+   10. tn-table — 表。横に長いときは自分だけ横スクロールさせる
+   <div class="tn-scroll"><table class="tn-table">…</table></div>
+   ================================================================ */
+.tn-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch }
+.tn-table{ border-collapse:collapse; width:100%; min-width:max-content }
+.tn-table thead{ border-bottom:1px solid var(--tn-line) }
+.tn-table th{ color:var(--tn-sub); font-weight:600; text-align:left;
+              padding:8px 12px; white-space:nowrap }
+.tn-table td{ padding:12px; vertical-align:middle }
+.tn-table tbody tr + tr{ border-top:1px solid var(--tn-line) }
+.tn-table .tn-num{ text-align:right; font-variant-numeric:tabular-nums }
+
+/* ================================================================
+   11. tn-row — 一覧の1行（押せる行）。押した波紋を親の中に閉じ込める
+   ※ isolation:isolate を必ず付ける。付けないと波紋が背景の下に潜って見えない
+   ================================================================ */
+.tn-row{
+  position:relative; isolation:isolate; overflow:hidden;
+  display:flex; align-items:center; gap:10px;
+  width:100%; min-height:var(--tn-tap); padding:12px 14px;
+  box-sizing:border-box; text-align:left; font:inherit; color:inherit;
+  background:none; border:0; border-radius:var(--tn-radius); cursor:pointer;
+}
+.tn-row::before{
+  content:""; position:absolute; left:50%; top:50%; z-index:-1;
+  width:120%; aspect-ratio:1; border-radius:50%;
+  background:var(--tn-ink); opacity:0;
+  transform:translate(-50%,-50%); transition:all 260ms ease-out;
+}
+.tn-row:active::before{ width:0; height:0; opacity:.14; transition:none }
+.tn-row.on{ background:var(--tn-accent-wash); color:var(--tn-fill) }
+
+/* ================================================================
+   12. 文字まわり — 蛍光ペンと注記
+   ================================================================ */
+.tn-mark{
+  padding-inline:.1em;
+  background:linear-gradient(transparent 58%, var(--tn-accent-wash) 58%);
+}
+.tn-hint{ margin:4px 0 0; font-size:13px; line-height:1.5; color:var(--tn-sub) }
+.tn-hint.tn-danger{ color:var(--tn-danger) }
+
+/* ================================================================
+   13. tn-toast — 一瞬出て消える知らせ（93本中53本が自作していた）
+   <div class="tn-toast" id="toast"></div>
+   出す: t.textContent='保存しました'; t.classList.add('on');
+   消す: setTimeout(()=>t.classList.remove('on'), 2200);
+   ================================================================ */
+.tn-toast{
+  position:fixed; left:50%; z-index:2000;
+  bottom:calc(env(safe-area-inset-bottom) + 24px);
+  max-width:min(92vw, 420px); padding:12px 18px;
+  box-sizing:border-box; text-align:center; line-height:1.5;
+  color:var(--tn-paper); background:rgba(28,28,30,.94);
+  border-radius:999px; box-shadow:0 6px 24px rgba(0,0,0,.28);
+  transform:translate(-50%, 12px); opacity:0; pointer-events:none;
+  transition:transform .22s ease, opacity .22s ease;
+}
+.tn-toast.on{ transform:translate(-50%, 0); opacity:1 }
+
+/* ================================================================
+   14. tn-empty — まだ何も無いときの画面（93本中55本が自作していた）
+   <div class="tn-empty"><span class="tn-empty-em">📄</span>
+     まだ1枚もありません。<br>ここから最初の1枚を。</div>
+   ================================================================ */
+.tn-empty{
+  text-align:center; color:var(--tn-sub);
+  font-size:14px; line-height:1.8; padding:44px 20px;
+}
+.tn-empty-em{
+  display:block; font-size:40px; line-height:1;
+  margin-bottom:10px; opacity:.85;
+}
+
+/* ================================================================
+   15. tn-seg — ひとつながりの切り替え（93本中20本が自作していた）
+   タブと違い「枠の中で選ぶ」型。等分に伸びる。
+   <div class="tn-seg"><button class="on">日</button><button>週</button></div>
+   ================================================================ */
+.tn-seg{
+  display:flex; gap:4px; padding:4px; box-sizing:border-box;
+  background:var(--tn-hover); border-radius:999px;
+}
+.tn-seg > button{
+  flex:1 1 0; min-width:0; min-height:var(--tn-tap);
+  padding:0 12px; font:inherit; font-size:14px; font-weight:700;
+  color:var(--tn-sub); background:transparent; border:0; border-radius:999px;
+  cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  transition:background .15s, color .15s;
+}
+.tn-seg > button.on{
+  color:var(--tn-fill); background:var(--tn-paper);
+  box-shadow:0 1px 3px rgba(0,0,0,.12);
+}
+.tn-seg > button:disabled{ opacity:.45; cursor:default }
+
+/* ================================================================
+   16. tn-badge — 種類や状態の小さな札（93本中11本が自作していた）
+   ================================================================ */
+.tn-badge{
+  display:inline-flex; align-items:center; flex:0 0 auto;
+  padding:2px 9px; border-radius:999px;
+  font-size:11px; font-weight:800; letter-spacing:.02em; line-height:1.6;
+  color:var(--tn-fill); background:var(--tn-accent-wash);
+}
+.tn-badge.tn-good  { color:var(--tn-good-ink); background:color-mix(in srgb, var(--tn-good)   14%, transparent) }
+.tn-badge.tn-warn  { color:var(--tn-warn-ink); background:color-mix(in srgb, var(--tn-warn)   16%, transparent) }
+.tn-badge.tn-danger{ color:var(--tn-danger); background:color-mix(in srgb, var(--tn-danger) 12%, transparent) }
+.tn-badge.tn-quiet { color:var(--tn-sub);    background:var(--tn-hover) }
+
+/* ================================================================
+   17. tn-field / tn-input — 入力ひと組（ラベル＋欄＋補足）
+   つみきの決まり「入力欄は16px以上・高さ44px」をここで守る。
+   iOSは16px未満の入力欄に触ると画面を勝手に拡大するので下げない。
+   ================================================================ */
+.tn-field{ display:flex; flex-direction:column; gap:5px }
+.tn-field > label{
+  font-size:12px; font-weight:700; color:var(--tn-sub);
+  letter-spacing:.02em; padding-inline-start:2px;
+}
+.tn-input,.tn-textarea,.tn-select{
+  width:100%; box-sizing:border-box; font:inherit; font-size:16px;
+  color:var(--tn-ink); background:var(--tn-paper);
+  border:1px solid var(--tn-line); border-radius:10px;
+  padding:11px 12px; min-height:var(--tn-tap);
+}
+.tn-textarea{ resize:vertical; line-height:1.6 }
+.tn-select{
+  appearance:none; -webkit-appearance:none; padding-inline-end:34px;
+  /* ▾ は背景のグラデーション2本で描く（画像もSVGも読み込まない） */
+  background-image:
+    linear-gradient(45deg,  transparent 50%, currentColor 50%, currentColor 58%, transparent 58%),
+    linear-gradient(-45deg, transparent 50%, currentColor 50%, currentColor 58%, transparent 58%);
+  background-size:6px 6px, 6px 6px;
+  background-position:right 18px center, right 13px center;
+  background-repeat:no-repeat;
+}
+.tn-input:focus,.tn-textarea:focus,.tn-select:focus{
+  outline:none; border-color:var(--tn-fill);
+}
+.tn-input:disabled,.tn-textarea:disabled,.tn-select:disabled{
+  opacity:.55; cursor:default;
+}
+.tn-input.tn-danger,.tn-textarea.tn-danger,.tn-select.tn-danger{ border-color:var(--tn-danger) }
+
+/* ================================================================
+   18. tn-search — さがす欄（虫めがねは疑似要素の丸と線で描く）
+   <div class="tn-search"><input class="tn-input" type="search" placeholder="さがす"></div>
+   ================================================================ */
+.tn-search{ position:relative }
+.tn-search > .tn-input{ padding-inline-start:38px }
+.tn-search::before{                     /* レンズ */
+  content:""; position:absolute; left:14px; top:50%; margin-top:-8px;
+  width:11px; height:11px; box-sizing:border-box;
+  border:2px solid var(--tn-sub); border-radius:50%; opacity:.9;
+}
+.tn-search::after{                      /* 柄 */
+  content:""; position:absolute; left:24px; top:50%; margin-top:2px;
+  width:5px; height:2px; border-radius:2px;
+  background:var(--tn-sub); transform:rotate(45deg); opacity:.9;
+}
+.tn-search > .tn-input::-webkit-search-decoration,
+.tn-search > .tn-input::-webkit-search-cancel-button{ -webkit-appearance:none }
+
+/* ================================================================
+   19. tn-hit — 見た目はそのままで「押せる範囲」だけ44pxに広げる
+   つみきの決まり「タップ44px」を、22pxのチェックや24pxの×ボタンで守るための道具。
+   透明な板を疑似要素で敷くだけなので、並びも大きさもずれない。
+
+   <button class="row-del tn-hit">×</button>
+   <input type="checkbox" class="tn-check tn-hit">
+
+   使えない場所・注意:
+   - その要素が ::after を自分で使っていると付けられない。
+     tn-check / tn-radio / tn-switch は、そのために ::after を空けてある。
+   - 透明な板が左右上下にはみ出す。**11px以内に別の押せるものがあると
+     そちらのタップを横取りする。** 隣り合うときは片方だけに付ける。
+   - 親に overflow:hidden があると板も切られる（＝広がらない）。
+   ================================================================ */
+.tn-hit{ position:relative }
+.tn-hit::after{
+  content:""; position:absolute; left:50%; top:50%;
+  width:max(100%, var(--tn-tap)); height:max(100%, var(--tn-tap));
+  transform:translate(-50%,-50%);
+}
+/* 行の端にあるものは、外へはみ出すぶんを内側に寄せたいことがある */
+.tn-hit.tn-hit-left::after { left:0;  transform:translateY(-50%) }
+.tn-hit.tn-hit-right::after{ left:auto; right:0; transform:translateY(-50%) }
+}
+</style>
+<script>
+/* ================================================================
+   つみき用「動きの下ごしらえ」JS  v1  (2026-09-09)
+
+   tn.css の相棒。CSS では書けない2つだけを持つ。
+     1. rnd()    …… 決定論の擬似乱数（Math.random() の置き換え）
+     2. reveal() …… 見えたら再生・押したらもう一度
+
+   考え方の出どころ: lieflat-charts（PolyForm Noncommercial）。
+   ライセンスが非商用なので**コードは写していない**。借りたのは
+   「デモの乱数は決定論にする」「再生前に必ずタイマーを掃除する」
+   という2つの考え方だけで、中身はつみき用に書き直したもの。
+   調査 → ~/つみき出力/道具としらべ/lieflat-charts_調査と採用可否_2026-09-08.md
+
+   使い方: 単一HTMLの <script> にこのまま貼る（or python3 inject_tn.py <HTML>）。
+   ぶら下がる名前は window.TN の1つだけ。既存コードとぶつからない。
+   ================================================================ */
+(function (global) {
+  'use strict';
+
+  /* ── 1 · 決定論の擬似乱数 ────────────────────────────────
+     Math.random() を使わない。リロードのたびに形が変わると、
+     スクショも録画も「前と同じか」の見比べも全部あてにならなくなる。
+     つみきは「架空データの複製から画面を撮る」運用（お返事カード・IG投稿）
+     をしているので、ここが変わると成果物が毎回ちがう絵になる。
+
+     同じ (i, k) を渡せば、いつ・どの端末で呼んでも同じ 0〜1 が返る。
+     i = 何番目か、k = 用途の区別（x座標なら 0、y座標なら 1、など）。
+
+     ※ 参考にした式（`((i*73856093)^(k*19349663))%1000/1000`）は
+       **k=0 のとき 0.000 / 0.093 / 0.186 … と等差の直線になる**（実測）。
+       既定の k=0 でいちばん使うのに散らばらないので、ここは採らずに
+       32bit のかき混ぜ（xor と乗算を交互に）に置き換えてある。     */
+  function rnd(i, k) {
+    var h = Math.imul((i | 0) + 0x9e3779b9, 0x85ebca6b);
+    h ^= Math.imul(((k === undefined ? 0 : k) | 0) + 0xc2b2ae35, 0x27d4eb2f);
+    h ^= h >>> 15; h = Math.imul(h, 0x2545f491);
+    h ^= h >>> 13; h = Math.imul(h, 0x3d73373b);
+    h ^= h >>> 16;
+    return (h >>> 0) / 4294967296;
+  }
+
+  /* lo〜hi に散らす（rnd の範囲つき版） */
+  function rndIn(i, k, lo, hi) {
+    return lo + rnd(i, k) * (hi - lo);
+  }
+
+  /* 配列から決定論的に1つ選ぶ（アイコン・色・名前のダミー割り当て用） */
+  function pick(list, i, k) {
+    if (!list || !list.length) return undefined;
+    return list[Math.floor(rnd(i, k) * list.length) % list.length];
+  }
+
+  /* 配列を決定論的に並べ替える（シャッフルしたいが毎回同じ順がいいとき） */
+  function shuffle(list, k) {
+    return list
+      .map(function (v, i) { return [rnd(i, k), v]; })
+      .sort(function (a, b) { return a[0] - b[0]; })
+      .map(function (p) { return p[1]; });
+  }
+
+  /* ── 2 · 見えたら再生・押したらもう一度 ──────────────────
+     画面に入ってから描く。入場アニメが「スクロールする前に終わっていた」
+     を防ぐ。押すともう一度。
+
+     肝は**再生前にタイマーを全部消すこと**。消さないと、連打したぶん
+     setInterval が積み上がって、だんだん速くなる／二重に描かれる。
+
+       TN.reveal('chart', function (el, ctx) {
+         el.innerHTML = '';
+         ctx.keep(setInterval(tick, 16));   // ← 自分で作ったタイマーは keep に預ける
+         if (ctx.reduced) { drawInstantly(el); return; }   // 動きを減らす設定のとき
+         drawWithAnimation(el);
+       });
+
+     opt: { threshold: 0.3, replay: true, once: true }
+       threshold … どれだけ見えたら再生するか（0〜1）
+       replay    … クリックで再生し直すか（既定 true）
+       once      … 一度再生したら監視をやめるか（既定 true）             */
+
+  var kept = new Map();   // 要素 → そこで動いているタイマーの控え
+
+  function clearKept(el) {
+    var list = kept.get(el) || [];
+    for (var i = 0; i < list.length; i++) {
+      clearTimeout(list[i]);
+      clearInterval(list[i]);
+    }
+    kept.set(el, []);
+  }
+
+  function reduced() {
+    return !!(global.matchMedia &&
+      global.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+
+  function reveal(target, draw, opt) {
+    var el = typeof target === 'string' ? document.getElementById(target) : target;
+    if (!el || typeof draw !== 'function') return null;
+
+    var o = opt || {};
+    var threshold = o.threshold === undefined ? 0.3 : o.threshold;
+    var replay = o.replay === undefined ? true : o.replay;
+    var once = o.once === undefined ? true : o.once;
+    var fallback = o.fallback === undefined ? 1200 : o.fallback;
+    var drawn = false;
+
+    function go() {
+      drawn = true;
+      clearKept(el);   // ← ここで kept.get(el) は必ず空配列になる
+      draw(el, {
+        rnd: rnd,
+        reduced: reduced(),
+        keep: function (id) { kept.get(el).push(id); return id; }
+      });
+    }
+
+    // 動きを減らす設定なら、監視もアニメもせずその場で1回だけ描く
+    if (reduced() || !global.IntersectionObserver) {
+      go();
+    } else {
+      var io = new IntersectionObserver(function (entries) {
+        if (!entries[0].isIntersecting) return;
+        go();
+        if (once) io.disconnect();
+      }, { threshold: threshold });
+      io.observe(el);
+
+      /* 保険。**画面に寸法が無いところでは IntersectionObserver は永久に発火しない**
+         （Claude のブラウザペインは innerWidth/innerHeight とも 0・2026-09-09 実測。
+          スクショ用のヘッドレス、PDF書き出し、display:none の iframe も同じ）。
+         そのまま放っておくと図が白いまま焼き付く。だから寸法が無いときだけ、
+         少し待ってから描く。ふつうのブラウザの「下のほうにある要素」は
+         寸法があるので、ここは通らない＝スクロールするまで待つ挙動のまま。 */
+      if (fallback) {
+        setTimeout(function () {
+          if (drawn) return;
+          if (!global.innerWidth || !global.innerHeight) go();
+        }, fallback);
+      }
+    }
+
+    if (replay) {
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', go);
+    }
+    return go;   // 呼び出し側から手で再生したいとき用
+  }
+
+  /* 止める（要素を消す前に呼ぶ。タイマーの置き去りを防ぐ） */
+  reveal.stop = function (target) {
+    var el = typeof target === 'string' ? document.getElementById(target) : target;
+    if (el) clearKept(el);
+  };
+
+  global.TN = global.TN || {};
+  global.TN.rnd = rnd;
+  global.TN.rndIn = rndIn;
+  global.TN.pick = pick;
+  global.TN.shuffle = shuffle;
+  global.TN.reveal = reveal;
+  global.TN.reduced = reduced;
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<!-- /tsumiki-native-parts -->
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <svg class="mark" viewBox="0 0 100 100" aria-hidden="true">
+      <rect width="100" height="100" rx="24"/>
+      <g stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round">
+        <polygon points="35,46 50,53.5 35,61 20,53.5"/>
+        <polygon points="20,53.5 35,61 35,76 20,68.5"/>
+        <polygon points="50,53.5 35,61 35,76 50,68.5"/>
+        <polygon points="65,46 80,53.5 65,61 50,53.5"/>
+        <polygon points="50,53.5 65,61 65,76 50,68.5"/>
+        <polygon points="80,53.5 65,61 65,76 80,68.5"/>
+        <polygon points="50,24 65,31.5 50,39 35,31.5"/>
+        <polygon points="35,31.5 50,39 50,54 35,46.5"/>
+        <polygon points="65,31.5 50,39 50,54 65,46.5"/>
+      </g>
+    </svg>
+    <div>
+      <h1>ほしのみち</h1>
+      <p class="lead">第五人格のランク戦。ゴールまで、1日に★いくつ？</p>
+    </div>
+  </header>
+
+  <div class="cols">
+    <div class="inputs">
+      <section class="card stack">
+        <div>
+          <h2>陣営</h2>
+          <div class="tn-seg" id="side" role="group" aria-label="陣営">
+            <button type="button" data-side="surv" class="on">サバイバー</button>
+            <button type="button" data-side="hunt">ハンター</button>
+          </div>
+          <p class="tn-hint">段位は陣営ごとに別。切り替えると、それぞれの段位を覚えています。</p>
+        </div>
+
+        <div>
+          <h2>いまの段位</h2>
+          <div class="pos" id="cur"></div>
+        </div>
+
+        <div>
+          <h2>ゴール</h2>
+          <div class="pos" id="goal"></div>
+          <p class="tn-hint" id="goalHint"></p>
+        </div>
+      </section>
+
+      <section class="card stack">
+        <div>
+          <h2>期間</h2>
+          <div class="grid2">
+            <div class="tn-field"><label for="today">今日</label><input class="tn-input" type="date" id="today"></div>
+            <div class="tn-field"><label for="deadline">締切（最後に遊ぶ日）</label><input class="tn-input" type="date" id="deadline"></div>
+          </div>
+          <p class="tn-hint" id="seasonHint"></p>
+          <label class="optrow" for="doneToday">
+            <span>今日の分はもう遊び終えた<small>オンにすると明日から数えます</small></span>
+            <input type="checkbox" class="tn-switch" id="doneToday">
+          </label>
+        </div>
+
+        <div>
+          <h2>勝ち方の見込み</h2>
+          <div class="grid2">
+            <div class="tn-field"><label for="winRate">勝率（%）</label><input class="tn-input" type="number" inputmode="decimal" min="0" max="100" step="1" id="winRate"></div>
+            <div class="tn-field"><label for="drawRate">引き分けの割合（%）</label><input class="tn-input" type="number" inputmode="decimal" min="0" max="100" step="1" id="drawRate"></div>
+          </div>
+          <p class="tn-hint" id="rateHint">残りは負けとして数えます。</p>
+          <div class="tn-field" style="margin-top:12px">
+            <label for="minutes">1試合にかかる分数（ピック込み・自分の感覚で）</label>
+            <input class="tn-input" type="number" inputmode="decimal" min="5" max="60" step="1" id="minutes">
+          </div>
+        </div>
+
+        <details class="tn-acc" id="bonusBox">
+          <summary>おまけの点も入れる</summary>
+          <div>
+            <label class="optrow" for="solo" id="soloRow">
+              <span>ひとりで参加する（ソロ）<small>勝ち+2（7段以上は+1）・引き分け+1</small></span>
+              <input type="checkbox" class="tn-switch" id="solo">
+            </label>
+            <label class="optrow" for="limited">
+              <span>シーズン期間限定の追加点<small>勝ち+2・引き分け+1。付く陣営は時期で変わります</small></span>
+              <input type="checkbox" class="tn-switch" id="limited">
+            </label>
+            <p class="tn-hint">連勝ボーナスとスーパープレー（+30）は、条件がシーズン中に変わるので計算に入れていません。入るぶん、実際は少し早く着きます。</p>
+          </div>
+        </details>
+      </section>
+    </div>
+
+    <div class="result">
+      <section class="card" id="resultCard" aria-live="polite">
+        <div class="hero">
+          <p class="cap" id="heroCap">1日に取りたい★</p>
+          <div class="big"><span class="star" aria-hidden="true">★</span><span class="counter" id="perDay" aria-hidden="true"></span><span class="unit" aria-hidden="true">個</span><span class="sr" id="perDaySr"></span></div>
+          <p class="total" id="heroTotal"></p>
+        </div>
+        <ul class="lines" id="lines"></ul>
+        <div class="notes" id="notes"></div>
+
+        <details class="tn-acc">
+          <summary>段位ごとの内訳</summary>
+          <div class="tn-scroll"><table class="tn-table" id="breakdown"></table></div>
+        </details>
+        <details class="tn-acc">
+          <summary>計算に使っている数字</summary>
+          <div id="basis"></div>
+        </details>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    非公式のファンツールです。Identity V 第五人格の運営とは関係ありません。
+    数字は2026年9月11日時点の攻略情報（攻略wiki・公式のお知らせ）から組んだ目安で、ゲーム内の表示が正しい値です。
+    入力はこの端末の中にだけ保存され、どこにも送りません。
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 100 100" aria-hidden="true">
+        <rect width="100" height="100" rx="24"/>
+        <g stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round">
+          <polygon points="35,46 50,53.5 35,61 20,53.5"/>
+          <polygon points="20,53.5 35,61 35,76 20,68.5"/>
+          <polygon points="50,53.5 35,61 35,76 50,68.5"/>
+          <polygon points="65,46 80,53.5 65,61 50,53.5"/>
+          <polygon points="50,53.5 65,61 65,76 50,68.5"/>
+          <polygon points="80,53.5 65,61 65,76 80,68.5"/>
+          <polygon points="50,24 65,31.5 50,39 35,31.5"/>
+          <polygon points="35,31.5 50,39 50,54 35,46.5"/>
+          <polygon points="65,31.5 50,39 50,54 65,46.5"/>
+        </g>
+      </svg>
+      つみき
+    </div>
+  </footer>
+</div>
+
+<script>
+'use strict';
+/* ================================================================
+   ランク戦の数字（日本版・2026-09-11 時点の調べ）
+   出典: wikiwiki 5ch攻略「ランク戦」2026-08-23 / bilibili wiki「排位模式」
+         日本公式お知らせ 2024-03-20（昇格戦の廃止）・2026-09-09（S44開始）
+   ================================================================ */
+const SEASON = { name:'S44', lastDay:'2026-11-18', endNote:'11/19 のメンテで終了' };
+
+// 段位ごと：小段位の数・1小段位の★・1★のpt・その段位の最初までの累計pt
+const TIERS = {
+  1:{ subs:3, stars:3, pps:20, base:0,    labels:['III','II','I'] },
+  2:{ subs:4, stars:4, pps:20, base:180,  labels:['IV','III','II','I'] },
+  3:{ subs:5, stars:5, pps:20, base:500,  labels:['V','IV','III','II','I'] },
+  4:{ subs:5, stars:5, pps:20, base:1000, labels:['V','IV','III','II','I'] },
+  5:{ subs:5, stars:5, pps:30, base:1500, labels:['V','IV','III','II','I'] },
+  6:{ subs:5, stars:5, pps:30, base:2250, labels:['V','IV','III','II','I'] },
+};
+const SEVEN_BASE = 3000, SEVEN_PPS = 30, PEAK_STARS = 25;
+
+const tierEnd = t => t === 7 ? Infinity : TIERS[t].base + TIERS[t].subs * TIERS[t].stars * TIERS[t].pps;
+const ppsOf  = t => t === 7 ? SEVEN_PPS : TIERS[t].pps;
+function tierAt(cum){ for (let t = 1; t <= 6; t++) if (cum < tierEnd(t)) return t; return 7; }
+function cumOf(p){
+  if (p.t === 7) return SEVEN_BASE + p.st * SEVEN_PPS;
+  const T = TIERS[p.t];
+  return T.base + p.s * T.stars * T.pps + p.st * T.pps;
+}
+function labelOf(p){
+  if (p.t === 7) return (p.st >= PEAK_STARS ? '最高峰7段' : '7段') + ' ★' + p.st;
+  return p.t + '段' + TIERS[p.t].labels[p.s] + ' ★' + p.st;
+}
+
+/* 1試合でもらえるptの見込み（基本点＋必ず付く点の平均＋段位ガード） */
+function matchPts(side, t, opt){
+  const low = t <= 2;
+  let r;
+  if (side === 'surv'){
+    const RANK = 2.5;                                      // 演繹得点の順位点 +1〜4 の平均
+    const gDraw = {1:4, 2:3, 3:2, 4:1}[t] || 0;
+    const gLoss1 = {1:6, 2:4, 3:3, 4:2}[t] || 0;           // 1人脱出の負け
+    const gLoss0 = {1:8, 2:5, 3:3, 4:2}[t] || 0;           // 0人脱出の負け
+    const b1 = t <= 5 ? -6 : t === 6 ? -7 : -8;
+    const b0 = t <= 5 ? -8 : t === 6 ? -9 : -10;
+    const win4 = (low ? 10 : 12) + RANK, win3 = (low ? 9 : 11) + RANK;
+    r = { win4, win3, win:(win4 + win3) / 2,
+          draw:(low ? 1 : 3) + RANK + gDraw,
+          loss:((b1 + gLoss1) + (b0 + gLoss0)) / 2 + RANK };
+    if (opt.solo){ r.win += t >= 7 ? 1 : 2; r.win4 += t >= 7 ? 1 : 2; r.win3 += t >= 7 ? 1 : 2; r.draw += 1; }
+  } else {
+    // 脱落させた人数の点：1吊り+1 … 4吊り+4、0吊り0（読み取り）
+    const gDraw = {1:4, 2:3, 3:2}[t] || 0;
+    const gLoss = {1:8, 2:5, 3:2}[t] || 0;
+    const win4 = (low ? 11 : 9) + 4, win3 = (low ? 10 : 8) + 3;
+    r = { win4, win3, win:(win4 + win3) / 2,
+          draw:(low ? 2 : 0) + 2 + gDraw,
+          loss:((-6 + 1) + (-7 + 0)) / 2 + gLoss };
+  }
+  if (opt.limited){ r.win += 2; r.win4 += 2; r.win3 += 2; r.draw += 1; }
+  return r;
+}
+
+/* 開放時間（日本時間）：5段以下 8時間／6段以上 6時間 */
+const openMinutes = t => t <= 5 ? 480 : 360;
+
+/* ---------------- 保存（この端末の中だけ） ---------------- */
+const KEY = 'hoshinomichi:v1';
+const DEFAULT = {
+  side:'surv',
+  pos:{ surv:{ cur:{t:3,s:0,st:0}, goal:{t:5,s:0,st:0} },
+        hunt:{ cur:{t:3,s:0,st:0}, goal:{t:5,s:0,st:0} } },
+  deadline:SEASON.lastDay, doneToday:false,
+  winRate:50, drawRate:10, minutes:20, solo:false, limited:false,
+};
+function load(){
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (s && s.pos && s.pos.surv && s.pos.hunt) return Object.assign({}, DEFAULT, s);
+  } catch (e) {}
+  return JSON.parse(JSON.stringify(DEFAULT));
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+const state = load();
+
+/* ---------------- 日付 ---------------- */
+const pad = n => String(n).padStart(2, '0');
+function todayStr(){ const d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function dayNum(s){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) / 86400000 : NaN; }
+function mdOf(s){ const m = /^\d{4}-(\d{2})-(\d{2})$/.exec(s || ''); return m ? (+m[1]) + '/' + (+m[2]) : ''; }
+
+/* ---------------- 段位の入力 ---------------- */
+const $ = id => document.getElementById(id);
+function buildPos(host, key){
+  host.innerHTML =
+    '<div class="tn-field"><label>段位</label><select class="tn-select" data-k="t"></select></div>' +
+    '<div class="tn-field" data-wrap="s"><label>小段位</label><select class="tn-select" data-k="s"></select></div>' +
+    '<div class="tn-field" data-wrap="st"><label>★の数</label><select class="tn-select" data-k="st"></select>' +
+    '<input class="tn-input" type="number" inputmode="numeric" min="0" step="1" data-k="st7" hidden></div>';
+  const tSel = host.querySelector('[data-k=t]');
+  for (let t = 1; t <= 7; t++) tSel.add(new Option(t === 7 ? '7段・最高峰' : t + '段', t));
+  host.querySelectorAll('select,input').forEach(el => el.addEventListener('input', () => {
+    const p = state.pos[state.side][key];
+    const k = el.dataset.k;
+    if (k === 't'){ p.t = +el.value; p.s = 0; p.st = (p.t === 7 && key === 'goal') ? PEAK_STARS : 0; }
+    else if (k === 's'){ p.s = +el.value; p.st = Math.min(p.st, TIERS[p.t].stars); }
+    else if (k === 'st'){ p.st = +el.value; }
+    else if (k === 'st7'){ p.st = Math.max(0, Math.floor(+el.value || 0)); }
+    syncPos(host, key); update();
+  }));
+}
+function syncPos(host, key){
+  const p = state.pos[state.side][key];
+  const tSel = host.querySelector('[data-k=t]'), sSel = host.querySelector('[data-k=s]');
+  const stSel = host.querySelector('[data-k=st]'), st7 = host.querySelector('[data-k=st7]');
+  const labS = host.querySelector('[data-wrap=s] label'), labSt = host.querySelector('[data-wrap=st] label');
+  tSel.value = p.t;
+  if (p.t === 7){
+    sSel.innerHTML = ''; sSel.add(new Option('—', 0)); sSel.disabled = true;
+    stSel.hidden = true; st7.hidden = false;
+    if (document.activeElement !== st7) st7.value = p.st;
+    labSt.textContent = '★の数';
+    labS.textContent = '小段位';
+  } else {
+    const T = TIERS[p.t];
+    sSel.disabled = false;
+    sSel.innerHTML = ''; T.labels.forEach((l, i) => sSel.add(new Option(l, i)));
+    sSel.value = p.s;
+    stSel.hidden = false; st7.hidden = true;
+    stSel.innerHTML = ''; for (let i = 0; i <= T.stars; i++) stSel.add(new Option('★' + i, i));
+    stSel.value = p.st;
+    labSt.textContent = '★の数';
+  }
+}
+
+/* ---------------- くるくる回る数字 ---------------- */
+// Rare UI「Animated counter」(MIT) の考え方をつみき用に書き直し。上下を段階的に抜くマスクが肝。
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function counter(host){
+  host.style.setProperty('--fade', 'linear-gradient(to bottom, var(--mask-clear) 0%, var(--mask-06) 5.5%, var(--mask-50) 11%, var(--mask-94) 16.5%, var(--mask-solid) 22%, var(--mask-solid) 78%, var(--mask-94) 83.5%, var(--mask-50) 89%, var(--mask-06) 94.5%, var(--mask-clear) 100%)');
+  let slots = [], shape = null;
+  function render(text){
+    host.innerHTML = ''; slots = [];
+    [...text].forEach(ch => {
+      if (ch >= '0' && ch <= '9'){
+        const win = document.createElement('span'); win.className = 'win';
+        const col = document.createElement('span'); col.className = 'col';
+        col.innerHTML = [0,1,2,3,4,5,6,7,8,9,0].map(n => '<span>' + n + '</span>').join('');
+        win.appendChild(col); host.appendChild(win);
+        slots.push({ col, digit:0 });
+      } else {
+        const f = document.createElement('span'); f.className = 'fixed'; f.textContent = ch;
+        host.appendChild(f);
+      }
+    });
+  }
+  return function set(text){
+    const sh = [...text].map(c => (c >= '0' && c <= '9') ? 'd' : c).join('');
+    if (sh !== shape){ render(text); shape = sh; }
+    let i = 0;
+    [...text].forEach(ch => {
+      if (ch < '0' || ch > '9') return;
+      const s = slots[i++], next = +ch;
+      const wrap = s.digit === 9 && next === 0;
+      s.col.style.transition = reduced ? 'none' : 'transform .6s cubic-bezier(.22,1,.36,1) ' + (i * 0.02) + 's';
+      s.col.style.transform = 'translateY(' + (-(wrap ? 10 : next) * 1.5) + 'em)';
+      if (wrap) setTimeout(() => { s.col.style.transition = 'none'; s.col.style.transform = 'translateY(0em)'; }, 640);
+      s.digit = next;
+    });
+    $('perDaySr').textContent = '1日に★' + text + '個';
+  };
+}
+const setPerDay = counter($('perDay'));
+
+/* ---------------- 計算と表示 ---------------- */
+const up1 = x => Math.ceil(x * 10 - 1e-9) / 10;                 // 小数1桁に切り上げ
+const fmt1 = x => up1(x).toFixed(1);
+const ptsTxt = x => (x > 0 ? '+' : x < 0 ? '−' : '±') + (Math.round(Math.abs(x) * 10) / 10);
+
+function segments(from, to){
+  const out = []; let c = from;
+  while (c < to){
+    const t = tierAt(c), e = Math.min(tierEnd(t), to);
+    out.push({ t, pt:e - c }); c = e;
+  }
+  return out;
+}
+
+function update(){
+  const side = state.side, P = state.pos[side];
+  const opt = { solo:state.solo && side === 'surv', limited:state.limited };
+  $('soloRow').hidden = side !== 'surv';
+
+  // 期間
+  const today = $('today').value || todayStr();
+  const start = dayNum(today) + (state.doneToday ? 1 : 0);
+  const days = dayNum(state.deadline) - start + 1;
+  const lastT = dayNum(SEASON.lastDay);
+  $('seasonHint').textContent = dayNum(today) <= lastT
+    ? '今のシーズン（' + SEASON.name + '）は ' + SEASON.endNote + '。最後に遊べるのは ' + mdOf(SEASON.lastDay) + ' まで（11/19 の朝の枠は予定しだい）。'
+    : 'シーズン ' + SEASON.name + ' は終わっています。新しいシーズンの締切を入れてください。';
+
+  const curCum = cumOf(P.cur), goalCum = cumOf(P.goal);
+  const need = goalCum - curCum;
+  $('goalHint').textContent = P.goal.t === 7 ? '★' + PEAK_STARS + 'で最高峰7段。その先も★は増え続けます。' : '';
+
+  const lines = $('lines'), notes = $('notes');
+  lines.innerHTML = ''; notes.innerHTML = '';
+  const note = (cls, html) => { const p = document.createElement('p'); p.className = 'msg ' + cls; p.innerHTML = html; notes.appendChild(p); };
+  const line = (label, value, sub) => {
+    const li = document.createElement('li');
+    li.innerHTML = '<span>' + label + '</span><span><b>' + value + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</span>';
+    lines.appendChild(li);
+  };
+
+  if (need <= 0){
+    setPerDay('0.0');
+    $('heroTotal').textContent = labelOf(P.cur) + ' → ' + labelOf(P.goal);
+    note('good', 'もうゴールに届いています。ゴールを上の段位にすると、1日のペースが出ます。');
+    $('breakdown').innerHTML = ''; renderBasis(side, opt); save(); return;
+  }
+  if (!(days >= 1)){
+    setPerDay('0.0');
+    $('heroTotal').textContent = '';
+    note('warn', '締切が今日より前になっています。締切の日付を直してください。');
+    $('breakdown').innerHTML = ''; renderBasis(side, opt); save(); return;
+  }
+
+  const segs = segments(curCum, goalCum);
+  const w = Math.max(0, Math.min(100, +state.winRate || 0)) / 100;
+  let d = Math.max(0, Math.min(100, +state.drawRate || 0)) / 100;
+  const rateOver = w + d > 1; if (rateOver) d = 1 - w;
+  const l = 1 - w - d;
+
+  let stars = 0, winsAll = 0, wins4 = 0, wins3 = 0, matches = 0, winsRate = 0, stuck = null, maxPerDay = Infinity;
+  const rows = [];
+  segs.forEach(sg => {
+    const m = matchPts(side, sg.t, opt);
+    const st = sg.pt / ppsOf(sg.t);
+    const e = w * m.win + d * m.draw + l * m.loss;
+    const row = { t:sg.t, pt:sg.pt, st, winsAll:sg.pt / m.win, e, matches:e > 0 ? sg.pt / e : Infinity };
+    stars += st; winsAll += row.winsAll; wins4 += sg.pt / m.win4; wins3 += sg.pt / m.win3;
+    if (e > 0){ matches += row.matches; winsRate += row.matches * w; }
+    else if (!stuck) stuck = { t:sg.t, e };
+    maxPerDay = Math.min(maxPerDay, openMinutes(sg.t) / Math.max(5, +state.minutes || 20));
+    rows.push(row);
+  });
+
+  setPerDay(fmt1(stars / days));
+  $('heroTotal').textContent = labelOf(P.cur) + ' → ' + labelOf(P.goal) + '　あと★' + Math.ceil(stars - 1e-9) + '個（' + need + 'pt）・' + days + '日';
+
+  if (side === 'surv'){
+    line('負けなしなら', '1日 ' + fmt1(winsAll / days) + '勝', 'ぜんぶで ' + Math.ceil(winsAll - 1e-9) + '勝（4人・3人脱出の平均）');
+  } else {
+    line('4吊りだけなら', '1日 ' + fmt1(wins4 / days) + '勝', 'ぜんぶで ' + Math.ceil(wins4 - 1e-9) + '勝');
+    line('3吊りだけなら', '1日 ' + fmt1(wins3 / days) + '勝', 'ぜんぶで ' + Math.ceil(wins3 - 1e-9) + '勝');
+  }
+  if (!stuck){
+    line('勝率' + Math.round(w * 100) + '%なら', '1日 ' + fmt1(matches / days) + '試合',
+      'うち勝ち 約' + fmt1(winsRate / days) + '・ぜんぶで ' + Math.ceil(matches - 1e-9) + '試合');
+  } else {
+    line('勝率' + Math.round(w * 100) + '%なら', '届きません', stuck.t + '段で1試合あたり ' + ptsTxt(stuck.e) + 'pt');
+    note('warn', 'この勝率だと、' + stuck.t + '段では1試合ごとのptが増えません（平均 ' + ptsTxt(stuck.e) + 'pt）。勝率を上げるか、引き分けの割合を見直してください。');
+  }
+  if (rateOver) note('warn', '勝率と引き分けの割合を足すと100%を超えています。引き分けを ' + Math.round(d * 100) + '% として計算しました。');
+
+  // 1日の枠に収まるか
+  if (!stuck){
+    const perDay = matches / days, cap = Math.floor(maxPerDay);
+    if (perDay <= cap){
+      note('good', '1試合' + (+state.minutes || 20) + '分なら、開いている時間で1日 最大' + cap + '試合。十分まにあいます。');
+    } else {
+      note('warn', '1試合' + (+state.minutes || 20) + '分だと、開いている時間では1日 最大' + cap + '試合。この勝率のままでは締切に届かない見込みです。');
+    }
+    if (perDay < 3) note('good', '毎日3試合すると、翌日0時にランク秘宝ももらえます。');
+  }
+
+  // 内訳
+  let h = '<thead><tr><th>段位</th><th class="tn-num">pt</th><th class="tn-num">★</th><th class="tn-num">負けなし</th><th class="tn-num">勝率' + Math.round(w * 100) + '%</th></tr></thead><tbody>';
+  rows.forEach(r => {
+    h += '<tr><td>' + (r.t === 7 ? '7段〜' : r.t + '段') + '</td><td class="tn-num">' + r.pt + '</td><td class="tn-num">' + Math.round(r.st * 10) / 10 +
+      '</td><td class="tn-num">' + Math.ceil(r.winsAll - 1e-9) + '勝</td><td class="tn-num">' + (isFinite(r.matches) ? Math.ceil(r.matches - 1e-9) + '試合' : '—') + '</td></tr>';
+  });
+  $('breakdown').innerHTML = h + '</tbody>';
+
+  renderBasis(side, opt);
+  save();
+}
+
+function renderBasis(side, opt){
+  const groups = side === 'surv' ? [[1,'1段'],[2,'2段'],[3,'3段'],[4,'4段'],[5,'5段'],[6,'6段'],[7,'7段〜']]
+                                 : [[1,'1段'],[2,'2段'],[3,'3段'],[4,'4段'],[5,'5〜6段'],[7,'7段〜']];
+  let h = '<div class="tn-scroll"><table class="tn-table"><thead><tr><th>段位</th>' +
+    (side === 'surv' ? '<th class="tn-num">勝ち</th>' : '<th class="tn-num">4吊り</th><th class="tn-num">3吊り</th>') +
+    '<th class="tn-num">引き分け</th><th class="tn-num">負け</th><th class="tn-num">1★</th></tr></thead><tbody>';
+  groups.forEach(([t, name]) => {
+    const m = matchPts(side, t, opt);
+    h += '<tr><td>' + name + '</td>' +
+      (side === 'surv' ? '<td class="tn-num">' + ptsTxt(m.win) + '</td>' : '<td class="tn-num">' + ptsTxt(m.win4) + '</td><td class="tn-num">' + ptsTxt(m.win3) + '</td>') +
+      '<td class="tn-num">' + ptsTxt(m.draw) + '</td><td class="tn-num">' + ptsTxt(m.loss) + '</td><td class="tn-num">' + ppsOf(t) + 'pt</td></tr>';
+  });
+  h += '</tbody></table></div><ul>';
+  if (side === 'surv'){
+    h += '<li>1試合のpt＝基本点＋演繹得点の順位点（+1〜4）の平均+2.5。負けは1人脱出と0人脱出の平均。</li>' +
+         '<li>4段以下は、負け・引き分けで自動で足される「段位ガード」を含みます。</li>';
+  } else {
+    h += '<li>1試合のpt＝基本点＋脱落させた人数の点（1吊り+1〜4吊り+4、0吊りは0として計算）。負けは1吊りと0吊りの平均。</li>' +
+         '<li>3段以下は「段位ガード」を含みます。4段のガードは資料で確かめられなかったので0にしています。</li>';
+  }
+  h += '<li>段位の境目は、4段以下が1★20pt、5段以上が1★30pt。昇格戦は2024年3月に無くなっています。</li>' +
+       '<li>1日に開いている時間：5段以下8時間（5〜7時・13〜15時・19〜23時）、6段以上6時間（夜は20〜22時）。</li></ul>';
+  $('basis').innerHTML = h;
+}
+
+/* ---------------- つなぐ ---------------- */
+buildPos($('cur'), 'cur'); buildPos($('goal'), 'goal');
+function syncAll(){
+  document.querySelectorAll('#side button').forEach(b => b.classList.toggle('on', b.dataset.side === state.side));
+  syncPos($('cur'), 'cur'); syncPos($('goal'), 'goal');
+}
+document.querySelectorAll('#side button').forEach(b => b.addEventListener('click', () => {
+  state.side = b.dataset.side; syncAll(); update();
+}));
+
+$('today').value = todayStr();
+if (!(dayNum(state.deadline) >= dayNum(todayStr())) && dayNum(SEASON.lastDay) >= dayNum(todayStr())) state.deadline = SEASON.lastDay;
+$('deadline').value = state.deadline;
+$('doneToday').checked = !!state.doneToday;
+$('winRate').value = state.winRate; $('drawRate').value = state.drawRate; $('minutes').value = state.minutes;
+$('solo').checked = !!state.solo; $('limited').checked = !!state.limited;
+
+$('today').addEventListener('input', update);
+$('deadline').addEventListener('input', e => { state.deadline = e.target.value; update(); });
+$('doneToday').addEventListener('change', e => { state.doneToday = e.target.checked; update(); });
+['winRate','drawRate','minutes'].forEach(id => $(id).addEventListener('input', e => { state[id] = e.target.value; update(); }));
+['solo','limited'].forEach(id => $(id).addEventListener('change', e => { state[id] = e.target.checked; update(); }));
+
+syncAll(); update();
+</script>
+</body>
+</html>
