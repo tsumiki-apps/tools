@@ -466,6 +466,15 @@
   .who .p .cd2 + span{margin-left:10px;}
   .who .p .cd2.few{color:var(--good); font-weight:700;}
   .who .p .cd2.many{color:var(--warn); font-weight:700;}
+  /* 決めた人の行：左＝外す／入れる、右＝時間を変える */
+  .who .prow{display:flex; gap:6px; align-items:stretch;}
+  .who .prow .p.pick{flex:1 1 auto; min-width:0; width:auto;}
+  .who .prow .p b{min-width:0; overflow:hidden; text-overflow:ellipsis;}
+  .who .tbtn{flex:0 0 auto; min-height:var(--tap); min-width:var(--tap); padding:6px 10px; border-radius:11px;
+    border:1.5px solid var(--accent); background:var(--surface); color:var(--accent-2);
+    font-family:var(--sans); font-size:.92rem; font-weight:700; font-variant-numeric:tabular-nums;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.15; cursor:pointer;}
+  .who .tbtn small{font-size:.68rem; font-weight:500; color:var(--ink-mid);}
 
   /* 頼めそうな人 */
   .askbox{margin-top:9px; border:1px dashed var(--line-2); border-radius:11px; padding:10px 11px;}
@@ -836,6 +845,20 @@
       <div id="fillSlots"></div>
       <button class="btn" id="shSave" style="margin-top:15px">この内容で入れる</button>
     </div>
+  </div>
+
+  <!-- ②' 決めた人の時間を直す（昼を1つにまとめたお店で、何時から入るかを店長が決める） -->
+  <div id="mTime" hidden>
+    <button class="backb" id="timeBack">‹ もどる</button>
+    <h2 id="timeTitle">—</h2>
+    <div class="sub" id="timeSub"></div>
+    <div class="presets" id="timePre"></div>
+    <div class="times">
+      <input type="time" step="900" id="timeFrom" aria-label="はじまり">
+      <span>〜</span>
+      <input type="time" step="900" id="timeTo" aria-label="おわり">
+    </div>
+    <button class="btn" id="timeSave" style="margin-top:15px">この時間にする</button>
   </div>
 
   <!-- ③ この日の必要人数 -->
@@ -1606,7 +1629,7 @@ const sheet=document.getElementById('sheet'), backdrop=document.getElementById('
 let shDate=null, fillSid=null, fillState={}, busy=false;
 
 function showMode(m){
-  ['mDay','mFill','mNeed','mReq','mMore','mMenu'].forEach(id=>{ document.getElementById(id).hidden = (id!==m); });
+  ['mDay','mFill','mTime','mNeed','mReq','mMore','mMenu'].forEach(id=>{ document.getElementById(id).hidden = (id!==m); });
   sheet.scrollTop=0;
 }
 function closeSheet(){ backdrop.classList.remove('show'); sheet.classList.remove('show');
@@ -1682,9 +1705,17 @@ function renderKime(){
         b.innerHTML='<span class="ck">'+(on?'✓':'')+'</span><b>'+esc(p.name)+'</b>'+
           (p.mark==='t'?'<span class="mk">行けたら</span>':'')+
           '<span class="cd2'+cls+'">今月'+fd+'日</span>'+
-          '<span>'+m2hm(on?got[p.id].from:p.from)+'〜'+m2hm(on?got[p.id].to:p.to)+'</span>';
+          (on?'':'<span>'+m2hm(p.from)+'〜'+m2hm(p.to)+'</span>');
         b.addEventListener('click',()=>toggleAssign(s.k,p.id,!on));
-        who.appendChild(b);
+        if(!on){ who.appendChild(b); return; }
+        /* ⚠️ ボタンの中にボタンは入れられない。行を2つに割って、右の時間だけを別のボタンにする。
+           何時から入るか（9:30／10:00 など）を、決めた人ごとに店長が変えるため。 */
+        const row=document.createElement('div'); row.className='prow';
+        const tb=document.createElement('button'); tb.className='tbtn';
+        tb.innerHTML=m2hm(got[p.id].from)+'<small>〜'+m2hm(got[p.id].to)+'</small>';
+        tb.setAttribute('aria-label',p.name+'さんの時間を変える');
+        tb.addEventListener('click',()=>openTimeEdit(s,p.id,p.name,got[p.id]));
+        row.appendChild(b); row.appendChild(tb); who.appendChild(row);
       });
     }
     wrap.appendChild(who);
@@ -1713,6 +1744,45 @@ function renderKime(){
     box.appendChild(wrap);
   });
 }
+/* --- 決めた人の時間を直す --- */
+let timeCtx=null;
+function openTimeEdit(s,sid,name,g){
+  timeCtx={k:s.k, sid:sid};
+  const w=wdayOf(shDate);
+  document.getElementById('timeTitle').textContent=fmtDateJP(shDate)+'（'+WD[w]+'）の'+s.label;
+  document.getElementById('timeSub').textContent=name+'さんの時間';
+  const f=document.getElementById('timeFrom'), t=document.getElementById('timeTo');
+  f.value=m2hm(g.from); t.value=m2hm(g.to);
+  /* よく使う「はじまり」を札にする＝この月にこの時間帯で出ている時刻＋時間帯の既定。多くて4つ */
+  const set=new Set([s.from]);
+  Object.keys(avail).forEach(d=>{ const m=avail[d]||{};
+    Object.keys(m).forEach(id=>{ const x=m[id]&&m[id][s.k]; if(x) set.add(x.from); }); });
+  const starts=[...set].sort((a,b)=>a-b).slice(0,4);
+  const pre=document.getElementById('timePre'); pre.innerHTML='';
+  pre.hidden = starts.length<2;
+  const paint=()=>{ [...pre.children].forEach(b=>b.classList.toggle('on', hm2m(f.value)===+b.dataset.m)); };
+  starts.forEach(m=>{
+    const b=document.createElement('button'); b.type='button'; b.dataset.m=m; b.textContent=m2hm(m)+'〜';
+    b.addEventListener('click',()=>{ f.value=m2hm(m); paint(); });
+    pre.appendChild(b);
+  });
+  f.oninput=paint; paint();
+  showMode('mTime');
+}
+document.getElementById('timeBack').addEventListener('click',()=>openDay(shDate));
+document.getElementById('timeSave').addEventListener('click',async()=>{
+  if(busy||!timeCtx) return;
+  const a=hm2m(document.getElementById('timeFrom').value), b=hm2m(document.getElementById('timeTo').value);
+  if(a==null||b==null){ toast('時間を入れてください'); return; }
+  if(b<=a){ toast('おわりが、はじまりより前になっています'); return; }
+  busy=true;
+  try{
+    await arpc('kibo_admin_assign_time',{p_date:shDate,p_slot:timeCtx.k,p_staff:timeCtx.sid,p_from:a,p_to:b});
+    await loadMonth(); openDay(shDate); toast('時間を変えました');
+  }catch(e){ if(!authLost(e)) toast('変えられませんでした'); }
+  finally{ busy=false; }
+});
+
 async function toggleAssign(k,sid,on){
   if(busy) return; busy=true;
   try{
@@ -2759,6 +2829,7 @@ function tutMaybeStart(){
   })();
 </script>
 <!-- /tsumiki-license-gate -->
+
 
 
 
