@@ -1754,10 +1754,10 @@ function openTimeEdit(s,sid,name,g){
   const f=document.getElementById('timeFrom'), t=document.getElementById('timeTo');
   f.value=m2hm(g.from); t.value=m2hm(g.to);
   /* よく使う「はじまり」を札にする＝この月にこの時間帯で出ている時刻＋時間帯の既定。多くて4つ */
-  const set=new Set([s.from]);
+  const cnt={}; cnt[s.from]=1e6;   // 時間帯の既定は必ず入れる
   Object.keys(avail).forEach(d=>{ const m=avail[d]||{};
-    Object.keys(m).forEach(id=>{ const x=m[id]&&m[id][s.k]; if(x) set.add(x.from); }); });
-  const starts=[...set].sort((a,b)=>a-b).slice(0,4);
+    Object.keys(m).forEach(id=>{ const x=m[id]&&m[id][s.k]; if(x) cnt[x.from]=(cnt[x.from]||0)+1; }); });
+  const starts=Object.keys(cnt).map(Number).sort((a,b)=>cnt[b]-cnt[a]).slice(0,4).sort((a,b)=>a-b);
   const pre=document.getElementById('timePre'); pre.innerHTML='';
   pre.hidden = starts.length<2;
   const paint=()=>{ [...pre.children].forEach(b=>b.classList.toggle('on', hm2m(f.value)===+b.dataset.m)); };
@@ -1775,6 +1775,8 @@ document.getElementById('timeSave').addEventListener('click',async()=>{
   const a=hm2m(document.getElementById('timeFrom').value), b=hm2m(document.getElementById('timeTo').value);
   if(a==null||b==null){ toast('時間を入れてください'); return; }
   if(b<=a){ toast('おわりが、はじまりより前になっています'); return; }
+  const sl=slotOf(timeCtx.k);
+  if(sl && !overlapsSlot({from:a,to:b}, sl)){ toast(sl.label+'の時間帯（'+m2hm(sl.from)+'〜'+m2hm(sl.to)+'）と重なっていません'); return; }
   busy=true;
   try{
     await arpc('kibo_admin_assign_time',{p_date:shDate,p_slot:timeCtx.k,p_staff:timeCtx.sid,p_from:a,p_to:b});
@@ -1783,10 +1785,22 @@ document.getElementById('timeSave').addEventListener('click',async()=>{
   finally{ busy=false; }
 });
 
+/* 外した人の時間を覚えておく。入れ直すとサーバーは「希望の時間」で入れるので、
+   店長が決めた時間（9:30／10:00 など）が黙って戻らないように、覚えた時間で直す */
+const offTime={};
 async function toggleAssign(k,sid,on){
   if(busy) return; busy=true;
+  const key=shDate+'|'+k+'|'+sid, g=((assign[shDate]||{})[k]||{})[sid];
+  if(!on && g) offTime[key]={from:g.from, to:g.to};
   try{
     await arpc('kibo_admin_assign',{p_date:shDate,p_slot:k,p_staff:sid,p_on:on});
+    const t=offTime[key];
+    if(on && t){
+      const av=((avail[shDate]||{})[sid]||{})[k];
+      if(!av || av.from!==t.from || av.to!==t.to)
+        await arpc('kibo_admin_assign_time',{p_date:shDate,p_slot:k,p_staff:sid,p_from:t.from,p_to:t.to});
+      delete offTime[key];
+    }
     await loadMonth(); renderKime();
   }catch(e){ if(!authLost(e)) toast('できませんでした'); }
   finally{ busy=false; }
@@ -2352,6 +2366,14 @@ document.getElementById('saveCfg').addEventListener('click',async()=>{
     if(badw){ toast(badw+'曜の人数を、0〜99の数で入れてください'); return; }
   }
   const closed=[...document.getElementById('cfWdays').children].filter(b=>b.classList.contains('on')).map(b=>+b.dataset.w);
+  /* 開いているあいだに時間帯が変わっていたら、古い設定欄のまま送らない */
+  try{
+    const now=await arpc('kibo_admin_login');
+    if(now && now.mode==='shop' && slotSig(now)!==slotSig(shop)){
+      shop=now; wdayNeed=indexWneed(shop.wday_needs); fillConfig(); loadMonth();
+      toast('時間帯が変わっていました。見直してから、もう一度保存してください'); return;
+    }
+  }catch(e){ if(authLost(e)) return; }
   try{
     await arpc('kibo_admin_update_shop',{p_name:name, p_deadline_day:dd, p_closed:closed, p_slots:arr});
     /* 枠より後に送る。曜日ごとの人数は枠にぶら下がっているので、先に送ると消えた枠のぶんが落ちる */
@@ -2366,6 +2388,7 @@ document.getElementById('saveCfg').addEventListener('click',async()=>{
    開きっぱなしのままだと「今日」も希望も古いまま。
    スタッフが直したぶんが見えないと、古い画面から上書きしてしまう。 */
 let lastFresh=0, refreshing=false;
+function slotSig(sh){ return JSON.stringify([(sh&&sh.slots||[]).map(x=>[x.k,x.from,x.to,x.need]), (sh&&sh.wday_needs)||[]]); }
 async function refresh(force){
   if(!admin || !shopId || refreshing) return;
   const now=Date.now();
@@ -2374,7 +2397,13 @@ async function refresh(force){
   refreshing=true;
   try{
     const info=await arpc('kibo_admin_login');
-    if(info && info.mode==='shop'){ shop=info; }
+    if(info && info.mode==='shop'){
+      /* ⚠️ 時間帯や曜日ごとの人数が別の画面（や制作者）で変わっていたら、設定欄も作り直す。
+         作り直さないと、古い設定欄のまま保存したときに、消えた時間帯が復活する（2026-09-26 反証役の指摘） */
+      const was=slotSig(shop);
+      shop=info; wdayNeed=indexWneed(shop.wday_needs);
+      if(slotSig(shop)!==was) fillConfig();
+    }
     await loadMonth();
     lastFresh=Date.now();
   }catch(e){ /* 電波が無いときは黙って諦める（次に戻ったときに再挑戦） */ }
@@ -2829,6 +2858,7 @@ function tutMaybeStart(){
   })();
 </script>
 <!-- /tsumiki-license-gate -->
+
 
 
 

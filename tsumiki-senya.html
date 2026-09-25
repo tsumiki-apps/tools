@@ -1225,7 +1225,13 @@ async function refresh(force){
   if(!force && now-lastFresh < 8000) return;
   if(sheet.classList.contains('show')) return;   // 操作中は触らない
   refreshing=true;
-  try{ await loadMonth(); lastFresh=Date.now(); }
+  try{
+    /* ⚠️ 時間帯はお店の設定で変わる（2026-09-26 に昼①②を「昼」1つにまとめた）。
+       開いたままの画面に古い時間帯が残ると、無い時間帯に出して、保存されないまま終わる */
+    const info=await rpc('kibo_staff_login',{p_code:code});
+    if(info && info.slots) me.slots=info.slots;
+    await loadMonth(); lastFresh=Date.now();
+  }
   catch(e){ /* 電波が無いときは黙って諦める */ }
   finally{ refreshing=false; }
 }
