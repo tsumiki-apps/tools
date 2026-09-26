@@ -1060,8 +1060,12 @@ function openSheet(key){
     shState={};
     (me.slots||[]).forEach(s=>{
       const got=(byDate[key]||{})[s.k];
+      /* 新しく入れる日の時間は「ふだん出している時間」を先に使う。
+         昼を1つにまとめたお店で、10時からしか来られない方が 9:30 のまま出してしまわないように */
+      const mt=(me.my_times||{})[s.k];
+      const df=(mt && mt.from < s.to && s.from < mt.to) ? mt : {from:s.from, to:s.to};
       shState[s.k]= got ? {on:true, mark:got.mark, from:got.from, to:got.to, edit:false}
-                        : {on:false, mark:'o', from:s.from, to:s.to, edit:false};
+                        : {on:false, mark:'o', from:df.from, to:df.to, edit:false};
     });
     renderSlots();
     shOrig=shSnap();
@@ -1229,7 +1233,7 @@ async function refresh(force){
     /* ⚠️ 時間帯はお店の設定で変わる（2026-09-26 に昼①②を「昼」1つにまとめた）。
        開いたままの画面に古い時間帯が残ると、無い時間帯に出して、保存されないまま終わる */
     const info=await rpc('kibo_staff_login',{p_code:code});
-    if(info && info.slots) me.slots=info.slots;
+    if(info && info.slots){ me.slots=info.slots; me.my_times=info.my_times||{}; }
     await loadMonth(); lastFresh=Date.now();
   }
   catch(e){ /* 電波が無いときは黙って諦める */ }
