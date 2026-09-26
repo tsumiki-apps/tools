@@ -1772,6 +1772,7 @@ function openTimeEdit(s,sid,name,g){
 document.getElementById('timeBack').addEventListener('click',()=>openDay(shDate));
 document.getElementById('timeSave').addEventListener('click',async()=>{
   if(busy||!timeCtx) return;
+  const d=shDate;
   const a=hm2m(document.getElementById('timeFrom').value), b=hm2m(document.getElementById('timeTo').value);
   if(a==null||b==null){ toast('時間を入れてください'); return; }
   if(b<=a){ toast('おわりが、はじまりより前になっています'); return; }
@@ -1779,8 +1780,8 @@ document.getElementById('timeSave').addEventListener('click',async()=>{
   if(sl && !overlapsSlot({from:a,to:b}, sl)){ toast(sl.label+'の時間帯（'+m2hm(sl.from)+'〜'+m2hm(sl.to)+'）と重なっていません'); return; }
   busy=true;
   try{
-    await arpc('kibo_admin_assign_time',{p_date:shDate,p_slot:timeCtx.k,p_staff:timeCtx.sid,p_from:a,p_to:b});
-    await loadMonth(); openDay(shDate); toast('時間を変えました');
+    await arpc('kibo_admin_assign_time',{p_date:d,p_slot:timeCtx.k,p_staff:timeCtx.sid,p_from:a,p_to:b});
+    await loadMonth(); openDay(d); toast('時間を変えました');
   }catch(e){ if(!authLost(e)) toast('変えられませんでした'); }
   finally{ busy=false; }
 });
@@ -1790,15 +1791,17 @@ document.getElementById('timeSave').addEventListener('click',async()=>{
 const offTime={};
 async function toggleAssign(k,sid,on){
   if(busy) return; busy=true;
-  const key=shDate+'|'+k+'|'+sid, g=((assign[shDate]||{})[k]||{})[sid];
+  /* ⚠️ 日付は最初に取っておく。await のあいだに別の日を開かれると shDate が変わり、ちがう日に書いてしまう */
+  const d=shDate;
+  const key=d+'|'+k+'|'+sid, g=((assign[d]||{})[k]||{})[sid];
   if(!on && g) offTime[key]={from:g.from, to:g.to};
   try{
-    await arpc('kibo_admin_assign',{p_date:shDate,p_slot:k,p_staff:sid,p_on:on});
+    await arpc('kibo_admin_assign',{p_date:d,p_slot:k,p_staff:sid,p_on:on});
     const t=offTime[key];
     if(on && t){
-      const av=((avail[shDate]||{})[sid]||{})[k];
+      const av=((avail[d]||{})[sid]||{})[k];
       if(!av || av.from!==t.from || av.to!==t.to)
-        await arpc('kibo_admin_assign_time',{p_date:shDate,p_slot:k,p_staff:sid,p_from:t.from,p_to:t.to});
+        await arpc('kibo_admin_assign_time',{p_date:d,p_slot:k,p_staff:sid,p_from:t.from,p_to:t.to});
       delete offTime[key];
     }
     await loadMonth(); renderKime();
@@ -2373,7 +2376,7 @@ document.getElementById('saveCfg').addEventListener('click',async()=>{
       shop=now; wdayNeed=indexWneed(shop.wday_needs); fillConfig(); loadMonth();
       toast('時間帯が変わっていました。見直してから、もう一度保存してください'); return;
     }
-  }catch(e){ if(authLost(e)) return; }
+  }catch(e){ if(!authLost(e)) toast('つながりませんでした。もう一度お試しください'); return; }
   try{
     await arpc('kibo_admin_update_shop',{p_name:name, p_deadline_day:dd, p_closed:closed, p_slots:arr});
     /* 枠より後に送る。曜日ごとの人数は枠にぶら下がっているので、先に送ると消えた枠のぶんが落ちる */
@@ -2388,7 +2391,8 @@ document.getElementById('saveCfg').addEventListener('click',async()=>{
    開きっぱなしのままだと「今日」も希望も古いまま。
    スタッフが直したぶんが見えないと、古い画面から上書きしてしまう。 */
 let lastFresh=0, refreshing=false;
-function slotSig(sh){ return JSON.stringify([(sh&&sh.slots||[]).map(x=>[x.k,x.from,x.to,x.need]), (sh&&sh.wday_needs)||[]]); }
+function slotSig(sh){ return JSON.stringify([(sh&&sh.slots||[]).map(x=>[x.k,x.from,x.to,x.need]), (sh&&sh.wday_needs)||[],
+  sh&&sh.deadline_day, (sh&&sh.closed_wdays)||[]]); }
 async function refresh(force){
   if(!admin || !shopId || refreshing) return;
   const now=Date.now();
@@ -2402,7 +2406,10 @@ async function refresh(force){
          作り直さないと、古い設定欄のまま保存したときに、消えた時間帯が復活する（2026-09-26 反証役の指摘） */
       const was=slotSig(shop);
       shop=info; wdayNeed=indexWneed(shop.wday_needs);
-      if(slotSig(shop)!==was) fillConfig();
+      if(slotSig(shop)!==was){
+        if(document.getElementById('view3').hidden) fillConfig();
+        else toast('設定が別の画面で変わりました。保存する前に見直してください');
+      }
     }
     await loadMonth();
     lastFresh=Date.now();
@@ -2858,6 +2865,7 @@ function tutMaybeStart(){
   })();
 </script>
 <!-- /tsumiki-license-gate -->
+
 
 
 
