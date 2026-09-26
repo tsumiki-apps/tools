@@ -53,7 +53,7 @@
       --accent:#d59a4d; --accent-2:#e0ab63; --accent-wash:#3c2d18; --accent-fill:#d59a4d;
       --good:#7fae82; --good-wash:#23301f; --warn:#d9825a; --warn-wash:#39251a;
       --sat:#7fa8c4; --sun:#d4867a;
-      --p1:#d59a4d; --p1-wash:#362a19; --p3:#7fa8c4; --p3-wash:#1d2831; --p4:#8fae7f; --p4-wash:#22301f; --p6:#a894c4; --p6-wash:#2a2333; --p5:#c09a78; --p5-wash:#33271d;
+      --p1:#c9a063; --p1-wash:#362a19; --p3:#8fb4cc; --p3-wash:#1d2831; --p4:#8fae7f; --p4-wash:#22301f; --p6:#a894c4; --p6-wash:#2a2333; --p5:#c09a78; --p5-wash:#33271d;
       --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px -18px rgba(0,0,0,.65);
     }
   }
@@ -65,7 +65,7 @@
     --accent:#d59a4d; --accent-2:#e0ab63; --accent-wash:#3c2d18; --accent-fill:#d59a4d;
     --good:#7fae82; --good-wash:#23301f; --warn:#d9825a; --warn-wash:#39251a;
     --sat:#7fa8c4; --sun:#d4867a;
-    --p1:#d59a4d; --p1-wash:#362a19; --p3:#7fa8c4; --p3-wash:#1d2831; --p4:#8fae7f; --p4-wash:#22301f; --p6:#a894c4; --p6-wash:#2a2333; --p5:#c09a78; --p5-wash:#33271d;
+    --p1:#c9a063; --p1-wash:#362a19; --p3:#8fb4cc; --p3-wash:#1d2831; --p4:#8fae7f; --p4-wash:#22301f; --p6:#a894c4; --p6-wash:#2a2333; --p5:#c09a78; --p5-wash:#33271d;
     --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px -18px rgba(0,0,0,.65);
   }
   *{box-sizing:border-box;}
@@ -191,9 +191,11 @@
   .cell.short.lk0{background:var(--p1-wash); border-color:var(--p1);}
   .cell.short.lk1{background:var(--p3-wash); border-color:var(--p3);}
   .cell.short.lk2{background:var(--p4-wash); border-color:var(--p4);}
-  .cell.short.lk3{background:var(--p6-wash); border-color:var(--p6);}
-  .cell.short.lk4{background:var(--p5-wash); border-color:var(--p5);}
-  .cell.short[class*="lk"] .dn, .cell.short[class*="lk"] .lack{color:var(--ink);}
+  .cell.short.lk3{background:var(--p5-wash); border-color:var(--p5);}
+  .cell.short.lk4{background:var(--p6-wash); border-color:var(--p6);}
+  .cell.short.lk .dn, .cell.short.lk .lack{color:var(--ink);}
+  /* いちばん急ぐ「2つ以上足りない日」は、色だけでなく枠の太さでも分ける（昼だけの黄土と塗りが近いため） */
+  .cell.short:not(.lk){border-width:2.5px;}
   /* 色の見本（カレンダーのすぐ下） */
   .lklegend{display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:10px; font-size:.78rem; color:var(--ink-mid);}
   .lklegend span{display:inline-flex; align-items:center; gap:6px; white-space:nowrap;}
@@ -1370,10 +1372,10 @@ function renderMonth(){
     const l=lackOn(key), isShort = anySubmitted && !rest && anyLack(key);
     /* 足りない時間帯が1つだけなら、その時間帯の色。2つ以上なら弁柄のまま */
     const lkIdx=slots().map((s,i)=>l[s.k]>0?i:-1).filter(i=>i>=0);
-    const lk = isShort ? ((slots().length>=2 && lkIdx.length===1 && lkIdx[0]<=4) ? lkIdx[0] : 'x') : null;   // 時間帯が1つのお店は今までどおり赤   // 6つめの時間帯は色が無いので弁柄
+    const lk = !isShort ? null : (slots().length<2 || lkIdx.length!==1) ? 'x' : (lkIdx[0]<=4 ? lkIdx[0] : 'o');   // 時間帯が1つのお店は今までどおり赤。6つめは色が無いので赤で塗り、見本は「◯◯だけ」   // 6つめの時間帯は色が無いので弁柄
     if(lk!=null) lkCount[lk]=(lkCount[lk]||0)+1;
     const e=document.createElement('div');
-    e.className='cell s'+w+(rest?' rest':'')+(isShort?' short'+(lk!=='x'?' lk'+lk:''):'')+(key===shop.today?' today':'');
+    e.className='cell s'+w+(rest?' rest':'')+(isShort?' short'+(typeof lk==='number'?' lk lk'+lk:''):'')+(key===shop.today?' today':'');
     let inner='<div class="dn">'+d+'</div>';
     if(rest) inner+='<div class="num">休</div>';
     else if(isShort){
@@ -1408,13 +1410,14 @@ function renderMonth(){
 /* 色の見本。時間帯が2つ以上あって、足りない日があるときだけ出す */
 function renderLkLegend(cnt){
   const box=document.getElementById('lkLegend'), sl=slots();
-  const PV=['--p1','--p3','--p4','--p6','--p5'];
+  const PV=['--p1','--p3','--p4','--p5','--p6'];   // DESIGN.md の順（黄土・藍・苔・鳶・紫紺）。弁柄は「両方」に使う
   const keys=Object.keys(cnt);
   if(sl.length<2 || !keys.length){ box.hidden=true; box.innerHTML=''; return; }
   let h='';
   sl.forEach((s,i)=>{ const k=String(i); if(i>4 || !cnt[k]) return;
     h+='<span><i style="background:var('+PV[k]+'-wash);border-color:var('+PV[k]+')"></i>'+esc(s.label)+'だけ <b>'+cnt[k]+'日</b></span>'; });
-  if(cnt.x) h+='<span><i style="background:var(--warn-wash);border-color:var(--warn)"></i>'+(sl.length===2?'両方':'2つ以上')+' <b>'+cnt.x+'日</b></span>';
+  if(cnt.o && sl[5]) h+='<span><i style="background:var(--warn-wash);border-color:var(--warn)"></i>'+esc(sl[5].label)+'だけ <b>'+cnt.o+'日</b></span>';
+  if(cnt.x) h+='<span><i style="background:var(--warn-wash);border-color:var(--warn);border-width:2.5px"></i>'+(sl.length===2?'両方':'2つ以上')+' <b>'+cnt.x+'日</b></span>';
   box.innerHTML=h; box.hidden=false;
 }
 
@@ -2902,6 +2905,7 @@ function tutMaybeStart(){
   })();
 </script>
 <!-- /tsumiki-license-gate -->
+
 
 
 
