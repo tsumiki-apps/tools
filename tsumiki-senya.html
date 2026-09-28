@@ -695,10 +695,11 @@ function indexUsual(rows){
 /* ===== 状態 ===== */
 let code=null, me=null, month=null, cur=null, byDate={}, byReq={}, byAssign={}, usual={}, tab='kibo';
 /* みんなの希望（kibo_staff_peers）。読めなかったときは空のまま＝何も出さない */
-let peersBy={}, needBy={}, peersOk=false;
+let peersBy={}, needBy={}, peersOk=false, peersAny=false;
 
 /* ===== 通信 ===== */
-async function rpc(fn,params){
+/* quiet＝右上の同期の印を触らない（おまけの読み込みが失敗しても「つながっていない」に見せない） */
+async function rpc(fn,params,quiet){
   let r;
   try{
     r=await fetch(RPC_URL+fn,{
@@ -707,8 +708,8 @@ async function rpc(fn,params){
                'Content-Type':'application/json','Accept':'application/json'},
       body:JSON.stringify(params||{})
     });
-  }catch(e){ setSync(false); throw new Error('network'); }   // 電波が無い・届かない
-  setSync(r.ok);
+  }catch(e){ if(!quiet) setSync(false); throw new Error('network'); }   // 電波が無い・届かない
+  if(!quiet) setSync(r.ok);
   const txt=await r.text();
   if(!r.ok){
     let msg=txt;
@@ -854,7 +855,7 @@ let seq=0;
 async function loadMonth(){
   const s=++seq;
   // みんなの希望は並べて取りに行く。失敗しても自分の画面は出す（何も出さないだけ）
-  const pp=rpc('kibo_staff_peers',{p_code:code,p_month:month}).catch(()=>null);
+  const pp=rpc('kibo_staff_peers',{p_code:code,p_month:month},true).catch(()=>null);
   try{ const r=await rpc('kibo_staff_month',{p_code:code,p_month:month});
        if(s!==seq) return; cur=r; }
   catch(e){
@@ -869,10 +870,24 @@ async function loadMonth(){
   byReq=indexReq(cur.requests);
   byAssign=indexByDate(cur.assign);
   usual=indexUsual(cur.usual);
-  const pr=await pp; if(s!==seq) return;
-  peersOk=!!(pr && pr.peers); peersBy=indexPeers(pr&&pr.peers); needBy=indexNeeds(pr&&pr.needs);
+  /* ⚠️ みんなの希望は待ちすぎない。電波が弱くて返事が止まると、自分のカレンダーまで出なくなる。
+     2.5秒で見切って先に描き、あとから届いたら描き直す。 */
+  const pr=await Promise.race([pp, new Promise(r=>setTimeout(()=>r('late'),2500))]);
+  if(s!==seq) return;
+  if(pr==='late'){
+    setPeers(null);
+    pp.then(x=>{ if(s!==seq || !x) return; setPeers(x); render(); if(sheetOpen() && cur.editable) renderSlots(); });
+  }else setPeers(pr);
   if(!cur.published && tab==='kakutei') tab='kibo';
   render();
+}
+
+/* サーバーは締切前の月だけ返す（open:false のときは名前も人数も出さない） */
+function setPeers(pr){
+  peersOk=!!(pr && pr.open!==false && pr.peers);
+  peersBy=indexPeers(peersOk&&pr.peers); needBy=indexNeeds(peersOk&&pr.needs);
+  // 店長画面と同じく、まだ誰も出していない間は「足りない」の点を出さない
+  peersAny=peersOk && pr.peers.length>0;
 }
 
 /* ===== 描画 ===== */
@@ -912,7 +927,7 @@ function render(){
     const has=!!(got && Object.keys(got).length);
     const hasReq=(me.slots||[]).some(s=>byReq[key+'|'+s.k]);
     // 足りない枠の印は、希望を集めている間だけ（締切後は決まったシフトのほうが本当の数になる）
-    const lack=peersOk && cur.editable && !showAssign && !closed.has(w)
+    const lack=peersAny && cur.editable && !showAssign && !closed.has(w)
       && (me.slots||[]).some(s=>{ const pl=(peersBy[key]||{})[s.k]||[]; const mine=pl.find(p=>p.me);
                                    return lackOf(pl, needBy[key+'|'+s.k], mine?mine.mark:null)>0; });
     const e=document.createElement('div');
@@ -1131,7 +1146,8 @@ document.getElementById('shX').addEventListener('click',function(){ closeSheet()
 
 /* 同じ枠に希望を出している人の並び。meMark＝自分の今の印（出していなければ null） */
 function peersRow(key,k,meMark){
-  if(!peersOk) return null;
+  // 名前が見えるのは希望を集めている間だけ（過去の月・締切後の月は出さない）
+  if(!peersOk || !cur.editable) return null;
   const list=((peersBy[key]||{})[k]||[]).filter(p=>!p.me);
   const need=needBy[key+'|'+k]||0;
   const closed=(me.closed_wdays||[]).indexOf(wdayOf(key))>=0;
