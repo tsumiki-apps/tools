@@ -301,6 +301,19 @@
   .cell .k.t{background:transparent; color:var(--accent-2); box-shadow:0 0 0 1px var(--accent) inset;}
   .cell .k.a{background:var(--good); color:var(--on-accent);}
   .cell.req{box-shadow:0 0 0 2px var(--warn) inset;}
+  /* 足りない枠がある日（みんなの ○ がほしい人数に届いていない）。2026-09-28 */
+  .cell.lack::after{content:""; position:absolute; top:4px; right:4px; width:6px; height:6px;
+    border-radius:50%; background:var(--warn);}
+
+  /* 日のシート：同じ枠に希望を出している人（2026-09-28 せんやのご要望） */
+  .peers{display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:10px 0 4px;}
+  .peers .pc{font-size:.8rem; font-weight:700; padding:5px 11px; border-radius:99px;
+    background:var(--surface-2); color:var(--ink); line-height:1.2;}
+  .peers .pc.t{background:transparent; color:var(--ink-mid); box-shadow:0 0 0 1px var(--line-2) inset;}
+  .peers .pc.me{background:var(--accent-wash); color:var(--accent-2); box-shadow:0 0 0 1.5px var(--accent) inset;}
+  .peers .nd{margin-left:auto; font-size:.74rem; font-weight:700; padding:3px 10px; border-radius:99px;}
+  .peers .nd.bad{background:var(--warn-wash); color:var(--warn);}
+  .peers .nd.ok{background:var(--good-wash); color:var(--good);}
 
   /* 出し終わりの印 */
   .pill.done{background:var(--good-wash); color:var(--good); border-color:transparent;}
@@ -468,7 +481,7 @@
 <!-- ===== ログイン ===== -->
 <section class="login" id="loginView">
   <div style="font-size:1.22rem;font-weight:700">シフトの希望を出す</div>
-  <p class="lead">お店から届いた <b>6文字の合言葉</b> を入れてください。<br>あなた専用の入口です。ほかの人の希望は見えません。</p>
+  <p class="lead">お店から届いた <b>6文字の合言葉</b> を入れてください。<br>あなた専用の入口です。</p>
   <input id="codeInput" inputmode="latin" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="6" placeholder="ABC123" aria-label="合言葉">
   <button class="btn" id="loginBtn">はいる</button>
   <div class="err" id="loginErr"></div>
@@ -656,6 +669,20 @@ function indexByDate(rows){
 function indexReq(rows){
   const o={}; (rows||[]).filter(r=>r.status==='open').forEach(r=>{ o[r.d+'|'+r.k]=r; }); return o;
 }
+/* みんなの希望 → {日付:{枠:[{name,mark,me}]}}（○が先・△が後の順はサーバーで並べてある） */
+function indexPeers(rows){
+  const o={}; (rows||[]).forEach(r=>{ const d=(o[r.d]=o[r.d]||{}); (d[r.k]=d[r.k]||[]).push(r); }); return o;
+}
+/* ほしい人数 → {"日付|枠": 人数} */
+function indexNeeds(rows){
+  const o={}; (rows||[]).forEach(r=>{ o[r.d+'|'+r.k]=r.need; }); return o;
+}
+/* その枠にあと何人要るか。meMark＝自分の今の印（'o'/'t'/null）。サーバーの自分の分は使わない
+   （シートで押し直している途中でも、数が今の選び方に合うように） */
+function lackOf(list, need, meMark){
+  const others=(list||[]).filter(p=>!p.me && p.mark==='o').length;
+  return (need||0) - others - (meMark==='o'?1:0);
+}
 /* 出した日数（枠ではなく日で数える） */
 function countDays(rows){ const s=new Set(); (rows||[]).forEach(r=>s.add(r.d)); return s.size; }
 /* 合計時間 */
@@ -667,6 +694,8 @@ function indexUsual(rows){
 
 /* ===== 状態 ===== */
 let code=null, me=null, month=null, cur=null, byDate={}, byReq={}, byAssign={}, usual={}, tab='kibo';
+/* みんなの希望（kibo_staff_peers）。読めなかったときは空のまま＝何も出さない */
+let peersBy={}, needBy={}, peersOk=false;
 
 /* ===== 通信 ===== */
 async function rpc(fn,params){
@@ -824,6 +853,8 @@ document.getElementById('mNext').addEventListener('click',()=>{ month=shiftMonth
 let seq=0;
 async function loadMonth(){
   const s=++seq;
+  // みんなの希望は並べて取りに行く。失敗しても自分の画面は出す（何も出さないだけ）
+  const pp=rpc('kibo_staff_peers',{p_code:code,p_month:month}).catch(()=>null);
   try{ const r=await rpc('kibo_staff_month',{p_code:code,p_month:month});
        if(s!==seq) return; cur=r; }
   catch(e){
@@ -838,6 +869,8 @@ async function loadMonth(){
   byReq=indexReq(cur.requests);
   byAssign=indexByDate(cur.assign);
   usual=indexUsual(cur.usual);
+  const pr=await pp; if(s!==seq) return;
+  peersOk=!!(pr && pr.peers); peersBy=indexPeers(pr&&pr.peers); needBy=indexNeeds(pr&&pr.needs);
   if(!cur.published && tab==='kakutei') tab='kibo';
   render();
 }
@@ -878,9 +911,13 @@ function render(){
     const got=showAssign?byAssign[key]:byDate[key];
     const has=!!(got && Object.keys(got).length);
     const hasReq=(me.slots||[]).some(s=>byReq[key+'|'+s.k]);
+    // 足りない枠の印は、希望を集めている間だけ（締切後は決まったシフトのほうが本当の数になる）
+    const lack=peersOk && cur.editable && !showAssign && !closed.has(w)
+      && (me.slots||[]).some(s=>{ const pl=(peersBy[key]||{})[s.k]||[]; const mine=pl.find(p=>p.me);
+                                   return lackOf(pl, needBy[key+'|'+s.k], mine?mine.mark:null)>0; });
     const e=document.createElement('div');
     e.className='cell s'+w+(has?' on':'')+(closed.has(w)&&!has?' rest':'')
-              +(key===me.today?' today':'')+(hasReq?' req':'');
+              +(key===me.today?' today':'')+(hasReq?' req':'')+(lack?' lack':'');
     let inner='<div class="dn">'+d+'</div>';
     if(has){
       const on=(me.slots||[]).filter(s=>got[s.k]);
@@ -1092,6 +1129,27 @@ function closeSheet(force){
 backdrop.addEventListener('click',function(){ closeSheet(); });
 document.getElementById('shX').addEventListener('click',function(){ closeSheet(); });
 
+/* 同じ枠に希望を出している人の並び。meMark＝自分の今の印（出していなければ null） */
+function peersRow(key,k,meMark){
+  if(!peersOk) return null;
+  const list=((peersBy[key]||{})[k]||[]).filter(p=>!p.me);
+  const need=needBy[key+'|'+k]||0;
+  const closed=(me.closed_wdays||[]).indexOf(wdayOf(key))>=0;
+  if(!list.length && !meMark && (!need || closed)) return null;
+  const el=document.createElement('div'); el.className='peers';
+  let h='';
+  if(meMark==='o') h+='<span class="pc me">自分</span>';
+  h+=list.filter(p=>p.mark==='o').map(p=>'<span class="pc">'+esc(p.name)+'</span>').join('');
+  if(meMark==='t') h+='<span class="pc me t">△ 自分</span>';
+  h+=list.filter(p=>p.mark==='t').map(p=>'<span class="pc t">△ '+esc(p.name)+'</span>').join('');
+  if(need>0 && !closed){
+    const n=lackOf(list,need,meMark);
+    h+=n>0?'<span class="nd bad">あと'+n+'人</span>':'<span class="nd ok">足りています</span>';
+  }
+  el.innerHTML=h;
+  return el;
+}
+
 /* 締切前：枠ごとの行 */
 function renderSlots(){
   const box=document.getElementById('shSlots'); box.innerHTML='';
@@ -1130,6 +1188,7 @@ function renderSlots(){
       seg.appendChild(b);
     });
     row.appendChild(seg);
+    const pe=peersRow(shDate,s.k,st.on?st.mark:null); if(pe) row.appendChild(pe);
 
     if(st.on && !(st.from < s.to && s.from < st.to)){
       const wn=document.createElement('p'); wn.className='note';
@@ -1185,6 +1244,7 @@ function renderLocked(key){
     t.innerHTML='<b>'+esc(s.label)+'</b><span class="rs">'
       +(got?(m2hm(got.from)+' 〜 '+m2hm(got.to)+' で出しています'):'出していません')+'</span>';
     row.appendChild(t);
+    const pe=peersRow(key,s.k,got?got.mark:null); if(pe){ pe.style.margin='0 0 10px'; row.appendChild(pe); }
 
     if(req){
       const p=document.createElement('div'); p.className='pend';
@@ -1275,7 +1335,7 @@ function tutSteps(){
   if(cur && cur.editable){
     return [
       {sel:'.brand', h:nm+'さん専用の入口',
-       text:'ほかの人の希望は見えません。'},
+       text:'日をタップすると、みんなの希望も見えます。'},
       {sel:'#cal', pad:4, h:'働ける日をタップ',
        text:'まず1日、ためしてみましょう。',
        done:sheetOpen},
@@ -1306,7 +1366,7 @@ function tutSteps(){
   /* 締切がすぎた月に、はじめて開いた人（出す操作ができないので読むだけ） */
   return [
     {sel:'.brand', h:nm+'さん専用の入口',
-     text:'ほかの人の希望は見えません。'},
+     text:'日をタップすると、みんなの希望も見えます。'},
     {sel:'#stateRow', h:'この月は締切ずみ',
      text:'いまから出したり、直したりはできません。'},
     {sel:'#cal', pad:4, h:'日をタップ',
