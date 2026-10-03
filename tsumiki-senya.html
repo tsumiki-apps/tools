@@ -271,6 +271,9 @@
       grid-template-areas:"cal list" "cal out";
     }
     #calCard{grid-area:cal;} #listCard{grid-area:list;} #outCard{grid-area:out;}
+    /* みんなのシフトは表が広いので、2列ぶんを使って下に置く（置き場が無いと右の狭い列のログアウトの下に回る） */
+    main.has-team{grid-template-areas:"cal list" "cal usual" "team team" "out out";}
+    #teamCard{grid-area:team;} main.has-team #usualCard{grid-area:usual;}
     .cell{min-height:clamp(58px, 5.4vw, 78px);}
     .brand h1{font-size:1.15rem;}
   }
@@ -459,6 +462,27 @@
     .tut-hd{margin-bottom:4px;}
   }
   @media (prefers-reduced-motion: reduce){ .tut-ring{transition:none;} }
+  /* みんなのシフト（知らせた月だけ。2026-10-04 店長が見本②＝表＋ひとりずつの合計を選択） */
+  #teamCard h2{font-size:.95rem; font-weight:700; margin:0 0 10px; display:flex; align-items:center; gap:8px;}
+  #teamCard h2 svg{width:20px; height:20px; stroke:var(--accent); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; flex:none;}
+  #teamCard .sub2{font-size:.9rem; font-weight:700; margin:18px 0 6px;}
+  .tm-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  table.tm{width:100%; border-collapse:collapse; font-size:.85rem;}
+  table.tm th,table.tm td{border:1px solid var(--line); padding:5px 6px; vertical-align:top; text-align:left;}
+  table.tm thead th{background:var(--surface-2); font-weight:700; font-size:.8rem;}
+  table.tm td.d{white-space:nowrap; width:1%; color:var(--ink-mid); font-variant-numeric:tabular-nums;}
+  table.tm td.d.s0{color:var(--sun);} table.tm td.d.s6{color:var(--sat);}
+  table.tm tr.today td.d{font-weight:700; color:var(--accent-2);}
+  table.tm .p{display:block; line-height:1.3; margin:1px 0; padding:2px 4px; border-radius:6px; overflow-wrap:anywhere;}
+  table.tm .p small{display:block; color:var(--ink-soft); font-size:.72rem; font-variant-numeric:tabular-nums;}
+  table.tm .p.me{background:var(--accent-wash); font-weight:700;}
+  table.tm td.rest,table.tm td.none{color:var(--ink-soft); text-align:center;}
+  table.tt{width:100%; border-collapse:collapse; font-size:.85rem;}
+  table.tt th,table.tt td{border-bottom:1px solid var(--line); padding:7px 6px; text-align:left;}
+  table.tt th{font-size:.78rem; color:var(--ink-mid); font-weight:700;}
+  table.tt .n{text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums;}
+  table.tt tr.me td{background:var(--accent-wash); font-weight:700;}
+  table.tt .bx{width:28%;} table.tt .bar{height:7px; border-radius:99px; background:var(--accent); min-width:2px;}
 </style>
 </head>
 <body>
@@ -517,6 +541,11 @@
     <div style="font-weight:700; font-size:.95rem; margin-bottom:10px" id="listTitle">出した日</div>
     <div id="outRow"></div>
     <div id="listBox"></div>
+  </section>
+
+  <section class="card" id="teamCard" hidden>
+    <h2><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.2c2.6.1 4.4 1.7 5 4.8"/></svg>みんなのシフト</h2>
+    <div id="teamBody"></div>
   </section>
 
   <section class="card usual" id="usualCard">
@@ -696,6 +725,8 @@ function indexUsual(rows){
 let code=null, me=null, month=null, cur=null, byDate={}, byReq={}, byAssign={}, usual={}, tab='kibo';
 /* みんなの希望（kibo_staff_peers）。読めなかったときは空のまま＝何も出さない */
 let peersBy={}, needBy={}, peersOk=false, peersAny=false;
+/* みんなのシフト（kibo_staff_team）。知らせた月だけ返る。読めなかったときはカードごと出さない */
+let team=null;
 
 /* ===== 通信 ===== */
 /* quiet＝右上の同期の印を触らない（おまけの読み込みが失敗しても「つながっていない」に見せない） */
@@ -856,6 +887,10 @@ async function loadMonth(){
   const s=++seq;
   // みんなの希望は並べて取りに行く。失敗しても自分の画面は出す（何も出さないだけ）
   const pp=rpc('kibo_staff_peers',{p_code:code,p_month:month},true).catch(()=>null);
+  /* みんなのシフトは待たない（届いたら描く）。どの月の結果かを持たせ、描くときに今の月と比べる */
+  const tm=month;
+  rpc('kibo_staff_team',{p_code:code,p_month:tm},true).catch(()=>null)
+    .then(x=>{ if(s!==seq) return; team=x?Object.assign({m:tm},x):null; if(cur && cur.month===tm) renderTeam(); });
   try{ const r=await rpc('kibo_staff_month',{p_code:code,p_month:month});
        if(s!==seq) return; cur=r; }
   catch(e){
@@ -975,6 +1010,7 @@ function render(){
   db.textContent=cur.submitted?'✓ 出し終わりました（取り消す）':'今月はこれで出し終わりました';
 
   renderList();
+  renderTeam();
   renderUsual();
   tutMaybeStart();
 }
@@ -1020,6 +1056,40 @@ function renderList(){
 document.getElementById('tabs').addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b) return; tab=b.dataset.t; render();
 });
+
+/* ===== みんなのシフト（日ごとの表＋ひとりずつの合計） =====
+   サーバーが「みんなに知らせた月」だけ返す。お店の設定で表だけ（合計なし）にもできる。 */
+function renderTeam(){
+  const card=document.getElementById('teamCard'), body=document.getElementById('teamBody');
+  const t=team;
+  const show=!!(t && t.open && cur && cur.published && t.m===cur.month && (t.assign||[]).length);
+  document.getElementById('appView').classList.toggle('has-team',show);
+  if(!show){ card.hidden=true; body.innerHTML=''; return; }
+  const sl=me.slots||[], closed=new Set(me.closed_wdays||[]);
+  const by={}; t.assign.forEach(a=>{ (by[a.d+'|'+a.k]=by[a.d+'|'+a.k]||[]).push(a); });
+  const {y,m1}=parseMonth(cur.month), last=daysInMonth(y,m1);
+  let h='<div class="tm-wrap"><table class="tm"><thead><tr><th>日</th>'+sl.map(s=>'<th>'+esc(s.label)+'</th>').join('')+'</tr></thead><tbody>';
+  for(let d=1;d<=last;d++){
+    const key=ymd(y,m1,d), w=new Date(y,m1-1,d).getDay();
+    const any=sl.some(s=>by[key+'|'+s.k]);
+    h+='<tr'+(key===me.today?' class="today"':'')+'><td class="d s'+w+'">'+d+'('+WD[w]+')</td>';
+    if(!any){ h+='<td class="'+(closed.has(w)?'rest':'none')+'" colspan="'+sl.length+'">'+(closed.has(w)?'休み':'—')+'</td></tr>'; continue; }
+    sl.forEach(s=>{
+      const ps=by[key+'|'+s.k]||[];
+      h+='<td>'+ps.map(a=>'<span class="p'+(a.me?' me':'')+'">'+esc(a.name)+'<small>'+m2hm(a.from)+'〜'+m2hm(a.to)+'</small></span>').join('')+'</td>';
+    });
+    h+='</tr>';
+  }
+  h+='</tbody></table></div>';
+  const tot=t.totals||[];
+  if(tot.length){
+    const mx=Math.max(1,...tot.map(x=>x.min||0));
+    h+='<div class="sub2">ひとりずつの合計</div><table class="tt"><thead><tr><th>お名前</th><th class="n">出る日</th><th class="n">時間</th><th></th></tr></thead><tbody>'+
+      tot.map(x=>'<tr'+(x.me?' class="me"':'')+'><td>'+esc(x.name)+'</td><td class="n">'+x.days+'日</td><td class="n">'+fmtDur(x.min||0)+'</td>'+
+        '<td class="bx"><div class="bar" style="width:'+Math.round((x.min||0)/mx*100)+'%"></div></td></tr>').join('')+'</tbody></table>';
+  }
+  body.innerHTML=h; card.hidden=false;
+}
 
 /* ===== 決まったシフトの持ち出し ===== */
 function assignRowsSorted(){

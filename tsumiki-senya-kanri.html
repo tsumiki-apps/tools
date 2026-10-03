@@ -481,6 +481,9 @@
     font-family:var(--sans); font-size:.78rem; color:var(--ink-soft); min-height:var(--tap); cursor:pointer;}
 
   /* 決めるとき：その人の今月の入り具合 */
+  .who .p .kt{margin-left:auto; flex:none; white-space:nowrap; font-size:.72rem; font-weight:700; color:var(--accent-2);
+            background:var(--accent-wash); border-radius:99px; padding:2px 8px; font-variant-numeric:tabular-nums;}
+  .who .p .kt + span{margin-left:10px; white-space:nowrap;}
   .who .p .cd2{margin-left:auto; font-size:.74rem; color:var(--ink-mid); flex:none; white-space:nowrap;}
   .who .p .cd2 + span{margin-left:10px;}
   .who .p .cd2.few{color:var(--good); font-weight:700;}
@@ -1686,8 +1689,13 @@ function slotKiboHtml(s){
         '<span class="cnt'+(lack?' lack':'')+'">'+ok+' / '+need+'人'+
         (maybe?'（＋△'+maybe+'）':'')+(lack?'（あと'+lack+'人）':'')+'</span></div>';
   if(!list.length) h+='<div class="who"><div class="none">まだ誰もいません</div></div>';
-  else h+='<div class="who">'+list.map(p=>'<div class="p"><b>'+esc(p.name)+'</b>'+
-      (p.mark==='t'?'<span class="mk">行けたら</span>':'')+
+  /* ⚠️ ここに出る時間は「スタッフが出した希望」。シフトを決めるで時間を変えても、ここは変わらない。
+     2026-10-03 店長「入れた時間が反映されていない」＝希望のほうを見ていた。決めた時間が違う人には添える */
+  const got=(assign[shDate]||{})[s.k]||{};
+  const kt=p=>{ const g=got[p.id]; return (g && (g.from!==p.from || g.to!==p.to))
+      ? '<span class="kt">決定 '+m2hm(g.from)+'〜'+(g.to!==p.to?m2hm(g.to):'')+'</span>' : ''; };
+  if(list.length) h+='<div class="who">'+list.map(p=>'<div class="p"><b>'+esc(p.name)+'</b>'+
+      (p.mark==='t'?'<span class="mk">行けたら</span>':'')+kt(p)+
       '<span>'+m2hm(p.from)+'〜'+m2hm(p.to)+'</span></div>').join('')+'</div>';
   return h+'</div>';
 }
