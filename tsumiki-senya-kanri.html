@@ -388,6 +388,7 @@
     .topbar{padding-top:calc(env(safe-area-inset-top) + 6px); padding-bottom:6px;}
     .login{padding-block:16px;}
     .sheet{max-height:96vh; max-height:96dvh;}
+    .daynav{margin-top:12px; padding-top:6px; padding-bottom:calc(env(safe-area-inset-bottom) + 6px);}
   }
 
   [hidden]{display:none !important;}
@@ -562,6 +563,26 @@
     font-family:inherit; font-size:1rem; line-height:1; cursor:pointer; border-radius:11px;}
   .closex:active{transform:scale(.94);}
   .sheet h2{padding-right:var(--tap);}
+
+  /* その日のシートの下に貼りつく「‹ 前の日」「次の日 ›」（横スワイプでも同じ）。
+     ⚠️ シート自体がスクロールするので sticky で下に残す。下の余白（安全域＋20px）の分だけ下げて、
+        シートの縁にぴったり付ける。中身の最後がバーに隠れないよう、上に余白を持たせる */
+  .daynav{position:sticky; bottom:calc(-1 * (env(safe-area-inset-bottom) + 20px)); z-index:2;
+    display:flex; gap:10px; margin:18px calc(-1 * max(18px, env(safe-area-inset-left))) calc(-1 * (env(safe-area-inset-bottom) + 20px));
+    padding:10px max(18px, env(safe-area-inset-left)) calc(env(safe-area-inset-bottom) + 10px);
+    background:var(--surface); border-top:1px solid var(--line);}
+  .daynav button{flex:1; min-width:0; min-height:var(--tap); padding:10px 8px; border:1.5px solid var(--line-2); border-radius:12px;
+    background:var(--surface-2); color:var(--ink); font-family:var(--sans); font-size:1rem; font-weight:700; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:4px; white-space:nowrap; font-variant-numeric:tabular-nums;}
+  .daynav button small{font-size:.8rem; font-weight:500; color:var(--ink-soft);}
+  .daynav button:active{transform:scale(.97);}
+  .daynav button.none{visibility:hidden;}
+  /* 日を移ったときに、どちらへ動いたかが分かる程度に中身を少しすべらせる */
+  @keyframes dayInL{from{opacity:.35; transform:translateX(26px);} to{opacity:1; transform:none;}}
+  @keyframes dayInR{from{opacity:.35; transform:translateX(-26px);} to{opacity:1; transform:none;}}
+  #mDay.inL > :not(.daynav){animation:dayInL .2s ease-out;}
+  #mDay.inR > :not(.daynav){animation:dayInR .2s ease-out;}
+  @media (prefers-reduced-motion:reduce){ #mDay.inL > :not(.daynav), #mDay.inR > :not(.daynav){animation:none;} }
 
   /* スタッフの「そのほか」と、その中身 */
   /* ⚠️ 以前は「…」の一文字だけで、枠も背景も無かった（.btn.sm.more で background:none; border:none）。
@@ -845,7 +866,7 @@
 
   <!-- ① その日 -->
   <div id="mDay">
-    <h2 id="shTitle">—</h2>
+    <h2 id="shTitle" aria-live="polite">—</h2>
     <div class="sub" id="shSub"></div>
     <div class="modeseg" id="modeSeg">
       <button data-m="kibo" class="on">出ている希望</button>
@@ -855,6 +876,11 @@
     <div class="dayacts" id="dayActs">
       <button class="btn sub" id="actFill">代わりに入れる</button>
       <button class="btn sub" id="actNeed">この日の必要人数</button>
+    </div>
+    <!-- 前の日・次の日（横スワイプでも同じ）。月の外へは出ない＝その月のデータしか持っていないため -->
+    <div class="daynav" id="dayNav">
+      <button id="dPrev" aria-label="前の日"></button>
+      <button id="dNext" aria-label="次の日"></button>
     </div>
   </div>
 
@@ -1867,6 +1893,7 @@ async function assignAuto(k){
 
 function openDay(key){
   shDate=key;
+  document.getElementById('mDay').classList.remove('inL','inR');   // 残すと、表示に戻るたびにすべり直す
   const w=wdayOf(key), rest=(shop.closed_wdays||[]).indexOf(w)>=0;
   const ov=!!dayNeed[key];
   document.getElementById('shTitle').textContent=fmtDateJP(key)+'（'+WD[w]+'）';
@@ -1877,9 +1904,68 @@ function openDay(key){
   document.getElementById('dayActs').hidden=(dayMode==='kime');
   if(dayMode==='kime') renderKime();
   else document.getElementById('slots').innerHTML=slots().map(slotKiboHtml).join('');
+  paintDayNav();
   showMode('mDay');
   backdrop.classList.add('show'); sheet.classList.add('show');
 }
+
+/* --- 前の日・次の日（ボタン・横スワイプ・←→キー） --- */
+function dayStep(key,delta){
+  const p=key.split('-').map(Number), d=p[2]+delta;
+  if(d<1 || d>daysInMonth(p[0],p[1])) return null;   // 月の外へは出ない
+  return ymd(p[0],p[1],d);
+}
+function paintDayNav(){
+  [['dPrev',-1],['dNext',1]].forEach(([id,dl])=>{
+    const b=document.getElementById(id), k=dayStep(shDate,dl);
+    b.classList.toggle('none',!k); b.disabled=!k;
+    if(!k){ b.innerHTML=''; return; }
+    const lab=(+k.split('-')[2])+'日<small>（'+WD[wdayOf(k)]+'）</small>';
+    b.innerHTML = dl<0 ? '‹ '+lab : lab+' ›';
+    b.setAttribute('aria-label',(dl<0?'前の日 ':'次の日 ')+fmtDateJP(k));
+  });
+}
+function goDay(delta){
+  if(!sheet.classList.contains('show') || document.getElementById('mDay').hidden) return;
+  const k=dayStep(shDate,delta); if(!k) return;
+  /* ⚠️ 保存の返事を待つあいだは移らない。移った先で押した名前は busy で黙って捨てられ、
+        時間の保存は終わると元の日を開き直して引き戻すため */
+  if(busy){ toast('保存しています。少し待ってください'); return; }
+  const had=document.activeElement && document.activeElement.closest && document.activeElement.closest('#dayNav');
+  openDay(k);
+  const m=document.getElementById('mDay');
+  void m.offsetWidth; m.classList.add(delta>0?'inL':'inR');
+  // 押したボタンが月の端で消えると、フォーカスが行方不明になる。もう片方へ移す
+  if(had && document.activeElement && document.activeElement.disabled)
+    document.getElementById(delta>0?'dPrev':'dNext').focus();
+}
+document.getElementById('dPrev').addEventListener('click',()=>goDay(-1));
+document.getElementById('dNext').addEventListener('click',()=>goDay(1));
+(function(){
+  /* ⚠️ iPhone の Safari は画面の左右の端から引くと「前のページに戻る」。端から始まった指は拾わない。
+     縦のスクロールと取り合わないよう、横の動きが縦の1.5倍以上・60px以上・0.8秒以内だけを日送りにする */
+  const EDGE=24; let t0=null;
+  const m=document.getElementById('mDay');
+  m.addEventListener('touchstart',e=>{
+    const t=e.touches[0];
+    t0 = (e.touches.length===1 && t.clientX>EDGE && t.clientX<innerWidth-EDGE && !e.target.closest('input,textarea,select'))
+       ? {x:t.clientX, y:t.clientY, at:Date.now()} : null;
+  },{passive:true});
+  m.addEventListener('touchend',e=>{
+    if(!t0 || tutOn) { t0=null; return; }
+    const t=e.changedTouches[0], dx=t.clientX-t0.x, dy=t.clientY-t0.y, ms=Date.now()-t0.at; t0=null;
+    if(Math.abs(dx)>=60 && Math.abs(dx)>Math.abs(dy)*1.5 && ms<800) goDay(dx<0?1:-1);
+  },{passive:true});
+  m.addEventListener('touchcancel',()=>{ t0=null; },{passive:true});
+  document.addEventListener('keydown',e=>{
+    if(e.key!=='ArrowLeft' && e.key!=='ArrowRight') return;
+    if(e.metaKey || e.altKey || e.ctrlKey || e.shiftKey) return;   // Cmd+← など、ブラウザの操作は奪わない
+    if(e.target.closest && e.target.closest('input,textarea,select,[role=tab]')) return;
+    if(tutOn) return;
+    if(!sheet.classList.contains('show') || document.getElementById('mDay').hidden) return;
+    e.preventDefault(); goDay(e.key==='ArrowRight'?1:-1);
+  });
+})();
 document.getElementById('modeSeg').addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b) return; dayMode=b.dataset.m; openDay(shDate);
 });
@@ -2913,6 +2999,8 @@ function tutMaybeStart(){
   })();
 </script>
 <!-- /tsumiki-license-gate -->
+
+
 
 
 
