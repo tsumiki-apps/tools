@@ -1294,6 +1294,7 @@ async function loadMonth(){
   try{ const r=await arpc('kibo_admin_month',{p_month:month}); if(s!==seq) return; cur=r; }
   catch(e){
     if(authLost(e)) return;
+    if(s!==seq) return;                     // もう次の月を読みに行っている。古い失敗で month を巻き戻さない
     if(cur && cur.month) month=cur.month;   // 失敗したまま月だけ進むと矢印がずれる
     toast(isOffline(e)?'つながりませんでした。電波のよいところでお試しください':'読み込みに失敗しました');
     return;
@@ -1489,9 +1490,14 @@ function renderShiftBox(anySubmitted){
   }
 }
 
+/* ⚠️ ‹ › を押すと month はすぐ変わるが、画面（cur）は読み終わるまで前の月のまま。
+   その間に押すと、見えている月とは別の月に効いてしまう。月単位の操作の入口で必ず止める。 */
+function monthSettled(){ return !!(cur && cur.month===month); }
+function monthName(){ return parseMonth(cur.month).m1+'月'; }
+
 async function assignMonth(){
-  if(busy) return;
-  if(!confirm('「入れます」で出ている希望を、この月ぜんぶシフトに入れます。\n（「行けたら」の方と定休日は入りません）\n\nこのあと、多いところを外していってください。')) return;
+  if(busy || !monthSettled()) return;
+  if(!confirm('「入れます」で出ている希望を、'+monthName()+'ぶん全部シフトに入れます。\n（「行けたら」の方と定休日は入りません）\n\nこのあと、多いところを外していってください。')) return;
   busy=true;
   try{ const r=await arpc('kibo_admin_assign_month',{p_month:month});
        await loadMonth(); toast((r&&r.n?r.n:0)+'コマ入れました'); }
@@ -1499,15 +1505,15 @@ async function assignMonth(){
   finally{ busy=false; }
 }
 async function clearMonth(){
-  if(busy) return;
+  if(busy || !monthSettled()) return;
   // ⚠️ 知らせている最中に消すと、スタッフの画面に空の「決まったシフト」が残ってしまう。
   //    サーバー側で知らせも一緒に取り消すので、そのことを先に伝える。
   const msg = cur.published
-    ? 'この月に決めたシフトを、全部消します。\n\n'
+    ? monthName()+'に決めたシフトを、全部消します。\n\n'
       +'いまスタッフに知らせている最中なので、知らせも一緒に取り消します。\n'
       +'みなさんの画面から「決まったシフト」が消え、組み直して知らせるまで出ません。\n\n'
       +'希望は消えません。よろしいですか？'
-    : 'この月に決めたシフトを、全部消します。\n希望は消えません。よろしいですか？';
+    : monthName()+'に決めたシフトを、全部消します。\n希望は消えません。よろしいですか？';
   if(!confirm(msg)) return;
   busy=true;
   try{ const r=await arpc('kibo_admin_assign_clear_month',{p_month:month});
@@ -1687,11 +1693,12 @@ document.getElementById('tvPrint').addEventListener('click',function(){ fitPrint
 window.addEventListener('beforeprint', fitPrint);
 
 async function doPublish(on){
-  if(on && !confirm('決まったシフトを、スタッフ全員の画面に出します。よろしいですか？')) return;
-  /* ⚠️ 取り消すと、その月のシフトがスタッフの画面から消えて振り返れなくなる（2026-10-28、1回押しで10月が消えた）。
+  if(!monthSettled()) return;
+  if(on && !confirm(monthName()+'のシフトを、スタッフ全員の画面に出します。よろしいですか？')) return;
+  /* ⚠️ 取り消すと、その月のシフトがスタッフの画面から消えて振り返れなくなる（2026-10-28 に10月が消え、店舗から報告）。
      新しい月を知らせるときに前の月を取り消す必要はないことも、ここで伝える。 */
-  if(!on && !confirm('この月のシフトを、スタッフの画面から消します。\n\n'
-      +'消えている間は、スタッフはこの月を見返せません。\n'
+  if(!on && !confirm(monthName()+'のシフトを、スタッフの画面から消します。\n\n'
+      +'消えている間は、スタッフは'+monthName()+'を見返せません。\n'
       +'新しい月を知らせるときに、前の月を取り消す必要はありません。\n\n'
       +'取り消してよろしいですか？')) return;
   try{ await arpc('kibo_admin_publish',{p_month:month,p_on:on});

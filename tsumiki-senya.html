@@ -895,6 +895,7 @@ async function loadMonth(){
        if(s!==seq) return; cur=r; }
   catch(e){
     if(authLost(e)) return;
+    if(s!==seq) return;   // もう次の月を読みに行っている。古い失敗で month を巻き戻さない
     // ⚠️ 失敗したまま month だけ進むと、次の ‹ › が1つずれる
     if(cur && cur.month) month=cur.month;
     toast(isOffline(e)?'つながりませんでした。電波のよいところでお試しください':'読み込みに失敗しました');
@@ -913,9 +914,9 @@ async function loadMonth(){
     setPeers(null);
     pp.then(x=>{ if(s!==seq || !x) return; setPeers(x); render(); if(sheetOpen() && cur.editable) renderSlots(); });
   }else setPeers(pr);
-  /* 月を移ったら、見たいほうを先に出す。締切後に知らせた月は「決まったシフト」、それ以外は「出した日」。
+  /* 月を移ったら、見たいほうを先に出す。締切後に知らせた月で自分のシフトがあれば「決まったシフト」、それ以外は「出した日」。
      同じ月の読み直しでは、本人が選んだタブを変えない。 */
-  if(cur.month!==tabMonth){ tabMonth=cur.month; tab=(cur.published && !cur.editable)?'kakutei':'kibo'; }
+  if(cur.month!==tabMonth){ tabMonth=cur.month; tab=(cur.published && !cur.editable && (cur.assign||[]).length)?'kakutei':'kibo'; }
   if(!cur.published && tab==='kakutei') tab='kibo';
   render();
 }
@@ -1633,7 +1634,7 @@ function tutTips(){
   if(tipShown || tutOn || !cur) return;
   if(!lsGet(tutKey(LS_TUT))) return;            /* 本編をまだ見ていない人には出さない */
   if(sheetOpen()) return;
-  if(tipShow('kakutei','#tabs','シフトが決まりました',
+  if(tab!=='kakutei' && tipShow('kakutei','#tabs','シフトが決まりました',
       '「決まったシフト」で見られます。予定表にも入れられます。')) return;
   if(cur.editable && !cur.submitted && countDays(cur.avail)>=3 &&
      tipShow('done','#doneBtn','入れ終わったら押す',
