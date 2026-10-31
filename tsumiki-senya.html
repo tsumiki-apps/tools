@@ -722,7 +722,7 @@ function indexUsual(rows){
 }
 
 /* ===== 状態 ===== */
-let code=null, me=null, month=null, cur=null, byDate={}, byReq={}, byAssign={}, usual={}, tab='kibo';
+let code=null, me=null, month=null, cur=null, byDate={}, byReq={}, byAssign={}, usual={}, tab='kibo', tabMonth=null;
 /* みんなの希望（kibo_staff_peers）。読めなかったときは空のまま＝何も出さない */
 let peersBy={}, needBy={}, peersOk=false, peersAny=false;
 /* みんなのシフト（kibo_staff_team）。知らせた月だけ返る。読めなかったときはカードごと出さない */
@@ -913,6 +913,9 @@ async function loadMonth(){
     setPeers(null);
     pp.then(x=>{ if(s!==seq || !x) return; setPeers(x); render(); if(sheetOpen() && cur.editable) renderSlots(); });
   }else setPeers(pr);
+  /* 月を移ったら、見たいほうを先に出す。締切後に知らせた月は「決まったシフト」、それ以外は「出した日」。
+     同じ月の読み直しでは、本人が選んだタブを変えない。 */
+  if(cur.month!==tabMonth){ tabMonth=cur.month; tab=(cur.published && !cur.editable)?'kakutei':'kibo'; }
   if(!cur.published && tab==='kakutei') tab='kibo';
   render();
 }

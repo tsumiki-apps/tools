@@ -1688,6 +1688,12 @@ window.addEventListener('beforeprint', fitPrint);
 
 async function doPublish(on){
   if(on && !confirm('決まったシフトを、スタッフ全員の画面に出します。よろしいですか？')) return;
+  /* ⚠️ 取り消すと、その月のシフトがスタッフの画面から消えて振り返れなくなる（2026-10-28、1回押しで10月が消えた）。
+     新しい月を知らせるときに前の月を取り消す必要はないことも、ここで伝える。 */
+  if(!on && !confirm('この月のシフトを、スタッフの画面から消します。\n\n'
+      +'消えている間は、スタッフはこの月を見返せません。\n'
+      +'新しい月を知らせるときに、前の月を取り消す必要はありません。\n\n'
+      +'取り消してよろしいですか？')) return;
   try{ await arpc('kibo_admin_publish',{p_month:month,p_on:on});
        cur.published=on; renderMonth(); toast(on?'みんなに知らせました':'取り消しました'); }
   catch(e){ if(!authLost(e)) toast('できませんでした'); }
