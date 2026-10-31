@@ -130,6 +130,8 @@
      （初めて1日を出した瞬間に39px下がっていた）。2行ぶんの高さを先に取っておく。 */
   .state{margin-top:11px; display:flex; gap:8px; flex-wrap:wrap;
     align-content:flex-start; min-height:70px;}
+  /* タブが続く月は高さの確保をやめる（タブとの間が空くため） */
+  .state:has(+ .tabs:not([hidden])){min-height:0;}
   .pill{font-size:.76rem; font-weight:700; padding:5px 11px; border-radius:999px;
     background:var(--surface-2); color:var(--ink-mid); border:1px solid var(--line);}
   .pill.open{background:var(--good-wash); color:var(--good); border-color:transparent;}
@@ -303,6 +305,9 @@
   .cell .k.o{background:var(--accent-fill); color:var(--on-accent);}
   .cell .k.t{background:transparent; color:var(--accent-2); box-shadow:0 0 0 1px var(--accent) inset;}
   .cell .k.a{background:var(--good); color:var(--on-accent);}
+  /* 決まったシフトは開始時刻を出す。字が長いので縦に積む */
+  .cell .mk.col{flex-direction:column; align-items:center; gap:1px; margin-top:2px;}
+  .cell .mk.col .k{font-size:.6rem; padding:1px 3px; letter-spacing:0; font-variant-numeric:tabular-nums;}
   .cell.req{box-shadow:0 0 0 2px var(--warn) inset;}
   /* 足りない枠がある日（みんなの ○ がほしい人数に届いていない）。2026-09-28 */
   .cell.lack::after{content:""; position:absolute; top:4px; right:4px; width:6px; height:6px;
@@ -352,7 +357,7 @@
     font-size:.78rem; font-weight:700; cursor:pointer;}
 
   /* 一覧のタブ */
-  .tabs{display:flex; gap:6px; margin-bottom:12px;}
+  .tabs{display:flex; gap:6px; margin-top:12px;}
   .tabs button{flex:1 1 0; min-height:var(--tap); border:1px solid var(--line); background:var(--surface-2);
     color:var(--ink-mid); border-radius:11px; font-family:inherit; font-size:.86rem; font-weight:700; cursor:pointer;}
   .tabs button.on{background:var(--accent-wash); border-color:var(--accent); color:var(--accent-2);}
@@ -523,6 +528,10 @@
       <button class="navbtn" id="mNext" aria-label="次の月">›</button>
     </div>
     <div class="state" id="stateRow"></div>
+    <div class="tabs" id="tabs" hidden>
+      <button data-t="kibo" class="on">出した日</button>
+      <button data-t="kakutei">決まったシフト</button>
+    </div>
 
     <div class="wd">
       <div class="s0">日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div class="s6">土</div>
@@ -534,10 +543,6 @@
   </section>
 
   <section class="card" id="listCard">
-    <div class="tabs" id="tabs" hidden>
-      <button data-t="kibo" class="on">出した日</button>
-      <button data-t="kakutei">決まったシフト</button>
-    </div>
     <div style="font-weight:700; font-size:.95rem; margin-bottom:10px" id="listTitle">出した日</div>
     <div id="outRow"></div>
     <div id="listBox"></div>
@@ -976,12 +981,15 @@ function render(){
     if(has){
       const on=(me.slots||[]).filter(s=>got[s.k]);
       const MK_MAX=2;   /* マスの高さは決まっている。3つ出すと3行になって下が切れる（320pxで実測） */
-      let mk=on.slice(0,MK_MAX).map(s=>{
-        const cls=showAssign?'a':(got[s.k].mark==='t'?'t':'o');
+      /* 決まったシフトは縦に積むので2段まで。3つ以上の日は「時刻＋残りの数」にする */
+      const shown=showAssign&&on.length>MK_MAX?1:MK_MAX;
+      let mk=on.slice(0,shown).map(s=>{
+        if(showAssign) return '<span class="k a">'+(got[s.k].from==null?esc(String(s.label).slice(0,3)):m2hm(got[s.k].from))+'</span>';
+        const cls=got[s.k].mark==='t'?'t':'o';
         return '<span class="k '+cls+'">'+esc(String(s.label).slice(0,3))+'</span>';
       }).join('');
-      if(on.length>MK_MAX) mk+='<span class="k more">+'+(on.length-MK_MAX)+'</span>';
-      inner+='<div class="mk">'+mk+'</div>';
+      if(on.length>shown) mk+='<span class="k more">+'+(on.length-shown)+'</span>';
+      inner+='<div class="mk'+(showAssign?' col':'')+'">'+mk+'</div>';
     }else if(closed.has(w)){ inner+='<div class="restmark">休</div>'; }
     e.innerHTML=inner;
     e.addEventListener('click',()=>openSheet(key));
@@ -1025,7 +1033,8 @@ function renderList(){
   tabs.hidden=!cur.published;
   [...tabs.children].forEach(b=>b.classList.toggle('on', b.dataset.t===tab));
   const showAssign=cur.published && tab==='kakutei';
-  document.getElementById('listTitle').hidden=!tabs.hidden;
+  // タブはカレンダーの上にある。こちらの一覧は、いま何の一覧かを見出しで言う
+  document.getElementById('listTitle').textContent=showAssign?'決まったシフト':'出した日';
 
   // 決まったシフトは「持ち出せて」はじめて役に立つ（手でカレンダーに写させない）
   const or2=document.getElementById('outRow'); or2.innerHTML='';
