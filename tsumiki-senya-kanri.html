@@ -1295,7 +1295,7 @@ async function loadMonth(){
   try{ const r=await arpc('kibo_admin_month',{p_month:month}); if(s!==seq) return 'stale'; cur=r; }
   catch(e){
     if(authLost(e)) return;
-    if(s!==seq) return;                     // もう次の月を読みに行っている。古い失敗で month を巻き戻さない
+    if(s!==seq) return 'stale';             // もう次の月を読みに行っている。古い失敗で month を巻き戻さない
     if(cur && cur.month) month=cur.month;   // 失敗したまま月だけ進むと矢印がずれる
     toast(isOffline(e)?'つながりませんでした。電波のよいところでお試しください':'読み込みに失敗しました');
     return;
