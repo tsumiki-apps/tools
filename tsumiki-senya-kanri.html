@@ -1292,7 +1292,7 @@ document.getElementById('mNext').addEventListener('click',()=>{ month=shiftMonth
 let seq=0;
 async function loadMonth(){
   const s=++seq;
-  try{ const r=await arpc('kibo_admin_month',{p_month:month}); if(s!==seq) return; cur=r; }
+  try{ const r=await arpc('kibo_admin_month',{p_month:month}); if(s!==seq) return 'stale'; cur=r; }
   catch(e){
     if(authLost(e)) return;
     if(s!==seq) return;                     // もう次の月を読みに行っている。古い失敗で month を巻き戻さない
@@ -2175,7 +2175,8 @@ async function resolveReq(id,action,d){
     await arpc('kibo_admin_request',{p_id:id,p_action:action});
     const ok=await loadMonth();
     if(!ok){ closeSheet(); return; }   // 古い一覧を出し直すと、済んだお願いをもう一度押せてしまう
-    if(openRequests().length) openReqs(); else { closeSheet(); }
+    if(ok==='stale') closeSheet();     // 別の月を読み直している。処理は済んでいるので知らせだけ出す
+    else if(openRequests().length) openReqs(); else { closeSheet(); }
     toast(action==='apply'?(d&&d.slice(0,7)!==cur.month?(+d.slice(5,7))+'月の希望に入れました':'希望に入れました'):'見送りました');
   }catch(e){ if(!authLost(e)) toast('できませんでした'); }
   finally{ busy=false; }
