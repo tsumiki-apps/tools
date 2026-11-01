@@ -1009,11 +1009,11 @@ function render(){
   /* 案内文。
      ⚠️ 締切前の説明は「使い方」なので、まだ1日も出していない人にだけ出す。
      慣れた人には毎月ずっと出続けるだけで、読まれない。空の月に戻れば また出る。
-     締切後の案内（お願いの出しかた）は、めったに出ない状況の説明なので残す。 */
+     締切後の案内（変更の伝えかた）は、めったに出ない状況の説明なので残す。 */
   const hintEl=document.getElementById('hint');
   const hintTxt = cur.editable
     ? (n===0 ? '働ける日をタップして、'+((me.slots||[]).map(s=>s.label).join('・')||'時間帯')+' それぞれを選んでください。選ばなかったところは「その時間は働けない」として伝わります。' : '')
-    : '締切をすぎたので直せません。急な変更は、日をタップして「お願い」を出してください。';
+    : '締切をすぎたので直せません。入れなくなったときは店長へ直接LINEを。入れる日があるときは、日をタップしてください。';
   hintEl.textContent=hintTxt; hintEl.hidden=!hintTxt;
 
   /* 出し終わりの印 */
@@ -1334,14 +1334,17 @@ document.getElementById('shSave').addEventListener('click',async()=>{
 /* 締切後：お願い */
 function renderLocked(key){
   const box=document.getElementById('shReqs'); box.innerHTML='';
+  let canAdd=false, hasShift=false;
   (me.slots||[]).forEach(s=>{
     const got=(byDate[key]||{})[s.k];
+    const fixed=(byAssign[key]||{})[s.k];   // 希望が無くても、店長が決めた枠は「入っている」として扱う
     const req=byReq[key+'|'+s.k];
     const row=document.createElement('div'); row.className='reqrow';
 
     const t=document.createElement('div'); t.className='rt';
     t.innerHTML='<b>'+esc(s.label)+'</b><span class="rs">'
-      +(got?(m2hm(got.from)+' 〜 '+m2hm(got.to)+' で出しています'):'出していません')+'</span>';
+      +(fixed?(m2hm(fixed.from)+' 〜 '+m2hm(fixed.to)+' で決まっています')
+        :got?(m2hm(got.from)+' 〜 '+m2hm(got.to)+' で出しています'):'出していません')+'</span>';
     row.appendChild(t);
     const pe=peersRow(key,s.k,got?got.mark:null); if(pe){ pe.style.margin='0 0 10px'; row.appendChild(pe); }
 
@@ -1352,18 +1355,25 @@ function renderLocked(key){
       c.addEventListener('click',()=>cancelReq(req.id));
       p.appendChild(c);
       row.appendChild(p);
-    }else{
+    }else if(!got && !fixed){
+      /* 「行けなくなりました」は店長の見落としが起きるのでやめた。変更は直接LINEで受ける */
       const b=document.createElement('button');
       b.className='btn sub'; b.style.margin='0';
-      b.textContent=got?'行けなくなりました':'ここ、入れます';
-      b.addEventListener('click',()=>sendReq(key,s.k,got?'drop':'add'));
+      b.textContent='ここ、入れます';
+      b.addEventListener('click',()=>sendReq(key,s.k,'add'));
       row.appendChild(b);
+      canAdd=true;
     }
+    if(got||fixed) hasShift=true;
     box.appendChild(row);
   });
-  const note=document.createElement('p'); note.className='note';
-  note.textContent='お願いはお店に届きます。反映されるとこの画面にも入ります。';
-  box.appendChild(note);
+  [canAdd?'お願いはお店に届きます。反映されるとこの画面にも入ります。':'',
+   hasShift?'入れなくなったときは、店長へ直接LINEしてください。':''
+  ].filter(Boolean).forEach(tx=>{
+    const note=document.createElement('p'); note.className='note';
+    note.textContent=tx;
+    box.appendChild(note);
+  });
 }
 async function sendReq(d,k,kind){
   try{
@@ -1469,10 +1479,10 @@ function tutSteps(){
     {sel:'#stateRow', h:'この月は締切ずみ',
      text:'いまから出したり、直したりはできません。'},
     {sel:'#cal', pad:4, h:'日をタップ',
-     text:'その日の内容が見られます。急な変更はそこから。',
+     text:'その日の内容が見られます。',
      done:sheetOpen},
-    {sel:'#shLocked', need:sheetOpen, h:'お願いを出す',
-     text:'「ここ、入れます」「行けなくなりました」がお店に届きます。'},
+    {sel:'#shLocked', need:sheetOpen, h:'締切後の変更',
+     text:'入れなくなったときは、店長へ直接LINEしてください。空いている時間は「ここ、入れます」が出ます。'},
     {sel:'#mNext', enter:function(){ if(sheetOpen()) closeSheet(true); },
      h:'来月ぶん', text:'ここで月をめくって出せます。締切までにお願いします。'}
   ];
@@ -1637,7 +1647,7 @@ function tipShow(id, sel, h, text){
 }
 function tipLocked(){
   tipShow('locked','#shLocked','締切をすぎた日は直せません',
-    '「ここ、入れます」「行けなくなりました」でお願いが届きます。');
+    '入れなくなったときは、店長へ直接LINEしてください。空いている時間は「ここ、入れます」が出ます。');
 }
 function tutTips(){
   if(tipShown || tutOn || !cur) return;
