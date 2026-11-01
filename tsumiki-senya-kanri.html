@@ -553,6 +553,7 @@
     font-size:.9rem; font-weight:700; text-align:left; cursor:pointer; line-height:1.5;}
   .reqbar .ch{margin-left:auto; flex:none;}
   .reqbar:active{transform:scale(.99);}
+  .reqgo{width:100%; margin-top:8px;}
 
   /* シートを閉じる ✕（「とじる」「やめる」の全幅ボタンの代わり） */
   /* ⚠️ シートは中身が長いと自分でスクロールする。absolute だと ✕ が上へ流れて消えてしまう。
@@ -1304,6 +1305,7 @@ async function loadMonth(){
   renderMonth();
   if(wnReady) renderWnFlat();
   if(!document.getElementById('view2').hidden) renderStaff();
+  return true;
 }
 
 /* --- 数え方（推定なし・枠そのもので数える） --- */
@@ -1365,7 +1367,7 @@ function renderMonth(){
      ⚠️ 前は名前のチップを並べていたが、どれを押しても同じ一覧が開くだけだった（＝ボタンの水増し）。
      1本の帯にまとめる。名前と日付は開いた先に全部出ている。 */
   const rb=document.getElementById('reqBox'); rb.innerHTML='';
-  const reqs=cur.requests||[];
+  const reqs=openRequests();
   if(reqs.length){
     rb.className='';
     const b=document.createElement('button'); b.className='reqbar';
@@ -2138,9 +2140,11 @@ document.getElementById('needReset').addEventListener('click',async()=>{
 });
 
 /* --- ⑤ お願い --- */
+/* ⚠️ 開く月は受付中の月なので、表示中の月だけを見ると決まった月のお願いが隠れる。全部の月を出す */
+function openRequests(){ return cur.all_requests||cur.requests||[]; }
 function openReqs(){
   const box=document.getElementById('reqList'); box.innerHTML='';
-  (cur.requests||[]).forEach(r=>{
+  openRequests().forEach(r=>{
     const el=document.createElement('div'); el.className='reqitem';
     el.innerHTML='<div class="rh">'+esc(r.name)+'さん</div>'+
       '<div class="rd">'+fmtDateJP(r.d)+'（'+WD[wdayOf(r.d)]+'）の'+esc(slotOf(r.k)?slotOf(r.k).label:r.k)+'　'+
@@ -2148,23 +2152,31 @@ function openReqs(){
       (r.note?'<br>'+esc(r.note):'')+'</div>';
     const a=document.createElement('div'); a.className='ra';
     const ok=document.createElement('button'); ok.className='btn'; ok.textContent='受け入れる';
-    ok.addEventListener('click',()=>resolveReq(r.id,'apply'));
+    ok.addEventListener('click',()=>resolveReq(r.id,'apply',r.d));
     const ng=document.createElement('button'); ng.className='btn sub'; ng.textContent='見送る';
     ng.addEventListener('click',()=>resolveReq(r.id,'dismiss'));
     a.appendChild(ok); a.appendChild(ng); el.appendChild(a);
+    const ym=r.d.slice(0,7);
+    if(ym!==cur.month){
+      const go=document.createElement('button'); go.className='btn sub reqgo';
+      go.textContent=(ym.slice(0,4)!==cur.month.slice(0,4)?ym.slice(0,4)+'年':'')+(+ym.slice(5))+'月を開く';
+      go.addEventListener('click',()=>{ if(busy) return; closeSheet(); month=ym; loadMonth(); });
+      el.appendChild(go);
+    }
     box.appendChild(el);
   });
-  if(!(cur.requests||[]).length) box.innerHTML='<div class="empty">お願いはありません</div>';
+  if(!openRequests().length) box.innerHTML='<div class="empty">お願いはありません</div>';
   showMode('mReq');
   backdrop.classList.add('show'); sheet.classList.add('show');
 }
-async function resolveReq(id,action){
+async function resolveReq(id,action,d){
   if(busy) return; busy=true;
   try{
     await arpc('kibo_admin_request',{p_id:id,p_action:action});
-    await loadMonth();
-    if((cur.requests||[]).length) openReqs(); else { closeSheet(); }
-    toast(action==='apply'?'希望に入れました':'見送りました');
+    const ok=await loadMonth();
+    if(!ok){ closeSheet(); return; }   // 古い一覧を出し直すと、済んだお願いをもう一度押せてしまう
+    if(openRequests().length) openReqs(); else { closeSheet(); }
+    toast(action==='apply'?(d&&d.slice(0,7)!==cur.month?(+d.slice(5,7))+'月の希望に入れました':'希望に入れました'):'見送りました');
   }catch(e){ if(!authLost(e)) toast('できませんでした'); }
   finally{ busy=false; }
 }
