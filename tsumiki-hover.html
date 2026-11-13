@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="light dark">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>つみきホバー — カーソルを乗せた窓が前に出る</title>
+<meta name="description" content="カーソルを乗せた窓が前に出て、そのまま操作の対象になります。クリックせずに窓を切り替える、メニューバーに常駐する Mac 用のアプリです。">
+<link rel="icon" href="icon-tsumiki-hover.png">
+<link rel="apple-touch-icon" href="icon-tsumiki-hover.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f5f4f0; --surface:#fffefb; --surface-2:#efece5;
+    --ink:#1d1a15; --ink-mid:#5b554a; --ink-soft:#666154; --ghost:#887f70;
+    --line:#e2ded4; --line-2:#d8d3c7;
+    --accent:#b06f26; --accent-2:#8a5a24; --accent-wash:#f0e4d1;
+    --btn-bg:var(--accent-2); --btn-ink:var(--paper);
+    --shadow:0 1px 2px rgba(40,32,18,.05), 0 10px 26px -16px rgba(40,32,18,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#0f0d07; --surface:#211d14; --surface-2:#2b2619;
+      --ink:#efe8da; --ink-mid:#a89e8b; --ink-soft:#9f988a; --ghost:#8a8170;
+      --line:#36301f; --line-2:#443d2b;
+      --accent:#d59a4d; --accent-2:#e0ab63; --accent-wash:#362a19;
+      --btn-bg:var(--accent); --btn-ink:#1d1a15;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px -18px rgba(0,0,0,.65);
+    }
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    background:var(--paper); color:var(--ink); min-height:100dvh;
+    font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN','Hiragino Sans',sans-serif;
+    font-size:16px; line-height:1.7; -webkit-font-smoothing:antialiased;
+    padding:0 20px calc(48px + env(safe-area-inset-bottom));
+  }
+  .wrap{max-width:560px; margin:0 auto;}
+  svg{display:block; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;}
+
+  header{padding:56px 0 32px; text-align:center;}
+  header img{width:88px; height:88px; margin:0 auto 16px; display:block;}
+  h1{font-size:28px; font-weight:700; letter-spacing:.04em; line-height:1.3;}
+  header p{margin-top:8px; font-size:14px; color:var(--ink-mid);}
+
+  .dl{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    min-height:52px; margin:24px auto 0; max-width:320px;
+    background:var(--btn-bg); color:var(--btn-ink); border-radius:12px;
+    font-size:16px; font-weight:700; text-decoration:none;
+  }
+  .dl svg{width:20px; height:20px;}
+  .meta{margin-top:10px; font-size:13px; color:var(--ink-soft); text-align:center;}
+
+  h2{font-size:14px; font-weight:700; color:var(--ink-mid); letter-spacing:.08em; margin:40px 0 12px;}
+
+  .keys{display:grid; grid-template-columns:1fr; gap:10px;}
+  .key{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:12px 14px;
+    display:flex; align-items:center; gap:12px; box-shadow:var(--shadow); min-height:56px;}
+  .key svg{width:24px; height:24px; flex-shrink:0; stroke:var(--accent); fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;}
+  .key b{font-size:16px; font-weight:500;}
+  .key .caps{margin-left:auto;}
+  @media (min-width:600px){ .keys{grid-template-columns:repeat(2,1fr);} }
+  .caps{display:flex; gap:5px;}
+  kbd{font-family:inherit; font-size:15px; font-weight:500; min-width:28px; height:28px; padding:0 5px;
+    display:inline-flex; align-items:center; justify-content:center;
+    background:var(--surface-2); border:1px solid var(--line-2); border-bottom-width:2px; border-radius:7px;}
+
+  ol{list-style:none; counter-reset:s;}
+  ol li{counter-increment:s; position:relative; padding:16px 0 16px 48px; border-top:1px solid var(--line);}
+  ol li:last-child{border-bottom:1px solid var(--line);}
+  ol li::before{content:counter(s); position:absolute; left:0; top:14px; width:32px; height:32px; border-radius:50%;
+    border:1.5px solid var(--line-2); display:flex; align-items:center; justify-content:center;
+    font-size:14px; font-weight:700; color:var(--ink-mid);}
+  ol li b{display:block; font-size:16px; font-weight:700;}
+  ol li span{display:block; font-size:14px; color:var(--ink-mid); margin-top:2px;}
+
+  .scenes{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
+  @media (min-width:600px){ .scenes{grid-template-columns:repeat(4,1fr);} }
+  .scene{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:14px 8px; text-align:center; box-shadow:var(--shadow);}
+  .scene svg{width:26px; height:26px; margin:0 auto 6px; stroke:var(--accent);}
+  .scene b{font-size:14px; font-weight:500;}
+  .note{margin-top:16px; font-size:13px; color:var(--ink-soft);}
+  footer{margin-top:48px; text-align:center;}
+  footer a{display:inline-flex; align-items:center; min-height:44px; padding:0 12px; font-size:13px; color:var(--ink-soft); text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="icon-tsumiki-hover.png" alt="">
+    <h1>つみきホバー</h1>
+    <p>カーソルを乗せた窓が、前に出る</p>
+    <a class="dl" href="tsumiki-hover.zip" download>
+      <svg viewBox="0 0 24 24"><path d="M12 4v11"/><path d="M7 10.5l5 5 5-5"/><path d="M5 19.5h14"/></svg>
+      ダウンロード
+    </a>
+    <p class="meta">macOS 15 以降・無料</p>
+  </header>
+
+  <h2>キー</h2>
+  <div class="keys">
+    <div class="key"><svg viewBox="0 0 24 24"><path d="M6 3.5v14l3.6-3.2 2.6 5.7 2.5-1.1-2.6-5.6 4.9-.3z"/></svg><b>乗せる</b><span class="caps">前に出る</span></div>
+    <div class="key"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="4.5" height="16" rx="1.5"/><rect x="14.5" y="4" width="4.5" height="16" rx="1.5"/></svg><b>止める</b><span class="caps"><kbd>⌃</kbd></span></div>
+    <div class="key"><svg viewBox="0 0 24 24"><rect x="3" y="7.5" width="18" height="9" rx="4.5"/><circle cx="16.5" cy="12" r="2.6"/></svg><b>オン・オフ</b><span class="caps"><kbd>⌃</kbd><kbd>⌥</kbd><kbd>⌘</kbd><kbd>H</kbd></span></div>
+    <div class="key"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="7"/><path d="M12 9.5V13l2.5 1.5M10 3h4"/></svg><b>待ち時間</b><span class="caps">0〜600ms</span></div>
+  </div>
+  <p class="note">⌃ は押しているあいだだけ止まります。休む・除外はメニューバーから。</p>
+
+  <h2>止まる場面</h2>
+  <div class="scenes">
+    <div class="scene"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M8 9h8M8 12.5h8M8 16h5"/></svg><b>メニュー</b></div>
+    <div class="scene"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-2.5 2.5M12 3l2.5 2.5M12 21l-2.5-2.5M12 21l2.5-2.5M3 12l2.5-2.5M3 12l2.5 2.5M21 12l-2.5-2.5M21 12l-2.5 2.5"/></svg><b>ドラッグ</b></div>
+    <div class="scene"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg><b>浮いた窓</b></div>
+    <div class="scene"><svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="9" height="12" rx="2"/><rect x="12.5" y="6" width="9" height="12" rx="2"/><path d="M9 3.5h6"/></svg><b>デスクトップ切替</b></div>
+  </div>
+
+  <h2>はじめに</h2>
+  <ol>
+    <li><b>「アプリケーション」へ</b><span>zip を開き、出てきたアプリをドラッグ</span></li>
+    <li><b>アプリを開く</b><span>確認が出たら「開く」。メニューバーにアイコンが出ます</span></li>
+    <li><b>「アクセシビリティ」をオン</b><span>システム設定 → プライバシーとセキュリティ。オンにすればそのまま動きます</span></li>
+    <li><b>窓に乗せて試す</b><span>後ろの窓の見えている所にカーソルを置く</span></li>
+  </ol>
+  <p class="note">同じ働きのアプリとは同時に使わないでください（二重に動きます）。アプリ自体は通信しません。</p>
+
+  <footer><a href="./">つみき tools</a></footer>
+</div>
+</body>
+</html>
